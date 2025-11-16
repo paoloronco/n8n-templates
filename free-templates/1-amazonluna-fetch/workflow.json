@@ -1,0 +1,674 @@
+{
+  "name": "25-AmazonLuna-Games-Fetch template",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Amazon Luna – Fetch “Included with Prime” Games\n\n#### How it works\n\n1. **Scheduled Trigger** – starts the workflow every 5 days at 3:00 PM (you can change the frequency and time).\n  \n2. **HTTP Request** – queries Amazon Luna’s official endpoint to retrieve the list of “Included with Prime” games.\n  \n3. **Code Node (JavaScript)** – processes the JSON response and extracts the title, release year, genres, ASIN, and images.\n  \n4. **Google Sheets** – automatically saves or updates the data in a Google Sheet, avoiding duplicates.\n  \n\n#### Parameters to configure \n\nin the node Edit Fields:\n\n* **x-amz-locale** Defines the language and region of the request.Supported options include:\n  \n  * `it_IT` 🇮🇹 (Italy)\n    \n  * `en_US` 🇺🇸 (USA)\n    \n  * `de_DE` 🇩🇪 (Germany)\n    \n  * `fr_FR` 🇫🇷 (France)\n    \n  * `es_ES` 🇪🇸 (Spain)\n    \n  * `en_GB` 🇬🇧 (United Kingdom)\n    \n  * `ja_JP` 🇯🇵 (Japan)\n    \n  * `en_CA` 🇨🇦 (Canada)\n    \n* **x-amz-marketplace-id** Amazon marketplace identifier that corresponds to the selected region.Common values:\n  \n  * `APJ6JRA9NG5V4` 🇮🇹 (Italy)\n    \n  * `ATVPDKIKX0DER` 🇺🇸 (USA)\n    \n  * `A1PA6795UKMFR9` 🇩🇪 (Germany)\n    \n  * `A13V1IB3VIYZZH` 🇫🇷 (France)\n    \n  * `A1RKKUPIHCS9HS` 🇪🇸 (Spain)\n    \n  * `A1F83G8C2ARO7P` 🇬🇧 (UK)\n    \n  * `A1VC38T7YXB528` 🇯🇵 (Japan)\n    \n  * `A2EUQ1WTGCTBG2` 🇨🇦 (Canada)\n    \n* **Accept-Language** Preferred response language. Example:`it-IT,it;q=0.9,en;q=0.8` (adjust for your region as needed).\n  \n* **User-Agent** Browser agent string used in the request header.You can keep the default value or replace it with a more recent one.\n  \n* **Trigger interval** Defines how often the workflow runs automatically.Default: every 5 days at 3:00 PM (can be changed).\n  \n* **Google Sheet** Destination where the data will be stored or updated.Select your document and worksheet when configuring the Google Sheets node.\n  \n\n#### Tips\n\n* You can adjust **locale** and **marketplace-id** to retrieve results from different countries (e.g., USA, Germany, Japan).\n  \n* The **Title** field is used as a key to prevent duplicates when updating records.\n  \n* The workflow can easily be adapted to export data to CSV, Airtable, or any database.\n  \n\n#### ⚠️ Important notes\n\n* The data retrieved belongs to Amazon and should only be used for personal or testing purposes.\n  \n* Do not republish or redistribute the results without permission.",
+        "height": 1184,
+        "width": 2464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        -592
+      ],
+      "id": "dd071cbc-210a-4145-a29d-4e6205811bf2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://proxy-prod.eu-west-1.tempo.digital.a2z.com/getPage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "={{ $json['Content-Type'] }}"
+            },
+            {
+              "name": "Origin",
+              "value": "={{ $json.Origin }}"
+            },
+            {
+              "name": "Referer",
+              "value": "={{ $json.Refer }}"
+            },
+            {
+              "name": "x-amz-locale",
+              "value": "={{ $json['x-amz-locale'] }}"
+            },
+            {
+              "name": "x-amz-platform",
+              "value": "={{ $json['x-amz-platform'] }}"
+            },
+            {
+              "name": "x-amz-device-type",
+              "value": "={{ $json['x-amz-device-type'] }}"
+            },
+            {
+              "name": "x-amz-marketplace-id",
+              "value": "={{ $json['x-amz-marketplace-id'] }}"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "={{ $json['Accept-Language'] }}"
+            },
+            {
+              "name": "User-Agent",
+              "value": "={{ $json['User-Agent'] }}"
+            },
+            {
+              "name": "searchContext",
+              "value": "={{ $json.searchContext }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"timeout\":10000,\"searchContext\":{\"query\":\"included_with_prime\",\"sort\":\"TITLE_A_TO_Z\",\"filtersList\":[]},\"featureScheme\":\"WEB_V1\",\"pageContext\":{\"pageType\":\"multistate_browse_results\",\"pageId\":\"default\"},\"clientContext\":{\"browserMetadata\":{\"browserClientRole\":\"browser\",\"browserType\":\"Chrome\",\"browserVersion\":\"141.0.0.0\",\"deviceModel\":\"unknown\",\"deviceType\":\"unknown\",\"osName\":\"Windows\",\"osVersion\":\"11\"}},\"inputContext\":{\"gamepadTypes\":[]},\"dynamicFeatures\":[]}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        336
+      ],
+      "id": "0146fbe4-dedf-4658-85b7-b0094c147352",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2014c337-009b-4c72-ab7a-cfc94318875e",
+              "name": "Content-Type",
+              "value": "text/plain;charset=UTF-8",
+              "type": "string"
+            },
+            {
+              "id": "af3dfb87-355d-40d3-8cc6-3074c7d99382",
+              "name": "Origin",
+              "value": "https://luna.amazon.it",
+              "type": "string"
+            },
+            {
+              "id": "971f2ce5-9d5e-4abd-b6f8-9815af9d1d6f",
+              "name": "Refer",
+              "value": "https://luna.amazon.it/",
+              "type": "string"
+            },
+            {
+              "id": "adc28f7c-1ad0-4e33-b4f8-1d4b678c1c2c",
+              "name": "x-amz-locale",
+              "value": "en_US",
+              "type": "string"
+            },
+            {
+              "id": "8852885e-013d-4b76-97e2-7393551e1f39",
+              "name": "x-amz-platform",
+              "value": "web",
+              "type": "string"
+            },
+            {
+              "id": "75790b6d-bdba-4547-866e-f078dae263b9",
+              "name": "x-amz-device-type",
+              "value": "browser",
+              "type": "string"
+            },
+            {
+              "id": "eb7c07a8-a963-41a3-8b44-9b94cd0c9f05",
+              "name": "x-amz-marketplace-id",
+              "value": "ATVPDKIKX0DER",
+              "type": "string"
+            },
+            {
+              "id": "cc5cf070-b37b-46b6-a5f5-5c588446395e",
+              "name": "Accept-Language",
+              "value": "en-US",
+              "type": "string"
+            },
+            {
+              "id": "9adc0222-535d-4c1d-9b9c-323184484875",
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+              "type": "string"
+            },
+            {
+              "id": "0f9694c2-307f-4c84-85eb-4602351deeff",
+              "name": "searchContext",
+              "value": "{ \"query\": \"included_with_prime\" }.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "9aa77d5d-837c-41b7-804a-8641c06b1e67",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 5,
+              "triggerAtHour": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        336
+      ],
+      "id": "ca73147f-1d93-4ef5-97ea-1eb9a6974372",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1-YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1234567,
+          "mode": "list",
+          "cachedResultName": "AmazonLunaGames-Fetch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1234567"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        336
+      ],
+      "id": "b22ac51d-ad22-405c-a931-d876054f9118",
+      "name": "Get row(s) in sheet",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "YOUR_ID",
+          "name": "ACCOUNT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📌 **New Games Notification**\n\n*This section of the workflow handles the automatic delivery of notifications when new games are detected.\n\n## 🔧 How it works\n\n1. After the first part of the workflow finishes processing the data, the nodes filter only the newly-added items.\n2. Each new item is passed into a **Loop** node.\n3. The **HTTP Request** node performs the **download of the file** associated with the item (for example images or metadata).\n4. A short delay is applied using a **Wait** node to prevent rate-limit issues with external services.\n5. Finally, each new item is delivered through the selected notification channel (Discord or any other provider).\n\n#### 🔄 Why “Loop” and “Wait”?\n\nThese nodes are included to **avoid rate limiting** on external services such as Discord or Telegram.\nBy sending messages one at a time, with a short pause in between, you prevent:\n\n* message throttling,\n* blocked requests,\n* temporary bans from the provider.\n\n\n---\n\n\n\n\n\n\n",
+        "height": 1584,
+        "width": 800,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -592
+      ],
+      "id": "eb8f6e3c-c0e7-44aa-af6c-93784c1a4d3e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse GAME_TILE widgets and extract game info\nconst data = items[0].json;\nconst out = [];\n\nfunction walk(n) {\n  if (Array.isArray(n)) return n.forEach(walk);\n  if (n && typeof n === 'object') {\n    if (n.type === 'GAME_TILE') {\n      const target = n.actions?.[0]?.target || '';\n      const parts = target.replace(/^\\/|\\/$/g,'').split('/');\n      const slug = parts[1] || null;\n      const asin = parts[2] || null;\n\n      let pd = {};\n      try { pd = JSON.parse(n.presentationData || '{}'); } catch(e){}\n\n      out.push({\n        asin,\n        slug,\n        title: pd.title || null,\n        releaseYear: pd.releaseYear || null,\n        publishers: pd.publishersText || null,\n        genres: Array.isArray(pd.genreTags) ? pd.genreTags.join(', ') : null,\n        productUrl: pd.productUrl || null,\n        imagePortrait: pd.imagePortrait || null,\n        imageLandscape: pd.imageLandscape || null,\n        ageRating: pd.ageRating?.categoryText || null,\n        target\n      });\n    }\n    Object.values(n).forEach(walk);\n  }\n}\nwalk(data);\n\nreturn out.map(x => ({ json: x }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        336
+      ],
+      "id": "e339bf8d-6d91-46a1-bbea-c8db04fb1014",
+      "name": "parsing"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Leggo tutte le righe dal nodo \"Get row(s) in sheet\"\nconst existingRows = $items('Get row(s) in sheet');\n\n// Se il foglio è vuoto: tutti nuovi\nif (!existingRows || existingRows.length === 0) {\n  return items.map(item => {\n    item.json.isNew = true;\n    return item;\n  });\n}\n\n// Costruisco le chiavi già presenti nel foglio:\n// prima asin, se vuoto uso il titolo (Title nel foglio, title negli item)\nconst existingKeys = new Set(\n  existingRows\n    .map(r => {\n      const asin = (r.json.asin || '').trim().toUpperCase();\n      const title =\n        (r.json.Title || r.json.title || '').trim().toUpperCase(); // 👈 QUI la differenza\n      return asin || title;\n    })\n    .filter(k => k !== '')\n);\n\n// Aggiungo isNew agli item in ingresso\nreturn items.map(item => {\n  const asin = (item.json.asin || '').trim().toUpperCase();\n  const title =\n    (item.json.Title || item.json.title || '').trim().toUpperCase();\n\n  const key = asin || title;\n\n  // se non ho né asin né titolo, lo considero nuovo\n  item.json.isNew = key === '' ? true : !existingKeys.has(key);\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        336
+      ],
+      "id": "56543b42-361b-4287-be44-f2f78ea0b726",
+      "name": "isNew"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "AmazonLuna-games",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_ID"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1439249437561061440",
+          "mode": "list",
+          "cachedResultName": "new-games-notifications",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_ID/YOUR_ID"
+        },
+        "content": "=New game added on Amazon Luna!\nTitle: {{ $('If1').item.json.title }}\nGeneres: {{ $('If1').item.json.genres }}\nRelease Year: {{ $('If1').item.json.releaseYear }}\n \n\n",
+        "options": {},
+        "files": {
+          "values": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        336
+      ],
+      "id": "3b4df533-f5d3-4289-a712-3ad6ee9214f7",
+      "name": "Send a message1",
+      "webhookId": "YOUR_ID",
+      "credentials": {
+        "discordOAuth2Api": {
+          "id": "YOUR_ID",
+          "name": "Discord account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1234567,
+          "mode": "list",
+          "cachedResultName": "AmazonLunaGames-Fetch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1234567"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "releaseYear": "={{ $('parsing').item.json.releaseYear }}",
+            "genres": "={{ $('parsing').item.json.genres }}",
+            "imageLandscape": "={{ $('parsing').item.json.imageLandscape }}",
+            "imagePortrait": "={{ $('parsing').item.json.imagePortrait }}",
+            "asin": "={{ $('parsing').item.json.asin }}",
+            "isNew": "=FALSE",
+            "title": "={{ $('parsing').item.json.title }}"
+          },
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "releaseYear",
+              "displayName": "releaseYear",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "genres",
+              "displayName": "genres",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asin",
+              "displayName": "asin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imagePortrait",
+              "displayName": "imagePortrait",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "imageLandscape",
+              "displayName": "imageLandscape",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isNew",
+              "displayName": "isNew",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        320
+      ],
+      "id": "cf24d5c1-248b-43cc-bd08-6c12d0d60ef3",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "YOUR_ID",
+          "name": "ACCOUNT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b51ea07a-8e6c-41c6-8d9b-45a0253f6712",
+              "leftValue": "={{ $json.isNew }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        336
+      ],
+      "id": "ecfdc381-89a6-4fcb-bff0-281b21bc3224",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "batchSize": 6,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1504,
+        320
+      ],
+      "id": "761a4e08-e144-4756-88d7-9915563242f6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1728,
+        336
+      ],
+      "id": "4ad1d3c2-2caa-49da-8de0-75d29c1d683f",
+      "name": "Wait",
+      "webhookId": "YOUR_ID"
+    },
+    {
+      "parameters": {
+        "content": "### 1. Create a Discord Application\n\n1. Go to: [https://discord.com/developers/applications](https://discord.com/developers/applications)\n2. Click **New Application**, choose a name, and save.\n\n### 2. Turn the application into a Bot\n\n1. In the left menu, open **Bot** → “Add Bot”.\n2. Click **Reset Token** to generate the bot token → copy and store it securely.\n\n### 3. Enable Bot Permissions\n\nIn **Privileged Gateway Intents**:\n\n* Enable **Message Content Intent**.\n\nSave the configuration.\n\n### 4. Invite the bot to your Discord server\n\n1. Go to **OAuth2 → URL Generator**.\n2. Select the scope: **bot**.\n3. Under permissions, enable **Send Messages** (and “Embed Links” if needed).\n4. Copy the generated invite link and open it in your browser.\n5. Choose your server → the bot is now added (it stays offline until used via API).\n\n### 5. Create a channel for notifications\n\n1. In your Discord server, create a new text channel.\n2. Right-click the channel → **Copy Channel ID**\n   (If you don’t see this, enable **Developer Mode** under User Settings → Advanced.)\n\n### 6. Connect Discord to n8n\n\nIn the Discord node:\n\n1. Insert your **Bot Token** in the credentials.\n2. Paste the **Channel ID**.\n3. Map the message content (title, link, image, etc.).\n\n**Alternative:**\nInstead of using a bot, you can use a **Discord Webhook**:\n\n* Create a webhook in *Channel Settings → Integrations → Webhooks*.\n* Use an **HTTP Request** node (POST) to send JSON payloads to the webhook URL.\n",
+        "height": 1072,
+        "width": 688,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -80
+      ],
+      "id": "15d6e73a-894b-4c80-86cb-3739834916ff",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 🔄 Replacing Discord with another notification provider\n\nYou can easily replace the Discord node with any other service, such as:\n\n* Telegram (via Bot API)\n* Email (via SMTP)\n* WhatsApp (via API or third-party services)\n* Slack / Microsoft Teams (webhooks)\n* Pushbullet / Matrix / Bark, etc.\n\n**Only the final message-sending node needs to be changed.**\nAll other logic stays the same.\n\n\n1. After the list of games is processed, the **IF** node identifies which items are marked as *new*.\n2. New items are passed to a **Loop Over Items** node.\n3. Each item is then delayed using a **Wait** node.\n\n\n---\n",
+        "height": 384,
+        "width": 720,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        576
+      ],
+      "id": "9b7f0590-f7d8-4274-8cad-7c199107525e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('isNew').item.json.imageLandscape }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        320
+      ],
+      "id": "bc7cd731-710c-4f31-be76-933ceee09707",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsing": {
+      "main": [
+        [
+          {
+            "node": "isNew",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "isNew": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "YOUR_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_ID"
+  },
+  "id": "YOUR_ID",
+  "tags": []
+}

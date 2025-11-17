@@ -1,4 +1,4 @@
-# 🚀 🤖 n8n Templates by Paolo Ronco
+# 🤖 n8n Templates [by Paolo Ronco]
 
 
 
@@ -29,6 +29,14 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
     │     ├─ NOTES-Fetch.md
 
     │     ├─ NOTES-Notify.md
+
+    │     └─ assets/
+
+    │  └─ SaveInvoices/
+
+    │     ├─ workflow.json
+
+    │     ├─ README.md
 
     │     └─ assets/
 
@@ -66,9 +74,26 @@ Automated workflow that fetches the entire **Included with Prime** game catalog 
 
 - **README.md** – Usage guide - **NOTES-Fetch.md**
 
-– Fetch logic, headers, endpoint, parsing - **NOTES-Notify.md**
+- Fetch logic, headers, endpoint, parsing - **NOTES-Notify.md**
 
-– Notifications & rate-limit handling - **assets/** – Images, previews, diagrams ---
+- Notifications & rate-limit handling - **assets/** – Images, previews, diagrams ---
+
+
+
+### ▶️ **2. Save Invoices**
+
+Automated workflow that fetches invoice emails from your ISP or utility provider, downloads the attached PDF, stores it in Google Drive (or optionally on your FTP/SFTP server), extracts all invoice details using AI, and logs everything into Google Sheets.
+
+📂 Folder → [`/free-templates/2-SaveInvoices`](./free-templates/2-SaveInvoices)
+
+📄 Files included:
+
+* **workflow.json** – Complete n8n importable workflow
+* **README.md** – Full setup guide
+* **NOTES-Extract.md** – AI extraction logic, parsing, field mapping
+* **assets/** – Screenshots, diagrams, previews
+
+
 
 
 
@@ -161,3 +186,5 @@ This section will host advanced and premium automation templates:
     If these templates help you automate your workflows, consider starring the repo ⭐  
 
     More templates are coming soon!
+
+

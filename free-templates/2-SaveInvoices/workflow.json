@@ -1,0 +1,551 @@
+{
+  "name": "20-SaveInvoices-Templates",
+  "nodes": [
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "=PATH/PATH/{{\n  (n => {\n    n = $('GoogleDrive-upload-file').item.json.name || $json.name || 'invoice';\n    n = n.replace(/[\\x00-\\x1F\\x7F]/g, '');\n    n = n.replace(/[:<>\\\"/\\\\|?*]/g, '-');\n    n = n.replace(/\\s+/g, ' ').replace(/[\\. ]+$/, '');\n    return n.toLowerCase().endsWith('.pdf') ? n : n + '.pdf';\n  })()\n}}\n"
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        0
+      ],
+      "id": "5c6fcda5-95d5-475f-9374-2b1a153917c8",
+      "name": "FTP-upload-octopus",
+      "credentials": {
+        "sftp": {
+          "id": "BsF0Em2AHLou3erf",
+          "name": "FTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "87e927b3-4f28-4843-b2d0-cf7269437fca",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Get many messages').item.binary}}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "240d6703-e434-48b3-9f1f-bd3dce7a4909",
+      "name": "Filter-contains_attachment",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        448,
+        0
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('GoogleDrive-upload-file').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1488,
+        0
+      ],
+      "id": "0c66ff53-61f7-4002-ae69-e302f76b1af5",
+      "name": "Delete a file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GGjvXfkqpDHVvYC3",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        352
+      ],
+      "id": "1c19a579-4714-40cd-ae41-b79dd89956ec",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "tx3QJZdQsNJEQ7LO",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        176
+      ],
+      "id": "5bc931ca-dd2e-44a2-b223-04e971367087",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "content": "## Automated Invoice Archiving\n\nAutomatically fetch, store, and extract key information from invoices received via email from your ISP or utility provider (electricity, gas, telecom, water, etc.).The workflow saves the invoices to Google Drive (or optionally to your personal FTP/SFTP server) and logs all invoice details into Google Sheets via AI-powered extraction.\n\n## How it works\n\n1. **Scheduled Trigger**Runs the workflow at a selected interval (e.g., every hour). You can freely adjust the timing.\n  \n2. **Gmail – Fetch Messages**Reads your Gmail inbox and retrieves only messages coming from your ISP/utility provider’s email address, filtering for messages with PDF attachments.\n  \n3. **Gmail – Download Invoice**Fetches the full email content and downloads the attached invoice (PDF).\n  \n4. **Google Drive – Upload File**Uploads the invoice into a specific Google Drive folder of your choice.\n  \n5. **(Optional) Upload to FTP/SFTP**Sends a copy of the invoice to your personal server via secure FTP/SFTP.\n  \n6. **AI Extraction Pipeline**\n  \n  * **Extract PDF Text** – converts the PDF into text (OCR not required if text-based).\n    \n  * **AI Agent (OpenRouter)** – understands the invoice content and extracts structured fields (invoice number, date, provider name, total amount, tax info, line items, etc.)\n    \n  * **Code Node** – sanitizes and parses the JSON from the AI model.\n    \n7. **Google Sheets – Append Invoice Data**Adds a new row to your Google Sheet with all parsed invoice fields.\n  \n8. **(Optional) Cleanup**Automatically deletes:– the Gmail message– the temporary file in Google Drive(Useful when you only want your FTP or Sheets copy.)\n  \n\n---\n\n## Notes and Tips\n\n* Works with most invoice formats from ISPs and utility providers.\n* Best results when the invoice PDF contains selectable text (OCR not required).\n* You can disable:\n  – FTP upload\n  – Gmail deletion\n  – Drive deletion\n  depending on your desired workflow.\n* You can create separate workflows for different providers, or filter multiple providers in a single one.\n* Google Sheets can be used to analyze spending trends over time.\n\n---\n\n## Important\n\n* Invoices may contain sensitive information.\n  – Secure your SFTP server properly.\n  – Use encrypted storage when possible.\n* Google APIs require correct OAuth/Service Account setup.\n* This workflow is intended for personal automation only.\n",
+        "height": 1136,
+        "width": 864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        160
+      ],
+      "id": "170589d6-8e1e-4f8d-8530-88af4145e0a0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "simple": false,
+        "filters": {
+          "sender": "SENDER_EMAIL_ADDRESS"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4fc76db4-ce7d-4e40-aff0-923a1d89428b",
+      "name": "Get many messages",
+      "webhookId": "af615cf7-1086-4de1-b3a6-020e6f96bcf1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "454oo3lK2q6e5HzC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 25
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "de276b42-c83f-4a62-9b9e-3d21b4f03317",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $('Get many messages').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1712,
+        0
+      ],
+      "id": "260fee8a-8c3c-4fba-9e30-96fd4ce74b48",
+      "name": "Delete a message",
+      "webhookId": "c974ebf7-e5f5-4e25-a894-d16561876f46",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "454oo3lK2q6e5HzC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $node[\"Get many messages\"].json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "17d74ff6-b02f-4641-bbe8-46ab717b5a1d",
+      "name": "Gmail-Get_Invoice",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        688,
+        0
+      ],
+      "webhookId": "a430c91c-4c1a-4377-88ad-f3ffefdc70ac",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "454oo3lK2q6e5HzC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $binary.keys()[0] }}",
+        "name": "={{ $json.from.value[0].name}}-{{ $json.date }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "=YOUR_ID",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "b6680055-8aef-4f9e-a2f8-b4dc0188cd70",
+      "name": "GoogleDrive-upload-file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        880,
+        0
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GGjvXfkqpDHVvYC3",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.webContentLink }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "269bdde6-6a68-4e9c-96e6-d67935df7a25",
+      "name": "downloadFile"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1-YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1842419144,
+          "mode": "list",
+          "cachedResultName": "Fatture-luce",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1842419144"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fornitore": "={{ $json.vendor_name }}",
+            "Importo": "={{ $json.total_amount }}",
+            "Data": "={{ $json.invoice_date }}",
+            "Tipo": "={{ $json.line_items[0].description }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fornitore",
+              "displayName": "Fornitore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Importo",
+              "displayName": "Importo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1952,
+        176
+      ],
+      "id": "29ea0f55-1d7a-48e6-89b5-4020edf095b2",
+      "name": "GoogleSheets_save",
+      "credentials": {
+        "googleApi": {
+          "id": "9oG4csVCDf8W3hIo",
+          "name": "YOUR_ACCOUNT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nlet raw = output.result || output.completion || output.text || JSON.stringify(output);\n\n// Step 1: Remove backticks if present\nraw = raw.trim();\nif (raw.startsWith(\"```json\")) {\n  raw = raw.replace(/^```json\\s*/, '').replace(/```$/, '').trim();\n} else if (raw.startsWith(\"```\")) {\n  raw = raw.replace(/^```\\s*/, '').replace(/```$/, '').trim();\n}\n\n// Step 2: Find full JSON block from first { to last }\nconst start = raw.indexOf('{');\nconst end = raw.lastIndexOf('}');\nif (start === -1 || end === -1 || end <= start) {\n  return [{\n    json: {\n      error: \"No valid JSON block found\",\n      raw_output: raw\n    }\n  }];\n}\n\nlet jsonCandidate = raw.substring(start, end + 1).trim();\n\n// Step 3: Unescape characters\njsonCandidate = jsonCandidate\n  .replace(/\\\\n/g, '')\n  .replace(/\\\\t/g, '')\n  .replace(/\\\\\"/g, '\"')\n  .replace(/\\\\'/g, \"'\")\n  .replace(/\\\\\\\\/g, '\\\\');\n\n// Step 4: Parse JSON safely\ntry {\n  let parsed = JSON.parse(jsonCandidate);\n\n  // Only double-parse if it looks like stringified JSON\n  if (typeof parsed === \"string\" && parsed.trim().startsWith('{') && parsed.trim().endsWith('}')) {\n    parsed = JSON.parse(parsed);\n  }\n\n  return [{ json: parsed }];\n} catch (e) {\n  return [{\n    json: {\n      error: \"JSON parsing failed\",\n      raw_output: raw,\n      attempted_extraction: jsonCandidate,\n      message: e.message\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        176
+      ],
+      "id": "bbf59dee-cde2-45e3-bfda-776413827429",
+      "name": "Code_extractFields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=- You must respond ONLY with valid raw rendered JSON.\n- Do NOT include the word \"json\".\n- Do NOT include the word \"```json\".\n- Do NOT use triple backticks or markdown formatting.\n- Do NOT wrap the response in any key like \"output\".\n- Do NOT write anything starting at output directly start with valid root-level JSON.\n- Only respond with a valid, root-level JSON object.\n- Do NOT skip any line item. Continue extracting all line items until the sum of all line_total values exactly equals the total sale amount extracted from the invoice. This verification ensures that all items are fully extracted and no entries are missed. If the totals do not match, keep parsing and extracting additional line items until they do. Only then stop.\n\nText to convert: {{ $json.text }}",
+        "options": {
+          "systemMessage": "You are a document parsing assistant designed to extract structured data from invoice PDFs for automated uploading and validation in a financial system.\n\nExtract the following fields from the invoice text:\n\ninvoice_number: Extract from the 'Invoice No' field.\n\nvendor_name: Company name issuing the invoice.\n\ninvoice_date: Format as DD/MM/YYYY.\n\npo_number: Extract the PO number or return null if not found.\n\npo_date: Extract the PO date in DD/MM/YYYY format or return null if not found.\n\ntotal_amount: Extract the invoice total as a float.\n\ntax_details: Include total CGST, total SGST.\n\nline_items: List of all items in the invoice. For each item, extract:\n\n  Serial No.: Item Serial No. In invoice.\n\n  code: The TWW word and its postfix only (e.g., TWW, TWW-Cover, TWW-HPCN). Do not include HSN code or numbers. This field must always be present.\n\n  description: Item description, never include HSN code of product in product description.\n\n  last character: This is a single word/character string found just after or around the line item, typically at the end of the price line or just on the next line. It will never be a number, HSN code, GST %, or unit (like PCS). Examples: G, C, S, 5C, .C If nothing is present (only digits or blank), return \"\". Check the next 1–2 lines after each item if it's not found on the same line.\n\n  quantity: Quantity value.\n\n  unit_price: Price per unit.\n\n  line_total: Total price for the line.\n\n  hsn_code: HSN code of the item.\n\n  cgst: Only extract the CGST percentage (e.g., 9%, 6%) as written in the invoice. Do not calculate based on line total.\n\n  sgst: Only extract the SGST percentage (e.g., 9%, 6%) as written in the invoice. Do not calculate based on line total.\n\nImportant: Double-check that all line items are extracted without omission.\n\nDo NOT skip any line item. Continue extracting all line items until the sum of all line_total values exactly equals the total_amount extracted from the invoice. This verification ensures that all items are fully extracted and no entries are missed. If the totals do not match, keep parsing and extracting additional line items until they do. Only then stop."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        176
+      ],
+      "id": "279fc733-3a4a-48b5-b90a-33437a93bec9",
+      "name": "AI_Agent-fields"
+    },
+    {
+      "parameters": {
+        "content": "## Parameters to configure\n\n### Gmail\n\n* Create Gmail OAuth2 credentials in Google Cloud.\n* Enable Gmail API.\n* Insert Client ID and Secret into n8n.\n* Click “Connect OAuth2”.\n* In the *Get Many Messages* node, set the sender email of your ISP/utility.\n  Example:\n\n  * `invoices@isp.com`\n  * `billing@provider.it`\n\n### Google Drive\n\n* Enable Drive API in your Google Cloud project.\n* Connect via OAuth2 in n8n.\n* In the upload node, paste the folder ID of your destination directory.\n  (Found in the URL of the Drive folder.)\n\n### FTP / SFTP (optional)\n\n* Set host/IP, port (22 for SFTP), username, password or SSH key.\n* Set the destination path where invoices should be stored.\n  Example: `/home/user/invoices/`\n\n### Google Sheets\n\n* Create a new spreadsheet.\n* Add columns for fields you want to store (Vendor, Invoice Number, Date, Amount, Service, etc.).\n* Use a Service Account credential.\n* Share the Sheet with the Service Account email.\n* Enter the document ID and sheet/tab name in the node.\n\n### AI (OpenRouter)\n\n* Insert your OpenRouter API key into n8n.\n* Choose a model (recommended: `gpt-4.1` or `llama-3.1`).\n* The AI Agent returns structured JSON that the Code node cleans before sending to Sheets.\n\n### Trigger Settings\n\n* Adjust frequency as needed: hourly, every 30 minutes, daily at a specific time, etc.",
+        "height": 1136,
+        "width": 912
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        160
+      ],
+      "id": "6b260978-de17-47c1-8b0b-bf2163d68b02",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "FTP-upload-octopus": {
+      "main": [
+        [
+          {
+            "node": "Delete a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter-contains_attachment": {
+      "main": [
+        [
+          {
+            "node": "Gmail-Get_Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI_Agent-fields",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "AI_Agent-fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Filter-contains_attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail-Get_Invoice": {
+      "main": [
+        [
+          {
+            "node": "GoogleDrive-upload-file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleDrive-upload-file": {
+      "main": [
+        [
+          {
+            "node": "downloadFile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "downloadFile": {
+      "main": [
+        [
+          {
+            "node": "FTP-upload-octopus",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file1": {
+      "main": [
+        [
+          {
+            "node": "Delete a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code_extractFields": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets_save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI_Agent-fields": {
+      "main": [
+        [
+          {
+            "node": "Code_extractFields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "71ba86f2-5a0f-4ebf-bbec-e9e574161664",
+  "meta": {
+    "instanceId": "INSTANCE_ID"
+  },
+  "id": "JO7p7aOEOypeEGoF",
+  "tags": []
+}

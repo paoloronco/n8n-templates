@@ -1,5 +1,5 @@
 {
-  "name": "25-AmazonLuna-Games-Fetch template",
+  "name": "AmazonLuna-Games-Fetch",
   "nodes": [
     {
       "parameters": {
@@ -55,14 +55,14 @@
         "jsonBody": "{\"timeout\":10000,\"searchContext\":{\"query\":\"included_with_prime\",\"sort\":\"TITLE_A_TO_Z\",\"filtersList\":[]},\"featureScheme\":\"WEB_V1\",\"pageContext\":{\"pageType\":\"multistate_browse_results\",\"pageId\":\"default\"},\"clientContext\":{\"browserMetadata\":{\"browserClientRole\":\"browser\",\"browserType\":\"Chrome\",\"browserVersion\":\"141.0.0.0\",\"deviceModel\":\"unknown\",\"deviceType\":\"unknown\",\"osName\":\"Windows\",\"osVersion\":\"11\"}},\"inputContext\":{\"gamepadTypes\":[]},\"dynamicFeatures\":[]}",
         "options": {}
       },
+      "id": "6b95e9e1-d883-4e05-932f-c67963ddf17d",
+      "name": "HTTP Request1",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "position": [
-        -1056,
-        880
+        1408,
+        352
       ],
-      "id": "e51bee9b-926f-4edb-ba3f-d757c4bbebc9",
-      "name": "HTTP Request1"
+      "typeVersion": 4.2
     },
     {
       "parameters": {
@@ -71,75 +71,75 @@
             {
               "id": "2014c337-009b-4c72-ab7a-cfc94318875e",
               "name": "Content-Type",
-              "value": "text/plain;charset=UTF-8",
-              "type": "string"
+              "type": "string",
+              "value": "text/plain;charset=UTF-8"
             },
             {
               "id": "af3dfb87-355d-40d3-8cc6-3074c7d99382",
               "name": "Origin",
-              "value": "https://luna.amazon.it",
-              "type": "string"
+              "type": "string",
+              "value": "https://luna.amazon.it"
             },
             {
               "id": "971f2ce5-9d5e-4abd-b6f8-9815af9d1d6f",
               "name": "Refer",
-              "value": "https://luna.amazon.it/",
-              "type": "string"
+              "type": "string",
+              "value": "https://luna.amazon.it/"
             },
             {
               "id": "adc28f7c-1ad0-4e33-b4f8-1d4b678c1c2c",
               "name": "x-amz-locale",
-              "value": "en_US",
-              "type": "string"
+              "type": "string",
+              "value": "en_US"
             },
             {
               "id": "8852885e-013d-4b76-97e2-7393551e1f39",
               "name": "x-amz-platform",
-              "value": "web",
-              "type": "string"
+              "type": "string",
+              "value": "web"
             },
             {
               "id": "75790b6d-bdba-4547-866e-f078dae263b9",
               "name": "x-amz-device-type",
-              "value": "browser",
-              "type": "string"
+              "type": "string",
+              "value": "browser"
             },
             {
               "id": "eb7c07a8-a963-41a3-8b44-9b94cd0c9f05",
               "name": "x-amz-marketplace-id",
-              "value": "ATVPDKIKX0DER",
-              "type": "string"
+              "type": "string",
+              "value": "ATVPDKIKX0DER"
             },
             {
               "id": "cc5cf070-b37b-46b6-a5f5-5c588446395e",
               "name": "Accept-Language",
-              "value": "en-US",
-              "type": "string"
+              "type": "string",
+              "value": "en-US"
             },
             {
               "id": "9adc0222-535d-4c1d-9b9c-323184484875",
               "name": "User-Agent",
-              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-              "type": "string"
+              "type": "string",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
             },
             {
               "id": "0f9694c2-307f-4c84-85eb-4602351deeff",
               "name": "searchContext",
-              "value": "{ \"query\": \"included_with_prime\" }.",
-              "type": "string"
+              "type": "string",
+              "value": "{ \"query\": \"included_with_prime\" }."
             }
           ]
         },
         "options": {}
       },
+      "id": "46d0296b-bf10-45a1-b936-590db25bbb7c",
+      "name": "Edit Fields",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "position": [
-        -1248,
-        880
+        1216,
+        352
       ],
-      "id": "90e866ac-6049-4b49-b36c-a14bb5ed18a3",
-      "name": "Edit Fields"
+      "typeVersion": 3.4
     },
     {
       "parameters": {
@@ -152,50 +152,44 @@
           ]
         }
       },
+      "id": "853ee870-2926-48a4-b7bb-69efab9dd2ff",
+      "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
       "position": [
-        -1616,
-        880
+        848,
+        352
       ],
-      "id": "afa5fe39-cadf-4b06-8b58-9a15c7b2ffcb",
-      "name": "Schedule Trigger"
+      "typeVersion": 1.2
     },
     {
       "parameters": {
         "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
-          "value": "1-YOUR_ID",
           "mode": "list",
-          "cachedResultName": "Folder_Name",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit?usp=drivesdk"
+          "value": "1-YOUR_ID",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit?usp=drivesdk",
+          "cachedResultName": "Folder_Name"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1234567,
           "mode": "list",
-          "cachedResultName": "Sheet_Name",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit#gid=Your_ID"
+          "value": 1234567,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit#gid=Your_ID",
+          "cachedResultName": "Sheet_Name"
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        -1424,
-        880
-      ],
-      "id": "8ad57013-7764-4b02-a260-35155801ff3d",
+      "id": "6a6b35e4-cac9-46fa-a69b-83be9fbd5331",
       "name": "Get row(s) in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1040,
+        352
+      ],
       "executeOnce": false,
-      "alwaysOutputData": true,
-      "credentials": {
-        "googleApi": {
-          "id": "Your_ID",
-          "name": "Your_ACCOUNT"
-        }
-      }
+      "typeVersion": 4.7,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -204,40 +198,40 @@
         "width": 640,
         "color": 5
       },
+      "id": "7947a59c-696e-44b0-a952-d2daea6c5606",
+      "name": "Sticky Note2",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
-        176,
-        528
+        2640,
+        0
       ],
-      "id": "bfff7efe-6fa6-43be-9b55-73f6a7437bb7",
-      "name": "Sticky Note2"
+      "typeVersion": 1
     },
     {
       "parameters": {
         "jsCode": "// Parse GAME_TILE widgets and extract game info\nconst data = items[0].json;\nconst out = [];\n\nfunction walk(n) {\n  if (Array.isArray(n)) return n.forEach(walk);\n  if (n && typeof n === 'object') {\n    if (n.type === 'GAME_TILE') {\n      const target = n.actions?.[0]?.target || '';\n      const parts = target.replace(/^\\/|\\/$/g,'').split('/');\n      const slug = parts[1] || null;\n      const asin = parts[2] || null;\n\n      let pd = {};\n      try { pd = JSON.parse(n.presentationData || '{}'); } catch(e){}\n\n      out.push({\n        asin,\n        slug,\n        title: pd.title || null,\n        releaseYear: pd.releaseYear || null,\n        publishers: pd.publishersText || null,\n        genres: Array.isArray(pd.genreTags) ? pd.genreTags.join(', ') : null,\n        productUrl: pd.productUrl || null,\n        imagePortrait: pd.imagePortrait || null,\n        imageLandscape: pd.imageLandscape || null,\n        ageRating: pd.ageRating?.categoryText || null,\n        target\n      });\n    }\n    Object.values(n).forEach(walk);\n  }\n}\nwalk(data);\n\nreturn out.map(x => ({ json: x }));\n"
       },
+      "id": "6ffc3165-6d9c-4bdd-b56a-f15f5cf5eb57",
+      "name": "parsing",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
       "position": [
-        -848,
-        880
+        1616,
+        352
       ],
-      "id": "498ecfef-1c23-4efd-a2b8-f01d58b955ea",
-      "name": "parsing"
+      "typeVersion": 2
     },
     {
       "parameters": {
         "jsCode": "// Leggo tutte le righe dal nodo \"Get row(s) in sheet\"\nconst existingRows = $items('Get row(s) in sheet');\n\n// Se il foglio è vuoto: tutti nuovi\nif (!existingRows || existingRows.length === 0) {\n  return items.map(item => {\n    item.json.isNew = true;\n    return item;\n  });\n}\n\n// Costruisco le chiavi già presenti nel foglio:\n// prima asin, se vuoto uso il titolo (Title nel foglio, title negli item)\nconst existingKeys = new Set(\n  existingRows\n    .map(r => {\n      const asin = (r.json.asin || '').trim().toUpperCase();\n      const title =\n        (r.json.Title || r.json.title || '').trim().toUpperCase(); // 👈 QUI la differenza\n      return asin || title;\n    })\n    .filter(k => k !== '')\n);\n\n// Aggiungo isNew agli item in ingresso\nreturn items.map(item => {\n  const asin = (item.json.asin || '').trim().toUpperCase();\n  const title =\n    (item.json.Title || item.json.title || '').trim().toUpperCase();\n\n  const key = asin || title;\n\n  // se non ho né asin né titolo, lo considero nuovo\n  item.json.isNew = key === '' ? true : !existingKeys.has(key);\n\n  return item;\n});"
       },
+      "id": "8f1a7332-659b-47e6-9baf-cc4f140de00c",
+      "name": "isNew",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
       "position": [
-        -672,
-        880
+        1792,
+        352
       ],
-      "id": "8767cdac-90f8-45ea-ab7a-f57c9977697a",
-      "name": "isNew"
+      "typeVersion": 2
     },
     {
       "parameters": {
@@ -245,17 +239,17 @@
         "resource": "message",
         "guildId": {
           "__rl": true,
-          "value": "YOUR_ID",
           "mode": "list",
-          "cachedResultName": "AmazonLuna-games",
-          "cachedResultUrl": "https://discord.com/channels/YOUR_ID"
+          "value": "YOUR_ID",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_ID",
+          "cachedResultName": "AmazonLuna-games"
         },
         "channelId": {
           "__rl": true,
-          "value": "Your_ID",
           "mode": "list",
-          "cachedResultName": "new-games-notifications",
-          "cachedResultUrl": "https://discord.com/channels/YOUR_ID/YOUR_ID"
+          "value": "Your_ID",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_ID/YOUR_ID",
+          "cachedResultName": "new-games-notifications"
         },
         "content": "=New game added on Amazon Luna!\nTitle: {{ $('If1').item.json.title }}\nGeneres: {{ $('If1').item.json.genres }}\nRelease Year: {{ $('If1').item.json.releaseYear }}\n \n\n",
         "options": {},
@@ -265,15 +259,15 @@
           ]
         }
       },
-      "type": "n8n-nodes-base.discord",
-      "typeVersion": 2,
-      "position": [
-        672,
-        880
-      ],
-      "id": "5125f814-c804-403e-9afd-bfdd473c3001",
+      "id": "1ddad36e-291b-469e-bc72-e47ec4e1d736",
       "name": "Send a message1",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        3136,
+        352
+      ],
       "webhookId": "YOUR_ID",
+      "typeVersion": 2,
       "credentials": {
         "discordOAuth2Api": {
           "id": "7fbjmSiUdOmdAtKf",
@@ -287,117 +281,117 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1-YOUR_ID",
           "mode": "list",
-          "cachedResultName": "n8n",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk"
+          "value": "1-YOUR_ID",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk",
+          "cachedResultName": "n8n"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1234567,
           "mode": "list",
-          "cachedResultName": "AmazonLunaGames-Fetch",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1234567"
+          "value": 1234567,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1234567",
+          "cachedResultName": "AmazonLunaGames-Fetch"
         },
         "columns": {
-          "mappingMode": "defineBelow",
           "value": {
-            "releaseYear": "={{ $('parsing').item.json.releaseYear }}",
-            "genres": "={{ $('parsing').item.json.genres }}",
-            "imageLandscape": "={{ $('parsing').item.json.imageLandscape }}",
-            "imagePortrait": "={{ $('parsing').item.json.imagePortrait }}",
             "asin": "={{ $('parsing').item.json.asin }}",
             "isNew": "=FALSE",
-            "title": "={{ $('parsing').item.json.title }}"
+            "title": "={{ $('parsing').item.json.title }}",
+            "genres": "={{ $('parsing').item.json.genres }}",
+            "releaseYear": "={{ $('parsing').item.json.releaseYear }}",
+            "imagePortrait": "={{ $('parsing').item.json.imagePortrait }}",
+            "imageLandscape": "={{ $('parsing').item.json.imageLandscape }}"
           },
-          "matchingColumns": [
-            "title"
-          ],
           "schema": [
             {
               "id": "title",
-              "displayName": "title",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "title",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
             },
             {
               "id": "releaseYear",
-              "displayName": "releaseYear",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "releaseYear",
+              "defaultMatch": false,
               "canBeUsedToMatch": true
             },
             {
               "id": "genres",
-              "displayName": "genres",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "genres",
+              "defaultMatch": false,
               "canBeUsedToMatch": true
             },
             {
               "id": "asin",
-              "displayName": "asin",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "asin",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
             },
             {
               "id": "imagePortrait",
-              "displayName": "imagePortrait",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "imagePortrait",
+              "defaultMatch": false,
               "canBeUsedToMatch": true
             },
             {
               "id": "imageLandscape",
-              "displayName": "imageLandscape",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "imageLandscape",
+              "defaultMatch": false,
               "canBeUsedToMatch": true
             },
             {
               "id": "isNew",
-              "displayName": "isNew",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "isNew",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
             }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "title"
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        -176,
-        864
-      ],
-      "id": "48b4db7b-b1b3-4ff6-8382-a84fadaa56a6",
+      "id": "ea4ad23c-0658-43a6-b84b-4bfe85198e25",
       "name": "Append or update row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2288,
+        336
+      ],
+      "typeVersion": 4.7,
       "credentials": {
         "googleApi": {
-          "id": "9oG4csVCDf8W3hIo",
-          "name": "Your_ACCOUNT"
+          "id": "YOUR_ID",
+          "name": "YOUR_ACCOUNT"
         }
       }
     },
@@ -405,61 +399,61 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 2,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
+          "combinator": "and",
           "conditions": [
             {
               "id": "b51ea07a-8e6c-41c6-8d9b-45a0253f6712",
-              "leftValue": "={{ $json.isNew }}",
-              "rightValue": "true",
               "operator": {
                 "type": "boolean",
                 "operation": "true",
                 "singleValue": true
-              }
+              },
+              "leftValue": "={{ $json.isNew }}",
+              "rightValue": "true"
             }
-          ],
-          "combinator": "and"
+          ]
         },
         "options": {}
       },
+      "id": "c1ba88a4-ba57-4aaf-a135-2d2412c575c4",
+      "name": "If1",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "position": [
-        -480,
-        880
+        1984,
+        352
       ],
-      "id": "bfb6ca68-c899-4e11-acb1-d43d2f9f304f",
-      "name": "If1"
+      "typeVersion": 2.2
     },
     {
       "parameters": {
         "batchSize": 6,
         "options": {}
       },
+      "id": "6bb72785-2d49-41b2-88d8-1517abf5efda",
+      "name": "Loop Over Items",
       "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
       "position": [
-        272,
-        864
+        2736,
+        336
       ],
-      "id": "ef904a0a-5946-4703-a445-25c817d7b121",
-      "name": "Loop Over Items"
+      "typeVersion": 3
     },
     {
       "parameters": {},
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        496,
-        880
-      ],
-      "id": "4878eb88-44b0-4dc2-95d3-c908ba7f1d00",
+      "id": "e3c2a176-adae-4049-8a4e-c94e7ad789f4",
       "name": "Wait",
-      "webhookId": "YOUR_ID"
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2960,
+        352
+      ],
+      "webhookId": "YOUR_ID",
+      "typeVersion": 1.1
     },
     {
       "parameters": {
@@ -468,14 +462,14 @@
         "width": 376,
         "color": 5
       },
+      "id": "3e1941a4-c6a6-4a71-b976-ab8e66e768de",
+      "name": "Sticky Note3",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
-        -320,
-        528
+        2144,
+        0
       ],
-      "id": "4c234cca-2ce8-44f1-9fc3-3b87c60b91e8",
-      "name": "Sticky Note3"
+      "typeVersion": 1
     },
     {
       "parameters": {
@@ -484,52 +478,96 @@
         "width": 1312,
         "color": 5
       },
+      "id": "18d4c8bd-0114-4b73-8fa0-6f9e3780b474",
+      "name": "Sticky Note4",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
-        -1664,
-        528
+        800,
+        0
       ],
-      "id": "f5344c9c-08e8-4559-aae1-17ed5b35bdaa",
-      "name": "Sticky Note4"
+      "typeVersion": 1
     },
     {
       "parameters": {
-        "content": "## Amazon Luna – Included with Prime\n\nThis workflow periodically fetches the list of “Included with Prime” games from Amazon Luna, parses the response, and keeps a Google Sheet in sync without duplicates.  \n\nNew titles are flagged and can be sent as notifications to a channel of your choice (for example Discord, Telegram, Slack, or email).  \n\nBefore activating the workflow, configure the Amazon request headers, region/marketplace, and Google Sheets document.\n\n📖 Full Guide & Region Codes: https://paoloronco.it/portfolio/n8n-guides/\n\n### Important notes\n\n- The data returned by this workflow comes from Amazon Luna and remains the property of Amazon.  \nUse it only for personal or testing purposes.  \n\n- Do not republish, redistribute, or share the results publicly without permission.  \nHeaders, endpoint and response format may change over time, so if the workflow stops working, double-check the values used in the **Edit Fields** and **HTTP Request** nodes.\n\n",
-        "height": 528,
+        "content": "## Amazon Luna – Included with Prime\n\nThis workflow periodically fetches the list of “Included with Prime” games from Amazon Luna, parses the response, and keeps a Google Sheet in sync without duplicates.  \n\nNew titles are flagged and can be sent as notifications to a channel of your choice (for example Discord, Telegram, Slack, or email).  \n\nBefore activating the workflow, configure the Amazon request headers, region/marketplace, and Google Sheets document.\n\n#### Full Guide: https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/\n\n### Video\n[![Watch the video](https://img.youtube.com/vi/PS6qdCbc5fU/maxresdefault.jpg)](https://youtu.be/PS6qdCbc5fU)\n\n\n### Important notes\n\n- The data returned by this workflow comes from Amazon Luna and remains the property of Amazon.  \nUse it only for personal or testing purposes.  \n\n- Do not republish, redistribute, or share the results publicly without permission.  \nHeaders, endpoint and response format may change over time, so if the workflow stops working, double-check the values used in the **Edit Fields** and **HTTP Request** nodes.\n\n",
+        "height": 912,
         "width": 784
       },
+      "id": "37eefa2e-cb7c-4f9f-b828-55b106a620cf",
+      "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
-        -2464,
-        528
+        0,
+        0
       ],
-      "id": "1f29687b-1725-4740-87bb-8b5e91086d0e",
-      "name": "Sticky Note"
+      "typeVersion": 1
     },
     {
       "parameters": {
         "url": "={{ $('isNew').item.json.imageLandscape }}",
         "options": {}
       },
+      "id": "d00de91b-a784-4fa2-9c17-0bcec8e29374",
+      "name": "GetImage",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "position": [
-        64,
-        864
+        2528,
+        336
       ],
-      "id": "b14f1928-d93c-482d-a6cf-951498d736da",
-      "name": "GetImage"
+      "typeVersion": 4.2
     }
   ],
   "pinData": {},
   "connections": {
-    "HTTP Request1": {
+    "If1": {
       "main": [
         [
           {
-            "node": "parsing",
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "isNew": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsing": {
+      "main": [
+        [
+          {
+            "node": "isNew",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetImage": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -541,6 +579,40 @@
         [
           {
             "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -569,89 +641,11 @@
         ]
       ]
     },
-    "parsing": {
-      "main": [
-        [
-          {
-            "node": "isNew",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "isNew": {
-      "main": [
-        [
-          {
-            "node": "If1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Append or update row in sheet": {
       "main": [
         [
           {
             "node": "GetImage",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If1": {
-      "main": [
-        [
-          {
-            "node": "Append or update row in sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "Send a message1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send a message1": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "GetImage": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -663,10 +657,10 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "0b71e419-be2c-4d91-9db4-665086ed9e73",
+  "versionId": "2f5afecd-87a5-43cf-8f24-c3e85a3971d0",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "Your_ID"
+    "instanceId": "YOUR_ID"
   },
   "id": "A8imlsPnCWETHm6k",
   "tags": []

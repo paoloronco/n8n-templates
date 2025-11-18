@@ -7,6 +7,10 @@ The workflow retrieves metadata directly from Amazon’s backend, cleans the res
 
 ![workflow](assets/amazonluna-fetch-asset1.png)
 
+Full deploy guide:  [Amazon Luna – Fetch “Included with Prime” Games &#8211; Paolo Ronco](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
+
+Video: [Amazon Luna – Fetch “Included with Prime” Games - YouTube](https://youtu.be/PS6qdCbc5fU)
+
 ---
 
 ## ⭐ Features

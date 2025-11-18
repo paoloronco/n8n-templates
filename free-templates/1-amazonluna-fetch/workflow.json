@@ -3,21 +3,6 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Amazon Luna – Fetch “Included with Prime” Games\n\n#### How it works\n\n1. **Scheduled Trigger** – starts the workflow every 5 days at 3:00 PM (you can change the frequency and time).\n  \n2. **HTTP Request** – queries Amazon Luna’s official endpoint to retrieve the list of “Included with Prime” games.\n  \n3. **Code Node (JavaScript)** – processes the JSON response and extracts the title, release year, genres, ASIN, and images.\n  \n4. **Google Sheets** – automatically saves or updates the data in a Google Sheet, avoiding duplicates.\n  \n\n#### Parameters to configure \n\nin the node Edit Fields:\n\n* **x-amz-locale** Defines the language and region of the request.Supported options include:\n  \n  * `it_IT` 🇮🇹 (Italy)\n    \n  * `en_US` 🇺🇸 (USA)\n    \n  * `de_DE` 🇩🇪 (Germany)\n    \n  * `fr_FR` 🇫🇷 (France)\n    \n  * `es_ES` 🇪🇸 (Spain)\n    \n  * `en_GB` 🇬🇧 (United Kingdom)\n    \n  * `ja_JP` 🇯🇵 (Japan)\n    \n  * `en_CA` 🇨🇦 (Canada)\n    \n* **x-amz-marketplace-id** Amazon marketplace identifier that corresponds to the selected region.Common values:\n  \n  * `APJ6JRA9NG5V4` 🇮🇹 (Italy)\n    \n  * `ATVPDKIKX0DER` 🇺🇸 (USA)\n    \n  * `A1PA6795UKMFR9` 🇩🇪 (Germany)\n    \n  * `A13V1IB3VIYZZH` 🇫🇷 (France)\n    \n  * `A1RKKUPIHCS9HS` 🇪🇸 (Spain)\n    \n  * `A1F83G8C2ARO7P` 🇬🇧 (UK)\n    \n  * `A1VC38T7YXB528` 🇯🇵 (Japan)\n    \n  * `A2EUQ1WTGCTBG2` 🇨🇦 (Canada)\n    \n* **Accept-Language** Preferred response language. Example:`it-IT,it;q=0.9,en;q=0.8` (adjust for your region as needed).\n  \n* **User-Agent** Browser agent string used in the request header.You can keep the default value or replace it with a more recent one.\n  \n* **Trigger interval** Defines how often the workflow runs automatically.Default: every 5 days at 3:00 PM (can be changed).\n  \n* **Google Sheet** Destination where the data will be stored or updated.Select your document and worksheet when configuring the Google Sheets node.\n  \n\n#### Tips\n\n* You can adjust **locale** and **marketplace-id** to retrieve results from different countries (e.g., USA, Germany, Japan).\n  \n* The **Title** field is used as a key to prevent duplicates when updating records.\n  \n* The workflow can easily be adapted to export data to CSV, Airtable, or any database.\n  \n\n#### ⚠️ Important notes\n\n* The data retrieved belongs to Amazon and should only be used for personal or testing purposes.\n  \n* Do not republish or redistribute the results without permission.",
-        "height": 1184,
-        "width": 2464
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1216,
-        -592
-      ],
-      "id": "dd071cbc-210a-4145-a29d-4e6205811bf2",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "https://proxy-prod.eu-west-1.tempo.digital.a2z.com/getPage",
         "sendHeaders": true,
@@ -73,10 +58,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        176,
-        336
+        -1056,
+        880
       ],
-      "id": "0146fbe4-dedf-4658-85b7-b0094c147352",
+      "id": "e51bee9b-926f-4edb-ba3f-d757c4bbebc9",
       "name": "HTTP Request1"
     },
     {
@@ -150,10 +135,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -16,
-        336
+        -1248,
+        880
       ],
-      "id": "9aa77d5d-837c-41b7-804a-8641c06b1e67",
+      "id": "90e866ac-6049-4b49-b36c-a14bb5ed18a3",
       "name": "Edit Fields"
     },
     {
@@ -170,10 +155,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -384,
-        336
+        -1616,
+        880
       ],
-      "id": "ca73147f-1d93-4ef5-97ea-1eb9a6974372",
+      "id": "afa5fe39-cadf-4b06-8b58-9a15c7b2ffcb",
       "name": "Schedule Trigger"
     },
     {
@@ -183,49 +168,49 @@
           "__rl": true,
           "value": "1-YOUR_ID",
           "mode": "list",
-          "cachedResultName": "n8n",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit?usp=drivesdk"
+          "cachedResultName": "Folder_Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1234567,
           "mode": "list",
-          "cachedResultName": "AmazonLunaGames-Fetch",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-YOUR_ID/edit#gid=1234567"
+          "cachedResultName": "Sheet_Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit#gid=Your_ID"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -192,
-        336
+        -1424,
+        880
       ],
-      "id": "b22ac51d-ad22-405c-a931-d876054f9118",
+      "id": "8ad57013-7764-4b02-a260-35155801ff3d",
       "name": "Get row(s) in sheet",
       "executeOnce": false,
       "alwaysOutputData": true,
       "credentials": {
         "googleApi": {
-          "id": "YOUR_ID",
-          "name": "ACCOUNT"
+          "id": "Your_ID",
+          "name": "Your_ACCOUNT"
         }
       }
     },
     {
       "parameters": {
-        "content": "## 📌 **New Games Notification**\n\n*This section of the workflow handles the automatic delivery of notifications when new games are detected.\n\n## 🔧 How it works\n\n1. After the first part of the workflow finishes processing the data, the nodes filter only the newly-added items.\n2. Each new item is passed into a **Loop** node.\n3. The **HTTP Request** node performs the **download of the file** associated with the item (for example images or metadata).\n4. A short delay is applied using a **Wait** node to prevent rate-limit issues with external services.\n5. Finally, each new item is delivered through the selected notification channel (Discord or any other provider).\n\n#### 🔄 Why “Loop” and “Wait”?\n\nThese nodes are included to **avoid rate limiting** on external services such as Discord or Telegram.\nBy sending messages one at a time, with a short pause in between, you prevent:\n\n* message throttling,\n* blocked requests,\n* temporary bans from the provider.\n\n\n---\n\n\n\n\n\n\n",
-        "height": 1584,
-        "width": 800,
+        "content": "### Section 3 – New game notifications\n\nThe “isNew” and “If1” nodes keep only new titles. For each new game, the image is fetched, items are processed in small batches and a Wait node adds a short pause to avoid rate limits. Finally a message is sent to your notification channel.\n\n#### Choose a notification provider\n\nBy default this template uses a Discord node to post messages in a channel. Select your Discord credentials and channel ID, or replace this node with another service (Telegram, Slack, email, webhooks, etc.) while keeping the rest of the flow unchanged.",
+        "height": 536,
+        "width": 640,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1264,
-        -592
+        176,
+        528
       ],
-      "id": "eb8f6e3c-c0e7-44aa-af6c-93784c1a4d3e",
+      "id": "bfff7efe-6fa6-43be-9b55-73f6a7437bb7",
       "name": "Sticky Note2"
     },
     {
@@ -235,10 +220,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        336
+        -848,
+        880
       ],
-      "id": "e339bf8d-6d91-46a1-bbea-c8db04fb1014",
+      "id": "498ecfef-1c23-4efd-a2b8-f01d58b955ea",
       "name": "parsing"
     },
     {
@@ -248,10 +233,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        336
+        -672,
+        880
       ],
-      "id": "56543b42-361b-4287-be44-f2f78ea0b726",
+      "id": "8767cdac-90f8-45ea-ab7a-f57c9977697a",
       "name": "isNew"
     },
     {
@@ -267,7 +252,7 @@
         },
         "channelId": {
           "__rl": true,
-          "value": "1439249437561061440",
+          "value": "Your_ID",
           "mode": "list",
           "cachedResultName": "new-games-notifications",
           "cachedResultUrl": "https://discord.com/channels/YOUR_ID/YOUR_ID"
@@ -283,15 +268,15 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        1904,
-        336
+        672,
+        880
       ],
-      "id": "3b4df533-f5d3-4289-a712-3ad6ee9214f7",
+      "id": "5125f814-c804-403e-9afd-bfdd473c3001",
       "name": "Send a message1",
       "webhookId": "YOUR_ID",
       "credentials": {
         "discordOAuth2Api": {
-          "id": "YOUR_ID",
+          "id": "7fbjmSiUdOmdAtKf",
           "name": "Discord account"
         }
       }
@@ -404,15 +389,15 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1056,
-        320
+        -176,
+        864
       ],
-      "id": "cf24d5c1-248b-43cc-bd08-6c12d0d60ef3",
+      "id": "48b4db7b-b1b3-4ff6-8382-a84fadaa56a6",
       "name": "Append or update row in sheet",
       "credentials": {
         "googleApi": {
-          "id": "YOUR_ID",
-          "name": "ACCOUNT"
+          "id": "9oG4csVCDf8W3hIo",
+          "name": "Your_ACCOUNT"
         }
       }
     },
@@ -444,10 +429,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        752,
-        336
+        -480,
+        880
       ],
-      "id": "ecfdc381-89a6-4fcb-bff0-281b21bc3224",
+      "id": "bfb6ca68-c899-4e11-acb1-d43d2f9f304f",
       "name": "If1"
     },
     {
@@ -458,10 +443,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1504,
-        320
+        272,
+        864
       ],
-      "id": "761a4e08-e144-4756-88d7-9915563242f6",
+      "id": "ef904a0a-5946-4703-a445-25c817d7b121",
       "name": "Loop Over Items"
     },
     {
@@ -469,44 +454,59 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1728,
-        336
+        496,
+        880
       ],
-      "id": "4ad1d3c2-2caa-49da-8de0-75d29c1d683f",
+      "id": "4878eb88-44b0-4dc2-95d3-c908ba7f1d00",
       "name": "Wait",
       "webhookId": "YOUR_ID"
     },
     {
       "parameters": {
-        "content": "### 1. Create a Discord Application\n\n1. Go to: [https://discord.com/developers/applications](https://discord.com/developers/applications)\n2. Click **New Application**, choose a name, and save.\n\n### 2. Turn the application into a Bot\n\n1. In the left menu, open **Bot** → “Add Bot”.\n2. Click **Reset Token** to generate the bot token → copy and store it securely.\n\n### 3. Enable Bot Permissions\n\nIn **Privileged Gateway Intents**:\n\n* Enable **Message Content Intent**.\n\nSave the configuration.\n\n### 4. Invite the bot to your Discord server\n\n1. Go to **OAuth2 → URL Generator**.\n2. Select the scope: **bot**.\n3. Under permissions, enable **Send Messages** (and “Embed Links” if needed).\n4. Copy the generated invite link and open it in your browser.\n5. Choose your server → the bot is now added (it stays offline until used via API).\n\n### 5. Create a channel for notifications\n\n1. In your Discord server, create a new text channel.\n2. Right-click the channel → **Copy Channel ID**\n   (If you don’t see this, enable **Developer Mode** under User Settings → Advanced.)\n\n### 6. Connect Discord to n8n\n\nIn the Discord node:\n\n1. Insert your **Bot Token** in the credentials.\n2. Paste the **Channel ID**.\n3. Map the message content (title, link, image, etc.).\n\n**Alternative:**\nInstead of using a bot, you can use a **Discord Webhook**:\n\n* Create a webhook in *Channel Settings → Integrations → Webhooks*.\n* Use an **HTTP Request** node (POST) to send JSON payloads to the webhook URL.\n",
-        "height": 1072,
-        "width": 688,
+        "content": "### Section 2 – Update Google Sheet\n\nThe “Append or update row in sheet” node writes the parsed games to your Google Sheet. Rows are matched by title so existing entries are updated and only new games are appended with their ASIN, genres and image URLs.",
+        "height": 532,
+        "width": 376,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2080,
-        -80
+        -320,
+        528
       ],
-      "id": "15d6e73a-894b-4c80-86cb-3739834916ff",
-      "name": "Sticky Note"
+      "id": "4c234cca-2ce8-44f1-9fc3-3b87c60b91e8",
+      "name": "Sticky Note3"
     },
     {
       "parameters": {
-        "content": "## 🔄 Replacing Discord with another notification provider\n\nYou can easily replace the Discord node with any other service, such as:\n\n* Telegram (via Bot API)\n* Email (via SMTP)\n* WhatsApp (via API or third-party services)\n* Slack / Microsoft Teams (webhooks)\n* Pushbullet / Matrix / Bark, etc.\n\n**Only the final message-sending node needs to be changed.**\nAll other logic stays the same.\n\n\n1. After the list of games is processed, the **IF** node identifies which items are marked as *new*.\n2. New items are passed to a **Loop Over Items** node.\n3. Each item is then delayed using a **Wait** node.\n\n\n---\n",
-        "height": 384,
-        "width": 720,
+        "content": "### Section 1 – Amazon request parameters\n\nThe **Edit Fields** node defines all required headers for the Amazon Luna request.  \nHere you should set:\n\n- `x-amz-locale` (language/region)\n- `x-amz-marketplace-id` (marketplace for your region)\n- `Accept-Language`\n- `User-Agent`\n- platform and device type\n\nThe **HTTP Request** node uses these values to call the Luna endpoint and retrieve the list of “Included with Prime” games.\n\n",
+        "height": 528,
+        "width": 1312,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1296,
-        576
+        -1664,
+        528
       ],
-      "id": "9b7f0590-f7d8-4274-8cad-7c199107525e",
-      "name": "Sticky Note3"
+      "id": "f5344c9c-08e8-4559-aae1-17ed5b35bdaa",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Amazon Luna – Included with Prime\n\nThis workflow periodically fetches the list of “Included with Prime” games from Amazon Luna, parses the response, and keeps a Google Sheet in sync without duplicates.  \n\nNew titles are flagged and can be sent as notifications to a channel of your choice (for example Discord, Telegram, Slack, or email).  \n\nBefore activating the workflow, configure the Amazon request headers, region/marketplace, and Google Sheets document.\n\n📖 Full Guide & Region Codes: https://paoloronco.it/portfolio/n8n-guides/\n\n### Important notes\n\n- The data returned by this workflow comes from Amazon Luna and remains the property of Amazon.  \nUse it only for personal or testing purposes.  \n\n- Do not republish, redistribute, or share the results publicly without permission.  \nHeaders, endpoint and response format may change over time, so if the workflow stops working, double-check the values used in the **Edit Fields** and **HTTP Request** nodes.\n\n",
+        "height": 528,
+        "width": 784
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2464,
+        528
+      ],
+      "id": "1f29687b-1725-4740-87bb-8b5e91086d0e",
+      "name": "Sticky Note"
     },
     {
       "parameters": {
@@ -516,11 +516,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1296,
-        320
+        64,
+        864
       ],
-      "id": "bc7cd731-710c-4f31-be76-933ceee09707",
-      "name": "HTTP Request2"
+      "id": "b14f1928-d93c-482d-a6cf-951498d736da",
+      "name": "GetImage"
     }
   ],
   "pinData": {},
@@ -595,7 +595,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request2",
+            "node": "GetImage",
             "type": "main",
             "index": 0
           }
@@ -610,8 +610,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Loop Over Items": {
@@ -648,7 +647,7 @@
         ]
       ]
     },
-    "HTTP Request2": {
+    "GetImage": {
       "main": [
         [
           {
@@ -664,11 +663,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "YOUR_ID",
+  "versionId": "0b71e419-be2c-4d91-9db4-665086ed9e73",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "YOUR_ID"
+    "instanceId": "Your_ID"
   },
-  "id": "YOUR_ID",
+  "id": "A8imlsPnCWETHm6k",
   "tags": []
 }

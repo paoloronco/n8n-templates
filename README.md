@@ -58,11 +58,15 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 
 
 
-Automated workflow that fetches the entire **Included with Prime** game catalog from Amazon Luna, parses all metadata, and syncs everything to Google Sheets without duplicates. Includes optional notifications (Discord, Telegram, Email…).
+Automatically fetch, organize, and maintain an updated catalog of **Amazon Luna – Included with Prime** games. This workflow regularly queries Amazon’s official Luna endpoint, extracts complete metadata, and syncs everything into Google Sheets without duplicates.
 
 
 
-📂 Folder → [`/free-templates/1-amazonluna-fetch`](./free-templates/1-amazonluna-fetch)
+📂 **Folder** → [`/free-templates/1-amazonluna-fetch`](./free-templates/1-amazonluna-fetch)
+
+📕Full deploy guide: [Paolo Ronco.it- Full Deploy Guide: Amazon Luna – Fetch “Included with Prime”](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
+
+👥 n8n Community Template: [Sync Amazon Luna Prime Games to Google Sheets with Automatic Updates | n8n workflow template](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
 
 
 
@@ -77,8 +81,8 @@ Automated workflow that fetches the entire **Included with Prime** game catalog 
 - Fetch logic, headers, endpoint, parsing - **NOTES-Notify.md**
 
 - Notifications & rate-limit handling - **assets/** – Images, previews, diagrams ---
-
-
+  
+  
 
 ### ▶️ **2. Save Invoices**
 
@@ -92,10 +96,10 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 * **README.md** – Full setup guide
 * **NOTES-Extract.md** – AI extraction logic, parsing, field mapping
 * **assets/** – Screenshots, diagrams, previews
-
-
-
-
+  
+  
+  
+  
 
 ---
 
@@ -186,5 +190,3 @@ This section will host advanced and premium automation templates:
     If these templates help you automate your workflows, consider starring the repo ⭐  
 
     More templates are coming soon!
-
-

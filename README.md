@@ -8,47 +8,42 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 
 * * *
 
-
-
 ## 📁 Repository Structure
 
-
-
-    📦 n8n-templates
-
-    ├─ README.MD
-
-    ├─ free-templates/
-
-    │  └─ fetch-AmazonLunaGames/
-
-    │     ├─ workflow.json
-
-    │     ├─ README.md
-
-    │     ├─ NOTES-Fetch.md
-
-    │     ├─ NOTES-Notify.md
-
-    │     └─ assets/
-
-    │  └─ SaveInvoices/
-
-    │     ├─ workflow.json
-
-    │     ├─ README.md
-
-    │     └─ assets/
-
-    └─ paid-templates/
-
-       └─ (coming soon)
+```
+.
+├── 📦 n8n-templates
+├── README.MD
+├── free-templates/
+├── 1-amazonluna-fetch/
+│   ├── workflow.json
+│   ├── README.md
+│   ├── docs/
+│   │   ├── NOTES-Fetch.md
+│   │   └── NOTES-Notify.md
+│   └── assets/
+│       └── amazonluna-fetch-asset1.png
+├── 2-SaveInvoices/
+│   ├── workflow.json
+│   ├── README.md
+│   └── assets/
+│       └── SaveInvoices-Asset1
+├── 3-Certification-Creation&Validation/
+│   ├── Cetificate-Creation&Validation.json
+│   ├── README.md
+│   ├── HTML-Files/
+│   │   ├── Certificate.html
+│   │   └── Cerification_Check.html
+│   └── assets/
+│       ├── Example-Certificate
+│       └── Workflow-image
+└── paid-templates/
+    └── (coming soon)
+```
 
 
 
 ---  
-
-
 
 ## 🌟 Free Templates
 
@@ -56,11 +51,7 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 
 ### ▶️ **1. Amazon Luna – Fetch “Included with Prime” Games and send notifications**
 
-
-
 Automatically fetch, organize, and maintain an updated catalog of **Amazon Luna – Included with Prime** games. This workflow regularly queries Amazon’s official Luna endpoint, extracts complete metadata, and syncs everything into Google Sheets without duplicates.
-
-
 
 📂 **Folder** → [`/free-templates/1-amazonluna-fetch`](./free-templates/1-amazonluna-fetch)
 
@@ -68,11 +59,7 @@ Automatically fetch, organize, and maintain an updated catalog of **Amazon Luna
 
 👥 n8n Community Template: [Sync Amazon Luna Prime Games to Google Sheets with Automatic Updates | n8n workflow template](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
 
-
-
 📄 Files included:
-
-
 
 - **workflow.json** – Complete n8n importable workflow
 
@@ -90,16 +77,41 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 
 📂 Folder → [`/free-templates/2-SaveInvoices`](./free-templates/2-SaveInvoices)
 
+📕 Full deploy guide: [[n8n-template] Automated Invoice Archiving &#8211; Paolo Ronco](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
+
+👥 n8n Community Template: [coming soon
+
 📄 Files included:
 
 * **workflow.json** – Complete n8n importable workflow
 * **README.md** – Full setup guide
-* **NOTES-Extract.md** – AI extraction logic, parsing, field mapping
 * **assets/** – Screenshots, diagrams, previews
   
   
   
   
+
+### ▶️ **3. Certificate Creation&Validation**
+
+Automated workflow for a complete **end-to-end certification management system built with n8n**.
+It automates the entire lifecycle of a digital certificate — from creation, to PDF generation, to verification via API or a user-friendly HTML page.
+
+📂 Folder → [`/free-templates/3-Certification-Creation&Validation`](./free-templates/3-Certification-Creation&Validation)
+
+📕 Full deploy guide: [[n8n-template] Certification Creator](https://paoloronco.it/n8n-template-certification-creator-checker/)
+
+👥 n8n Community Template: [coming soon]()
+
+📄 Files included:
+
+* **workflow.json** – Complete n8n importable workflow
+* **README.md** – Full setup guide
+* **HTML Files** – Example HTML templates
+* **assets/** – Screenshots, diagrams, previews
+
+
+
+
 
 ---
 
@@ -107,13 +119,9 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 
 ## 💎 Paid Templates (Soon)
 
+ 📦 Folder →      `/paid-templates/`  
 
-
-    📦 Folder →  
-
-    `/paid-templates/`  
-
-    (Will include previews, documentation, and purchase/activation details.)
+ (Will include previews, documentation, and purchase/activation details.)
 
 This section will host advanced and premium automation templates:
 
@@ -146,8 +154,6 @@ This section will host advanced and premium automation templates:
 
 
 ## ✨ How to Use These Templates
-
-
 
     1. Open n8n  
 

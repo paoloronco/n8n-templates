@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Certification Check</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+    }
+    label, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Certification Check</h1>
+
+  <label for="id-input">Certificate ID</label>
+  <input id="id-input" type="text" />
+
+  <button id="check-btn" type="button">Check</button>
+
+  <p id="result"></p>
+
+  <script>
+    // Wait until the DOM is ready
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("id-input");
+      const btn = document.getElementById("check-btn");
+      const result = document.getElementById("result");
+
+      console.log("Script loaded, listener ready");
+
+      btn.addEventListener("click", async (event) => {
+        event.preventDefault();
+        console.log("Button clicked");
+
+        const id = input.value.trim();
+
+        if (!id) {
+          result.textContent = "Please enter an ID.";
+          return;
+        }
+
+        result.textContent = "Checking...";
+
+        try {
+          const res = await fetch("https://YOUR-N8N-DOMAIN.com/webhook/certificationscheck", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "ID": id // 👈 same as Postman
+            }
+            // no body needed, we only send the ID in the header
+          });
+
+          const data = await res.json();
+          console.log("n8n response:", res.status, data);
+
+          if (data.ok === "true") {
+            // Show first and last name returned by the workflow
+            const name = data.name || "";
+            const surname = data.surname || "";
+            result.textContent = `Certification found ✅ ${name} ${surname}`;
+          } else if (data.ok === "false") {
+            result.textContent = "Certification not found ❌";
+          } else {
+            result.textContent = "Invalid server response.";
+          }
+        } catch (err) {
+          console.error("Fetch error:", err);
+          result.textContent = "Error during verification. Please try again later.";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

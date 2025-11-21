@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Achievement</title>
+</head>
+<body>
+
+<div style="
+    width: 800px;
+    height: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    border: 10px solid #0056b3; /* Dark blue main border */
+    border-image: linear-gradient(45deg, #0056b3, #007bff, #0056b3) 1; /* Gradient effect */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    background-color: #ffffff; /* White background for clean look */
+    font-family: 'Arial', sans-serif; /* Simplified font for better rendering */
+    text-align: center;
+    position: relative;
+">
+    
+    <h1 style="
+        font-size: 48px;
+        color: #e3a800; /* Gold/Orange */
+        margin-bottom: 0;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    ">CERTIFICATE</h1>
+    
+    <h2 style="
+        font-size: 36px;
+        color: #0056b3; /* Dark Blue */
+        margin-top: 5px;
+        margin-bottom: 40px;
+        text-transform: uppercase;
+    ">OF ACHIEVEMENT</h2>
+    
+    <p style="
+        font-size: 18px;
+        color: #343a40;
+        margin-bottom: 10px;
+        font-style: italic;
+    ">Is proudly presented to:</p>
+    
+    <div style="
+        border-bottom: 2px solid #343a40;
+        display: inline-block;
+        padding: 5px 60px;
+        margin-bottom: 40px;
+    ">
+        <p style="
+            font-size: 36px;
+            color: #000000;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        "></p>{{ $('Webhook').item.json.headers.name }}{{ $('Webhook').item.json.headers.surname }}</div>
+    
+    <p style="
+        font-size: 24px;
+        color: #343a40;
+        line-height: 1.5;
+        margin-bottom: 80px; /* Increased margin for signature lines */
+    ">
+        For successful completion and outstanding performance in the course:
+        <br>
+        <strong style="color: #007bff; font-size: 30px;">"example_course"</strong>
+    </p>
+    
+    <div style="
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        width: 80%;
+        margin: 0 auto;
+    ">
+        
+        <div style="text-align: center; flex-basis: 40%;">
+            <p style="
+                font-size: 16px; 
+                font-weight: bold; 
+                margin: 0 0 5px 0;
+                color: #000000;
+                letter-spacing: 0.5px;
+            ">
+                {{ $json.id }}
+            </p>
+            <div style="border-top: 1px solid #343a40; width: 100%;"></div>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #343a40;">
+                Candidate ID
+            </p>
+        </div>
+        
+        <div style="text-align: center; flex-basis: 40%;">
+            <p style="
+                font-size: 16px; 
+                font-weight: bold; 
+                margin: 0 0 5px 0;
+                color: #000000;
+                letter-spacing: 0.5px;
+            ">
+                {{ $today.toFormat('dd/MM/yyyy') }}
+            </p>
+            <div style="border-top: 1px solid #343a40; width: 100%;"></div>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #343a40;">
+                Date
+            </p>
+        </div>
+        
+    </div>
+
+</div>
+
+</body>
+</html>

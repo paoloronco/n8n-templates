@@ -79,7 +79,7 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 
 📕 Full deploy guide: [[n8n-template] Automated Invoice Archiving &#8211; Paolo Ronco](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
 
-👥 n8n Community Template: [coming soon
+👥 n8n Community Template: [Automatic Email Invoice Archiving & Data Extraction with Gmail, Drive & AI](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/)
 
 📄 Files included:
 
@@ -108,10 +108,10 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 * **README.md** – Full setup guide
 * **HTML Files** – Example HTML templates
 * **assets/** – Screenshots, diagrams, previews
-
-
-
-
+  
+  
+  
+  
 
 ---
 

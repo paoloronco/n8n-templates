@@ -4,6 +4,36 @@
 This repository contains a complete **end-to-end certification management system built with n8n**.  
 It automates the entire lifecycle of a digital certificate — from creation, to PDF generation, to verification via API or a user-friendly HTML page.
 
+![Workflowimage](/E:\Projects\Automazione_Workflows_Pipelines\n8n\Workflows-Templates-Github\n8n-templates\free-templates\3-Certification-Creation&Validation/Assets/Workflow-image.png)
+
+[Example-certificate](./Assets/Example-Certificate.pdf)
+
+Visit my website for the: [n8n-template Certification Creator&Checker](https://paoloronco.it/n8n-template-certification-creator-checker/)
+
+See the workflow on n8n Creators hub: [coming soon]()
+
+
+
+***
+
+### 📁 Repository Structure:
+
+```textile
+3-Certificate_Creation&Validation/
+├── HTML-Files/
+│   ├── Cerification_Check.html
+│   └── Certificate.html
+├── Assets/
+│   ├── Example-Certificate.pdf
+│   └── Workflow-image.png
+├── README.md
+└── workflow.json
+```
+
+
+
+****
+
 ## 🔥 What This Workflow Does
 
 ### 🎓 1. Certificate Creation
@@ -73,32 +103,6 @@ In short, this workflow automates:
 ✔ Public verification interface
 
 Together, these features form a complete, production-ready certificate management platform powered by n8n.
-
-****
-
-![Workflow-image](./Assets/Workflow-image.png)
-
-[Example-certificate](./Assets/Example-Certificate.pdf)
-
-Visit my website for the: [full guide]([[n8n-template] Certification Creator &amp; Checker &#8211; Paolo Ronco](https://paoloronco.it/n8n-template-certification-creator-checker/))
-
-See the workflow on n8n Creators hub: [coming soon]()
-
-***
-
-### 📁 Repository Structure:
-
-```textile
-3-Certificate_Creation&Validation/
-├── HTML-Files/
-│   ├── Cerification_Check.html
-│   └── Certificate.html
-├── Assets/
-│   ├── Example-Certificate.pdf
-│   └── Workflow-image.png
-├── README.md
-└── workflow.json
-```
 
 * * *
 

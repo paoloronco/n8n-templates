@@ -5,6 +5,18 @@ The workflow saves the invoices to Google Drive (or optionally to your personal 
 
 
 
+📕 Full deploy guide: [[n8n-template] Automated Invoice Archiving &#8211; Paolo Ronco](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
+
+👥 n8n Community Template: [Automatic Email Invoice Archiving & Data Extraction with Gmail, Drive & AI
+
+
+
+📄 Files included:
+
+* **workflow.json** – Complete n8n importable workflow
+* **README.md** – Full setup guide
+* **assets/** – Screenshots, diagrams, previews
+
 
 
 ![workflow](assets/SaveInvoices-Asset1.png)
@@ -254,5 +266,3 @@ Example mappings:
 * This workflow is for **personal automation**, not a replacement for official fiscal archiving.
 
 * AI extraction quality depends on invoice formatting and the model you choose.
-
-

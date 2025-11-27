@@ -10,7 +10,7 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 
 Visit my website for the: [n8n-template Certification Creator&Checker](https://paoloronco.it/n8n-template-certification-creator-checker/)
 
-See the workflow on n8n Creators hub: [coming soon]()
+See the workflow on n8n Creators hub: [Automated Digital Certificate Creator & Validator with PDF Generation](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
 
 
 

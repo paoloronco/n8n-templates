@@ -1,93 +1,105 @@
 {
-  "name": "10-Cetificate-Creation&Validation",
+  "id": "o018cyB8genb6ONB",
+  "meta": {
+    "instanceId": "YOUR_ID",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "6-Utility-Certificate-Creator&Validation",
+  "tags": [
+    {
+      "id": "YOUR-ID",
+      "name": "YOUR-ID",
+      "createdAt": "2025-11-23T13:36:13.729Z",
+      "updatedAt": "2025-11-23T13:36:13.729Z"
+    }
+  ],
   "nodes": [
     {
+      "id": "613c5389-2f80-44c9-8ec1-043d02d720d7",
+      "name": "Insert_Certificaton",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        320,
+        -224
+      ],
       "parameters": {
-        "dataTableId": {
-          "__rl": true,
-          "value": "ZyOrfuHDK22tXq81",
-          "mode": "list",
-          "cachedResultName": "Certifications",
-          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/ZyOrfuHDK22tXq81"
-        },
         "columns": {
-          "mappingMode": "defineBelow",
           "value": {
             "Name": "={{ $('Webhook_Creation').item.json.headers.name }}",
             "Surname": "={{ $('Webhook_Creation').item.json.headers.surname }}",
             "CertificationID": "={{ $('Generate_Certification_ID').item.json.id }}"
           },
-          "matchingColumns": [],
           "schema": [
             {
               "id": "Name",
-              "displayName": "Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "removed": false,
               "readOnly": false,
-              "removed": false
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false
             },
             {
               "id": "Surname",
-              "displayName": "Surname",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "removed": false,
               "readOnly": false,
-              "removed": false
+              "required": false,
+              "displayName": "Surname",
+              "defaultMatch": false
             },
             {
               "id": "CertificationID",
-              "displayName": "CertificationID",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
               "type": "string",
+              "display": true,
+              "removed": false,
               "readOnly": false,
-              "removed": false
+              "required": false,
+              "displayName": "CertificationID",
+              "defaultMatch": false
             }
           ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Your_ID",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/Your_ID",
+          "cachedResultName": "Certifications"
+        }
       },
-      "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
-      "position": [
-        320,
-        -224
-      ],
-      "id": "613c5389-2f80-44c9-8ec1-043d02d720d7",
-      "name": "Insert_Certificaton",
       "alwaysOutputData": true
     },
     {
-      "parameters": {
-        "jsCode": "const uniqueId =\n  Date.now().toString(36).toUpperCase() +\n  Math.random().toString(36).substring(2, 8).toUpperCase();\n\nreturn [{ id: uniqueId }];\n"
-      },
+      "id": "7b690565-bc2e-4c50-9e34-5368972be90f",
+      "name": "Generate_Certification_ID",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
       "position": [
         -352,
         -240
       ],
-      "id": "7b690565-bc2e-4c50-9e34-5368972be90f",
-      "name": "Generate_Certification_ID"
+      "parameters": {
+        "jsCode": "const uniqueId =\n  Date.now().toString(36).toUpperCase() +\n  Math.random().toString(36).substring(2, 8).toUpperCase();\n\nreturn [{ id: uniqueId }];\n"
+      },
+      "typeVersion": 2
     },
     {
+      "id": "ee3e5ab4-7d0a-41d9-b72c-0d1e071c9142",
+      "name": "Find_Certification_By_ID",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -144,
+        -240
+      ],
       "parameters": {
-        "operation": "get",
-        "dataTableId": {
-          "__rl": true,
-          "value": "ZyOrfuHDK22tXq81",
-          "mode": "list",
-          "cachedResultName": "Certifications",
-          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/ZyOrfuHDK22tXq81"
-        },
         "filters": {
           "conditions": [
             {
@@ -96,53 +108,61 @@
             }
           ]
         },
-        "returnAll": true
+        "operation": "get",
+        "returnAll": true,
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ZyOrfuHDK22tXq81",
+          "cachedResultUrl": "/projects/YOUR_ID/datatables/ZyOrfuHDK22tXq81",
+          "cachedResultName": "Certifications"
+        }
       },
-      "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
-      "position": [
-        -144,
-        -240
-      ],
-      "id": "ee3e5ab4-7d0a-41d9-b72c-0d1e071c9142",
-      "name": "Find_Certification_By_ID",
       "alwaysOutputData": true
     },
     {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "416a8c8a-b9bd-4044-9987-b3320c09efd4",
-              "leftValue": "=Object",
-              "rightValue": "={{ $json }}",
-              "operator": {
-                "type": "string",
-                "operation": "empty",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
+      "id": "554946dd-0444-4e50-b132-983b44e931e5",
+      "name": "Certification_ID_Exists",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "position": [
         64,
         -240
       ],
-      "id": "554946dd-0444-4e50-b132-983b44e931e5",
-      "name": "Certification_ID_Exists"
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "416a8c8a-b9bd-4044-9987-b3320c09efd4",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "=Object",
+              "rightValue": "={{ $json }}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 2.2
     },
     {
+      "id": "848bddc2-4362-40b6-a8e0-18511f9b5c23",
+      "name": "Generate_PDF",
+      "type": "@pdfgeneratorapi/n8n-nodes-pdf-generator-api.pdfGeneratorApi",
+      "position": [
+        528,
+        -224
+      ],
       "parameters": {
         "resource": "conversion",
         "htmlContent": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Certificate of Achievement</title>\n</head>\n<body>\n\n<div style=\"\n    width: 800px;\n    height: 600px;\n    margin: 50px auto;\n    padding: 30px;\n    border: 10px solid #0056b3; /* Dark blue main border */\n    border-image: linear-gradient(45deg, #0056b3, #007bff, #0056b3) 1; /* Gradient effect */\n    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);\n    background-color: #ffffff; /* White background for clean look */\n    font-family: 'Arial', sans-serif; /* Simplified font for better rendering */\n    text-align: center;\n    position: relative;\n\">\n    \n    <h1 style=\"\n        font-size: 48px;\n        color: #e3a800; /* Gold/Orange */\n        margin-bottom: 0;\n        text-transform: uppercase;\n        letter-spacing: 3px;\n    \">CERTIFICATE</h1>\n    \n    <h2 style=\"\n        font-size: 36px;\n        color: #0056b3; /* Dark Blue */\n        margin-top: 5px;\n        margin-bottom: 40px;\n        text-transform: uppercase;\n    \">OF ACHIEVEMENT</h2>\n    \n    <p style=\"\n        font-size: 18px;\n        color: #343a40;\n        margin-bottom: 10px;\n        font-style: italic;\n    \">Is proudly presented to:</p>\n    \n    <div style=\"\n        border-bottom: 2px solid #343a40;\n        display: inline-block;\n        padding: 5px 60px;\n        margin-bottom: 40px;\n    \">\n        <p style=\"\n            font-size: 36px;\n            color: #000000;\n            font-weight: bold;\n            text-transform: uppercase;\n            letter-spacing: 1px;\n            margin: 0;\n        \">{{ $('Webhook_Creation').item.json.headers.name }}&nbsp;{{ $('Webhook_Creation').item.json.headers.surname }}</p> \n    </div>\n    \n    <p style=\"\n        font-size: 24px;\n        color: #343a40;\n        line-height: 1.5;\n        margin-bottom: 80px; /* Increased margin for signature lines */\n    \">\n        For successful completion and outstanding performance in the course:\n        <br>\n        <strong style=\"color: #007bff; font-size: 30px;\">\"{{ $('Webhook_Creation').item.json.headers.course }}\"</strong>\n    </p>\n    \n    <div style=\"\n        display: flex;\n        justify-content: space-around;\n        align-items: flex-end;\n        width: 80%;\n        margin: 0 auto;\n    \">\n        \n        <div style=\"text-align: center; flex-basis: 40%;\">\n            <p style=\"\n                font-size: 16px; \n                font-weight: bold; \n                margin: 0 0 5px 0;\n                color: #000000;\n                letter-spacing: 0.5px;\n            \">\n                {{ $('Generate_Certification_ID').item.json.id }}\n            </p>\n            <div style=\"border-top: 1px solid #343a40; width: 100%;\"></div>\n            <p style=\"margin: 5px 0 0 0; font-size: 14px; color: #343a40;\">\n                Candidate ID\n            </p>\n        </div>\n        \n        <div style=\"text-align: center; flex-basis: 40%;\">\n            <p style=\"\n                font-size: 16px; \n                font-weight: bold; \n                margin: 0 0 5px 0;\n                color: #000000;\n                letter-spacing: 0.5px;\n            \">\n                {{ $today.toFormat('dd/MM/yyyy') }}\n            </p>\n            <div style=\"border-top: 1px solid #343a40; width: 100%;\"></div>\n            <p style=\"margin: 5px 0 0 0; font-size: 14px; color: #343a40;\">\n                Date\n            </p>\n        </div>\n        \n    </div>\n\n</div>\n\n</body>\n</html>",
@@ -151,25 +171,25 @@
           "conversionOutput": "file"
         }
       },
-      "type": "@pdfgeneratorapi/n8n-nodes-pdf-generator-api.pdfGeneratorApi",
-      "typeVersion": 1,
-      "position": [
-        528,
-        -224
-      ],
-      "id": "848bddc2-4362-40b6-a8e0-18511f9b5c23",
-      "name": "Generate_PDF",
       "credentials": {
         "pdfGeneratorApi": {
-          "id": "qUCWxatdK0hM7EQZ",
+          "id": "YOUR_ID",
           "name": "PDF Generator account"
         }
-      }
+      },
+      "typeVersion": 1
     },
     {
+      "id": "03f873c2-f9b0-409c-bff0-4d32f5ed6efd",
+      "name": "Email_Certification",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        752,
+        -224
+      ],
+      "webhookId": "45b356fb-c1b0-4a5e-a467-749efaa47e4a",
       "parameters": {
         "sendTo": "={{ $('Webhook_Creation').item.json.headers.email }}",
-        "subject": "Your certification is ready!",
         "message": "Attached you find your new certification!",
         "options": {
           "attachmentsUi": {
@@ -179,51 +199,43 @@
               }
             ]
           }
-        }
+        },
+        "subject": "Your certification is ready!"
       },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
-      "position": [
-        752,
-        -224
-      ],
-      "id": "03f873c2-f9b0-409c-bff0-4d32f5ed6efd",
-      "name": "Email_Certification",
-      "webhookId": "45b356fb-c1b0-4a5e-a467-749efaa47e4a",
       "credentials": {
         "gmailOAuth2": {
           "id": "454oo3lK2q6e5HzC",
           "name": "Gmail account"
         }
-      }
+      },
+      "typeVersion": 2.1
     },
     {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "certificationscheck",
-        "responseMode": "responseNode",
-        "options": {}
-      },
+      "id": "aed81c3b-10ce-4d98-9b6c-c890c71ab815",
+      "name": "Webhook_Check",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
       "position": [
         -592,
         224
       ],
-      "id": "aed81c3b-10ce-4d98-9b6c-c890c71ab815",
-      "name": "Webhook_Check",
-      "webhookId": "9ab877a7-5555-4463-b820-c509c9ff9f37"
+      "webhookId": "YOUR_ID",
+      "parameters": {
+        "path": "certificationscheck",
+        "options": {},
+        "httpMethod": "POST",
+        "responseMode": "responseNode"
+      },
+      "typeVersion": 2.1
     },
     {
+      "id": "71b9f653-4574-4bf2-b9ce-660c083d0a85",
+      "name": "Find_Certification_By_ID1",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -352,
+        224
+      ],
       "parameters": {
-        "operation": "get",
-        "dataTableId": {
-          "__rl": true,
-          "value": "ZyOrfuHDK22tXq81",
-          "mode": "list",
-          "cachedResultName": "Certifications",
-          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/ZyOrfuHDK22tXq81"
-        },
         "filters": {
           "conditions": [
             {
@@ -232,311 +244,218 @@
             }
           ]
         },
-        "returnAll": true
+        "operation": "get",
+        "returnAll": true,
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ZyOrfuHDK22tXq81",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/ZyOrfuHDK22tXq81",
+          "cachedResultName": "Certifications"
+        }
       },
-      "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
-      "position": [
-        -352,
-        224
-      ],
-      "id": "71b9f653-4574-4bf2-b9ce-660c083d0a85",
-      "name": "Find_Certification_By_ID1",
       "alwaysOutputData": true
     },
     {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "416a8c8a-b9bd-4044-9987-b3320c09efd4",
-              "leftValue": "={{ $json.CertificationID }}",
-              "rightValue": "={{ $('Webhook_Check').item.json.headers.id }}",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
+      "id": "e35823bf-189c-4192-85ca-24010ba3ed09",
+      "name": "Certification_Exists",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "position": [
         -144,
         224
       ],
-      "id": "e35823bf-189c-4192-85ca-24010ba3ed09",
-      "name": "Certification_Exists"
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "416a8c8a-b9bd-4044-9987-b3320c09efd4",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.CertificationID }}",
+              "rightValue": "={{ $('Webhook_Check').item.json.headers.id }}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 2.2
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"ok\": \"true\",\n  \"name\": \"{{ $('Find_Certification_By_ID1').item.json.Name }}\",\n  \"surname\": \"{{ $('Find_Certification_By_ID1').item.json.Surname }}\"\n}",
-        "options": {}
-      },
+      "id": "98428e2a-330b-4995-b177-74ce6ec41a35",
+      "name": "Respond_Found",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
       "position": [
         96,
         160
       ],
-      "id": "98428e2a-330b-4995-b177-74ce6ec41a35",
-      "name": "Respond_Found"
+      "parameters": {
+        "options": {},
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": \"true\",\n  \"name\": \"{{ $('Find_Certification_By_ID1').item.json.Name }}\",\n  \"surname\": \"{{ $('Find_Certification_By_ID1').item.json.Surname }}\"\n}"
+      },
+      "typeVersion": 1.4
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "{\n  \"ok\": \"false\"\n}",
-        "options": {}
-      },
+      "id": "15e115bd-3d35-4805-9806-85d6e80a7c21",
+      "name": "Respond_NotFound",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
       "position": [
         96,
         288
       ],
-      "id": "15e115bd-3d35-4805-9806-85d6e80a7c21",
-      "name": "Respond_NotFound"
+      "parameters": {
+        "options": {},
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": \"false\"\n}"
+      },
+      "typeVersion": 1.4
     },
     {
-      "parameters": {
-        "content": "## Certifications – Creator & Checker\n\nEnd-to-end workflow for creating, saving, emailing, and verifying certifications.\n\n`/certifications`: generates unique ID → stores entry → builds PDF → emails certification.\n\n`/certificationscheck:` checks CertificationID and returns a simple JSON response.\n\nGuides & resources:\n- Full docs, workflow & images: https://github.com/paoloronco/n8n-templates\n- Full guide: https://paoloronco.it/n8n-template-certification-creator-checker/",
-        "height": 304,
-        "width": 640
-      },
+      "id": "38d50087-20f5-43aa-acbd-0893dafe8381",
+      "name": "Sticky Note1",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1056,
-        -768
-      ],
-      "id": "06757203-8698-4284-a082-1f00f84765b9",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "content": "### **Webhook_Creation /certifications**\n\n[n8n Webhook docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)\n\n- HTTP POST endpoint receiving: name, surname, course, email.\n- Starts the whole certification creation chain.\n",
-        "height": 368,
-        "width": 256,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         -672,
         -448
       ],
-      "id": "38d50087-20f5-43aa-acbd-0893dafe8381",
-      "name": "Sticky Note1"
+      "parameters": {
+        "color": 7,
+        "width": 256,
+        "height": 368,
+        "content": "## Creation  \n## Webhook input\n\nReceives name, surname, course and email via HTTP POST on `/certifications`.  \nStarts the certificate creation flow.\n"
+      },
+      "typeVersion": 1
     },
     {
-      "parameters": {
-        "content": "### **Generate_Certification_ID – Code**\n[Code node docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.code/)\nGenerate_Certification_ID (Code node)\n- Creates unique CertificationID using random string.\n-  Output field: id.\n-  If ID already exists, workflow loops until unique.\n\n### **Find_Certification_By_ID – Uniqueness Check**\n[Data Table docs](https://docs.n8n.io/data/data-table/)\nFind_Certification_By_ID – Data Table\n- Searches Data Table for CertificationID = {{$json.id}}.\n- Used to ensure the generated ID is not duplicated.\n\n### **Certification_ID_Exists – IF**\n[IF node docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.if/)\nCertification_ID_Exists (IF node):\n- true → ID already taken → return to Generate_Certification_ID\n- false → ID is free → proceed to Insert_Certificaton\n",
-        "height": 624,
-        "width": 640,
-        "color": 7
-      },
+      "id": "9672b65b-832d-4496-9f50-d75b5432fcc2",
+      "name": "Sticky Note2",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         -400,
-        -704
+        -448
       ],
-      "id": "9672b65b-832d-4496-9f50-d75b5432fcc2",
-      "name": "Sticky Note2"
+      "parameters": {
+        "color": 7,
+        "width": 864,
+        "height": 368,
+        "content": "## Creation – Generate & validate ID\n\nGenerates a random CertificationID, checks the Data Table for duplicates and only continues when the ID is unique.  \nIf the ID already exists, the flow loops until a free one is found.\n"
+      },
+      "typeVersion": 1
     },
     {
-      "parameters": {
-        "content": "### **Insert_Certificaton Save to Data Table**\n\n[Data Table docs](https://docs.n8n.io/data/data-table/)\n\nInsert_Certificaton\n- Inserts new certification record: Name, Surname, CertificationID.\n- Ensure fields match your Data Table schema.",
-        "height": 448,
-        "width": 208,
-        "color": 7
-      },
+      "id": "00c13ad1-1026-4b0f-b880-89d901a1ee11",
+      "name": "Sticky Note4",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        256,
-        -528
-      ],
-      "id": "6b99a0bc-0b87-4e39-b558-a4c8aa20ef83",
-      "name": "Sticky Note3"
-    },
-    {
-      "parameters": {
-        "content": "### **Generate_PDF – Certificate PDF**\n\n[PDF Generator API Docs](https://www.npmjs.com/package/@pdfgeneratorapi/n8n-nodes-pdf-generator-api)\n\nGenerate_PDF:\nHTML → PDF conversion\n- Uses an HTML template (certificate layout).\n- Produces binary document.pdf.\n- Requires pdfGeneratorApi credentials.\n",
-        "height": 448,
-        "width": 208,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         480,
-        -528
+        -448
       ],
-      "id": "00c13ad1-1026-4b0f-b880-89d901a1ee11",
-      "name": "Sticky Note4"
+      "parameters": {
+        "color": 7,
+        "width": 448,
+        "height": 368,
+        "content": "## Creation – Save, PDF & email\n\nSaves the learner record with the CertificationID to the Data Table, generates the certificate PDF from an HTML template and emails it to the learner.\n"
+      },
+      "typeVersion": 1
     },
     {
-      "parameters": {
-        "content": "### **Email_Certification – Gmail Send**\n\n[Gmail docs:](https://docs.n8n.io/integrations/builtin/credentials/google/)\n\nEmail_Certification (Gmail)\n- Sends email to the user with the generated certificate PDF attached.\n- Attachment property: document (binary).\n",
-        "height": 448,
-        "width": 208,
-        "color": 7
-      },
+      "id": "741f9beb-f922-441b-9249-c6a06da55571",
+      "name": "Sticky Note6",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        704,
-        -528
-      ],
-      "id": "e5ad1d56-6fbc-4778-b7d2-0cb121a602ad",
-      "name": "Sticky Note5"
-    },
-    {
-      "parameters": {
-        "content": "### **Webhook_Check /certificationscheck**\n\n[n8n Webhook docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)\n\n- HTTP POST.\n- Reads id from request header.\n- Used by API manual check and HTML verification page.\nStarts the whole certification creation chain.\n",
-        "height": 400,
-        "width": 256,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         -672,
-        -48
+        32
       ],
-      "id": "741f9beb-f922-441b-9249-c6a06da55571",
-      "name": "Sticky Note6"
+      "parameters": {
+        "color": 7,
+        "width": 256,
+        "height": 320,
+        "content": "## Check – Webhook input\n\nReceives a CertificationID via HTTP POST on `/certificationscheck` and starts the verification flow.\n"
+      },
+      "typeVersion": 1
     },
     {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "certifications",
-        "responseMode": "lastNode",
-        "options": {}
-      },
+      "id": "1c7f6487-80e4-45d2-a676-645f66c4bfaf",
+      "name": "Webhook_Creation",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
       "position": [
         -592,
         -240
       ],
-      "id": "1c7f6487-80e4-45d2-a676-645f66c4bfaf",
-      "name": "Webhook_Creation",
-      "webhookId": "9ab877a7-5555-4463-b820-c509c9ff9f37"
+      "webhookId": "9ab877a7-5555-4463-b820-c509c9ff9f37",
+      "parameters": {
+        "path": "certifications",
+        "options": {},
+        "httpMethod": "POST",
+        "responseMode": "lastNode"
+      },
+      "typeVersion": 2.1
     },
     {
-      "parameters": {
-        "content": "### **Find_Certification_By_ID1**\n[Data Table docs](https://docs.n8n.io/data/data-table/)\n- Searches for the submitted CertificationID in the certifications table.\n- Feeds the IF node that validates existence.\n\n### **Certification_Exists – IF Check**\n[IF node docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.if/)\n- true → certification exists → respond with name + surname\n- false → not found → respond with { ok: \"false\" }",
-        "height": 400,
-        "width": 432,
-        "color": 7
-      },
+      "id": "28750e3a-7cec-4a45-8a5a-cb87dbd3181d",
+      "name": "Sticky Note7",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         -400,
-        -48
+        32
       ],
-      "id": "28750e3a-7cec-4a45-8a5a-cb87dbd3181d",
-      "name": "Sticky Note7"
+      "parameters": {
+        "color": 7,
+        "width": 432,
+        "height": 320,
+        "content": "## Check – Look up ID\n\nSearches the Certifications Data Table for the submitted CertificationID and branches depending on whether a matching record exists.\n"
+      },
+      "typeVersion": 1
     },
     {
-      "parameters": {
-        "content": "### **Respond_Found – Success Response**\n\nRespond_Found – Webhook Reply\n- Returns { ok: \"true\", name, surname }.\n- Used by the verification page to show “Valid certification”.\n\n",
-        "height": 128,
-        "width": 432,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        272,
-        144
-      ],
       "id": "18468a33-fdb7-4602-a995-29d9e1c5aca5",
-      "name": "Sticky Note8"
-    },
-    {
-      "parameters": {
-        "content": "### **Respond_NotFound – Failure Response**\n\nRespond_NotFound – Webhook Reply\n- Returns { ok: \"false\" }.\n- Allows the frontend to show “Certification ID not found”.",
-        "height": 128,
-        "width": 432,
-        "color": 7
-      },
+      "name": "Sticky Note8",
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
       "position": [
         272,
-        288
+        176
       ],
-      "id": "5cd2a3b6-6503-4a4c-a0ce-1d94776a36b7",
-      "name": "Sticky Note9"
+      "parameters": {
+        "color": 7,
+        "width": 432,
+        "height": 176,
+        "content": "## Check – Responses\n\nReturns JSON to the caller.  \nIf the ID is found: `ok: true` plus name and surname.  \nIf not found: `ok: false` so the client can show an “invalid certification” message.\n"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "3bedbbcb-cd61-4c54-872d-cfd54df9e991",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1344,
+        -448
+      ],
+      "parameters": {
+        "width": 640,
+        "height": 560,
+        "content": "## Certifications – Creator & Checker\n\n## How it works\nThis workflow manages the full lifecycle of a training certificate.  \n`/certifications` receives learner details, generates a unique CertificationID and checks that it does not exist yet.  \nIf the ID is free, the workflow stores the record, builds a PDF certificate and emails it to the learner.  \n\n`/certificationscheck` lets you verify a certificate later.  \nThe webhook receives a CertificationID, looks it up in the same Data Table and returns a simple JSON response that frontends or other services can use to show “valid” or “not found”.\n\n## Setup steps\n1. Create a Data Table (e.g. **Certifications**) with Name, Surname, CertificationID and any extra fields.\n2. Configure the PDF Generator node with your account API and adjust the HTML template to your branding.\n3. Connect your email account (Gmail/SMTP) in **Email_Certification**.\n4. Deploy the `/certifications` and `/certificationscheck` webhooks and use their public URLs.\n5. Test creation and verification with a few sample requests before going live.\n"
+      },
+      "typeVersion": 1
     }
   ],
+  "active": false,
   "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "898197be-08ab-4488-85ee-a9a1b688cb1c",
   "connections": {
-    "Insert_Certificaton": {
-      "main": [
-        [
-          {
-            "node": "Generate_PDF",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generate_Certification_ID": {
-      "main": [
-        [
-          {
-            "node": "Find_Certification_By_ID",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Find_Certification_By_ID": {
-      "main": [
-        [
-          {
-            "node": "Certification_ID_Exists",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Certification_ID_Exists": {
-      "main": [
-        [
-          {
-            "node": "Generate_Certification_ID",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Insert_Certificaton",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Generate_PDF": {
       "main": [
         [
@@ -559,11 +478,22 @@
         ]
       ]
     },
-    "Find_Certification_By_ID1": {
+    "Webhook_Creation": {
       "main": [
         [
           {
-            "node": "Certification_Exists",
+            "node": "Generate_Certification_ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert_Certificaton": {
+      "main": [
+        [
+          {
+            "node": "Generate_PDF",
             "type": "main",
             "index": 0
           }
@@ -588,7 +518,7 @@
         ]
       ]
     },
-    "Webhook_Creation": {
+    "Certification_ID_Exists": {
       "main": [
         [
           {
@@ -596,19 +526,48 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Insert_Certificaton",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find_Certification_By_ID": {
+      "main": [
+        [
+          {
+            "node": "Certification_ID_Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find_Certification_By_ID1": {
+      "main": [
+        [
+          {
+            "node": "Certification_Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate_Certification_ID": {
+      "main": [
+        [
+          {
+            "node": "Find_Certification_By_ID",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
-  },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "79a8fb96-f088-4dcf-ad0d-9a528ebf701e",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
-  "id": "o018cyB8genb6ONB",
-  "tags": []
+  }
 }

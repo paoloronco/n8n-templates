@@ -37,6 +37,11 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 │   └── assets/
 │       ├── Example-Certificate
 │       └── Workflow-image
+├── 4-RSS-News_Tech/
+│   ├── News_Tech_EN.json
+│   ├── README.md
+│   └── assets/
+│       └── workflow.png
 └── paid-templates/
     └── (coming soon)
 ```

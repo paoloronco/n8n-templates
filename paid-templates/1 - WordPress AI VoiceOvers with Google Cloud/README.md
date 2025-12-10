@@ -7,7 +7,9 @@ This repository showcases the complete automation workflow that transforms your 
 The workflow is publicly available for purchase here:
 
 👉 **Gumroad:** [https://paoloronco.gumroad.com/l/ailfum](https://paoloronco.gumroad.com/l/ailfum)
+
 👉 **paoloronco.it Store:** [https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+
 👉 **n8n Marketplace:** *Publishing soon*
 
 
@@ -18,12 +20,23 @@ The workflow is publicly available for purchase here:
 
 ## 🎧 Example generated voiceovers
 
-[Listen to the audio](assets/GitHubPagesWebsite.mp3)
+### Example voiceover: My Github Pages Website
+<audio controls>
+  <source src="https://storage.googleapis.com/wp-voiceovers/631EN.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
 
-[Listen to the audio](assets/Github-paoloronco-Lynx.mp3)
+### Example voiceover: n8n Template - fetch AmazonLuna Games
+<audio controls>
+  <source src="https://storage.googleapis.com/wp-voiceovers/1767EN.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
 
-[Listen to the audio](assets/n8n-template-fetch-amazonlunagames.mp3)
-
+### Example voiceover: Github paoloronco/lynx
+<audio controls>
+  <source src="https://storage.googleapis.com/wp-voiceovers/1685EN.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
 
 ---
 

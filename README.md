@@ -12,43 +12,47 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 
 ```
 .
-├── 📦 n8n-templates
-├── README.MD
+n8n-templates/
 ├── free-templates/
-├── 1-amazonluna-fetch/
-│   ├── workflow.json
-│   ├── README.md
-│   ├── docs/
-│   │   ├── NOTES-Fetch.md
-│   │   └── NOTES-Notify.md
-│   └── assets/
-│       └── amazonluna-fetch-asset1.png
-├── 2-SaveInvoices/
-│   ├── workflow.json
-│   ├── README.md
-│   └── assets/
-│       └── SaveInvoices-Asset1
-├── 3-Certification-Creation&Validation/
-│   ├── Cetificate-Creation&Validation.json
-│   ├── README.md
-│   ├── HTML-Files/
-│   │   ├── Certificate.html
-│   │   └── Cerification_Check.html
-│   └── assets/
-│       ├── Example-Certificate
-│       └── Workflow-image
-├── 4-RSS-News_Tech/
-│   ├── News_Tech_EN.json
-│   ├── README.md
-│   └── assets/
-│       └── workflow.png
-└── paid-templates/
-    ├── WordPress AI VoiceOvers with Google Cloud
-    ├── README.md
-    ├── assets/
-│       ├── Example-Certificate
-│       └──
-    
+│   ├── 1-amazonluna-fetch/
+│   │   ├── assets/
+│   │   │   └── amazonluna-fetch-asset1.png
+│   │   ├── docs/
+│   │   │   ├── NOTES-Fetch.md
+│   │   │   └── NOTES-Notify.md
+│   │   ├── README.md
+│   │   └── workflow.json
+│   ├── 2-SaveInvoices/
+│   │   ├── assets/
+│   │   │   └── SaveInvoices-Asset1.png
+│   │   ├── README.md
+│   │   └── workflow.json
+│   ├── 3-Certification-Creation&Validation/
+│   │   ├── Assets/
+│   │   │   ├── Example-Certificate.pdf
+│   │   │   └── Workflow-image.png
+│   │   ├── Cetificate-Creation&Validation.json
+│   │   ├── HTML-Files/
+│   │   │   ├── Cerification_Check.html
+│   │   │   └── Certificate.html
+│   │   └── README.md
+│   └── 4-RSS_News_Tech/
+│       ├── Assets/
+│       │   └── workflow.png
+│       ├── News_Tech_EN.json
+│       └── readme.md
+├── paid-templates/
+│   └── 1 - WordPress AI VoiceOvers with Google Cloud/
+│       ├── assets/
+│       │   ├── banner.png
+│       │   ├── Github-paoloronco-Lynx.mp3
+│       │   ├── GitHubPagesWebsite.mp3
+│       │   └── n8n-template-fetch-amazonlunagames.mp3
+│       └── README.md
+│   └── 2 - AI News - Social Publishing Automation
+│       ├── (coming soon)
+└── README.md
+
 
 ```
 
@@ -128,12 +132,12 @@ It functions as a **fully autonomous editorial engine**, combining dozens of RSS
 
 ---
 
-## 💎 Paid Templates (Soon)
+## 💎 Paid Templates
 
 📦 Folder →      `/paid-templates/`  
 
 
-### 🎧 WordPress → AI VoiceOver Automation (Premium Template)
+### ▶️ 1. WordPress → AI VoiceOver Automation (Premium Template)
 
 A full end-to-end automation that transforms your WordPress articles into multilingual, human-sounding audio, powered by n8n, OpenAI, Google Cloud Text-to-Speech (Long Audio), and Google Sheets.
 This premium workflow handles everything: text cleaning, translation, long-form TTS generation, WordPress publishing, and complete status tracking — fully automatic and production-ready.
@@ -143,8 +147,14 @@ If you want to offer audio versions of your blog posts, boost accessibility, or 
 🔗 Get the workflow:
 
 [Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+
 [paoloronco.it Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+
 [n8n Marketplace - pubblishing soon](Publishing soon)
+
+### ▶️ 2. AI News - Social Publishing Automation
+
+(coming soon)
 
 ---
 

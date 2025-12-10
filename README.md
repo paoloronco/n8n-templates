@@ -101,7 +101,7 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 Automated workflow for a complete **end-to-end certification management system built with n8n**.
 It automates the entire lifecycle of a digital certificate — from creation, to PDF generation, to verification via API or a user-friendly HTML page.
 
-📂 Folder → [`/free-templates/3-Certification-Creation&Validation`](./free-templates/3-Certification-Creation&Validation)
+📂 Folder → [`/free-templates/4-RSS_News_Tech`](./free-templates/4-RSS_News_Tech)
 
 📕 Full deploy guide: [[n8n-template] Certification Creator](https://paoloronco.it/n8n-template-certification-creator-checker/)
 
@@ -114,9 +114,20 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 * **HTML Files** – Example HTML templates
 * **assets/** – Screenshots, diagrams, previews
   
-  
-  
-  
+
+
+
+### Curate and Send Tech News Digests with RSS, Gemini AI and Gmail
+
+This workflow automates the entire lifecycle of collecting, filtering, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.  
+It functions as a **fully autonomous editorial engine**, combining dozens of RSS feeds, structured data processing, and an LLM (Google Gemini) to transform a large volume of raw articles into a concise, high–value daily briefing delivered straight to your inbox.
+
+📕Full deploy guide: [paoloronco.it - Full deploy guide - Tech & AI Daily Briefing](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
+
+👥 n8n Community Template: [Curate and Send Tech News Digests with RSS, Gemini AI and Gmail](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
+
+
+
 
 ---
 

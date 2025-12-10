@@ -43,7 +43,13 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 │   └── assets/
 │       └── workflow.png
 └── paid-templates/
-    └── (coming soon)
+    ├── WordPress AI VoiceOvers with Google Cloud
+    ├── README.md
+    ├── assets/
+│       ├── Example-Certificate
+│       └──
+    
+
 ```
 
 
@@ -51,7 +57,6 @@ A curated collection of **ready-to-use n8n templates** for automations, data ext
 ---  
 
 ## 🌟 Free Templates
-
 
 
 ### ▶️ **1. Amazon Luna – Fetch “Included with Prime” Games and send notifications**
@@ -73,8 +78,7 @@ Automatically fetch, organize, and maintain an updated catalog of **Amazon Luna
 - Fetch logic, headers, endpoint, parsing - **NOTES-Notify.md**
 
 - Notifications & rate-limit handling - **assets/** – Images, previews, diagrams ---
-  
-  
+
 
 ### ▶️ **2. Save Invoices**
 
@@ -91,9 +95,6 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 * **workflow.json** – Complete n8n importable workflow
 * **README.md** – Full setup guide
 * **assets/** – Screenshots, diagrams, previews
-  
-  
-  
   
 
 ### ▶️ **3. Certificate Creation&Validation**
@@ -115,9 +116,7 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 * **assets/** – Screenshots, diagrams, previews
   
 
-
-
-### Curate and Send Tech News Digests with RSS, Gemini AI and Gmail
+### ▶️ **Create and Send Tech News Digests with RSS, Gemini AI and Gmail**
 
 This workflow automates the entire lifecycle of collecting, filtering, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.  
 It functions as a **fully autonomous editorial engine**, combining dozens of RSS feeds, structured data processing, and an LLM (Google Gemini) to transform a large volume of raw articles into a concise, high–value daily briefing delivered straight to your inbox.
@@ -127,29 +126,25 @@ It functions as a **fully autonomous editorial engine**, combining dozens of RSS
 👥 n8n Community Template: [Curate and Send Tech News Digests with RSS, Gemini AI and Gmail](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 
 
-
-
 ---
-
-
 
 ## 💎 Paid Templates (Soon)
 
- 📦 Folder →      `/paid-templates/`  
+📦 Folder →      `/paid-templates/`  
 
- (Will include previews, documentation, and purchase/activation details.)
 
-This section will host advanced and premium automation templates:
+### 🎧 WordPress → AI VoiceOver Automation (Premium Template)
 
-- Multi-platform notification systems  
+A full end-to-end automation that transforms your WordPress articles into multilingual, human-sounding audio, powered by n8n, OpenAI, Google Cloud Text-to-Speech (Long Audio), and Google Sheets.
+This premium workflow handles everything: text cleaning, translation, long-form TTS generation, WordPress publishing, and complete status tracking — fully automatic and production-ready.
 
-- Complex data pipelines  
+If you want to offer audio versions of your blog posts, boost accessibility, or scale your content distribution, this automation gives you a hands-off, enterprise-grade solution with zero manual work.
 
-- API scrapers  
+🔗 Get the workflow:
 
-- Automation bundles  
-
-- Business integration templates  
+[Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+[paoloronco.it Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+[n8n Marketplace - pubblishing soon](Publishing soon)
 
 ---
 

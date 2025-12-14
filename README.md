@@ -50,7 +50,9 @@ n8n-templates/
 │       │   └── n8n-template-fetch-amazonlunagames.mp3
 │       └── README.md
 │   └── 2 - AI News - Social Publishing Automation
-│       ├── (coming soon)
+│       ├── assets/
+│       │   ├── banner.png
+│       └── README.md
 └── README.md
 
 
@@ -61,7 +63,6 @@ n8n-templates/
 ---  
 
 ## 🌟 Free Templates
-
 
 ### ▶️ **1. Amazon Luna – Fetch “Included with Prime” Games and send notifications**
 
@@ -83,7 +84,6 @@ Automatically fetch, organize, and maintain an updated catalog of **Amazon Luna
 
 - Notifications & rate-limit handling - **assets/** – Images, previews, diagrams ---
 
-
 ### ▶️ **2. Save Invoices**
 
 Automated workflow that fetches invoice emails from your ISP or utility provider, downloads the attached PDF, stores it in Google Drive (or optionally on your FTP/SFTP server), extracts all invoice details using AI, and logs everything into Google Sheets.
@@ -99,7 +99,6 @@ Automated workflow that fetches invoice emails from your ISP or utility provider
 * **workflow.json** – Complete n8n importable workflow
 * **README.md** – Full setup guide
 * **assets/** – Screenshots, diagrams, previews
-  
 
 ### ▶️ **3. Certificate Creation&Validation**
 
@@ -118,7 +117,6 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 * **README.md** – Full setup guide
 * **HTML Files** – Example HTML templates
 * **assets/** – Screenshots, diagrams, previews
-  
 
 ### ▶️ **Create and Send Tech News Digests with RSS, Gemini AI and Gmail**
 
@@ -129,13 +127,11 @@ It functions as a **fully autonomous editorial engine**, combining dozens of RSS
 
 👥 n8n Community Template: [Curate and Send Tech News Digests with RSS, Gemini AI and Gmail](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 
-
 ---
 
 ## 💎 Paid Templates
 
 📦 Folder →      `/paid-templates/`  
-
 
 ### ▶️ 1. WordPress → AI VoiceOver Automation (Premium Template)
 

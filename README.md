@@ -144,13 +144,23 @@ If you want to offer audio versions of your blog posts, boost accessibility, or 
 
 [Gumroad](https://paoloronco.gumroad.com/l/ailfum)
 
-[paoloronco.it Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+[paoloronco.it Shop](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
 [n8n Marketplace - pubblishing soon](Publishing soon)
 
 ### ▶️ 2. AI News - Social Publishing Automation
 
-(coming soon)
+An advanced automation that collects the latest news from **any topic or industry** via RSS feeds, analyzes them with AI, and automatically creates **ready-to-post Instagram content** — complete with title, caption, and AI-generated image.
+
+Ideal for creators, media professionals, and brands that want to keep their social channels **active, consistent, and always on-trend** — without manual research or content drafting.
+
+[Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+
+[paoloronco.it Shop]([n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html))
+
+[n8n Marketplace - pubblishing soon]
+
+
 
 ---
 

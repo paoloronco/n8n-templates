@@ -6,7 +6,7 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 
 
 
-👉 **Gumroad:** [n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
+👉 **Gumroad:** [n8n Workflow: “AI News → Social Publishing Automation”](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 
 👉 **paoloronco.it Store:** [n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 

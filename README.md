@@ -156,9 +156,9 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 
 [Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 
-[paoloronco.it Shop]([n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html))
+[paoloronco.it Shop]([n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 
-[n8n Marketplace - pubblishing soon]
+[n8n Marketplace](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 
 
 

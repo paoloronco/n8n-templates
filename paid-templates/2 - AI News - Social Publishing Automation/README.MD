@@ -10,9 +10,9 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 
 👉 **paoloronco.it Store:** [n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 
-👉 **n8n Marketplace:** _Publishing soon_
+👉 **n8n Marketplace** [Automate RSS to Instagram with AI-Generated Content and Cloudinary](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 
-![WordPress AI VoiceOver Automation](assets/banner.png)
+
 
 ### **What it does**
 

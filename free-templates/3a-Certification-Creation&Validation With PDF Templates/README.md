@@ -1,20 +1,13 @@
 📄 Certificate Creation&Validation with PDFgenerationAPI Templates (n8n)
 ===============================
 
-This repository contains a complete **end-to-end certificate creation and verification system built with n8n**, using **PDF Generator API templates** instead of raw HTML.
+This template provides a **complete and reusable solution to automatically create, distribute, and verify digital certificates using n8n**, with **PDF Generator API templates** for PDF generation.
 
-It automates the entire certificate lifecycle:
+The workflow is designed to cover the **entire lifecycle of a certificate**, from the initial request to public verification, in a clean and maintainable way.
 
-- creation
-- PDF generation
-- email delivery
-- public verification
+It is an **MVP**, but already **fully functional, tested, and production-ready**, and can be reused with minimal configuration in different environments.
 
-This is an **MVP that is already fully functional, tested, and reusable**, designed to be imported and adapted with minimal effort.
-
-![Workflowimage](/E:\Projects\Automazione_Workflows_Pipelines\n8n\Workflows-Templates-Github\n8n-templates\free-templates\3-Certification-Creation&Validation/Assets/Workflow-image.png)
-
-![Workflowimage](/Assets/Workflow-image.png)
+![image](assets/Workflow-image.png)
 
 [Example-certificate](./Assets/Example-Certificate.pdf)
 
@@ -41,6 +34,26 @@ See the workflow on n8n Creators hub: [coming soon](coming soon)
 
 ****
 
+## What problem this template solves
+
+In many real-world scenarios, certificates are still:
+
+- generated manually
+- created with fragile scripts
+- hard to verify
+- visually inconsistent
+- difficult to maintain over time
+
+This template solves those problems by providing:
+
+- automated certificate creation
+- a unique and verifiable Certification ID
+- consistent PDF output using templates
+- a public verification endpoint
+- a clear separation between automation logic and visual design
+
+---
+
 ## 🚀 What makes this version different
 
 This workflow is the **evolution of the original HTML-based version**.
@@ -54,6 +67,8 @@ This workflow is the **evolution of the original HTML-based version**.
 - Better collaboration between developers and designers
 
 The PDF layout is managed **entirely through PDF Generator API templates**.
+
+![image](assets/PDFgenerationAPI-Template.png)
 
 ------
 
@@ -237,6 +252,8 @@ Before importing the workflow, you need:
 
 ------
 
+---
+
 ## 🚀 Installation
 
 ### 1. Import the workflow
@@ -268,6 +285,8 @@ Update these nodes:
 Click **Activate** and you’re ready to go.
 
 ------
+
+---
 
 ## 🧪 Status: MVP (but production-ready)
 

@@ -1,10 +1,13 @@
 📄 Certificate Creation&Validation (n8n)
 ===============================
 
-This repository contains a complete **end-to-end certification management system built with n8n**.  
-It automates the entire lifecycle of a digital certificate — from creation, to PDF generation, to verification via API or a user-friendly HTML page.
+This template provides a **complete and reusable solution to automatically create, distribute, and verify digital certificates using n8n**, with **PDF Generator API templates** for PDF generation.
 
-![Workflowimage](/E:\Projects\Automazione_Workflows_Pipelines\n8n\Workflows-Templates-Github\n8n-templates\free-templates\3-Certification-Creation&Validation/Assets/Workflow-image.png)
+The workflow is designed to cover the **entire lifecycle of a certificate**, from the initial request to public verification, in a clean and maintainable way.
+
+It is an **MVP**, but already **fully functional, tested, and production-ready**, and can be reused with minimal configuration in different environments.
+
+![image](assets/Workflow-image.png)
 
 [Example-certificate](./Assets/Example-Certificate.pdf)
 

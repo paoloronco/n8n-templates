@@ -137,7 +137,7 @@ It automates the entire lifecycle of a digital certificate — from creation, to
 </details>
 
 <details>
-<summary>▶️ **3a. Certificate Creation&Validation with PDF Templates**</summary>
+<summary>▶️ 3a. Certificate Creation&Validation with PDF Templates</summary>
 
 This is the **evolved version** of the original *Certificate Creation & Validation* workflow.
 
@@ -175,7 +175,7 @@ Instead of generating PDFs from raw HTML, this version uses **PDF Generator API 
 
 
 <details>
-<summary>▶️ **Create and Send Tech News Digests with RSS, Gemini AI and Gmail**</summary>
+<summary>▶️ Create and Send Tech News Digests with RSS, Gemini AI and Gmail </summary>
 
 This workflow automates the entire lifecycle of collecting, filtering, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.  
 It functions as a **fully autonomous editorial engine**, combining dozens of RSS feeds, structured data processing, and an LLM (Google Gemini) to transform a large volume of raw articles into a concise, high–value daily briefing delivered straight to your inbox.
@@ -256,24 +256,25 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 ## ✨ How to Use These Templates
 
        1. Open n8n  
+       2. Import the `workflow.json` file of your chosen template  
+       3. Configure credentials (Google, Discord, etc.)  
+       4. Read the included NOTES files for advanced configuration  
+       5. Run once manually → then enable scheduled execution  
 
-          2. Import the `workflow.json` file of your chosen template  
 
-                    3. Configure credentials (Google, Discord, etc.)  
-
-                       4. Read the included NOTES files for advanced configuration  
-
-                                 5. Run once manually → then enable scheduled execution  
 
 ## 🔗 Useful Links
 
    - 🌐 n8n Website: https://n8n.io  
+        - [My n8n Creator profile & templates](https://n8n.io/creators/paoloronco/)
+        - 📚 Documentation: https://docs.n8n.io  
+        - 💬 Community Forum: https://community.n8n.io  
+        - 🧩 Node Reference: https://docs.n8n.io/integrations/
 
-     - 📚 Documentation: https://docs.n8n.io  
+   - my n8n Guides: [paoloronco.it Website - n8n Guides](https://paoloronco.it/portfolio/n8n-guides/)
+   - my [YouTube Channel n8n Playlist](https://www.youtube.com/watch?v=PS6qdCbc5fU&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9)
 
-          - 💬 Community Forum: https://community.n8n.io  
 
-            - 🧩 Node Reference: https://docs.n8n.io/integrations/
 
 ## 🧑‍💻 About This Repository
 
@@ -282,17 +283,16 @@ Ideal for creators, media professionals, and brands that want to keep their soci
     Templates aim to be:
 
    - modular  
+   - clean  
+   - easy to customize  
+   - production-ready  
 
-     - clean  
+ If you want to contribute, suggest ideas, or request new templates, feel free to open an issue.    
 
-          - easy to customize  
 
-            - production-ready  
-
-    If you want to contribute, suggest ideas, or request new templates, feel free to open an issue.    
 
 ## ⭐ Support the Project
 
     If these templates help you automate your workflows, consider starring the repo ⭐  
 
-    More templates are coming soon!
+    **More templates are coming soon!**

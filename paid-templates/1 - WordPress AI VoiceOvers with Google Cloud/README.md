@@ -10,7 +10,7 @@ The workflow is publicly available for purchase here:
 
 👉 **paoloronco.it Store:** [https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
-👉 **n8n Marketplace:** *Publishing soon*
+👉 **n8n Marketplace:** [Convert WordPress Articles to Multilingual Voiceovers with Google TTS and OpenAI](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) 
 
 
 ![WordPress AI VoiceOver Automation](assets/banner.png)

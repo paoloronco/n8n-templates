@@ -208,7 +208,7 @@ If you want to offer audio versions of your blog posts, boost accessibility, or 
 
 [paoloronco.it Shop](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
-[n8n Marketplace - pubblishing soon](Publishing soon)
+[n8n Marketplace](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
 
 </details>
 
@@ -256,10 +256,10 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 ## ✨ How to Use These Templates
 
        1. Open n8n  
-       2. Import the `workflow.json` file of your chosen template  
-       3. Configure credentials (Google, Discord, etc.)  
-       4. Read the included NOTES files for advanced configuration  
-       5. Run once manually → then enable scheduled execution  
+          2. Import the `workflow.json` file of your chosen template  
+          3. Configure credentials (Google, Discord, etc.)  
+             4. Read the included NOTES files for advanced configuration  
+             5. Run once manually → then enable scheduled execution  
 
 
 

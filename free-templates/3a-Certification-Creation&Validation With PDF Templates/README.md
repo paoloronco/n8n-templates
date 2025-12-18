@@ -11,9 +11,10 @@ It is an **MVP**, but already **fully functional, tested, and production-ready**
 
 [Example-certificate](./Assets/Example-Certificate.pdf)
 
-Visit my website for the: [n8n-template Certification Creator&Checke with PDF Templatesr](https://paoloronco.it/n8n-template-certification-creator-checker-with-pdfgenerationapi-templates/)
+📕 Full deploy guide:
+ [n8n Template – Certificate Creator & Checker (PDF Templates)](https://paoloronco.it/n8n-template-certification-creator-checker/)
 
-See the workflow on n8n Creators hub: [coming soon](coming soon)
+👥 n8n Community Template: [Create & Validate Digital Certificates with PDF Generator API and Gmail](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 
 ***
 

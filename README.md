@@ -157,8 +157,7 @@ Instead of generating PDFs from raw HTML, this version uses **PDF Generator API 
 📕 Full deploy guide:
  [n8n Template – Certificate Creator & Checker (PDF Templates)](https://paoloronco.it/n8n-template-certification-creator-checker/)
 
-👥 n8n Community Template:
- *(Template-based version – coming soon / updated version)*
+👥 n8n Community Template: [Create & Validate Digital Certificates with PDF Generator API and Gmail](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 
 📄 Files included:
 
@@ -256,10 +255,10 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 ## ✨ How to Use These Templates
 
        1. Open n8n  
-          2. Import the `workflow.json` file of your chosen template  
-          3. Configure credentials (Google, Discord, etc.)  
-             4. Read the included NOTES files for advanced configuration  
-             5. Run once manually → then enable scheduled execution  
+                2. Import the `workflow.json` file of your chosen template  
+                3. Configure credentials (Google, Discord, etc.)  
+                      4. Read the included NOTES files for advanced configuration  
+                      5. Run once manually → then enable scheduled execution  
 
 
 

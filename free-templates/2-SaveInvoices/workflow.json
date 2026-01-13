@@ -1,5 +1,5 @@
 {
-  "name": "20-SaveInvoices-Templates",
+  "name": "2-Utility-SaveInvoices_template",
   "nodes": [
     {
       "parameters": {
@@ -12,10 +12,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        1520,
-        464
+        2736,
+        672
       ],
-      "id": "279fc733-3a4a-48b5-b90a-33437a93bec9",
+      "id": "8740476c-9d06-414b-b68a-828df048b29e",
       "name": "AI_Agent-fields"
     },
     {
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
-        464
+        3024,
+        672
       ],
-      "id": "bbf59dee-cde2-45e3-bfda-776413827429",
+      "id": "f6d0666f-ba52-4ce9-a8bb-b6ea735427ca",
       "name": "Code_extractFields"
     },
     {
@@ -37,31 +37,31 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1-Your_ID",
+          "value": "1-qkYalPWAugIUGqsgR8_gU15CHkzsqQfCVB793i8Ku8",
           "mode": "list",
           "cachedResultName": "n8n",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-qkYalPWAugIUGqsgR8_gU15CHkzsqQfCVB793i8Ku8/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 12345678,
+          "value": 1842419144,
           "mode": "list",
-          "cachedResultName": "Invoices",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Your_ID/edit#gid=Your_ID"
+          "cachedResultName": "Fatture-luce",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-qkYalPWAugIUGqsgR8_gU15CHkzsqQfCVB793i8Ku8/edit#gid=1842419144"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Vendor": "={{ $json.vendor_name }}",
-            "Amount": "={{ $json.total_amount }}",
-            "Date": "={{ $json.invoice_date }}",
-            "Description": "={{ $json.line_items[0].description }}"
+            "Fornitore": "={{ $json.vendor_name }}",
+            "Importo": "={{ $json.total_amount }}",
+            "Data": "={{ $json.invoice_date }}",
+            "Tipo": "={{ $json.line_items[0].description }}"
           },
           "matchingColumns": [],
           "schema": [
             {
-              "id": "Vendor",
-              "displayName": "Vendor",
+              "id": "Fornitore",
+              "displayName": "Fornitore",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -69,8 +69,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Description",
-              "displayName": "Description",
+              "id": "Tipo",
+              "displayName": "Tipo",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -78,8 +78,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Date",
-              "displayName": "Date",
+              "id": "Data",
+              "displayName": "Data",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -87,8 +87,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Amount",
-              "displayName": "Amount",
+              "id": "Importo",
+              "displayName": "Importo",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -104,17 +104,11 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2000,
-        464
+        3216,
+        672
       ],
-      "id": "29ea0f55-1d7a-48e6-89b5-4020edf095b2",
-      "name": "GoogleSheets_save",
-      "credentials": {
-        "googleApi": {
-          "id": "Your_Account",
-          "name": "Your_Account"
-        }
-      }
+      "id": "e308190d-ab88-430c-ac06-5835edbf0d7f",
+      "name": "GoogleSheets_save"
     },
     {
       "parameters": {
@@ -124,10 +118,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1136,
-        0
+        2352,
+        208
       ],
-      "id": "269bdde6-6a68-4e9c-96e6-d67935df7a25",
+      "id": "3c478faf-ec04-4da4-a7d4-34a208689ab0",
       "name": "downloadFile"
     },
     {
@@ -146,20 +140,14 @@
         },
         "options": {}
       },
-      "id": "b6680055-8aef-4f9e-a2f8-b4dc0188cd70",
+      "id": "cb8e5ab0-cb78-4c18-88cc-6301ce5a00db",
       "name": "GoogleDrive-upload-file",
       "type": "n8n-nodes-base.googleDrive",
       "position": [
-        928,
-        0
+        2144,
+        208
       ],
-      "typeVersion": 3,
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "GGjvXfkqpDHVvYC3",
-          "name": "Google Drive account"
-        }
-      }
+      "typeVersion": 3
     },
     {
       "parameters": {
@@ -170,21 +158,15 @@
           "downloadAttachments": true
         }
       },
-      "id": "17d74ff6-b02f-4641-bbe8-46ab717b5a1d",
+      "id": "4966a033-d088-4ef1-88d8-b338b3a912b2",
       "name": "Gmail-Get_Invoice",
       "type": "n8n-nodes-base.gmail",
       "position": [
-        720,
-        0
+        1936,
+        208
       ],
       "webhookId": "a430c91c-4c1a-4377-88ad-f3ffefdc70ac",
-      "typeVersion": 2.1,
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
-          "name": "Gmail account"
-        }
-      }
+      "typeVersion": 2.1
     },
     {
       "parameters": {
@@ -194,18 +176,12 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1760,
-        0
+        3168,
+        208
       ],
-      "id": "260fee8a-8c3c-4fba-9e30-96fd4ce74b48",
+      "id": "b45ff76f-eab8-4989-9c0f-3e965b6b2aee",
       "name": "Delete a message",
-      "webhookId": "c974ebf7-e5f5-4e25-a894-d16561876f46",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
-          "name": "Gmail account"
-        }
-      }
+      "webhookId": "c974ebf7-e5f5-4e25-a894-d16561876f46"
     },
     {
       "parameters": {
@@ -221,10 +197,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        0
+        672,
+        192
       ],
-      "id": "de276b42-c83f-4a62-9b9e-3d21b4f03317",
+      "id": "7f91a088-b772-4cf0-9460-3d8b1f907286",
       "name": "Schedule Trigger"
     },
     {
@@ -232,6 +208,7 @@
         "operation": "getAll",
         "simple": false,
         "filters": {
+          "receivedAfter": "={{ new Date(Date.now() - 60 * 60 * 1000).toISOString() }}",
           "sender": "SENDER_EMAIL_ADDRESS"
         },
         "options": {
@@ -241,18 +218,12 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        256,
-        0
+        928,
+        192
       ],
-      "id": "4fc76db4-ce7d-4e40-aff0-923a1d89428b",
+      "id": "06bbcd36-63f8-4675-8844-50d0f028efa2",
       "name": "Get many messages",
-      "webhookId": "af615cf7-1086-4de1-b3a6-020e6f96bcf1",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
-          "name": "Gmail account"
-        }
-      }
+      "webhookId": "af615cf7-1086-4de1-b3a6-020e6f96bcf1"
     },
     {
       "parameters": {
@@ -263,10 +234,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -800,
-        -240
+        -128,
+        -48
       ],
-      "id": "170589d6-8e1e-4f8d-8530-88af4145e0a0",
+      "id": "b8777576-41e7-46c0-86b8-7af73f30ab5c",
       "name": "Sticky Note"
     },
     {
@@ -277,10 +248,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        1344,
-        208
+        2560,
+        416
       ],
-      "id": "5bc931ca-dd2e-44a2-b223-04e971367087",
+      "id": "22841f63-b10a-48bd-bf8e-fbd51a65beac",
       "name": "Extract from File1"
     },
     {
@@ -290,17 +261,11 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1520,
-        608
+        2736,
+        816
       ],
-      "id": "1c19a579-4714-40cd-ae41-b79dd89956ec",
-      "name": "OpenRouter Chat Model1",
-      "credentials": {
-        "openRouterApi": {
-          "id": "tx3QJZdQsNJEQ7LO",
-          "name": "OpenRouter account"
-        }
-      }
+      "id": "f34ed231-eb4e-4c6d-afe4-55002ec51d8f",
+      "name": "OpenRouter Chat Model1"
     },
     {
       "parameters": {
@@ -315,17 +280,11 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1536,
-        0
+        2944,
+        208
       ],
-      "id": "0c66ff53-61f7-4002-ae69-e302f76b1af5",
-      "name": "Delete a file1",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "GGjvXfkqpDHVvYC3",
-          "name": "Google Drive account"
-        }
-      }
+      "id": "f544762a-4d82-4638-99f5-dd16cf233bc0",
+      "name": "Delete a file1"
     },
     {
       "parameters": {
@@ -352,35 +311,14 @@
         },
         "options": {}
       },
-      "id": "240d6703-e434-48b3-9f1f-bd3dce7a4909",
+      "id": "95b99314-b4c1-4b3b-af12-ac5ee64cff06",
       "name": "Filter-contains_attachment",
       "type": "n8n-nodes-base.filter",
       "position": [
-        496,
-        0
+        1168,
+        192
       ],
       "typeVersion": 2.2
-    },
-    {
-      "parameters": {
-        "protocol": "sftp",
-        "operation": "upload",
-        "path": "=PATH/PATH/{{\n  (n => {\n    n = $('GoogleDrive-upload-file').item.json.name || $json.name || 'invoice';\n    n = n.replace(/[\\x00-\\x1F\\x7F]/g, '');\n    n = n.replace(/[:<>\\\"/\\\\|?*]/g, '-');\n    n = n.replace(/\\s+/g, ' ').replace(/[\\. ]+$/, '');\n    return n.toLowerCase().endsWith('.pdf') ? n : n + '.pdf';\n  })()\n}}\n"
-      },
-      "type": "n8n-nodes-base.ftp",
-      "typeVersion": 1,
-      "position": [
-        1344,
-        0
-      ],
-      "id": "5c6fcda5-95d5-475f-9374-2b1a153917c8",
-      "name": "FTP-upload-octopus",
-      "credentials": {
-        "sftp": {
-          "id": "BsF0Em2AHLou3erf",
-          "name": "FTP account"
-        }
-      }
     },
     {
       "parameters": {
@@ -391,42 +329,42 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -32,
-        -240
+        640,
+        -48
       ],
-      "id": "28ca213f-f1dd-4e76-b510-656abe8acb2d",
+      "id": "5a407aa3-d3d1-4f45-9c4a-88a5dd0cfdb7",
       "name": "Sticky Note2"
     },
     {
       "parameters": {
-        "content": "### SECTION 2 — Email Intake & Attachment filtering\n\nFetches messages from a specific sender and filters only emails containing PDF attachments.\n\n**Setup:**\nIn **Gmail → Get Many Messages**, enter the sender email that sends you invoices.\n\nConfigure your Gmail OAuth2 account: [🔗 Gmail Node Docs](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.gmail/)",
+        "content": "### SECTION 2.1 — Email Intake & Attachment filtering\n\nFetches messages from a specific sender and filters only emails containing PDF attachments.\n\n**Setup:**\nIn **Gmail → Get Many Messages**, enter the sender email that sends you invoices.\n\nConfigure your Gmail OAuth2 account: [🔗 Gmail Node Docs](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.gmail/)",
         "height": 400,
-        "width": 624,
+        "width": 560,
         "color": 7
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        224,
-        -240
+        896,
+        -48
       ],
-      "id": "b7c00f57-bd81-4f38-8baf-eb01ec791fe2",
+      "id": "163f9fb4-9dc1-4e92-83ee-ecc3e1510585",
       "name": "Sticky Note3"
     },
     {
       "parameters": {
         "content": "### SECTION 3 — Download & Storage\n\nDownloads the invoice PDF and saves it to Google Drive. You can optionally upload a copy to your FTP/SFTP server.\n\n**Google Drive:**\nConnect your Drive account: [🔗 Google Drive Docs](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledrive/)\nInsert the **Folder ID** where invoices will be stored.\n\n**FTP/SFTP (optional):**\nSet up your FTP/SFTP credentials: [🔗 FTP Node Docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.ftp/)\nIn **PATH**, enter the directory where files should be saved. Leave other fields unchanged.\n",
-        "height": 400,
+        "height": 416,
         "width": 816,
         "color": 7
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        880,
-        -240
+        2096,
+        -48
       ],
-      "id": "0223ec95-a03f-462d-afc3-cfe6a2f7592e",
+      "id": "31b2113c-b7f7-45f2-b277-1b3800c8c68d",
       "name": "Sticky Note4"
     },
     {
@@ -438,10 +376,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        576,
-        192
+        1792,
+        400
       ],
-      "id": "a1d6eaa6-ae71-42cf-b7ed-d9c73f877423",
+      "id": "c633ca42-aeb2-42d9-9a53-6f64ed13a5ad",
       "name": "Sticky Note5"
     },
     {
@@ -454,10 +392,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1488,
-        192
+        2704,
+        400
       ],
-      "id": "5b32c16c-07d7-4bcf-a40b-3cb696ce52b7",
+      "id": "08b97c66-9033-4b59-aa9f-2be21f09fee6",
       "name": "Sticky Note6"
     },
     {
@@ -470,11 +408,117 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1952,
+        3168,
+        400
+      ],
+      "id": "34bfa6d9-f7ea-4acb-95f6-1c57bc6a89d2",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  if (!item.binary) return item;\n\n  const key = Object.keys(item.binary)[0];         // prende il primo binary field\n  const bin = item.binary[key];\n\n  let n = item.json.name || bin?.fileName || 'invoice';\n\n  n = n.replace(/[\\x00-\\x1F\\x7F]/g, '');\n  n = n.replace(/\\.\\d+Z$/, '');\n  n = n.replace(/[:<>\"/\\\\|?*]/g, '-');\n  n = n.replace(/\\s+/g, ' ').replace(/[. ]+$/, '');\n  if (!n.toLowerCase().endsWith('.pdf')) n += '.pdf';\n\n  item.binary[key].fileName = n;\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        208
+      ],
+      "id": "b464e077-d9e3-4100-b6f5-71c5c3117f9a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
         192
       ],
-      "id": "46b16b4d-823d-4e19-ba8e-75cba720d5ef",
-      "name": "Sticky Note7"
+      "id": "7f948036-e8a3-4c33-a934-c0e6dcdc5bc6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1-qkYalPWAugIUGqsgR8_gU15CHkzsqQfCVB793i8Ku8",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-qkYalPWAugIUGqsgR8_gU15CHkzsqQfCVB793i8Ku8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "=12345678",
+          "mode": "id"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "uniqueKey",
+              "lookupValue": "={{ $('Get many messages').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        192
+      ],
+      "id": "c993184f-56b6-4c05-9868-963917d2dea7",
+      "name": "Check: Message already processed",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "### Section 3: Check if already existing\n\nPrevents duplicate processing of the same email.\nThis section checks whether the current Gmail message has already been processed by looking up its Gmail message ID in a Google Sheets registry.\n\nConfiguration\n* Set the Google Sheets document and sheet name.\n* Ensure the sheet has a uniqueKey column containing Gmail message IDs.\n",
+        "height": 416,
+        "width": 416,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        -48
+      ],
+      "id": "9f7b972a-3ee1-4ba0-bb35-145aef6efbef",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "### Section 2.2\n\nGet attachment from Gmail \n(binary file)",
+        "height": 416,
+        "width": 176,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        -48
+      ],
+      "id": "08bbcd5d-dc15-48bd-9d29-a6bb8316364b",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "=PATH/PATH/{{ $binary[Object.keys($binary)[0]].fileName }}"
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        2752,
+        208
+      ],
+      "id": "114f1c8c-c5de-4f09-ab00-53acff498026",
+      "name": "FTP-upload"
     }
   ],
   "pinData": {},
@@ -510,7 +554,7 @@
             "index": 0
           },
           {
-            "node": "FTP-upload-octopus",
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -598,14 +642,25 @@
       "main": [
         [
           {
-            "node": "Gmail-Get_Invoice",
+            "node": "Check: Message already processed",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "FTP-upload-octopus": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "FTP-upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP-upload": {
       "main": [
         [
           {
@@ -621,10 +676,36 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "10c160b7-9adb-4eb5-b6fd-64aad59c083e",
+  "versionId": "54ea6eaf-4f29-4b70-9b79-20cf3a309300",
   "meta": {
-    "instanceId": "Your_ID"
+    "templateCredsSetupCompleted": true,
+    "instanceId": "efbf05d03d3e47a9d323e384711f6bc5e7df14be0284d04bab068a214f13aa2e"
   },
-  "id": "JO7p7aOEOypeEGoF",
-  "tags": []
+  "id": "hAr5yxUjH6GnWhRq",
+  "tags": [
+    {
+      "name": "Utility",
+      "id": "gZvMl56PRMiUM0GB",
+      "updatedAt": "2026-01-13T18:54:25.559Z",
+      "createdAt": "2026-01-13T18:54:25.559Z"
+    },
+    {
+      "name": "Mail",
+      "id": "vghJqYF0cZvWjgCI",
+      "updatedAt": "2026-01-13T18:54:25.550Z",
+      "createdAt": "2026-01-13T18:54:25.550Z"
+    },
+    {
+      "name": "PROD",
+      "id": "r7fcfwCl5k0mTYj8",
+      "updatedAt": "2026-01-13T18:54:59.745Z",
+      "createdAt": "2026-01-13T18:54:59.745Z"
+    },
+    {
+      "name": "creator-published",
+      "id": "PlxhyZPXjXMiEkoD",
+      "updatedAt": "2026-01-13T18:54:59.705Z",
+      "createdAt": "2026-01-13T18:54:59.705Z"
+    }
+  ]
 }

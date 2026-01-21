@@ -243,7 +243,7 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 
 
 <details>
-<summary>▶️ 3. Reliable Backup & Sync Execution Validation (Log-Driven) /summary>
+<summary>▶️ 3. Reliable Backup & Sync Execution Validation (Log-Driven) </summary>
 
 This workflow monitors filesystem sync and backup jobs by **validating their execution logs**, not by running or inspecting the jobs themselves.
 

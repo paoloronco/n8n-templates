@@ -2,9 +2,11 @@
 
 This workflow monitors filesystem sync and backup jobs by **validating their execution logs**, not by running or inspecting the jobs themselves.
 
+![Banner](assets/banner.png)
+
 👉 **Gumroad:** [Backup & Sync Execution Validation Log Driven](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
 
-👉 **paoloronco.it Store:** [[Backup & Sync Execution Validation Log Driven]](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
+👉 **paoloronco.it Store:** [Backup & Sync Execution Validation Log Driven](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
 
 👉 **n8n Marketplace** *coming soon*
 

@@ -4,7 +4,7 @@ An advanced automation that collects the latest news from **any topic or indust
 
 Ideal for creators, media professionals, and brands that want to keep their social channels **active, consistent, and always on-trend** — without manual research or content drafting.
 
-
+![Banner](assets/banner.png)
 
 👉 **Gumroad:** [n8n Workflow: “AI News → Social Publishing Automation”](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 

@@ -258,11 +258,11 @@ This workflow monitors filesystem sync and backup jobs by **validating their exe
 
 - 📂 Folder → [`/paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven)`](./paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven))
 
-- 👥 n8n Community Template: [ [coming soon]]()
+- 👥 n8n Community Template: *coming soon*
 
-- 🛍️ GumRoad: [coming soon]
+- 🛍️ GumRoad: [Backup & Sync Execution Validation Log Driven](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
 
-- 🛍️ Paolo Ronco Shop  [coming soon]
+- 🛍️ Paolo Ronco Shop  [[Backup & Sync Execution Validation Log Driven]](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
 
 > **After purchase, you will receive a complete package including:**
 >

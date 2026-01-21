@@ -61,6 +61,10 @@ n8n-templates/
 │       ├── assets/
 │       │   ├── banner.png
 │       └── README.md
+│   └── 3 - Reliable Backup & Sync Execution Validation (Log-Driven)
+│       ├── assets/
+│       │   ├── 
+│       └── README.md
 └── README.md
 
 ```
@@ -201,11 +205,15 @@ This premium workflow handles everything: text cleaning, translation, long-form 
 
 If you want to offer audio versions of your blog posts, boost accessibility, or scale your content distribution, this automation gives you a hands-off, enterprise-grade solution with zero manual work.
 
-🔗 Get the workflow:
+**🔗 Get the workflow:**
 
-[Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+- 📂 Folder → [`/paid-templates/1 - WordPress AI VoiceOvers with Google Cloud`](./paid-templates/1 - WordPress AI VoiceOvers with Google Cloud)
 
-[paoloronco.it Shop](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+- 👥 n8n Community Template: [Convert WordPress articles to multilingual voiceovers with Google TTS and OpenAI](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
+
+- 🛍️ GumRoad:  [WordPress AI VoiceOvers](https://paoloronco.gumroad.com/l/ailfum)
+
+- 🛍️ Paolo Ronco Shop [paoloronco.it Shop](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
 [n8n Marketplace](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
 
@@ -220,13 +228,51 @@ An advanced automation that collects the latest news from **any topic or indust
 
 Ideal for creators, media professionals, and brands that want to keep their social channels **active, consistent, and always on-trend** — without manual research or content drafting.
 
-[Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+🔗 Get the workflow:
 
-[paoloronco.it Shop]([n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
+- 📂 Folder → [`/paid-templates/2 - AI News - Social Publishing Automation`](./paid-templates/2 - AI News - Social Publishing Automation)
 
-[n8n Marketplace](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+- 👥 n8n Community Template: [2. AI News - Social Publishing Automation](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+
+- 🛍️ GumRoad [AI News Social pubblishing](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+
+- 🛍️ Paolo Ronco Shop [n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 
 </details>
+
+
+
+<details>
+<summary>▶️ 3. Reliable Backup & Sync Execution Validation (Log-Driven) /summary>
+
+This workflow monitors filesystem sync and backup jobs by **validating their execution logs**, not by running or inspecting the jobs themselves.
+
+**Key design principles**
+
+* Log-driven monitoring (evidence-based, not assumption-based)
+* One job = one log = one source of truth
+* No SSH, no server access, no execution coupling
+* Safe to run in untrusted or restricted environments
+
+**🔗 Get the workflow:**
+
+- 📂 Folder → [`/paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven)`](./paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven))
+
+- 👥 n8n Community Template: *coming soon*
+
+- 🛍️ GumRoad: [Backup & Sync Execution Validation Log Driven](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
+
+- 🛍️ Paolo Ronco Shop  [[Backup & Sync Execution Validation Log Driven]](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
+
+> **After purchase, you will receive a complete package including:**
+>
+> - **`workflow.json`** – ready to be imported into n8n
+> - **Shell script templates (`.sh`)** – reference sync job templates designed to generate structured logs fully compatible with the workflow
+> - **Complete setup documentation** – step-by-step guide covering configuration, deployment, and operational requirements
+
+</details>
+
+
 
 ---
 
@@ -256,9 +302,9 @@ Ideal for creators, media professionals, and brands that want to keep their soci
 
        1. Open n8n  
                 2. Import the `workflow.json` file of your chosen template  
-                3. Configure credentials (Google, Discord, etc.)  
-                      4. Read the included NOTES files for advanced configuration  
-                      5. Run once manually → then enable scheduled execution  
+                            3. Configure credentials (Google, Discord, etc.)  
+                                        4. Read the included NOTES files for advanced configuration  
+                                            5. Run once manually → then enable scheduled execution  
 
 
 

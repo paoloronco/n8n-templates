@@ -8,7 +8,7 @@ This workflow monitors filesystem sync and backup jobs by **validating their exe
 
 👉 **paoloronco.it Store:** [Backup & Sync Execution Validation Log Driven](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
 
-👉 **n8n Marketplace** *coming soon*
+👉 👥 n8n Community Template: [Monitor backup and sync logs with Google Cloud Storage, GitHub, Gmail, OpenAI, and GLPI](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
 
 
 

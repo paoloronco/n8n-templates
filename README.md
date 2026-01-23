@@ -258,7 +258,7 @@ This workflow monitors filesystem sync and backup jobs by **validating their exe
 
 - 📂 Folder → [`/paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven)`](./paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven))
 
-- 👥 n8n Community Template: *coming soon*
+- 👥 n8n Community Template: [Monitor backup and sync logs with Google Cloud Storage, GitHub, Gmail, OpenAI, and GLPI](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
 
 - 🛍️ GumRoad: [Backup & Sync Execution Validation Log Driven](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
 

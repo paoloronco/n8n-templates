@@ -4,6 +4,8 @@
 
 A curated collection of **ready-to-use n8n templates** for automations, data extraction, integrations, and notification systems.Includes **free templates**, **detailed technical notes**, and **workflow assets**.
 
+![image](/assets/n8n-templates.png)
+
 
 
 * * *

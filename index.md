@@ -67,6 +67,21 @@ n8n-templates/
 │       ├── assets/
 │       │   ├── 
 │       └── README.md
+│   └── 4 - WordPress AI Chatbot/
+│       ├── assets/
+│       |   ├── promotional.png
+│       |   ├── promotional-banner.png
+│       |   ├── promotional-square.png
+│       |   └── amazonluna-fetch-asset1.png
+│       |   └── frontend/
+│       |       ├── MicroWebsite.png
+│       |       └── WP-ChatBot/
+│       |           ├── WP-AI_ChatBot-SmallTalk.png
+│       |           ├── WP-AI_ChatBot-RAG.png
+│       |           ├── WP-AI_ChatBot-Skills_MongoDB.png
+│       ├── FEATURES.md
+│       ├── LICENSE.md
+│       ├── README.md
 └── README.md
 
 ```
@@ -180,7 +195,8 @@ Instead of generating PDFs from raw HTML, this version uses **PDF Generator API 
 
 
 <details>
-<summary>▶️ Create and Send Tech News Digests with RSS, Gemini AI and Gmail </summary>
+<summary>▶️ 4. Create and Send Tech News Digests with RSS, Gemini AI and Gmail </summary>
+
 
 This workflow automates the entire lifecycle of collecting, filtering, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.  
 It functions as a **fully autonomous editorial engine**, combining dozens of RSS feeds, structured data processing, and an LLM (Google Gemini) to transform a large volume of raw articles into a concise, high–value daily briefing delivered straight to your inbox.
@@ -273,6 +289,90 @@ This workflow monitors filesystem sync and backup jobs by **validating their exe
 > - **Complete setup documentation** – step-by-step guide covering configuration, deployment, and operational requirements
 
 </details>
+
+
+
+<details>
+<summary>▶️ 4. WordPress AI Chatbot </summary>
+A production-ready AI chatbot for WordPress sites using n8n workflows, vector databases, and OpenAI. Provides semantic search across your content with RAG (Retrieval-Augmented Generation).
+
+<p align="center">
+  <a href="https://paoloronco.gumroad.com/l/wordpress-aichatbot" target="_blank">
+    <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
+  </a>
+  <a href="https://shop.paoloronco.it/24-wordpress-ai-chatbot-with-n8n.html" target="_blank">
+    <img src="https://img.shields.io/badge/Coming%20Soon%20on%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="Coming Soon on n8n"/>
+  </a>
+  <a href="https://shop.paoloronco.it" target="_blank">
+    <img src="https://img.shields.io/badge/Visit%20Our%20Store-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
+  </a>
+</p>
+
+📂 Folder → [`/paid-templates/4 - WordPress AI Chatbot)`](./paid-templates/4 - WordPress AI Chatbot)
+
+**Overview**
+
+This is a complete AI chatbot solution for WordPress websites, powered by n8n automation workflows. It uses semantic search to understand user questions and provides accurate answers based on your actual WordPress content.
+
+**Key capabilities:**
+
+- No coding required - import workflows and configure
+- Semantic search using vector embeddings
+- Choice of vector databases (Qdrant or MongoDB Atlas)
+- Built-in authentication and GDPR-compliant logging
+- Multilingual support (English and Italian, extensible)
+- Works with free tiers of all required services
+
+**Features**
+
+- **Intent Classification**
+  The chatbot routes queries intelligently:
+
+  - **Small Talk** - Casual conversations, greetings
+
+  - **Content Search** - Semantic search across WordPress posts
+
+  - **Profile/Skills** - Optional database for expertise/experience queries
+
+
+- **Semantic Search**
+
+  - Vector embeddings for meaning-based search (not just keywords)
+
+  - Reranking with Cohere for improved relevance
+
+  - Combines multiple sources for comprehensive answers
+
+  - Intelligent document chunking
+
+
+- **Security**
+
+  - Bearer token authentication for webhooks
+
+  - GDPR-compliant IP hashing (SHA3-256)
+
+  - Input sanitization
+
+  - Server-side API key management
+
+  - HTTPS-only communication
+
+
+- **User Experience**
+
+  - Modern, responsive chat interface
+
+  - Simple WordPress shortcode integration: `[wp_ai_chatbot]`
+
+  - Customizable colors and styling
+
+  - Mobile-optimized
+
+
+
+</details>
+
 
 
 

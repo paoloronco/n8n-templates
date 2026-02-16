@@ -8,6 +8,22 @@ A production-ready AI chatbot for WordPress sites using n8n workflows, vector da
 
 ---
 
+## Purchase
+
+<p align="center">
+  <a href="https://paoloronco.gumroad.com/l/wordpress-aichatbot" target="_blank">
+    <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
+  </a>
+  <a href="https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/" target="_blank">
+    <img src="https://img.shields.io/badge/%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="n8n"/>
+  </a>
+  <a href="https://shop.paoloronco.it" target="_blank">
+    <img src="https://img.shields.io/badge/Paolo%20Ronco%20Shop-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
+  </a>
+</p>
+
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -357,13 +373,14 @@ A: Yes. The architecture supports both.
   <a href="https://paoloronco.gumroad.com/l/wordpress-aichatbot" target="_blank">
     <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
   </a>
-  <a href="https://shop.paoloronco.it/24-wordpress-ai-chatbot-with-n8n.html" target="_blank">
-    <img src="https://img.shields.io/badge/Coming%20Soon%20on%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="Coming Soon on n8n"/>
+  <a href="https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/" target="_blank">
+    <img src="https://img.shields.io/badge/%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="n8n"/>
   </a>
   <a href="https://shop.paoloronco.it" target="_blank">
-    <img src="https://img.shields.io/badge/Visit%20Our%20Store-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
+    <img src="https://img.shields.io/badge/Paolo%20Ronco%20Shop-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
   </a>
 </p>
+
 
 
 

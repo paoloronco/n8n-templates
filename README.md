@@ -310,9 +310,23 @@ A production-ready AI chatbot for WordPress sites using n8n workflows, vector da
     <img src="https://img.shields.io/badge/Paolo%20Ronco%20Shop-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
   </a>
 </p>
-
+<p align="center">
+  <a href="https://paoloronco.gumroad.com/l/wordpress-aichatbot" target="_blank">
+    <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
+  </a>
+  <a href="https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/" target="_blank">
+    <img src="https://img.shields.io/badge/%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="n8n"/>
+  </a>
+  <a href="https://shop.paoloronco.it" target="_blank">
+    <img src="https://img.shields.io/badge/Paolo%20Ronco%20Shop-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Our Store"/>
+  </a>
+</p>
 
 📂 Folder → [`/paid-templates/4 - WordPress AI Chatbot)`](./paid-templates/4 - WordPress AI Chatbot)
+
+**Video:**
+
+[![Video](https://img.youtube.com/vi/vg33xcdU9gE/maxresdefault.jpg)](https://www.youtube.com/watch?v=vg33xcdU9gE)
 
 **Overview**
 

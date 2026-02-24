@@ -24,6 +24,14 @@ A production-ready AI chatbot for WordPress sites using n8n workflows, vector da
 
 ---
 
+### Video:
+
+[![Video](https://img.youtube.com/vi/vg33xcdU9gE/0.jpg)](https://www.youtube.com/watch?v=vg33xcdU9gE)
+
+---
+
+
+
 ## Table of Contents
 
 - [Overview](#overview)

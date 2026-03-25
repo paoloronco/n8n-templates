@@ -1,0 +1,155 @@
+{
+  "name": "Menu Order Push Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📋 Menu Order Push Notifications\n\n📖 **Full documentation:**\nhttps://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7\n\n**What this workflow does:**\n- Your menu website sends customer orders to the `Webhook` node\n- n8n receives the order and forwards it to your ntfy topic\n- Every device connected to ntfy can receive the push notification\n\n**Setup overview:**\n1. Open the `Webhook` node and copy the **Production URL**\n2. In `website-mockup/menu-data.js`, set `orderWebhook` to that webhook URL\n3. Deploy the menu website: it must send every order to that exact webhook endpoint\n4. Deploy ntfy by following `docs/01-setup-ntfy.md`\n5. Create the ntfy admin user/password with:\n   `docker exec -e NTFY_PASSWORD=\"your_password\" ntfy ntfy user add --role=admin admin`\n6. Generate the token used by n8n with:\n   `docker exec ntfy ntfy token add admin`\n7. In n8n create a `Header Auth` credential:\n   Name: `HeaderAuth ntfy`\n   Value: `Bearer YOUR_NTFY_TOKEN`\n8. Open the `ntfy notification` node and replace `YOUR_TOPIC` in the URL\n9. Activate the workflow\n\n**Receive notifications on your devices:**\n- Install the **ntfy** app on Android or iPhone/iPad\n- Add your ntfy server URL inside the app\n- Log in with the username/password created during ntfy setup\n- Subscribe to the same topic used in the `ntfy notification` node\n\nSee the `docs/` folder for the full step-by-step setup.",
+        "height": 700,
+        "width": 700
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-500, -470],
+      "id": "b1c2d3e4-f5a6-7890-bcde-f12345678901",
+      "name": "Documentation"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "menu",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -48
+      ],
+      "id": "925fbd83-f32d-4b2d-849c-f8f0b81408e3",
+      "name": "Webhook",
+      "webhookId": "f967893c-ce62-4b03-95a7-8b456c86c6f7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ntfy/YOUR_TOPIC",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{\n  'Nome: ' + $json.body.nome + ' | ' +\n  $json.body.ordine\n    .map(i =>\n      i.quantita + 'x ' +\n      i.nome + ' ' +\n      i.dettaglio\n    )\n    .join(' | ') +\n  '\\n🕐 ' +\n  $json.body.orario\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "da7ce680-601a-4162-8566-f952f38860d3",
+      "name": "ntfy notification",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "COXnwwmXry8A0lcT",
+          "name": "HeaderAuth ntfy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu orders log",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "item": "={{ $('Webhook').item.json.body.ordine[0].nome }}",
+            "person": "={{ $('Webhook').item.json.body.nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "person",
+              "displayName": "person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "4e6fb97b-d965-417e-88e9-718169df61cd",
+      "name": "DB"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "ntfy notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ntfy notification": {
+      "main": [
+        [
+          {
+            "node": "DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ea2a027d-b399-4d78-aa55-e0f9155e7f48",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "id": "rXR1joSjCCaG3w8j",
+  "tags": []
+}

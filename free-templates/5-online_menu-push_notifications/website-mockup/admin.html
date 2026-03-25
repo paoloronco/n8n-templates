@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Menu Admin</title>
+  <script src="menu-data.js"></script>
+  <style>
+    :root {
+      --bg:       #0f0f0f;
+      --surface:  #191919;
+      --surface2: #222;
+      --gold:     #c9a84c;
+      --gold-dim: rgba(201,168,76,.12);
+      --text:     #efe9d5;
+      --muted:    #6b6355;
+      --border:   rgba(201,168,76,.15);
+      --danger:   #c0392b;
+      --radius:   8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    .overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .overlay.hidden { display: none; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .45rem;
+    }
+    input[type=text], input[type=password], input[type=url] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      padding: .6rem .75rem;
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: var(--gold); }
+    input::placeholder { color: var(--muted); }
+
+    .hint {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .5rem;
+      line-height: 1.5;
+    }
+    .error {
+      font-size: .78rem;
+      color: #e74c3c;
+      margin-top: .4rem;
+      min-height: 1.2em;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .55rem 1rem;
+      border: none; border-radius: 5px;
+      font-family: inherit; font-size: .82rem; font-weight: 500;
+      cursor: pointer; transition: opacity .15s, background .15s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary  { background: var(--gold); color: #111; }
+    .btn-ghost    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+    .btn-danger   { background: transparent; color: var(--danger); border: 1px solid rgba(192,57,43,.3); }
+    .btn-danger:hover { background: rgba(192,57,43,.1); opacity: 1; }
+    .btn-icon     { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: .55rem .7rem; border-radius: 5px; font-size: 1rem; cursor: pointer; transition: color .15s, border-color .15s; }
+    .btn-icon:hover { color: var(--gold); border-color: var(--gold); }
+
+    .modal-actions {
+      display: flex; justify-content: flex-end; gap: .6rem;
+      margin-top: 1.5rem; padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: .85rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-right { display: flex; gap: .5rem; align-items: center; }
+    .title-input {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      color: var(--gold);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: .35rem .6rem;
+      width: 220px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .title-input:hover { border-color: var(--border); }
+    .title-input:focus { border-color: var(--gold); background: var(--surface2); }
+
+    .main {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .section-head {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .85rem 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-head:hover { background: var(--gold-dim); }
+    .section-toggle {
+      color: var(--muted); font-size: .75rem;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .section-card.open .section-toggle { transform: rotate(90deg); }
+    .section-title-input {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text);
+      font-size: .95rem;
+      font-weight: 600;
+      padding: .25rem .4rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .section-title-input:focus { border-color: var(--gold); background: var(--surface2); }
+    .section-title-input:not(:focus) { cursor: default; }
+    .section-title-input:not(:focus):hover { border-color: var(--border); }
+
+    .section-meta { font-size: .72rem; color: var(--muted); flex-shrink: 0; padding-right: .5rem; }
+    .section-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+    .btn-xs {
+      background: transparent; border: none;
+      color: var(--muted); font-size: .85rem;
+      cursor: pointer; padding: .2rem .35rem;
+      border-radius: 3px;
+      transition: color .15s, background .15s;
+    }
+    .btn-xs:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .btn-xs.danger:hover { color: var(--danger); }
+
+    .section-items { border-top: 1px solid var(--border); display: none; }
+    .section-card.open .section-items { display: block; }
+
+    .item-row {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .65rem 1rem;
+      border-bottom: 1px solid rgba(201,168,76,.07);
+      transition: background .1s;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: rgba(255,255,255,.03); }
+
+    .item-row-info { flex: 1; min-width: 0; }
+    .item-row-name { font-size: .88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-row-desc { font-size: .75rem; color: var(--muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-row-actions { display: flex; gap: .2rem; flex-shrink: 0; }
+
+    .add-item-row { padding: .65rem 1rem; border-top: 1px solid var(--border); }
+    .btn-add-item {
+      font-size: .78rem; color: var(--muted);
+      background: none; border: 1px dashed var(--border);
+      border-radius: 4px; padding: .45rem .9rem;
+      cursor: pointer; width: 100%;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-add-item:hover { color: var(--gold); border-color: var(--gold); }
+
+    .btn-add-section {
+      display: block; width: 100%;
+      background: none;
+      border: 1px dashed rgba(201,168,76,.3);
+      border-radius: var(--radius);
+      color: var(--muted);
+      padding: .9rem;
+      font-family: inherit; font-size: .82rem;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-add-section:hover { color: var(--gold); border-color: var(--gold); }
+
+    details summary {
+      cursor: pointer; font-size: .8rem; color: var(--muted);
+      margin-bottom: .5rem; list-style: none;
+    }
+    details summary::before { content: '▶ '; font-size: .6em; }
+    details[open] summary::before { content: '▼ '; }
+    .instructions { border-left: 2px solid var(--border); padding-left: .9rem; margin-top: .6rem; }
+    .instructions ol { padding-left: 1.1rem; }
+    .instructions li { margin-bottom: .3rem; }
+    .instructions code { background: var(--surface2); border-radius: 3px; padding: .1em .35em; font-size: .88em; }
+
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: .75rem 1.2rem;
+      font-size: .85rem; box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok  { border-color: rgba(46,204,113,.4); color: #2ecc71; }
+    .toast.err { border-color: rgba(192,57,43,.4);  color: #e74c3c; }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+    /* v2 badge in topbar */
+    .version-badge {
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: var(--gold-dim);
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,.25);
+      border-radius: 3px;
+      padding: .15em .55em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login" class="overlay">
+  <div class="card">
+    <h1 class="card-title">Menu Admin <span class="version-badge">v2</span></h1>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="pwd-input" placeholder="Enter password"
+             autofocus autocomplete="current-password"
+             onkeydown="if(event.key==='Enter') doLogin()">
+      <p class="error" id="login-error"></p>
+    </div>
+    <p class="hint" id="login-hint" style="margin-bottom:1.2rem">
+      Default password: <strong>admin</strong>
+    </p>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login</button>
+  </div>
+</div>
+
+<!-- ══ ITEM MODAL ══ -->
+<div id="item-modal" class="overlay hidden">
+  <div class="card" style="max-width:480px">
+    <h2 class="card-title" id="modal-title">Edit item</h2>
+    <div class="form-group">
+      <label>Name *</label>
+      <input type="text" id="f-name" placeholder="E.g. Citrus Spritz">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" id="f-desc" placeholder="E.g. Sparkling wine, citrus, soda">
+    </div>
+    <div class="form-group">
+      <label>Detail (format / size)</label>
+      <input type="text" id="f-detail" placeholder="E.g. 33cl">
+    </div>
+    <div class="form-group">
+      <label>Link (optional)</label>
+      <input type="url" id="f-link" placeholder="https://...">
+      <p class="hint">If set, the name will appear as a link in the menu.</p>
+    </div>
+    <p class="error" id="item-error"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeItemModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="commitItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS MODAL ══ -->
+<div id="settings-modal" class="overlay hidden">
+  <div class="card" style="max-width:520px">
+    <h2 class="card-title">Settings</h2>
+
+    <!-- ── Webhook Ordini (v2 only) ── -->
+    <div class="form-group">
+      <label>Order Webhook (n8n)</label>
+      <input type="url" id="order-webhook-url" placeholder="https://n8n.yourdomain.com/webhook/...">
+      <p class="hint">
+        Called on every guest order. Receive name, items, and timestamp in real time.
+      </p>
+    </div>
+
+    <details style="margin-bottom:1rem">
+      <summary>Payload sent to the order webhook</summary>
+      <div class="hint instructions" style="margin-top:.5rem">
+        <pre style="font-size:.75rem;line-height:1.5;white-space:pre-wrap">{
+  "nome": "Marco",
+  "orario": "24/03/2026, 21:30",
+  "ordine": [
+    { "sezione": "Cocktails", "nome": "Herbal Bitter Mix", "quantita": 2 }
+  ],
+  "totale": 3
+}</pre>
+        <p style="margin-top:.5rem">Recommended n8n workflow: <code>Webhook → Telegram</code> or <code>→ Email</code></p>
+      </div>
+    </details>
+
+    <hr class="divider">
+
+    <!-- ── Webhook salvataggio menu ── -->
+    <div class="form-group">
+      <label>Menu Save Webhook (n8n)</label>
+      <input type="url" id="webhook-url" placeholder="https://n8n.yourdomain.com/webhook/...">
+      <p class="hint">
+        If set, the menu is POSTed on every save (updates menu-data.js on the server).
+      </p>
+    </div>
+
+    <details style="margin-bottom:1rem">
+      <summary>How to configure the menu save webhook</summary>
+      <div class="hint instructions">
+        <ol>
+          <li>In n8n create a new workflow</li>
+          <li>Add a <strong>Webhook</strong> node → Method: <code>POST</code></li>
+          <li>Add a <strong>Code</strong> node to transform the JSON into: <code>window.MENU_DATA = {...};</code></li>
+          <li>Connect a <strong>Write Binary File</strong> node with the absolute path of <code>menu-data.js</code> on the server</li>
+          <li>Add a <strong>Respond to Webhook</strong> node</li>
+          <li>Activate the workflow and paste the URL above</li>
+        </ol>
+      </div>
+    </details>
+
+    <hr class="divider">
+
+    <div class="form-group">
+      <label>Change password</label>
+      <input type="password" id="new-pwd"  placeholder="New password" style="margin-bottom:.5rem">
+      <input type="password" id="new-pwd2" placeholder="Repeat password">
+      <p class="error" id="pwd-change-error"></p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSettings()">Close</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="admin" class="hidden">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <input type="text" id="menu-title-input" class="title-input" placeholder="Restaurant name">
+      <span class="version-badge">v2</span>
+    </div>
+    <div class="topbar-right">
+      <a href="menu.html" target="_blank" class="btn btn-ghost" style="text-decoration:none">↗ View menu</a>
+      <button class="btn-icon" onclick="openSettings()" title="Settings">⚙</button>
+      <button class="btn btn-primary" onclick="saveData()">Save menu</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="sections-list"></div>
+    <button class="btn-add-section" onclick="addSection()">+ Add section</button>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let menuData  = { title: 'Your Restaurant', orderWebhook: '', sections: [] };
+let editState = null;
+
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+function toast(msg, type='ok', ms=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => { el.className = 'toast'; }, ms);
+}
+
+/* ── Auth ── */
+const LS_HASH = 'menuAdminPwdHash';
+const LS_DATA = 'menuAdminDataV2';
+const LS_HOOK = 'menuAdminWebhookV2';
+
+async function initAuth() {
+  if (!localStorage.getItem(LS_HASH)) {
+    localStorage.setItem(LS_HASH, await sha256('admin'));
+    document.getElementById('login-hint').style.display = '';
+  } else {
+    document.getElementById('login-hint').style.display = 'none';
+  }
+}
+
+async function doLogin() {
+  const hash  = await sha256(document.getElementById('pwd-input').value);
+  if (hash === localStorage.getItem(LS_HASH)) {
+    hide('login');
+    initAdmin();
+  } else {
+    document.getElementById('login-error').textContent = 'Wrong password.';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+/* ── Init ── */
+async function initAdmin() {
+  show('admin');
+  await loadData();
+  render();
+  document.getElementById('webhook-url').value = localStorage.getItem(LS_HOOK) || '';
+}
+
+async function loadData() {
+  if (window.MENU_DATA) {
+    menuData = normalise(JSON.parse(JSON.stringify(window.MENU_DATA)));
+    localStorage.setItem(LS_DATA, JSON.stringify(menuData));
+    return;
+  }
+  const cached = localStorage.getItem(LS_DATA);
+  if (cached) { try { menuData = normalise(JSON.parse(cached)); return; } catch {} }
+  menuData = { title: 'Your Restaurant', orderWebhook: '', sections: [] };
+}
+
+function normalise(d) {
+  if (!d || typeof d !== 'object') return { title: 'Your Restaurant', orderWebhook: '', sections: [] };
+  if (!Array.isArray(d.sections)) d.sections = [];
+  d.orderWebhook = d.orderWebhook ?? '';
+  d.sections.forEach(s => {
+    if (!s.id) s.id = uid();
+    if (!Array.isArray(s.items)) s.items = [];
+    s.items.forEach(it => {
+      it.description = it.description ?? '';
+      it.detail      = it.detail ?? '';
+      it.link        = it.link ?? '';
+    });
+  });
+  return d;
+}
+
+/* ── Render ── */
+function render() {
+  const ti = document.getElementById('menu-title-input');
+  ti.value = menuData.title || '';
+  ti.addEventListener('input', () => { menuData.title = ti.value; });
+
+  const list = document.getElementById('sections-list');
+  list.innerHTML = '';
+  menuData.sections.forEach((sec, si) => list.appendChild(renderSection(sec, si)));
+}
+
+function renderSection(sec, si) {
+  const card = document.createElement('div');
+  card.className = 'section-card open';
+  card.id = 'sc-' + sec.id;
+  card.innerHTML = `
+    <div class="section-head" onclick="toggleSection('${sec.id}')">
+      <span class="section-toggle">▶</span>
+      <input class="section-title-input" type="text" value="${esc(sec.title)}"
+             placeholder="Section name"
+             onclick="event.stopPropagation()"
+             oninput="onSectionTitleChange('${sec.id}', this.value)">
+      <span class="section-meta">${sec.items.length} items</span>
+      <div class="section-actions" onclick="event.stopPropagation()">
+        <button class="btn-xs" onclick="moveSec('${sec.id}',-1)">↑</button>
+        <button class="btn-xs" onclick="moveSec('${sec.id}',1)">↓</button>
+        <button class="btn-xs danger" onclick="deleteSec('${sec.id}')">✕</button>
+      </div>
+    </div>
+    <div class="section-items" id="si-${sec.id}">
+      ${sec.items.map((it,ii) => renderItemRow(sec.id, it, ii)).join('')}
+      <div class="add-item-row">
+        <button class="btn-add-item" onclick="openItemModal('${sec.id}', null)">+ Add item</button>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function renderItemRow(secId, item, idx) {
+  return `
+    <div class="item-row">
+      <div class="item-row-info">
+        <div class="item-row-name">${esc(item.name || '—')}</div>
+        ${(item.description||item.detail) ? `<div class="item-row-desc">${esc(item.description || item.detail)}</div>` : ''}
+      </div>
+      <div class="item-row-actions">
+        <button class="btn-xs" onclick="moveItem('${secId}',${idx},-1)">↑</button>
+        <button class="btn-xs" onclick="moveItem('${secId}',${idx},1)">↓</button>
+        <button class="btn-xs" onclick="openItemModal('${secId}',${idx})">✎</button>
+        <button class="btn-xs danger" onclick="deleteItem('${secId}',${idx})">✕</button>
+      </div>
+    </div>
+  `;
+}
+
+function refreshSection(secId) {
+  const sec = menuData.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const old = document.getElementById('sc-' + secId);
+  if (old) old.replaceWith(renderSection(sec, menuData.sections.indexOf(sec)));
+}
+
+/* ── Section actions ── */
+function toggleSection(id) { document.getElementById('sc-'+id)?.classList.toggle('open'); }
+function onSectionTitleChange(id, val) { const s = menuData.sections.find(s=>s.id===id); if(s) s.title=val; }
+
+function addSection() {
+  const sec = { id: uid(), title: 'New section', items: [] };
+  menuData.sections.push(sec);
+  render();
+  const last = document.querySelector('#sections-list .section-card:last-child');
+  last?.querySelector('.section-title-input')?.focus();
+}
+
+function deleteSec(id) {
+  if (!confirm('Delete this section?')) return;
+  menuData.sections = menuData.sections.filter(s => s.id !== id);
+  render();
+}
+
+function moveSec(id, dir) {
+  const i = menuData.sections.findIndex(s => s.id === id), j = i + dir;
+  if (j < 0 || j >= menuData.sections.length) return;
+  [menuData.sections[i], menuData.sections[j]] = [menuData.sections[j], menuData.sections[i]];
+  render();
+}
+
+/* ── Item actions ── */
+function openItemModal(secId, itemIdx) {
+  editState = { secId, itemIdx };
+  document.getElementById('item-error').textContent = '';
+  if (itemIdx !== null) {
+    const item = menuData.sections.find(s=>s.id===secId)?.items[itemIdx];
+    document.getElementById('modal-title').textContent = 'Edit item';
+    document.getElementById('f-name').value   = item?.name        ?? '';
+    document.getElementById('f-desc').value   = item?.description ?? '';
+    document.getElementById('f-detail').value = item?.detail      ?? '';
+    document.getElementById('f-link').value   = item?.link        ?? '';
+  } else {
+    document.getElementById('modal-title').textContent = 'New item';
+    ['f-name','f-desc','f-detail','f-link'].forEach(id => document.getElementById(id).value = '');
+  }
+  show('item-modal');
+  document.getElementById('f-name').focus();
+}
+
+function closeItemModal() { hide('item-modal'); editState = null; }
+
+function commitItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('item-error').textContent = 'Name is required.'; return; }
+  const item = {
+    name,
+    description: document.getElementById('f-desc').value.trim(),
+    detail:      document.getElementById('f-detail').value.trim(),
+    link:        document.getElementById('f-link').value.trim(),
+  };
+  const { secId, itemIdx } = editState;
+  const sec = menuData.sections.find(s => s.id === secId);
+  if (!sec) return;
+  if (itemIdx !== null) sec.items[itemIdx] = item; else sec.items.push(item);
+  closeItemModal();
+  refreshSection(secId);
+}
+
+function deleteItem(secId, idx) {
+  if (!confirm('Delete this item?')) return;
+  const sec = menuData.sections.find(s => s.id === secId);
+  if (sec) { sec.items.splice(idx, 1); refreshSection(secId); }
+}
+
+function moveItem(secId, idx, dir) {
+  const sec = menuData.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const j = idx + dir;
+  if (j < 0 || j >= sec.items.length) return;
+  [sec.items[idx], sec.items[j]] = [sec.items[j], sec.items[idx]];
+  refreshSection(secId);
+}
+
+/* ── Save ── */
+async function saveData() {
+  menuData.title = document.getElementById('menu-title-input').value.trim() || 'Your Restaurant';
+  document.querySelectorAll('.section-title-input').forEach(inp => {
+    const secId = inp.closest('.section-card')?.id.replace('sc-','');
+    const sec = menuData.sections.find(s => s.id === secId);
+    if (sec) sec.title = inp.value;
+  });
+
+  const json = JSON.stringify(menuData, null, 2);
+  localStorage.setItem(LS_DATA, json);
+
+  const date = new Date().toLocaleDateString('en-US');
+  const jsContent = `// Menu data — last updated ${date}\nwindow.MENU_DATA = ${json};\n`;
+  const blob = new Blob([jsContent], { type: 'application/javascript' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'menu-data.js' });
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('menu-data.js downloaded — upload it to your server.');
+
+  const adminHook = (localStorage.getItem(LS_HOOK) || '').trim();
+  if (adminHook) {
+    try {
+      const r = await fetch(adminHook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
+      toast(r.ok ? 'Menu saved via n8n!' : 'n8n error ' + r.status, r.ok ? 'ok' : 'err');
+    } catch { toast('Could not reach the webhook.', 'err'); }
+  }
+}
+
+/* ── Settings ── */
+function openSettings() {
+  document.getElementById('new-pwd').value  = '';
+  document.getElementById('new-pwd2').value = '';
+  document.getElementById('pwd-change-error').textContent = '';
+  document.getElementById('webhook-url').value       = localStorage.getItem(LS_HOOK) || '';
+  document.getElementById('order-webhook-url').value = menuData.orderWebhook || '';
+  show('settings-modal');
+}
+
+function closeSettings() { hide('settings-modal'); }
+
+async function saveSettings() {
+  // Save admin (menu-save) webhook to localStorage only
+  localStorage.setItem(LS_HOOK, document.getElementById('webhook-url').value.trim());
+
+  // Save order webhook into menuData (it will be included in menu-data.js on next save)
+  menuData.orderWebhook = document.getElementById('order-webhook-url').value.trim();
+
+  const p1 = document.getElementById('new-pwd').value;
+  const p2 = document.getElementById('new-pwd2').value;
+  if (p1 || p2) {
+    if (p1 !== p2) { document.getElementById('pwd-change-error').textContent = 'Passwords do not match.'; return; }
+    if (p1.length < 4) { document.getElementById('pwd-change-error').textContent = 'Password too short.'; return; }
+    localStorage.setItem(LS_HASH, await sha256(p1));
+  }
+
+  closeSettings();
+  toast('Settings saved. Remember to "Save menu" to include the order webhook.', 'ok', 4000);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!document.getElementById('item-modal').classList.contains('hidden')) closeItemModal();
+  if (!document.getElementById('settings-modal').classList.contains('hidden')) closeSettings();
+});
+
+(async () => { await initAuth(); })();
+</script>
+</body>
+</html>

@@ -48,11 +48,24 @@ n8n-templates/
 │   │   ├── PDFgeneratorAPI-Templates/
 │   │   │   └── template_export_1560735.json
 │   │   └── README.md
-│   └── 4-RSS_News_Tech/
-│       ├── Assets/
-│       │   └── workflow.png
-│       ├── News_Tech_EN.json
-│       └── readme.md
+│   ├── 4-RSS_News_Tech/
+│   │   ├── Assets/
+│   │   │   └── workflow.png
+│   │   ├── News_Tech_EN.json
+│   │   └── readme.md
+│   └── 5-online_menu-push_notifications/
+│       ├── docs/
+│       │   ├── 01-setup-ntfy.md
+│       │   ├── 02-setup-cloudflare-tunnel.md
+│       │   └── 03-setup-n8n-workflow.md
+│       ├── website-mockup/
+│       │   ├── admin.html
+│       │   ├── index.html
+│       │   ├── menu-data.js
+│       │   └── menu.html
+│       ├── workflow/
+│       │   └── menu-order-notifications.json
+│       └── README.md
 ├── paid-templates/
 │   └── 1 - WordPress AI VoiceOvers with Google Cloud/
 │       ├── assets/
@@ -208,6 +221,28 @@ It functions as a **fully autonomous editorial engine**, combining dozens of RSS
 📕Full deploy guide: [paoloronco.it - Full deploy guide - Tech & AI Daily Briefing](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
 
 👥 n8n Community Template: [Curate and Send Tech News Digests with RSS, Gemini AI and Gmail](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
+
+</details>
+
+
+
+<details>
+<summary>▶️ 5. Online Menu — Receive Push Notifications from Customer Orders</summary>
+
+Receive instant push notifications on your phone every time a customer places an order on your menu website — powered by n8n and a self-hosted ntfy.sh instance. No third-party notification APIs. No paid plans. Fully self-hosted.
+
+The template includes a complete ready-to-host static menu website with a customer-facing order page and a password-protected admin panel for managing menu items.
+
+📂 **Folder** → [`/free-templates/5-online_menu-push_notifications`](./free-templates/5-online_menu-push_notifications)
+
+📕 Full documentation: [Documentation: Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
+
+📄 Files included:
+
+* **workflow/menu-order-notifications.json** – Complete n8n importable workflow
+* **README.md** – Full setup guide
+* **docs/** – Step-by-step setup docs (ntfy.sh, Cloudflare Tunnel, n8n config)
+* **website-mockup/** – Ready-to-host static menu website with admin panel
 
 </details>
 

@@ -290,15 +290,15 @@ No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
 
 Extension of template 5 v2. Adds **BAC (Blood Alcol Concentration)** logic on top of push notifications and Home Assistant TTS voice announcements.
 
+📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?pvs=74)
+
 📂 **Folder** → [`/free-templates/5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation`](./free-templates/5%20v3%20online_menu-push_notifications-homeassistant-TTS-BACcalculation)
 
 📄 Files included:
 
+* **workflow/Menu Order Push Notifications + Home Assistant TTS + BAC.json** – Complete n8n importable workflow
 * **README.md** – Setup guide
-* **readme-n8n.md** – n8n template publishing info
 * **docs/** – Setup docs (ntfy.sh, Cloudflare Tunnel, Home Assistant TTS)
-
-> ⚠️ This template is currently in setup. Workflow file and complete docs are being finalized.
 
 </details>
 

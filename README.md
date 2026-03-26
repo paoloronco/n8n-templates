@@ -53,7 +53,7 @@ n8n-templates/
 │   │   │   └── workflow.png
 │   │   ├── News_Tech_EN.json
 │   │   └── readme.md
-│   ├── 5-online_menu-push_notifications/
+│   ├── 5 v1 -online_menu-push_notifications/
 │   │   ├── docs/
 │   │   │   ├── 01-setup-ntfy.md
 │   │   │   ├── 02-setup-cloudflare-tunnel.md
@@ -66,14 +66,20 @@ n8n-templates/
 │   │   ├── workflow/
 │   │   │   └── menu-order-notifications.json
 │   │   └── README.md
-│   └── 5a-online_menu-push_notifications-homeassistant-TTS/
+│   ├── 5 v2 online_menu-push_notifications-homeassistant-TTS/
+│   │   ├── docs/
+│   │   │   ├── 01-setup-ntfy.md
+│   │   │   ├── 02-setup-cloudflare-tunnel.md
+│   │   │   ├── 03-setup-n8n-workflow.md
+│   │   │   └── 04-setup-homeassistant-tts.md
+│   │   ├── workflow/
+│   │   │   └── menu-order-notifications-with-tts.json
+│   │   └── README.md
+│   └── 5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation/
 │       ├── docs/
 │       │   ├── 01-setup-ntfy.md
 │       │   ├── 02-setup-cloudflare-tunnel.md
-│       │   ├── 03-setup-n8n-workflow.md
 │       │   └── 04-setup-homeassistant-tts.md
-│       ├── workflow/
-│       │   └── menu-order-notifications-with-tts.json
 │       ├── readme-n8n.md
 │       └── README.md
 ├── paid-templates/
@@ -237,13 +243,13 @@ It functions as a **fully autonomous editorial engine**, combining dozens of RSS
 
 
 <details>
-<summary>▶️ 5. Online Menu — Receive Push Notifications from Customer Orders</summary>
+<summary>▶️ 5 v1. Online Menu — Receive Push Notifications from Customer Orders</summary>
 
 Receive instant push notifications on your phone every time a customer places an order on your menu website — powered by n8n and a self-hosted ntfy.sh instance. No third-party notification APIs. No paid plans. Fully self-hosted.
 
 The template includes a complete ready-to-host static menu website with a customer-facing order page and a password-protected admin panel for managing menu items.
 
-📂 **Folder** → [`/free-templates/5-online_menu-push_notifications`](./free-templates/5-online_menu-push_notifications)
+📂 **Folder** → [`/free-templates/5 v1 -online_menu-push_notifications`](./free-templates/5%20v1%20-online_menu-push_notifications)
 
 📕 Full documentation: [Documentation: Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
 
@@ -259,13 +265,13 @@ The template includes a complete ready-to-host static menu website with a custom
 
 
 <details>
-<summary>▶️ 5a. Online Menu — Push Notifications + Home Assistant Voice Announcements</summary>
+<summary>▶️ 5 v2. Online Menu — Push Notifications + Home Assistant Voice Announcements</summary>
 
-Extension of template 5. Receive a push notification on your phone **and** trigger a voice announcement on your Google Home every time a customer places an order — powered by n8n, ntfy.sh, and Home Assistant TTS.
+Extension of template 5 v1. Receive a push notification on your phone **and** trigger a voice announcement on your Google Home every time a customer places an order — powered by n8n, ntfy.sh, and Home Assistant TTS.
 
 No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
 
-📂 **Folder** → [`/free-templates/5a-online_menu-push_notifications-homeassistant-TTS`](./free-templates/5a-online_menu-push_notifications-homeassistant-TTS)
+📂 **Folder** → [`/free-templates/5 v2 online_menu-push_notifications-homeassistant-TTS`](./free-templates/5%20v2%20online_menu-push_notifications-homeassistant-TTS)
 
 📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
 
@@ -273,8 +279,26 @@ No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
 
 * **workflow/menu-order-notifications-with-tts.json** – Complete n8n importable workflow
 * **README.md** – Full setup guide
-* **readme-n8n.md** – n8n template publishing info and description
 * **docs/** – Step-by-step setup docs (ntfy.sh, Cloudflare Tunnel, n8n config, Home Assistant TTS)
+
+</details>
+
+
+
+<details>
+<summary>▶️ 5 v3. Online Menu — Push Notifications + Home Assistant TTS + BAC Calculation (in setup)</summary>
+
+Extension of template 5 v2. Adds **BAC (Blood Alcol Concentration)** logic on top of push notifications and Home Assistant TTS voice announcements.
+
+📂 **Folder** → [`/free-templates/5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation`](./free-templates/5%20v3%20online_menu-push_notifications-homeassistant-TTS-BACcalculation)
+
+📄 Files included:
+
+* **README.md** – Setup guide
+* **readme-n8n.md** – n8n template publishing info
+* **docs/** – Setup docs (ntfy.sh, Cloudflare Tunnel, Home Assistant TTS)
+
+> ⚠️ This template is currently in setup. Workflow file and complete docs are being finalized.
 
 </details>
 

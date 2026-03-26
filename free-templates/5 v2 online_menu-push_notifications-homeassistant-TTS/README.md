@@ -142,7 +142,7 @@ Point your menu website's webhook to the n8n Production URL:
 "orderWebhook": "https://YOUR_N8N_DOMAIN/webhook/menu"
 ```
 
-> See the [original template 5](../5-online_menu-push_notifications/README.md) for full website setup instructions and the `website-mockup/` files.
+> See [template 5 v1](../5 v1 -online_menu-push_notifications/README.md) for full website setup instructions and the `website-mockup/` files.
 
 ### 6. Test end-to-end
 
@@ -164,7 +164,7 @@ Point your menu website's webhook to the n8n Production URL:
 ## File Structure
 
 ```
-5a-online_menu-push_notifications-homeassistant-TTS/
+5 v2 online_menu-push_notifications-homeassistant-TTS/
 ├── README.md                                        ← you are here
 ├── workflow/
 │   └── menu-order-notifications-with-tts.json      ← importable n8n workflow
@@ -234,7 +234,7 @@ The TTS announcement uses `ordine[0].nome` — the first item in the order.
 ## Related Resources
 
 - [Full documentation on Notion](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
-- [Template 5 — Push Notifications only](../5-online_menu-push_notifications/README.md)
+- [Template 5 v1 — Push Notifications only](../5 v1 -online_menu-push_notifications/README.md)
 - [ntfy.sh documentation](https://docs.ntfy.sh)
 - [Home Assistant TTS documentation](https://www.home-assistant.io/integrations/tts/)
 - [Home Assistant Scripts](https://www.home-assistant.io/integrations/script/)

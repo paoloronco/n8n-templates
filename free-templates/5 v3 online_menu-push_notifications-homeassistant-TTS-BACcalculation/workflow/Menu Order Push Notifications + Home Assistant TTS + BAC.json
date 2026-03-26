@@ -1,0 +1,217 @@
+{
+  "name": "Menu Orders — Push Notifications, BAC Tracking & HA TTS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "menu",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, -48],
+      "id": "925fbd83-f32d-4b2d-849c-f8f0b81408e3",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Normalise name, calculate alcolOrdine and ordine_str for the current order\nconst body    = $input.first().json.body;\nconst nomeRaw = (body.nome || 'Anonimo').trim();\nconst nome    = nomeRaw.charAt(0).toUpperCase() + nomeRaw.slice(1).toLowerCase();\nconst orario  = body.orario || new Date().toLocaleString('it-IT');\nconst ordine  = body.ordine || [];\nconst today   = new Date().toISOString().slice(0, 10);\n\nconst alcolOrdine = ordine.reduce((s, i) => s + (i.alcol_grammi || 0) * (i.quantita || 1), 0);\n\nconst ordine_str = ordine\n  .map(i => {\n    let s = i.quantita + 'x ' + i.nome;\n    if (i.dettaglio) s += ' ' + i.dettaglio;\n    return s;\n  })\n  .join(', ');\n\nreturn [{ json: { nome, orario, ordine, ordine_str, alcolOrdine: Math.round(alcolOrdine * 10) / 10, today } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, -48],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Prepare Order"
+    },
+
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_DATATABLE_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_DATATABLE_NAME",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_DATATABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "item":         "={{ $json.ordine_str }}",
+            "person":       "={{ $json.nome }}",
+            "alcol_grammi": "={{ $json.alcolOrdine }}",
+            "data":         "={{ $json.today }}",
+            "orario":       "={{ $json.orario }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "item",         "displayName": "item",         "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "person",       "displayName": "person",       "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "alcol_grammi", "displayName": "alcol_grammi", "required": false, "defaultMatch": false, "display": true, "type": "number", "readOnly": false, "removed": false },
+            { "id": "data",         "displayName": "data",         "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "orario",       "displayName": "orario",       "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [480, -48],
+      "id": "4e6fb97b-d965-417e-88e9-718169df61cd",
+      "name": "Log Ordine DB"
+    },
+
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_DATATABLE_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_DATATABLE_NAME",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_DATATABLE_ID"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "person",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Order').item.json.nome }}"
+            },
+            {
+              "keyName": "data",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Order').item.json.today }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [720, -48],
+      "id": "b2c3d4e5-f6a7-8901-bcde-f01234567891",
+      "name": "Read Today"
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Calculate cumulative BAC reading today's rows from the DataTable\n// rows = all orders for this person today (including the one just inserted)\nconst rows      = $input.all().map(i => i.json);\nconst nome      = $('Prepare Order').item.json.nome;\nconst orario    = $('Prepare Order').item.json.orario;\nconst ordine_str = $('Prepare Order').item.json.ordine_str;\n\nconst totalAlcol = Math.round(rows.reduce((s, r) => s + (r.alcol_grammi || 0), 0) * 10) / 10;\nconst nOrdini    = rows.length;\nconst bac        = totalAlcol > 0 ? totalAlcol / (70 * 0.68) : 0;\nconst bacStr     = bac.toFixed(2);\n\nconst E_OK    = String.fromCodePoint(0x1F7E2);\nconst E_WARN  = String.fromCodePoint(0x1F7E1);\nconst E_OVER  = String.fromCodePoint(0x1F534);\nconst E_NONE  = String.fromCodePoint(0x2B1C);\nconst E_LIST  = String.fromCodePoint(0x1F4CB);\nconst E_CLOCK = String.fromCodePoint(0x1F552);\nconst E_DRINK = String.fromCodePoint(0x1F378);\nconst E_WATER = String.fromCodePoint(0x1F964);\nconst E_TIME  = String.fromCodePoint(0x1F550);\n\nlet bacLevel;\nif      (bac === 0)  bacLevel = E_NONE;\nelse if (bac < 0.2)  bacLevel = E_OK;\nelse if (bac < 0.5)  bacLevel = E_WARN;\nelse                  bacLevel = E_OVER;\n\n// Previous orders = all rows except the last (the one just inserted)\nconst prevOrders = rows.slice(0, -1);\nconst storStr = prevOrders.length > 0\n  ? '\\n' + E_LIST + ' Gia ordinato oggi (' + prevOrders.length + ' ordini):\\n'\n    + prevOrders.map(r => '  - ' + r.item + '  ' + E_CLOCK + ' ' + r.orario).join('\\n')\n  : '';\n\nconst bacRow = totalAlcol > 0\n  ? '\\n' + E_DRINK + ' BAC ~' + bacStr + ' g/L  ' + bacLevel\n  : '\\n' + E_WATER + ' nessun alcolico';\n\nconst messaggio = nome + ': ' + ordine_str\n  + '\\n' + E_TIME + ' ' + orario\n  + storStr\n  + bacRow;\n\nreturn [{\n  json: {\n    nome,\n    orario,\n    ordine_str,\n    messaggio,\n    bac:        bacStr,\n    bacLevel,\n    totalAlcol,\n    alcolOrdine: $('Prepare Order').item.json.alcolOrdine,\n    nOrdini,\n    today: $('Prepare Order').item.json.today\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, -48],
+      "id": "c3d4e5f6-a7b8-9012-cdef-012345678912",
+      "name": "BAC Calculator"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_NTFY_SERVER/YOUR_NTFY_TOPIC",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{ $json.messaggio }}",
+        "options": {
+          "headers": {
+            "parameters": [
+              { "name": "Title",    "value": "={{ '🛎 Ordine da ' + $json.nome }}" },
+              { "name": "Priority", "value": "4" },
+              { "name": "Tags",     "value": "bell,fork_and_knife" }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1200, -48],
+      "id": "da7ce680-601a-4162-8566-f952f38860d3",
+      "name": "ntfy notification",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "YOUR_NTFY_HEADER_AUTH_CREDENTIAL"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "script",
+        "service": "YOUR_HA_SCRIPT_NAME",
+        "serviceAttributes": {
+          "attributes": [
+            {
+              "name":  "message",
+              "value": "={{ $json.nome }} HAS ORDERED {{ $('Webhook').item.json.body.ordine[0].nome }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1440, -48],
+      "id": "48b587e8-59a8-44d3-98de-cf8df811e4c6",
+      "name": "Call a service",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "",
+          "name": "YOUR_HOME_ASSISTANT_CREDENTIAL"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "content": "## 🍸 Menu Ordini v3.1 — BAC dal DataTable\n\n📖 **Docs:** https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?source=copy_link\n\n---\n\n### Setup\n\n1. Crea un **DataTable** in n8n → Data con le colonne:\n   `item` (Text), `person` (Text), `alcol_grammi` (Number), `data` (Text), `orario` (Text)\n2. Nei nodi **Log Ordine DB** e **Read Today** sostituisci `YOUR_DATATABLE_ID` con l'ID del tuo DataTable\n3. Nel nodo **ntfy notification** imposta l'URL del tuo server ntfy e il topic, e collega le credenziali Header Auth con il token Bearer\n4. Nel nodo **Call a service** imposta il nome del tuo script Home Assistant e collega le credenziali HA (opzionale — rimuovi il nodo se non usi HA)\n5. Attiva il workflow e copia la **Production URL** del Webhook nel tuo sito menu come `orderWebhook`\n\n---\n\n### Flusso\n```\nWebhook\n  → Prepare Order   (normalizza nome, calcola alcolOrdine)\n  → Log Ordine DB   (INSERT riga nel DataTable)\n  → Read Today      (GET righe persona+data di oggi)\n  → BAC Calculator  (calcola BAC dalla somma delle righe)\n  → ntfy\n  → Call a service  (Home Assistant TTS — opzionale)\n```\n\n---\n\n### Reset storico\n\nCancella le righe dal DataTable per resettare il BAC.\nIl giorno dopo riparte automaticamente da zero\n(il filtro legge solo `data = oggi`).\n\n---\n\n### Payload webhook atteso\n```json\n{\n  \"nome\": \"Mario\",\n  \"orario\": \"21:30\",\n  \"ordine\": [\n    { \"nome\": \"Negroni\", \"dettaglio\": \"\", \"quantita\": 2, \"alcol_grammi\": 19 },\n    { \"nome\": \"Messina\", \"dettaglio\": \"33cl\", \"quantita\": 1, \"alcol_grammi\": 13 }\n  ],\n  \"totale\": 3\n}\n```\n\n---\n\n### Formula BAC (Widmark)\n`BAC [g/L] = grammi_totali / (70 kg x 0.68)`\nAssunzione: adulto 70 kg. Stima approssimativa.\n\n| Livello | BAC |\n|---|---|\n| 🟢 | < 0.2 g/L |\n| 🟡 | 0.2–0.5 g/L |\n| 🔴 | > 0.5 g/L |\n\nLimite legale IT: 0.5 g/L",
+        "height": 860,
+        "width": 620
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-780, -500],
+      "id": "aa72fc40-9b9b-43b7-8ca4-1cf3aa9b8f44",
+      "name": "Documentation"
+    }
+  ],
+
+  "pinData": {},
+  "connections": {
+    "Webhook":           { "main": [[{ "node": "Prepare Order",     "type": "main", "index": 0 }]] },
+    "Prepare Order":     { "main": [[{ "node": "Log Ordine DB",     "type": "main", "index": 0 }]] },
+    "Log Ordine DB":     { "main": [[{ "node": "Read Today",        "type": "main", "index": 0 }]] },
+    "Read Today":        { "main": [[{ "node": "BAC Calculator",    "type": "main", "index": 0 }]] },
+    "BAC Calculator":    { "main": [[{ "node": "ntfy notification", "type": "main", "index": 0 }]] },
+    "ntfy notification": { "main": [[{ "node": "Call a service",    "type": "main", "index": 0 }]] },
+    "Call a service":    { "main": [[]] }
+  },
+
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "tags": [
+    { "name": "Utility" },
+    { "name": "creator-published" }
+  ]
+}

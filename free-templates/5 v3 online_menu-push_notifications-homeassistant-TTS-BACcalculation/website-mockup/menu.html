@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Your Restaurant — Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="menu-data.js"></script>
+  <style>
+    :root {
+      --bg:       #0f0f0f;
+      --surface:  #191919;
+      --surface2: #242424;
+      --gold:     #c9a84c;
+      --gold-bg:  rgba(201,168,76,.08);
+      --text:     #efe9d5;
+      --muted:    #6b6355;
+      --border:   rgba(201,168,76,.15);
+      --radius:   12px;
+    }
+    html.light {
+      --bg:       #f5f0e8;
+      --surface:  #ffffff;
+      --surface2: #ede8de;
+      --gold:     #a07828;
+      --gold-bg:  rgba(160,120,40,.07);
+      --text:     #2a2218;
+      --muted:    #8a7a5a;
+      --border:   rgba(160,120,40,.2);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 90px;
+      transition: background .25s, color .25s;
+    }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: .8rem;
+      right: 1rem;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+    .theme-icon {
+      font-size: .9rem;
+      line-height: 1;
+      user-select: none;
+      pointer-events: none;
+    }
+    .toggle-track {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: background .25s, border-color .25s;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+    .toggle-track:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--gold);
+      transition: transform .25s cubic-bezier(.4,0,.2,1), background .25s;
+      pointer-events: none;
+    }
+    html.light .toggle-thumb { transform: translateX(20px); }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 3.5rem 1.5rem 2.5rem;
+    }
+    .header-eyebrow {
+      font-size: .68rem;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .header-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2.2rem, 9vw, 3.8rem);
+      font-weight: 400;
+      line-height: 1.1;
+    }
+    .header-sub {
+      margin-top: .7rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .header-rule {
+      width: 32px; height: 1px;
+      background: var(--gold);
+      margin: 1.4rem auto 0;
+      opacity: .45;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(15,15,15,.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: background .25s, border-color .25s;
+    }
+    html.light .nav { background: rgba(245,240,232,.96); }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav-list {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      padding: 0 1rem;
+      min-width: max-content;
+      margin: 0 auto;
+    }
+    .nav-list li button {
+      display: block;
+      padding: .9rem 1.1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .nav-list li.active button,
+    .nav-list li button:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── Content ── */
+    .content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1rem 2rem;
+    }
+
+    /* ── Section ── */
+    .section { padding-top: 3rem; }
+    .section-header { text-align: center; margin-bottom: 1.8rem; }
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      color: var(--gold);
+      margin-bottom: .6rem;
+    }
+    .section-rule {
+      width: 28px; height: 1px;
+      background: var(--gold);
+      margin: 0 auto;
+      opacity: .4;
+    }
+
+    /* ── Item card ── */
+    .items-grid { display: flex; flex-direction: column; gap: .55rem; }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .95rem 1rem .95rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      transition: border-color .2s, background .2s;
+    }
+    .item-card.selected {
+      border-color: rgba(201,168,76,.55);
+      background: var(--gold-bg);
+    }
+    html.light .item-card.selected { border-color: rgba(160,120,40,.5); }
+    .item-card-info { flex: 1; min-width: 0; }
+    .item-card-header {
+      display: flex;
+      align-items: baseline;
+      gap: .55rem;
+      flex-wrap: wrap;
+    }
+    .item-card-name {
+      font-size: .93rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .item-card-detail {
+      font-size: .7rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: .1em .42em;
+      white-space: nowrap;
+    }
+    .item-card-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: .28rem;
+      line-height: 1.55;
+    }
+    .item-card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .2rem;
+      font-size: .7rem;
+      color: var(--gold);
+      text-decoration: none;
+      margin-top: .3rem;
+      opacity: .65;
+      transition: opacity .15s;
+    }
+    .item-card-link:hover { opacity: 1; }
+
+    /* ── Quantity control ── */
+    .qty-wrap {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      flex-shrink: 0;
+    }
+    .qty-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 1.15rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s, color .15s, transform .1s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .qty-btn:active { transform: scale(.9); }
+    .qty-btn.add {
+      background: var(--gold-bg);
+      border-color: rgba(201,168,76,.45);
+      color: var(--gold);
+      font-weight: 700;
+    }
+    html.light .qty-btn.add { border-color: rgba(160,120,40,.4); }
+    .qty-btn.sub { display: none; }
+    .qty-btn.sub.on { display: flex; }
+    .qty-num {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 1.4em;
+      text-align: center;
+      display: none;
+    }
+    .qty-num.on { display: block; }
+
+    /* ── Variants ── */
+    .variants-wrap {
+      margin-top: .6rem;
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+    }
+    .variant-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .3rem .5rem .3rem .6rem;
+      border: 1px solid rgba(201,168,76,.1);
+      border-radius: 8px;
+      background: rgba(255,255,255,.02);
+      transition: border-color .2s, background .2s;
+    }
+    html.light .variant-row { background: rgba(0,0,0,.02); border-color: rgba(160,120,40,.12); }
+    .variant-row.selected {
+      border-color: rgba(201,168,76,.4);
+      background: rgba(201,168,76,.06);
+    }
+    html.light .variant-row.selected { border-color: rgba(160,120,40,.35); background: rgba(160,120,40,.07); }
+    .variant-label {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color .2s;
+    }
+    .variant-row.selected .variant-label { color: var(--gold); }
+
+    /* ── Note input ── */
+    .note-wrap { margin-top: .5rem; }
+    .note-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(201,168,76,.2);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: .82rem;
+      font-family: 'Inter', sans-serif;
+      padding: .42rem .72rem;
+      outline: none;
+      transition: border-color .15s, background .25s, color .25s;
+    }
+    html.light .note-input { border-color: rgba(160,120,40,.25); }
+    .note-input:focus { border-color: var(--gold); }
+    .note-input::placeholder { color: var(--muted); font-style: italic; }
+
+    /* ── Floating order bar ── */
+    .order-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 40;
+      padding: .8rem 1.2rem;
+      background: rgba(13,13,13,.97);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid var(--border);
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1), background .25s, border-color .25s;
+    }
+    html.light .order-bar { background: rgba(245,240,232,.97); }
+    .order-bar.on { transform: translateY(0); }
+    .order-bar-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .order-bar-info { font-size: .85rem; color: var(--muted); }
+    .order-bar-info strong { color: var(--text); font-size: 1rem; }
+    .btn-send {
+      background: var(--gold);
+      color: #111;
+      border: none;
+      border-radius: 9px;
+      padding: .75rem 1.6rem;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-send:hover { filter: brightness(1.1); }
+
+    /* ── Order modal (bottom sheet) ── */
+    .backdrop {
+      position: fixed; inset: 0; z-index: 80;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .backdrop.on { opacity: 1; pointer-events: all; }
+
+    .sheet {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 90;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 1.4rem 1.5rem 2.5rem;
+      max-height: 88vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1), background .25s;
+    }
+    .sheet.on { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 38px; height: 4px;
+      background: rgba(128,128,128,.25);
+      border-radius: 2px;
+      margin: 0 auto 1.4rem;
+    }
+    .sheet-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 400;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+
+    .sheet-items {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      overflow: hidden;
+      margin-bottom: 1.4rem;
+    }
+    .sheet-row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .72rem 1rem;
+      border-bottom: 1px solid rgba(201,168,76,.07);
+    }
+    .sheet-row:last-child { border-bottom: none; }
+    .sheet-qty {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 2.4em;
+    }
+    .sheet-name { flex: 1; font-size: .88rem; }
+    .sheet-sec  { font-size: .72rem; color: var(--muted); }
+
+    .field-label {
+      display: block;
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+    .name-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      padding: .78rem 1rem;
+      outline: none;
+      margin-bottom: 1.2rem;
+      transition: border-color .15s, background .25s, color .25s;
+    }
+    .name-input:focus { border-color: var(--gold); }
+    .name-input::placeholder { color: var(--muted); }
+
+    .btn-confirm {
+      width: 100%;
+      background: var(--gold);
+      color: #111;
+      border: none;
+      border-radius: 10px;
+      padding: .95rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-confirm:hover { filter: brightness(1.1); }
+    .btn-confirm:disabled { opacity: .45; cursor: default; filter: none; }
+    .sheet-error {
+      font-size: .8rem;
+      color: #e74c3c;
+      margin-top: .6rem;
+      min-height: 1.1em;
+    }
+
+    /* ── Success ── */
+    .success {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+    }
+    .success.on { opacity: 1; pointer-events: all; }
+    .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      font-weight: 400;
+      color: var(--gold);
+      margin-bottom: .7rem;
+    }
+    .success-sub {
+      font-size: .88rem;
+      color: var(--muted);
+      max-width: 290px;
+      line-height: 1.65;
+      margin-bottom: 2rem;
+    }
+    .btn-again {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      padding: .75rem 1.6rem;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-again:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 1.2rem;
+      border-top: 1px solid var(--border);
+      margin-top: .5rem;
+    }
+    .footer a {
+      font-size: .7rem; color: var(--muted);
+      text-decoration: none; opacity: .22;
+      transition: opacity .2s;
+    }
+    .footer a:hover { opacity: .75; }
+  </style>
+</head>
+<body>
+
+<!-- Theme toggle -->
+<div class="theme-toggle">
+  <span class="theme-icon">🌙</span>
+  <button class="toggle-track" id="theme-btn" role="switch" aria-checked="false" aria-label="Light/Dark mode" onclick="toggleTheme()">
+    <span class="toggle-thumb"></span>
+  </button>
+  <span class="theme-icon">☀️</span>
+</div>
+
+<header class="header">
+  <p class="header-eyebrow">Welcome</p>
+  <h1 class="header-title" id="menu-title">Your Restaurant</h1>
+  <p class="header-sub">Choose what you'd like to order</p>
+  <div class="header-rule"></div>
+</header>
+
+<nav class="nav" aria-label="Categories">
+  <ul class="nav-list" id="nav-list" role="list"></ul>
+</nav>
+
+<main class="content" id="content"></main>
+
+<footer class="footer">
+  <a href="admin.html">⚙ admin</a>
+</footer>
+
+<!-- Floating bar -->
+<div class="order-bar" id="order-bar">
+  <div class="order-bar-inner">
+    <div class="order-bar-info">
+      <strong id="bar-count">0</strong>
+      <span id="bar-label"> items</span>
+    </div>
+    <button class="btn-send" onclick="openSheet()">Place order →</button>
+  </div>
+</div>
+
+<!-- Backdrop -->
+<div class="backdrop" id="backdrop" onclick="closeSheet()"></div>
+
+<!-- Bottom sheet -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Your order">
+  <div class="sheet-handle"></div>
+  <h2 class="sheet-title">Your order</h2>
+  <div class="sheet-items" id="sheet-items"></div>
+  <label class="field-label" for="guest-name">Your name</label>
+  <input type="text" id="guest-name" class="name-input"
+         placeholder="E.g. John" autocomplete="given-name"
+         onkeydown="if(event.key==='Enter') submitOrder()">
+  <button class="btn-confirm" id="btn-confirm" onclick="submitOrder()">Confirm order</button>
+  <p class="sheet-error" id="sheet-error"></p>
+</div>
+
+<!-- Success -->
+<div class="success" id="success">
+  <div class="success-icon">🥃</div>
+  <h2 class="success-title">On its way!</h2>
+  <p class="success-sub" id="success-msg">Your order has been placed.</p>
+  <button class="btn-again" onclick="resetOrder()">New order</button>
+</div>
+
+<script>
+  /* ── theme ── */
+  (function () {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') document.documentElement.classList.add('light');
+  })();
+
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    document.getElementById('theme-btn').setAttribute('aria-checked', isLight ? 'true' : 'false');
+  }
+
+  /* ── helpers ── */
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── state ── */
+  // key = 'sectionId::itemIndex'  or  'sectionId::itemIndex::variantIndex'
+  const qty   = {};
+  // notes key = 'sectionId::itemIndex'
+  const notes = {};
+
+  function total() { return Object.values(qty).reduce((s,v) => s+v, 0); }
+
+  /* ── item lookup ── */
+  function getItemInfo(key) {
+    const parts   = key.split('::');
+    const secId   = parts[0];
+    const itemIdx = parseInt(parts[1], 10);
+    const varIdx  = parts.length === 3 ? parseInt(parts[2], 10) : null;
+
+    const data = window.MENU_DATA;
+    const sec  = (data.sections || []).find(s => s.id === secId);
+    if (!sec) return null;
+    const item = (sec.items || [])[itemIdx];
+    if (!item) return null;
+
+    const baseKey = secId + '::' + itemIdx;
+    let nome = item.name;
+    if (varIdx !== null && item.variants) {
+      nome += ' (' + item.variants[varIdx] + ')';
+    } else {
+      const note = (notes[baseKey] || '').trim();
+      if (note) nome += ' · ' + note;
+    }
+
+    return { sec, item, nome, baseKey };
+  }
+
+  /* ── render ── */
+  function renderMenu(data) {
+    if (data.title) {
+      document.getElementById('menu-title').textContent = data.title;
+      document.title = data.title;
+    }
+
+    const navList = document.getElementById('nav-list');
+    const content = document.getElementById('content');
+
+    (data.sections || []).forEach((sec) => {
+      // Nav tab
+      const li  = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.textContent = sec.title;
+      btn.onclick = () => document.getElementById('sec-' + sec.id)
+        .scrollIntoView({ behavior: 'smooth', block: 'start' });
+      li.appendChild(btn);
+      navList.appendChild(li);
+
+      // Section
+      const section = document.createElement('section');
+      section.id = 'sec-' + sec.id;
+      section.className = 'section';
+      section.innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">${esc(sec.title)}</h2>
+          <div class="section-rule"></div>
+        </div>
+        <div class="items-grid" id="grid-${esc(sec.id)}"></div>
+      `;
+      content.appendChild(section);
+
+      const grid = section.querySelector('.items-grid');
+      (sec.items || []).forEach((item, idx) => {
+        grid.appendChild(makeCard(sec.id, item, idx));
+      });
+    });
+
+    // Active nav on scroll
+    const tabs = [...navList.querySelectorAll('li')];
+    const secs = [...content.querySelectorAll('.section')];
+    secs.forEach(s => new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const i = secs.indexOf(e.target);
+        tabs.forEach(t => t.classList.remove('active'));
+        if (tabs[i]) tabs[i].classList.add('active');
+      });
+    }, { rootMargin: '-80px 0px -58% 0px', threshold: 0 }).observe(s));
+  }
+
+  function makeCard(secId, item, idx) {
+    const key   = secId + '::' + idx;
+    const keyId = key.replace(/::/g, '-');
+    const card  = document.createElement('div');
+    card.className = 'item-card';
+    card.id = 'c-' + keyId;
+
+    const headerHtml = `
+      <div class="item-card-header">
+        <span class="item-card-name">${esc(item.name)}</span>
+        ${item.detail ? `<span class="item-card-detail">${esc(item.detail)}</span>` : ''}
+      </div>
+      ${item.description ? `<p class="item-card-desc">${esc(item.description)}</p>` : ''}
+      ${item.link ? `<a class="item-card-link" href="${esc(item.link)}" target="_blank" rel="noopener">↗ Details</a>` : ''}
+    `;
+
+    if (item.variants && item.variants.length) {
+      /* ── Variant card ── */
+      const varRows = item.variants.map((v, vi) => {
+        const vKey   = key + '::' + vi;
+        const vKeyId = vKey.replace(/::/g, '-');
+        return `
+          <div class="variant-row" id="vr-${vKeyId}">
+            <span class="variant-label">${esc(v)}</span>
+            <div class="qty-wrap">
+              <button class="qty-btn sub" data-key="${vKey}" data-d="-1" aria-label="Remove ${esc(v)}">−</button>
+              <span class="qty-num" id="qn-${vKeyId}">0</span>
+              <button class="qty-btn add" data-key="${vKey}" data-d="1" aria-label="Add ${esc(v)}">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="item-card-info">
+          ${headerHtml}
+          <div class="variants-wrap">${varRows}</div>
+        </div>
+      `;
+
+    } else if (item.hasNote) {
+      /* ── Note card ── */
+      card.innerHTML = `
+        <div class="item-card-info">
+          ${headerHtml}
+          <div class="note-wrap" id="nw-${keyId}" style="display:none">
+            <input type="text" class="note-input" id="ni-${keyId}"
+                   data-key="${key}"
+                   placeholder="Which one?"
+                   oninput="saveNote(this)">
+          </div>
+        </div>
+        <div class="qty-wrap">
+          <button class="qty-btn sub" data-key="${key}" data-d="-1" aria-label="Remove one">−</button>
+          <span class="qty-num" id="qn-${keyId}">0</span>
+          <button class="qty-btn add" data-key="${key}" data-d="1" aria-label="Add">+</button>
+        </div>
+      `;
+
+    } else {
+      /* ── Standard card ── */
+      card.innerHTML = `
+        <div class="item-card-info">
+          ${headerHtml}
+        </div>
+        <div class="qty-wrap">
+          <button class="qty-btn sub" data-key="${key}" data-d="-1" aria-label="Remove one">−</button>
+          <span class="qty-num" id="qn-${keyId}">0</span>
+          <button class="qty-btn add" data-key="${key}" data-d="1" aria-label="Add">+</button>
+        </div>
+      `;
+    }
+
+    return card;
+  }
+
+  /* event delegation for qty buttons */
+  document.getElementById('content').addEventListener('click', e => {
+    const btn = e.target.closest('.qty-btn');
+    if (!btn) return;
+    changeQty(btn.dataset.key, parseInt(btn.dataset.d, 10));
+  });
+
+  function changeQty(key, d) {
+    const nxt = Math.max(0, (qty[key] || 0) + d);
+    if (nxt === 0) delete qty[key]; else qty[key] = nxt;
+    refreshCard(key);
+    refreshBar();
+  }
+
+  function refreshCard(key) {
+    const parts = key.split('::');
+    const keyId = key.replace(/::/g, '-');
+
+    if (parts.length === 3) {
+      /* Variant key: secId::itemIdx::variantIdx */
+      const baseKey   = parts[0] + '::' + parts[1];
+      const baseKeyId = baseKey.replace(/::/g, '-');
+      const q = qty[key] || 0;
+
+      const vrow = document.getElementById('vr-' + keyId);
+      if (vrow) {
+        vrow.classList.toggle('selected', q > 0);
+        vrow.querySelector('.qty-btn.sub')?.classList.toggle('on', q > 0);
+        const vnum = vrow.querySelector('.qty-num');
+        if (vnum) { vnum.textContent = q; vnum.classList.toggle('on', q > 0); }
+      }
+
+      const card = document.getElementById('c-' + baseKeyId);
+      if (card) {
+        const hasAny = Object.keys(qty).some(k => k.startsWith(baseKey + '::') && qty[k] > 0);
+        card.classList.toggle('selected', hasAny);
+      }
+    } else {
+      /* Standard / note key: secId::itemIdx */
+      const card = document.getElementById('c-' + keyId);
+      if (!card) return;
+      const q = qty[key] || 0;
+      card.classList.toggle('selected', q > 0);
+      card.querySelector('.qty-btn.sub')?.classList.toggle('on', q > 0);
+      const num = card.querySelector('.qty-num');
+      if (num) { num.textContent = q; num.classList.toggle('on', q > 0); }
+
+      /* Show/hide note field */
+      const nw = document.getElementById('nw-' + keyId);
+      if (nw) {
+        nw.style.display = q > 0 ? 'block' : 'none';
+        if (q === 0) {
+          delete notes[key];
+          const ni = document.getElementById('ni-' + keyId);
+          if (ni) ni.value = '';
+        }
+      }
+    }
+  }
+
+  function saveNote(input) {
+    const val = input.value.trim();
+    if (val) notes[input.dataset.key] = val;
+    else     delete notes[input.dataset.key];
+  }
+
+  function refreshBar() {
+    const t   = total();
+    const bar = document.getElementById('order-bar');
+    bar.classList.toggle('on', t > 0);
+    document.getElementById('bar-count').textContent = t;
+    document.getElementById('bar-label').textContent = t === 1 ? ' item' : ' items';
+  }
+
+  /* ── sheet ── */
+  function openSheet() {
+    const list = document.getElementById('sheet-items');
+    list.innerHTML = '';
+
+    Object.entries(qty)
+      .filter(([, q]) => q > 0)
+      .forEach(([key, q]) => {
+        const info = getItemInfo(key);
+        if (!info) return;
+        const row = document.createElement('div');
+        row.className = 'sheet-row';
+        row.innerHTML = `
+          <span class="sheet-qty">${q}×</span>
+          <span class="sheet-name">${esc(info.nome)}</span>
+          <span class="sheet-sec">${esc(info.sec.title)}</span>
+        `;
+        list.appendChild(row);
+      });
+
+    document.getElementById('sheet-error').textContent = '';
+    document.getElementById('btn-confirm').disabled = false;
+    document.getElementById('btn-confirm').textContent = 'Confirm order';
+    document.getElementById('backdrop').classList.add('on');
+    document.getElementById('sheet').classList.add('on');
+    setTimeout(() => document.getElementById('guest-name').focus(), 320);
+  }
+
+  function closeSheet() {
+    document.getElementById('backdrop').classList.remove('on');
+    document.getElementById('sheet').classList.remove('on');
+  }
+
+  /* ── submit ── */
+  async function submitOrder() {
+    const name = document.getElementById('guest-name').value.trim();
+    if (!name) {
+      document.getElementById('sheet-error').textContent = 'Please enter your name to continue.';
+      document.getElementById('guest-name').focus();
+      return;
+    }
+
+    const items = [];
+    Object.entries(qty)
+      .filter(([, q]) => q > 0)
+      .forEach(([key, q]) => {
+        const info = getItemInfo(key);
+        if (!info) return;
+        items.push({
+          sezione:   info.sec.title,
+          nome:      info.nome,
+          dettaglio: info.item.detail || '',
+          quantita:  q,
+        });
+      });
+
+    const payload = {
+      nome:   name,
+      orario: new Date().toLocaleString('en-US'),
+      ordine: items,
+      totale: total(),
+    };
+
+    const btn  = document.getElementById('btn-confirm');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const hook = ((window.MENU_DATA.orderWebhook) || '').trim();
+    if (hook) {
+      try {
+        const r = await fetch(hook, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+      } catch (err) {
+        document.getElementById('sheet-error').textContent = 'Network error. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Conferma ordine';
+        return;
+      }
+    }
+
+    closeSheet();
+    const msg = hook
+      ? `Your order is on its way, ${name}!`
+      : `Thank you ${name}, order received!`;
+    document.getElementById('success-msg').textContent = msg;
+    document.getElementById('success').classList.add('on');
+  }
+
+  function resetOrder() {
+    Object.keys(qty).forEach(k   => delete qty[k]);
+    Object.keys(notes).forEach(k => delete notes[k]);
+    document.querySelectorAll('.item-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelectorAll('.qty-btn.sub').forEach(b => b.classList.remove('on'));
+      c.querySelectorAll('.qty-num').forEach(n     => { n.classList.remove('on'); n.textContent = '0'; });
+      c.querySelectorAll('.variant-row').forEach(r => r.classList.remove('selected'));
+    });
+    document.querySelectorAll('.note-wrap').forEach(nw  => nw.style.display = 'none');
+    document.querySelectorAll('.note-input').forEach(ni => ni.value = '');
+    document.getElementById('guest-name').value = '';
+    refreshBar();
+    document.getElementById('success').classList.remove('on');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSheet();
+  });
+
+  /* ── init ── */
+  if (window.MENU_DATA) {
+    renderMenu(window.MENU_DATA);
+  } else {
+    document.getElementById('content').innerHTML =
+      '<p style="text-align:center;padding:4rem;color:var(--muted)">menu-data.js not found.</p>';
+  }
+</script>
+</body>
+</html>

@@ -53,18 +53,28 @@ n8n-templates/
 │   │   │   └── workflow.png
 │   │   ├── News_Tech_EN.json
 │   │   └── readme.md
-│   └── 5-online_menu-push_notifications/
+│   ├── 5-online_menu-push_notifications/
+│   │   ├── docs/
+│   │   │   ├── 01-setup-ntfy.md
+│   │   │   ├── 02-setup-cloudflare-tunnel.md
+│   │   │   └── 03-setup-n8n-workflow.md
+│   │   ├── website-mockup/
+│   │   │   ├── admin.html
+│   │   │   ├── index.html
+│   │   │   ├── menu-data.js
+│   │   │   └── menu.html
+│   │   ├── workflow/
+│   │   │   └── menu-order-notifications.json
+│   │   └── README.md
+│   └── 5a-online_menu-push_notifications-homeassistant-TTS/
 │       ├── docs/
 │       │   ├── 01-setup-ntfy.md
 │       │   ├── 02-setup-cloudflare-tunnel.md
-│       │   └── 03-setup-n8n-workflow.md
-│       ├── website-mockup/
-│       │   ├── admin.html
-│       │   ├── index.html
-│       │   ├── menu-data.js
-│       │   └── menu.html
+│       │   ├── 03-setup-n8n-workflow.md
+│       │   └── 04-setup-homeassistant-tts.md
 │       ├── workflow/
-│       │   └── menu-order-notifications.json
+│       │   └── menu-order-notifications-with-tts.json
+│       ├── readme-n8n.md
 │       └── README.md
 ├── paid-templates/
 │   └── 1 - WordPress AI VoiceOvers with Google Cloud/
@@ -243,6 +253,28 @@ The template includes a complete ready-to-host static menu website with a custom
 * **README.md** – Full setup guide
 * **docs/** – Step-by-step setup docs (ntfy.sh, Cloudflare Tunnel, n8n config)
 * **website-mockup/** – Ready-to-host static menu website with admin panel
+
+</details>
+
+
+
+<details>
+<summary>▶️ 5a. Online Menu — Push Notifications + Home Assistant Voice Announcements</summary>
+
+Extension of template 5. Receive a push notification on your phone **and** trigger a voice announcement on your Google Home every time a customer places an order — powered by n8n, ntfy.sh, and Home Assistant TTS.
+
+No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
+
+📂 **Folder** → [`/free-templates/5a-online_menu-push_notifications-homeassistant-TTS`](./free-templates/5a-online_menu-push_notifications-homeassistant-TTS)
+
+📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
+
+📄 Files included:
+
+* **workflow/menu-order-notifications-with-tts.json** – Complete n8n importable workflow
+* **README.md** – Full setup guide
+* **readme-n8n.md** – n8n template publishing info and description
+* **docs/** – Step-by-step setup docs (ntfy.sh, Cloudflare Tunnel, n8n config, Home Assistant TTS)
 
 </details>
 

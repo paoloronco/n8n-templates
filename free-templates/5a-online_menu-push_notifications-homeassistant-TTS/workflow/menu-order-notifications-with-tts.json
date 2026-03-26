@@ -1,0 +1,184 @@
+{
+  "name": "Menu Order Push Notifications + HA TTS",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📋 Menu Order Push Notifications + Home Assistant TTS\n\n📖 **Full documentation:**\nhttps://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a\n\n**What this workflow does:**\n- Your menu website sends customer orders to the `Webhook` node\n- n8n forwards the order to ntfy → push notification on your phone\n- The order is logged in the n8n DB table\n- n8n calls a Home Assistant script → voice announcement on Google Home\n\n**Setup overview:**\n1. Copy the **Production URL** from the `Webhook` node and set it in your website\n2. Deploy ntfy: follow `docs/01-setup-ntfy.md`\n3. Expose ntfy via HTTPS: follow `docs/02-setup-cloudflare-tunnel.md`\n4. Setup Home Assistant TTS: follow `docs/04-setup-homeassistant-tts.md`\n   - Verify Google Cast integration in HA\n   - Create a Long-lived access token in HA\n   - Create the `annuncia_ordine` script in HA\n5. Create credentials in n8n:\n   - **Header Auth** for ntfy: `Bearer YOUR_NTFY_TOKEN`\n   - **Home Assistant**: host + Long-lived token\n6. Configure the `ntfy notification` node: replace `YOUR_TOPIC` in the URL\n7. Configure the `Home Assistant TTS` node: set credential + service attributes\n8. Activate the workflow\n\n**Full step-by-step:** see `docs/03-setup-n8n-workflow.md`",
+        "height": 780,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-784, -480],
+      "id": "aa72fc40-9b9b-43b7-8ca4-1cf3aa9b8f44",
+      "name": "Documentation"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "menu",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, -48],
+      "id": "925fbd83-f32d-4b2d-849c-f8f0b81408e3",
+      "name": "Webhook",
+      "webhookId": "f967893c-ce62-4b03-95a7-8b456c86c6f7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ntfy/YOUR_TOPIC",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{\n  'Name: ' + $json.body.nome + ' | ' +\n  $json.body.ordine\n    .map(i =>\n      i.quantita + 'x ' +\n      i.nome + ' ' +\n      i.dettaglio\n    )\n    .join(' | ') +\n  '\\n🕐 ' +\n  $json.body.orario\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [208, -48],
+      "id": "da7ce680-601a-4162-8566-f952f38860d3",
+      "name": "ntfy notification",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "HeaderAuth ntfy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "menu orders log",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "item": "={{ $('Webhook').item.json.body.ordine[0].nome }}",
+            "person": "={{ $('Webhook').item.json.body.nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "person",
+              "displayName": "person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [416, -48],
+      "id": "4e6fb97b-d965-417e-88e9-718169df61cd",
+      "name": "DB"
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "script",
+        "service": "annuncia_ordine",
+        "serviceAttributes": {
+          "attributes": [
+            {
+              "name": "message",
+              "value": "={{ $('Webhook').item.json.body.nome }} has ordered {{ $('Webhook').item.json.body.ordine[0].nome }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [624, -48],
+      "id": "48b587e8-59a8-44d3-98de-cf8df811e4c6",
+      "name": "Home Assistant TTS",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "",
+          "name": "Home Assistant account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "ntfy notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ntfy notification": {
+      "main": [
+        [
+          {
+            "node": "DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB": {
+      "main": [
+        [
+          {
+            "node": "Home Assistant TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Home Assistant TTS": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0bfab03d-6428-4b5b-a5da-fd28a301b23c",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "id": "rXR1joSjCCaG3w8j",
+  "tags": []
+}

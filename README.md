@@ -275,6 +275,8 @@ No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
 
 📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
 
+👥 **n8n Community Template** : coming soon
+
 📄 Files included:
 
 * **workflow/menu-order-notifications-with-tts.json** – Complete n8n importable workflow
@@ -294,6 +296,8 @@ Extension of template 5 v2. Adds **BAC (Blood Alcol Concentration)** logic on to
 
 📂 **Folder** → [`/free-templates/5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation`](./free-templates/5%20v3%20online_menu-push_notifications-homeassistant-TTS-BACcalculation)
 
+👥 **n8n Community Template**: coming soon
+
 📄 Files included:
 
 * **workflow/Menu Order Push Notifications + Home Assistant TTS + BAC.json** – Complete n8n importable workflow
@@ -303,6 +307,25 @@ Extension of template 5 v2. Adds **BAC (Blood Alcol Concentration)** logic on to
 </details>
 
 
+
+<details>
+<summary>▶️ 6 Sync n8n schedule to GoogleCalendar </summary>
+
+Reads every workflow on your n8n instance every 30 minutes, extracts their schedule triggers, and keeps a matching recurring event on Google Calendar — one event per workflow, forever in sync.
+
+📕 Full documentation: https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link
+
+📂 **Folder** → [`/free-templates/6 Sync n8n schedule to GoogleCalendar](./free-templates/6%Sync%n8n%schedule%to%GoogleCalendar)
+
+👥 **n8n Community Template**: coming soon
+
+📄 Files included:
+
+* **workflow/sync-n8n-workflow-schedules-to-google-calendar.json** – Complete n8n importable workflow
+* **README.md** – general information
+* **docs/** – Setup docs
+
+</details>
 
 ---
 

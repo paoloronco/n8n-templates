@@ -1,0 +1,1208 @@
+{
+  "name": "Sync n8n Workflow Schedules to Google Calendar",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1728,
+        512
+      ],
+      "id": "9ae22e9d-0b4b-476c-9138-819eda9e0635",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Output: 1 row per trigger \"schedulabile\"\n * - include: scheduleTrigger, cron\n * - exclude: webhook, errorTrigger, manualTrigger (configurabile)\n */\n\nconst INCLUDE_MANUAL = false; // metti true se vuoi includere manualTrigger come \"Evento (manual)\"\n\nconst pad2 = (n) => String(n ?? 0).padStart(2, '0');\nconst DAY_NUM_TO_ICAL = { 1: 'MO', 2: 'TU', 3: 'WE', 4: 'TH', 5: 'FR', 6: 'SA', 7: 'SU' };\nconst DAY_STR_TO_ICAL = {\n  mon: 'MO', monday: 'MO', mo: 'MO',\n  tue: 'TU', tuesday: 'TU', tu: 'TU',\n  wed: 'WE', wednesday: 'WE', we: 'WE',\n  thu: 'TH', thursday: 'TH', th: 'TH',\n  fri: 'FR', friday: 'FR', fr: 'FR',\n  sat: 'SA', saturday: 'SA', sa: 'SA',\n  sun: 'SU', sunday: 'SU', su: 'SU',\n};\nconst icalToIt = { MO: 'lun', TU: 'mar', WE: 'mer', TH: 'gio', FR: 'ven', SA: 'sab', SU: 'dom' };\n\nfunction normalizeByDay(value) {\n  if (value == null) return null;\n  if (Array.isArray(value)) {\n    const mapped = value\n      .map(v => normalizeByDay(v))\n      .flatMap(v => (v ? v.split(',') : []));\n    const uniq = [...new Set(mapped)].filter(Boolean);\n    return uniq.length ? uniq.join(',') : null;\n  }\n  if (typeof value === 'number') return DAY_NUM_TO_ICAL[value] ?? null;\n  if (typeof value === 'string') {\n    const s = value.trim();\n    if (!s) return null;\n    if (/^(MO|TU|WE|TH|FR|SA|SU)(,(MO|TU|WE|TH|FR|SA|SU))*$/i.test(s)) return s.toUpperCase();\n    const lower = s.toLowerCase();\n    if (DAY_STR_TO_ICAL[lower]) return DAY_STR_TO_ICAL[lower];\n    const asNum = Number(lower);\n    if (!Number.isNaN(asNum)) return DAY_NUM_TO_ICAL[asNum] ?? null;\n  }\n  return null;\n}\n\nfunction humanSchedule(s) {\n  if (!s || !s.freq) return '';\n\n  const it = s.interval ?? 1;\n\n  if (s.freq === 'minutely') return it === 1 ? 'Ogni minuto' : `Ogni ${it} minuti`;\n  if (s.freq === 'hourly')   return `Ogni ora :${pad2(s.atMinute ?? 0)}`;\n  if (s.freq === 'daily')    return `Ogni giorno ${pad2(s.atHour)}:${pad2(s.atMinute)}`;\n\n  if (s.freq === 'weekly') {\n    const days = (s.byDay ?? '')\n      .split(',')\n      .filter(Boolean)\n      .map(d => icalToIt[d] ?? d)\n      .join(', ');\n    const dayTxt = days ? `Ogni ${days}` : 'Ogni settimana';\n    return `${dayTxt} ${pad2(s.atHour)}:${pad2(s.atMinute)}`;\n  }\n\n  if (s.freq === 'monthly') {\n    const dom = s.byMonthDay ?? '?';\n    return `Ogni mese (giorno ${dom}) ${pad2(s.atHour)}:${pad2(s.atMinute)}`;\n  }\n\n  if (s.freq === 'cron') {\n    return s.cronExpression ? `Cron: ${s.cronExpression}` : 'Cron';\n  }\n\n  if (s.freq === 'event') {\n    return s.eventType ? `Evento (${s.eventType})` : 'Evento';\n  }\n\n  return '';\n}\n\n/**\n * Robust scheduleTrigger parser:\n * handles:\n *  - rule.interval[0].field present (minutes/hours/days/weeks/months)\n *  - field missing but triggerAtHour/triggerAtMinute present (infer daily)\n *  - weekly/monthly signals via triggerAtDay / dayOfMonth / weekday / days\n */\nfunction parseScheduleTrigger(node) {\n  const rule = node?.parameters?.rule ?? null;\n  const tz = node?.parameters?.timezone || null;\n\n  const intervals = rule?.interval;\n  const i = Array.isArray(intervals) && intervals.length ? intervals[0] : (rule ?? {});\n\n  const out = {\n    triggerType: 'scheduleTrigger',\n    freq: null,\n    interval: 1,\n    atHour: null,\n    atMinute: null,\n    byDay: null,\n    byMonthDay: null,\n    timezone: tz,\n    scheduleRaw: { rule },\n    cronExpression: null,\n  };\n\n  // If cronExpression exists here\n  if (rule?.cronExpression) {\n    out.freq = 'cron';\n    out.cronExpression = rule.cronExpression;\n    out.scheduleHuman = humanSchedule(out);\n    return out;\n  }\n\n  const field = i.field;\n\n  // Helper reads (some versions use different keys)\n  const atHour = i.triggerAtHour ?? i.atHour ?? null;\n  const atMinute = i.triggerAtMinute ?? i.atMinute ?? null;\n  const trigDay = i.triggerAtDay ?? i.weekday ?? i.dayOfWeek ?? i.days ?? null;\n  const monthDay = i.dayOfMonth ?? i.monthDay ?? null;\n\n  // If field is present, use it\n  if (field === 'minutes') {\n    out.freq = 'minutely';\n    out.interval = i.minutesInterval ?? i.interval ?? 1;\n\n  } else if (field === 'hours') {\n    out.freq = 'hourly';\n    out.interval = i.hoursInterval ?? i.interval ?? 1;\n    out.atMinute = atMinute ?? 0;\n\n  } else if (field === 'days') {\n    out.freq = 'daily';\n    out.interval = i.daysInterval ?? i.interval ?? 1;\n    out.atHour = atHour ?? 0;\n    out.atMinute = atMinute ?? 0;\n\n  } else if (field === 'weeks') {\n    out.freq = 'weekly';\n    out.interval = i.weeksInterval ?? i.interval ?? 1;\n    out.atHour = atHour ?? 0;\n    out.atMinute = atMinute ?? 0;\n    out.byDay = normalizeByDay(trigDay);\n\n  } else if (field === 'months') {\n    out.freq = 'monthly';\n    out.interval = i.monthsInterval ?? i.interval ?? 1;\n    out.atHour = atHour ?? 0;\n    out.atMinute = atMinute ?? 0;\n    const dom = i.triggerAtDay ?? monthDay;\n    const domNum = typeof dom === 'number' ? dom : Number(dom);\n    out.byMonthDay = Number.isNaN(domNum) ? null : domNum;\n\n  } else {\n    // field missing -> infer\n    const hasHour = atHour !== null;\n    const hasMinute = atMinute !== null;\n\n    const byDay = normalizeByDay(trigDay);\n    const dom = i.triggerAtDay ?? monthDay;\n\n    if (byDay) {\n      // weekly-ish\n      out.freq = 'weekly';\n      out.atHour = atHour ?? 0;\n      out.atMinute = atMinute ?? 0;\n      out.byDay = byDay;\n    } else if (dom != null) {\n      // monthly-ish\n      out.freq = 'monthly';\n      out.atHour = atHour ?? 0;\n      out.atMinute = atMinute ?? 0;\n      const domNum = typeof dom === 'number' ? dom : Number(dom);\n      out.byMonthDay = Number.isNaN(domNum) ? null : domNum;\n    } else if (hasHour || hasMinute) {\n      // assume daily at HH:MM\n      out.freq = 'daily';\n      out.atHour = atHour ?? 0;\n      out.atMinute = atMinute ?? 0;\n    } else if (rule?.interval?.[0]?.field === undefined && Array.isArray(rule?.interval) && rule.interval.length) {\n      // still unknown shape; keep as unknown for debugging\n      out.freq = 'unknown';\n    } else {\n      out.freq = 'unknown';\n    }\n  }\n\n  out.scheduleHuman = humanSchedule(out);\n  return out;\n}\n\nfunction parseCronNode(node) {\n  const p = node?.parameters ?? {};\n  const cron =\n    p.cronExpression ||\n    p.expression ||\n    p.cron ||\n    p.rules?.[0]?.cronExpression ||\n    null;\n\n  return {\n    triggerType: 'cron',\n    freq: 'cron',\n    interval: 1,\n    atHour: null,\n    atMinute: null,\n    byDay: null,\n    byMonthDay: null,\n    timezone: p.timezone || null,\n    cronExpression: cron,\n    scheduleRaw: { parameters: p },\n    scheduleHuman: humanSchedule({ freq: 'cron', cronExpression: cron }),\n  };\n}\n\nfunction getTags(wf) {\n  const tags = wf.tags ?? [];\n  return tags.map(t => (typeof t === 'string' ? t : t.name)).filter(Boolean);\n}\n\nfunction getNodes(wf) {\n  return wf.activeVersion?.nodes || wf.nodes || [];\n}\n\nconst output = [];\n\nfor (const item of $input.all()) {\n  const wf = item.json;\n  const nodes = getNodes(wf);\n\n  // pick triggers\n  const triggers = nodes.filter(n => {\n    if (n.type === 'n8n-nodes-base.webhook') return false;          // EXCLUDE\n    if (n.type === 'n8n-nodes-base.errorTrigger') return false;     // EXCLUDE\n    if (n.type === 'n8n-nodes-base.manualTrigger') return INCLUDE_MANUAL; // optional\n    return (\n      n.type === 'n8n-nodes-base.scheduleTrigger' ||\n      n.type === 'n8n-nodes-base.cron'\n    );\n  });\n\n  // If no schedulable triggers: do nothing (keeps sheet clean)\n  if (triggers.length === 0) continue;\n\n  for (const t of triggers) {\n    const sched =\n      t.type === 'n8n-nodes-base.scheduleTrigger' ? parseScheduleTrigger(t)\n      : t.type === 'n8n-nodes-base.cron' ? parseCronNode(t)\n      : { triggerType: 'event', freq: 'event', scheduleHuman: 'Evento', scheduleRaw: { parameters: t.parameters ?? {} } };\n\n    output.push({\n      json: {\n        WorkflowID: wf.id,\n        Workflow: wf.name,\n        Tags: JSON.stringify(getTags(wf)),\n        Active: !!wf.active,\n\n        triggerType: sched.triggerType,\n        freq: sched.freq ?? '',\n        interval: sched.interval ?? '',\n        atHour: sched.atHour ?? '',\n        atMinute: sched.atMinute ?? '',\n        byDay: sched.byDay ?? '',\n        byMonthDay: sched.byMonthDay ?? '',\n        timezone: sched.timezone ?? (wf.settings?.timezone || ''),\n\n        schedule: sched.scheduleHuman ?? '',\n        \"Schedule-RAW\": JSON.stringify(sched.scheduleRaw ?? {}),\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1152,
+        512
+      ],
+      "id": "3dcf261e-1442-470a-b828-8feb7ec668dd",
+      "name": "Code: parsing"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_CALENDAR_ID"
+        },
+        "start": "={{$json.calendarPayload.start}}",
+        "end": "={{$json.calendarPayload.end}}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "color": "3",
+          "description": "={{$json.calendarPayload.description}}",
+          "repeatFrecuency": "={{$json.calendarPayload.repeatFrequency}}",
+          "repeatUntil": "={{$json.calendarPayload.repeatUntil}}",
+          "summary": "={{$json.calendarPayload.summary}}",
+          "visibility": "private"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        512
+      ],
+      "id": "807c9b17-1158-4da4-be3e-8de4751009d6",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Google Calendar payload builder.\n *\n * Schedules supportati:\n * - DAILY  \"Ogni giorno HH:MM\"              → 1 evento Daily\n * - WEEKLY \"Ogni settimana HH:MM\"           → 1 evento Weekly\n * - WEEKLY \"Ogni lun HH:MM\" / \"Ogni lun, mer HH:MM\" → 1 evento Weekly\n * - MONTHLY \"Ogni mese (giorno N) HH:MM\"   → 1 evento Monthly\n * - HOURLY \"Ogni ora :MM\"                   → 1 evento Daily (FIX: era 24, ora 1)\n * - MINUTELY / CRON                         → SKIP\n *\n * FIX: Hourly ora produce 1 solo evento (era 24 → rate limit).\n * FIX: Aggiunto supporto weekly con giorni e monthly.\n */\n\nconst DEFAULT_TIMEZONE  = 'Europe/Rome';\nconst EVENT_DURATION_MIN = 5;\n\nconst SKIP_WORKFLOW_NAME_CONTAINS = ['Workflow Scheduling Extraction'];\nconst SKIP_SCHEDULE_REGEXES = [\n  /ogni\\s+minuto/i,\n  /ogni\\s+\\d+\\s+minut/i,\n];\n\nconst FREQ = {\n  DAILY:   'Daily',\n  WEEKLY:  'Weekly',\n  MONTHLY: 'Monthly',\n};\n\nconst pad2 = (n) => String(n ?? 0).padStart(2, '0');\n\nfunction localDateTimeString(d) {\n  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;\n}\n\nfunction startEndForToday(atHour, atMinute) {\n  const now = new Date();\n  const s = new Date(now.getFullYear(), now.getMonth(), now.getDate(), atHour ?? 0, atMinute ?? 0, 0);\n  const e = new Date(s);\n  e.setMinutes(e.getMinutes() + EVENT_DURATION_MIN);\n  return { start: localDateTimeString(s), end: localDateTimeString(e) };\n}\n\nfunction shouldSkip(r) {\n  const wfName = String(r.Workflow || r.workflow || r.name || '');\n  if (SKIP_WORKFLOW_NAME_CONTAINS.some(x => wfName.includes(x))) return true;\n  const sched = String(r.schedule || '');\n  if (SKIP_SCHEDULE_REGEXES.some(rx => rx.test(sched))) return true;\n  return false;\n}\n\n/**\n * Parses humanSchedule string → schedule type object.\n * Returns null if schedule type is unsupported/should be skipped.\n */\nfunction parseSchedule(scheduleHuman) {\n  if (!scheduleHuman) return null;\n  const txt = String(scheduleHuman).trim().toLowerCase();\n\n  // \"Ogni giorno 09:30\"\n  const mDaily = txt.match(/ogni\\s+giorno\\s+(\\d{1,2})\\s*[:.]\\s*(\\d{1,2})/);\n  if (mDaily) {\n    const h = Number(mDaily[1]), m = Number(mDaily[2]);\n    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return { type: 'daily', atHour: h, atMinute: m };\n  }\n\n  // \"Ogni settimana 07:00\" (nessun giorno specifico)\n  const mWeekly = txt.match(/ogni\\s+settimana\\s+(\\d{1,2})\\s*[:.]\\s*(\\d{1,2})/);\n  if (mWeekly) {\n    const h = Number(mWeekly[1]), m = Number(mWeekly[2]);\n    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return { type: 'weekly', atHour: h, atMinute: m };\n  }\n\n  // \"Ogni lun 07:00\" / \"Ogni lun, mer 07:00\" (FIX: weekly con giorni specifici)\n  const mWeeklyDay = txt.match(/^ogni\\s+(?:lun|mar|mer|gio|ven|sab|dom)[\\w,\\s]*\\s+(\\d{1,2})[:.]\\s*(\\d{1,2})/);\n  if (mWeeklyDay) {\n    const h = Number(mWeeklyDay[1]), m = Number(mWeeklyDay[2]);\n    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return { type: 'weekly', atHour: h, atMinute: m };\n  }\n\n  // \"Ogni mese (giorno N) HH:MM\" (FIX: aggiunto monthly)\n  const mMonthly = txt.match(/ogni\\s+mese.*\\s+(\\d{1,2}):(\\d{2})\\s*$/);\n  if (mMonthly) {\n    const h = Number(mMonthly[1]), m = Number(mMonthly[2]);\n    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return { type: 'monthly', atHour: h, atMinute: m };\n  }\n\n  // \"Ogni ora :45\" o \"Ogni ora .00\" (FIX: ora produce 1 evento invece di 24)\n  const mHourly = txt.match(/ogni\\s+ora\\s*[.:]\\s*(\\d{1,2})/);\n  if (mHourly) {\n    const m = Number(mHourly[1]);\n    if (m >= 0 && m <= 59) return { type: 'hourly', minute: m };\n  }\n\n  return null;  // cron, unknown, minutely → skip\n}\n\nfunction buildCommon(r) {\n  const wfName = r.Workflow || r.workflow || r.name || 'workflow';\n  const description =\n`WorkflowID: ${r.WorkflowID || r.workflowId || r.id || ''}\nTags: ${r.Tags || r.tags || ''}\nTriggerType: ${r.triggerType || ''}\nSchedule: ${r.schedule || ''}`;\n  return { summaryBase: `n8n | ${wfName}`, description };\n}\n\nconst out = [];\n\nfor (const item of $input.all()) {\n  const r = item.json;\n  if (shouldSkip(r)) continue;\n\n  const parsed = parseSchedule(r.schedule);\n  if (!parsed) {\n    console.log(`SKIP (schedule non supportato): ${r.WorkflowID} | ${r.schedule}`);\n    continue;\n  }\n\n  const timezone = r.timezone || DEFAULT_TIMEZONE;\n  const { summaryBase, description } = buildCommon(r);\n\n  if (parsed.type === 'daily') {\n    const { start, end } = startEndForToday(parsed.atHour, parsed.atMinute);\n    out.push({ json: { ...r, calendarPayload: { summary: summaryBase, description, start, end, timezone, repeatFrequency: FREQ.DAILY, repeatUntil: null } } });\n  }\n\n  if (parsed.type === 'weekly') {\n    const { start, end } = startEndForToday(parsed.atHour, parsed.atMinute);\n    out.push({ json: { ...r, calendarPayload: { summary: summaryBase, description, start, end, timezone, repeatFrequency: FREQ.WEEKLY, repeatUntil: null } } });\n  }\n\n  if (parsed.type === 'monthly') {\n    const { start, end } = startEndForToday(parsed.atHour, parsed.atMinute);\n    out.push({ json: { ...r, calendarPayload: { summary: summaryBase, description, start, end, timezone, repeatFrequency: FREQ.MONTHLY, repeatUntil: null } } });\n  }\n\n  if (parsed.type === 'hourly') {\n    // FIX: 1 evento Daily invece di 24 (riduceva a ~100 API calls → rate limit)\n    // L'evento è collocato a 00:MM e si ripete ogni giorno, con label \"ogni ora :MM\"\n    const { start, end } = startEndForToday(0, parsed.minute);\n    out.push({\n      json: {\n        ...r,\n        calendarPayload: {\n          summary: `${summaryBase} (ogni ora :${pad2(parsed.minute)})`,\n          description,\n          start,\n          end,\n          timezone,\n          repeatFrequency: FREQ.DAILY,\n          repeatUntil: null,\n        }\n      }\n    });\n  }\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        512
+      ],
+      "id": "f977bd11-3bc3-48f4-bba2-66531a6a5a90",
+      "name": "Code: RRULE"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_CALENDAR_ID"
+        },
+        "eventId": "={{ $json.id }}",
+        "options": {
+          "sendUpdates": "none"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -1136,
+        1040
+      ],
+      "id": "7766b246-1694-43f4-8640-884dacb379e1",
+      "name": "Delete an event",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar OAuth2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_CALENDAR_ID"
+        },
+        "returnAll": true,
+        "timeMin": "2026-01-16T00:00:00",
+        "timeMax": "2100-12-31T00:00:00",
+        "options": {
+          "recurringEventHandling": "first"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -1424,
+        1040
+      ],
+      "id": "eada40f6-f268-434b-b3f2-2233bc0ae636",
+      "name": "Get many events2",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "WorkflowID,current_schedule",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        720,
+        512
+      ],
+      "id": "b91a529d-f08e-4b17-86f5-a3972baff2ab",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607954075,
+          "mode": "list",
+          "cachedResultName": "n8n Scheduling"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        512
+      ],
+      "id": "f4a38c2c-da29-47bb-a0b2-3bb2d5b5f396",
+      "name": "Sheets:Lookup-ExistOnCalendar",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607954075,
+          "mode": "list",
+          "cachedResultName": "n8n Scheduling"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "WorkflowID": "={{ $json.WorkflowID }}",
+            "Workflow": "={{ $json.Workflow }}",
+            "Tags": "={{ $json.Tags }}",
+            "triggerType": "={{ $json.triggerType }}",
+            "schedule": "={{ $json.schedule }}",
+            "freq": "={{ $json.freq }}",
+            "atHour": "={{ $json.atHour }}",
+            "atMinute": "={{ $json.atMinute }}",
+            "byDay": "={{ $json.byDay }}",
+            "byMonthDay": "={{ $json.byMonthDay }}",
+            "interval": "={{ $json.interval }}",
+            "On Calendar": "YES",
+            "Calendar_EventID": "={{ $json.Calendar_EventID }}",
+            "calendarLastSync": "={{ $today }}"
+          },
+          "matchingColumns": [
+            "WorkflowID"
+          ],
+          "schema": [
+            {
+              "id": "WorkflowID",
+              "displayName": "WorkflowID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Workflow",
+              "displayName": "Workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "triggerType",
+              "displayName": "triggerType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schedule",
+              "displayName": "schedule",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Calendar_EventID",
+              "displayName": "Calendar_EventID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "On Calendar",
+              "displayName": "On Calendar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendarLastSync",
+              "displayName": "calendarLastSync",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "freq",
+              "displayName": "freq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "atHour",
+              "displayName": "atHour",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "atMinute",
+              "displayName": "atMinute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "byDay",
+              "displayName": "byDay",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "byMonthDay",
+              "displayName": "byMonthDay",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "interval",
+              "displayName": "interval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2016,
+        512
+      ],
+      "id": "5c8aae74-3d10-4432-bf1c-371fd65f1718",
+      "name": "Sheets:OnCalendar=YES",
+      "credentials": {
+        "googleApi": {
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "filters": {
+          "activeWorkflows": true
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        512
+      ],
+      "id": "3618a0a7-5b23-4f5a-94a5-9c57999af221",
+      "name": "Get many workflows",
+      "alwaysOutputData": false,
+      "credentials": {
+        "n8nApi": {
+          "name": "n8n API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "delete-calendar",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1744,
+        1040
+      ],
+      "id": "78b8189a-02c8-4598-b3ef-279a0765fe7c",
+      "name": "Webhook",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Detect Changes - confronta 'schedule' (stringa human) tra stato corrente e Sheets.\n *\n * Logica:\n *   - On Calendar vuoto O schedule salvato vuoto → CREATE\n *   - schedule corrente ≠ schedule salvato → UPDATE\n *   - schedule è cron/minutely E già su Calendar → SKIP (evita loop 410 su delete)\n *   - altrimenti → SKIP\n */\n\n// Schedule types che RRULE non può gestire — non creare nuovi eventi per questi\nconst UNSUPPORTED_REGEXES = [\n  /ogni\\s+minuto/i,\n  /ogni\\s+\\d+\\s+minut/i,\n  /^cron:/i,\n];\n\nfunction isUnsupported(schedule) {\n  return !schedule || UNSUPPORTED_REGEXES.some(rx => rx.test(String(schedule).trim()));\n}\n\nreturn items.map(item => {\n  const data = item.json;\n\n  const currentSchedule = String(data.current_schedule ?? '');\n  const savedSchedule   = String(data.schedule ?? '');\n  const onCalendar      = data['On Calendar'] || '';\n  const workflowId      = data.WorkflowID || data.current_WorkflowID || '';\n\n  console.log(`=== ${workflowId} | current=\"${currentSchedule}\" | saved=\"${savedSchedule}\" | onCal=\"${onCalendar}\"`);\n\n  if (!workflowId) {\n    return { json: { ...data, action: 'skip', scheduleChanged: false, changedFields: '' } };\n  }\n\n  let action = 'skip';\n  let scheduleChanged = false;\n\n  const savedIsEmpty  = !savedSchedule;\n  const isNewWorkflow = !onCalendar || savedIsEmpty;\n\n  if (isNewWorkflow) {\n    // Nuovo workflow: crea solo se lo schedule è supportato da RRULE\n    if (isUnsupported(currentSchedule)) {\n      action = 'skip';\n      console.log('→ skip (nuovo ma schedule non supportato da RRULE)');\n    } else {\n      action = 'create';\n      console.log('→ create (nuovo)');\n    }\n\n  } else if (onCalendar === 'YES') {\n\n    if (currentSchedule !== savedSchedule) {\n      // Schedule cambiato\n      if (isUnsupported(currentSchedule)) {\n        // Nuovo schedule non supportabile → skip, lascia evento vecchio su Calendar\n        // (l'evento sarà stale ma non causa loop 410)\n        action = 'skip';\n        console.log('→ skip (schedule cambiato in tipo non supportato - lascia evento esistente)');\n      } else {\n        action = 'update';\n        scheduleChanged = true;\n        console.log(`→ update (schedule cambiato: \"${currentSchedule}\" vs \"${savedSchedule}\")`);\n      }\n    } else {\n      action = 'skip';\n      console.log('→ skip (invariato)');\n    }\n\n  } else {\n    // On Calendar = 'NO'\n    if (isUnsupported(currentSchedule)) {\n      action = 'skip';\n      console.log('→ skip (On Calendar=NO, schedule non supportato)');\n    } else {\n      action = 'create';\n      console.log('→ create (On Calendar=NO)');\n    }\n  }\n\n  return {\n    json: {\n      ...data,\n      action,\n      scheduleChanged,\n      changedFields: scheduleChanged ? 'schedule' : '',\n      _debug: { workflowId, currentSchedule, savedSchedule, onCalendar, isNewWorkflow }\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        512
+      ],
+      "id": "7b47f7cf-a72b-44ce-a30e-4ce2695a6de9",
+      "name": "Code: detect changes"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "145d9953-de54-49da-a77e-4b36ac6746c4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e8db78af-3bc3-4902-83e5-1654aab87e60",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2cab4207-3a61-421a-a62a-b2c5a3601691",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "skip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "skip"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        496
+      ],
+      "id": "d6caddd9-77d7-42ee-b9c3-ac6ed24a6bdb",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIX: usa ?? '' (non || '') per non perdere valori numerici come atHour=0 o atMinute=0\nreturn items.map(item => {\n  return {\n    json: {\n      ...item.json,\n      current_schedule:    item.json.schedule    ?? '',\n      current_freq:        item.json.freq        ?? '',\n      current_atHour:      String(item.json.atHour   != null ? item.json.atHour   : ''),\n      current_atMinute:    String(item.json.atMinute != null ? item.json.atMinute : ''),\n      current_byDay:       item.json.byDay       ?? '',\n      current_byMonthDay:  String(item.json.byMonthDay != null ? item.json.byMonthDay : ''),\n      current_interval:    String(item.json.interval  != null ? item.json.interval  : ''),\n      current_WorkflowID:  item.json.WorkflowID  ?? ''\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        512
+      ],
+      "id": "98859d16-bf8b-46ad-b2a1-739c1e7e304d",
+      "name": "Code: save current values"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Match manuale: combina i dati correnti con quelli salvati dal foglio.\n * FIX: Calendar_EventID ora propagato correttamente (serve per cancellare eventi vecchi).\n */\n\nconst currentWorkflows = $('Code: save current values').all();\nconst sheetRows = items;\n\nconsole.log(`Current workflows: ${currentWorkflows.length}`);\nconsole.log(`Sheet rows: ${sheetRows.length}`);\n\nconst savedMap = {};\nfor (const row of sheetRows) {\n  const wfId = row.json.WorkflowID;\n  if (wfId) savedMap[wfId] = row.json;\n}\n\nconsole.log(`Found ${Object.keys(savedMap).length} unique workflows in sheet`);\n\nconst output = currentWorkflows.map(current => {\n  const wfId = current.json.WorkflowID;\n  const saved = savedMap[wfId] || {};\n  const hasSavedData = Object.keys(saved).length > 0;\n\n  return {\n    json: {\n      ...current.json,\n\n      // Dati salvati su Sheets (usa null-coalesce per non perdere valori numerici tipo 0)\n      schedule:         saved.schedule          || '',\n      freq:             saved.freq              || '',\n      atHour:           saved.atHour   != null  ? saved.atHour   : '',\n      atMinute:         saved.atMinute != null  ? saved.atMinute : '',\n      byDay:            saved.byDay             || '',\n      byMonthDay:       saved.byMonthDay != null ? saved.byMonthDay : '',\n      interval:         saved.interval != null  ? saved.interval : '',\n      'On Calendar':    saved['On Calendar']    || '',\n      // ✅ FIX CRITICO: Calendar_EventID era mancante → UPDATE non cancellava mai i vecchi eventi\n      'Calendar_EventID': saved['Calendar_EventID'] || '',\n\n      _matchDebug: {\n        workflowId:       wfId,\n        foundInSheet:     hasSavedData,\n        totalInSheet:     Object.keys(savedMap).length,\n        savedSchedule:    saved.schedule           || 'EMPTY',\n        currentSchedule:  current.json.current_schedule || 'EMPTY',\n        calendarEventID:  saved['Calendar_EventID'] || 'EMPTY',\n      }\n    }\n  };\n});\n\nconsole.log(`Returning ${output.length} merged items`);\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        512
+      ],
+      "id": "3d5e5933-7d47-4a01-816e-d6197025821f",
+      "name": "Code manual merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Post-create: aggrega gli event ID di Google Calendar per workflowId.\n *\n * Input: N items da 'Create an event' (risposta GCal - uno per evento creato)\n * Cross-ref: $('Code: RRULE').all() per recuperare i dati workflow originali\n * Output: 1 item per workflowId -> Sheets:OnCalendar=YES\n */\n\nconst allRruleItems = $('Code: RRULE').all();\nconst byWorkflow = {};\n\nfor (let i = 0; i < items.length; i++) {\n  const created = items[i].json;\n  const rruleItem = allRruleItems[i];\n  if (!rruleItem) continue;\n\n  const d = rruleItem.json;\n  const wfId = d.WorkflowID || d.current_WorkflowID || '';\n  if (!wfId) continue;\n\n  if (!byWorkflow[wfId]) {\n    byWorkflow[wfId] = { data: d, eventIds: [] };\n  }\n  const eventId = created.id || '';\n  if (eventId) byWorkflow[wfId].eventIds.push(eventId);\n}\n\nreturn Object.entries(byWorkflow).map(([wfId, { data: d, eventIds }]) => ({\n  json: {\n    WorkflowID: wfId,\n    Workflow: d.Workflow || '',\n    Tags: d.Tags || '',\n    triggerType: d.triggerType || '',\n    schedule: d.current_schedule || d.schedule || '',\n    freq: d.current_freq || d.freq || '',\n    atHour: String(d.current_atHour ?? d.atHour ?? ''),\n    atMinute: String(d.current_atMinute ?? d.atMinute ?? ''),\n    byDay: String(d.current_byDay ?? d.byDay ?? ''),\n    byMonthDay: String(d.current_byMonthDay ?? d.byMonthDay ?? ''),\n    interval: String(d.current_interval ?? d.interval ?? ''),\n    'On Calendar': 'YES',\n    Calendar_EventID: eventIds.join(' '),\n    calendarLastSync: new Date().toISOString().split('T')[0]\n  }\n}));\n"
+      },
+      "id": "ef89bad9-1015-4fc3-8bcc-6ae0755255e3",
+      "name": "Code: post-create",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Split eventIds: estrae un item per Calendar_EventID da eliminare.\n *\n * Input: items da Switch[update] (hanno Calendar_EventID spazio-separato)\n * Output: 1 item per eventId { calendarEventIdToDelete: 'gCal_event_id' }\n *\n * Se Calendar_EventID e' vuoto -> nessun output (niente da eliminare).\n * Il percorso UPDATE crea comunque nuovi eventi via Remove Duplicates.\n */\n\nconst output = [];\nfor (const item of items) {\n  const raw = String(item.json.Calendar_EventID || '').trim();\n  const ids = raw.split(/\\s+/).filter(id => id.length > 0);\n  for (const eid of ids) {\n    output.push({ json: { calendarEventIdToDelete: eid } });\n  }\n}\nreturn output;\n"
+      },
+      "id": "d57f09f3-25bb-4b9a-8e98-9374cb7be397",
+      "name": "Code: split eventIds for delete",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_CALENDAR_ID"
+        },
+        "eventId": "={{ $json.calendarEventIdToDelete }}",
+        "options": {
+          "sendUpdates": "none"
+        }
+      },
+      "id": "f22523dc-c631-4daa-8bd1-40a3de59d8b3",
+      "name": "Delete old event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        1040
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar OAuth2"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "content": "## 🕒 n8n – Workflow Scheduling Extraction\nScans all active n8n workflows every **30 min** · syncs schedules as recurring events on Google Calendar `YOUR_GOOGLE_ACCOUNT@gmail.com` · state store: Google Sheets `n8n Scheduling` tab",
+        "height": 80,
+        "width": 4104,
+        "color": 7
+      },
+      "id": "ea296d83-c150-4241-81a9-228c5b3f2db5",
+      "name": "__title",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### A · Fetch\n\nRetrieves all n8n workflows via the n8n REST API. Both active and inactive workflows are fetched; filtering to scheduleTrigger-only happens in **Code: parsing**.",
+        "height": 544,
+        "width": 584,
+        "color": 7
+      },
+      "id": "f4b3437c-a404-460a-aa80-abfbfbe3e6c3",
+      "name": "__sec_fetch",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### B · Parse & Lookup\n\nNormalises each workflow's trigger configuration into a human-readable schedule string. Then reads the current Sheets state (schedule, On Calendar, Calendar_EventID) for every WorkflowID so it can be compared downstream.",
+        "height": 544,
+        "width": 908,
+        "color": 7
+      },
+      "id": "e5a7b6f2-3ea5-45f1-98d0-1947f109854e",
+      "name": "__sec_parse",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### C · Change Detection\n\nMerges live workflow data with Sheets state. Compares `current_schedule` (live) vs `schedule` (Sheets) and assigns an **action**: `create` (new) · `update` (changed) · `skip` (unchanged or unsupported type). Cron and minutely schedules are always skipped.",
+        "height": 544,
+        "width": 880,
+        "color": 7
+      },
+      "id": "9f5e07d5-b3f7-4535-bcb0-18282622262a",
+      "name": "__sec_detect",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### D · Create / Update Path\n\nBuilds a Google Calendar recurring event payload (RRULE) and creates the event. On **update** this branch runs in parallel with the Delete branch (E). After creation, writes Calendar_EventID + On Calendar=YES back to Sheets.",
+        "height": 528,
+        "width": 1640,
+        "color": 7
+      },
+      "id": "4d76bdd7-e4b0-4322-a8b9-e41596259524",
+      "name": "__sec_create",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### E · Delete Old Event\n\nRuns in parallel with branch D on **update**. Deletes the previous Calendar event(s) identified by Calendar_EventID from Sheets. `continueOnFail = true` — HTTP 410 (already gone) does not halt execution.",
+        "height": 496,
+        "width": 700,
+        "color": 7
+      },
+      "id": "297bdd17-8445-4781-99ed-814945170bdb",
+      "name": "__sec_delete",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### F · Webhook Sub-flow  *(disconnected – manual trigger)*\n\nStandalone maintenance endpoint. Accepts an HTTP POST with event IDs, fetches the matching Calendar events, and hard-deletes them. Not connected to the main 30-min pipeline.",
+        "height": 470,
+        "width": 940,
+        "color": 7
+      },
+      "id": "3f1980e5-cc38-4362-9a4f-4f7295193e77",
+      "name": "__sec_webhook",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Schedule Trigger**\n\nFires every 30 min (cron `*/30 * * * *`).\nAlso supports manual execution from the n8n UI.\nEntry point for the entire sync pipeline.",
+        "height": 380,
+        "width": 260,
+        "color": 7
+      },
+      "id": "eec1eecc-2a8f-4cfa-9ea9-e49372c00922",
+      "name": "__node_schedule_trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Get many workflows**\n\nCalls `GET /api/v1/workflows` on the local n8n instance.\nReturns all workflows (active + inactive).\nNo filter applied here — filtering is done in Code: parsing.",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "07b02e91-7f2b-496a-b2db-ec4d36833299",
+      "name": "__node_get_many_workflows",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: parsing**\n\n- Filters to workflows that have a `scheduleTrigger` node\n- Excludes system / internal workflows by name\n- Normalises trigger config → human schedule string\n- Extracts: WorkflowID, name, tags, triggerType, schedule, freq, atHour, atMinute, byDay, byMonthDay, interval",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "d6c8e7a1-7073-4074-8c61-6e3b3fff0e79",
+      "name": "__node_code_parsing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: save current values**\n\nSnapshots all parsed fields into `current_*` prefixed copies\n(e.g. `current_schedule`, `current_freq`, …).\nPreserves the live state before it is overwritten by the Sheets\nmerge so change detection can compare fresh vs. persisted data.",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "abe5abb3-7c89-4f77-b7a9-23d51ef51daf",
+      "name": "__node_code_save",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Sheets: Lookup ExistOnCalendar**\n\nReads every row in the \"n8n Scheduling\" tab of the spreadsheet.\nReturns per-workflow: `schedule`, `On Calendar`, `Calendar_EventID`, `calendarLastSync`.\nUses a Google Service Account (does not expire — no OAuth re-auth needed).",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "e7c98db5-8183-4a2d-aa4d-a95f0f6be0d4",
+      "name": "__node_sheets_lookup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code manual merge**\n\nJoins live workflow items with Sheets rows on WorkflowID.\nPropagates from Sheets: `schedule`, `On Calendar`, `Calendar_EventID`.\n`current_*` fields are kept intact from Code: save current values.\nCritical: `Calendar_EventID` must flow through here for the delete branch to work.",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "f3b6e523-8268-4cd6-9a86-fab7a0b3b663",
+      "name": "__node_code_merge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: detect changes**\n\nCompares `current_schedule` (live) vs `schedule` (Sheets).\nUses only the human string — not granular fields — to avoid false positives from stale rows.\n- Empty saved schedule or no Calendar entry → **create**\n- Strings differ → **update** (unless new schedule is unsupported → skip)\n- Strings equal → **skip**\n- cron / minutely / unsupported type → always **skip**",
+        "height": 396,
+        "width": 260,
+        "color": 7
+      },
+      "id": "b2edab53-4877-4dae-9f95-a7a144be4b41",
+      "name": "__node_code_detect",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Switch**\n\nRoutes items by the `action` field:\n- `out0` → **create**  (new workflow, no Calendar event yet)\n- `out1` → **update**  (schedule changed; two parallel branches: D + E)\n- `out2` → **skip**    (no change; terminal — no downstream nodes)",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "0135024e-1f68-4378-a436-fbe7e4c755bc",
+      "name": "__node_switch",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Remove Duplicates**\n\nDeduplicates by WorkflowID before event creation.\nDefensive node: prevents accidental double-creation if a workflow\nappears multiple times in the current batch (e.g. after a manual re-run).",
+        "height": 380,
+        "width": 260,
+        "color": 7
+      },
+      "id": "b0fc2d09-58c9-4093-9587-c04b19c302c1",
+      "name": "__node_remove_dupes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        656,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: RRULE**\n\nConverts `current_schedule` string → Google Calendar event payload with RRULE recurrence.\nSupported types: daily · weekly (with or without specific days) · monthly · hourly.\nHourly → 1 daily event at 00:MM (not 24 events — avoids API rate limiting).\nUnsupported: cron, minutely → item silently dropped (returns empty array).",
+        "height": 380,
+        "width": 260,
+        "color": 7
+      },
+      "id": "30577841-cce6-48e4-b9c8-9064856eeac5",
+      "name": "__node_code_rrule",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Create an event**\n\nGoogle Calendar node. Creates a recurring event on `YOUR_GOOGLE_ACCOUNT@gmail.com`.\nUses `repeatFrequency` + `repeatUntil = null` for infinite recurrence.\nReturns the full GCal event object including the `id` used downstream.\nOAuth credential: `Google Calendar OAuth2` (expires periodically).",
+        "height": 396,
+        "width": 260,
+        "color": 7
+      },
+      "id": "afb8e9c5-a0be-4c7c-9649-77d97d68a22f",
+      "name": "__node_create_event",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: post-create**\n\nAggregates created event IDs by WorkflowID (handles batch creates).\nAdds `On Calendar = YES`, `Calendar_EventID`, `calendarLastSync` (ISO timestamp).\nPrepares the exact row structure expected by Sheets: OnCalendar=YES.",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "8009e9f3-59ef-47aa-af81-00344237954b",
+      "name": "__node_code_post_create",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Sheets: OnCalendar=YES**\n\n`appendOrUpdate` operation matching on the **WorkflowID** column.\nWrites all schedule fields + `On Calendar=YES` + `Calendar_EventID` + `calendarLastSync`.\nService Account credential (never expires).\nThis is the canonical state store — downstream runs read from here.",
+        "height": 412,
+        "width": 260,
+        "color": 7
+      },
+      "id": "0da373d3-2a4d-4fed-9d54-4541e73c0899",
+      "name": "__node_sheets_yes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Code: split eventIds for delete**\n\nSplits the `Calendar_EventID` field (comma-separated string) into one item per ID.\nRequired because a workflow can accumulate multiple event IDs across runs.\nFeeds individual IDs to Delete old event.",
+        "height": 366,
+        "width": 260,
+        "color": 7
+      },
+      "id": "d693564a-7a09-4880-bf53-e760331b118d",
+      "name": "__node_code_split",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Delete old event**\n\nDeletes the previous Calendar event(s) when a schedule update occurs.\n`continueOnFail = true` — HTTP 410 \"Resource has been deleted\" is tolerated and does not halt execution.\nTerminal node — no downstream connections.",
+        "height": 382,
+        "width": 260,
+        "color": 7
+      },
+      "id": "57e6e365-7fd8-40b5-b948-a20a635dd9c0",
+      "name": "__node_delete_old",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Webhook**\n\nHTTP POST trigger for manual Calendar cleanup.\nNot connected to the main 30-min pipeline.\nAccepts event IDs in the request body.",
+        "height": 350,
+        "width": 260,
+        "color": 7
+      },
+      "id": "32cdfa17-1447-4dc3-9e38-0e42dd21fadb",
+      "name": "__node_webhook",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Get many events2**\n\nRetrieves Calendar events by ID or search query.\nFeeds the event list into Delete an event.",
+        "height": 350,
+        "width": 260,
+        "color": 7
+      },
+      "id": "09035062-7137-45c7-a4b4-d3ffca205ba2",
+      "name": "__node_get_events2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Delete an event**\n\nHard-deletes Calendar events by ID.\nUsed only in the manual webhook-triggered maintenance flow.",
+        "height": 350,
+        "width": 260,
+        "color": 7
+      },
+      "id": "0b136e75-9d51-4280-a375-08b2ac28dbae",
+      "name": "__node_delete_event",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## n8n Workflow Scheduling Extraction\n\nReads all n8n workflows every 30 min via REST API, extracts their schedules, compares against a Google Sheets state store, and syncs Google Calendar with recurring events.\n\n📄 Full docs: https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497\n\n---\n\n### What it does\n- **Fetch** all workflows via `GET /api/v1/workflows`\n- **Parse** scheduleTrigger / cron nodes → human-readable string (e.g. \"Every day 09:30\")\n- **Lookup** saved state from Sheets: `schedule`, `On Calendar`, `Calendar_EventID`\n- **Detect changes**: `create` · `update` · `skip`\n  - create: new workflow, no Calendar event yet\n  - update: schedule changed → delete old event + create new one\n  - skip: unchanged, or unsupported type (cron / minutely)\n- **Create**: build RRULE payload → create GCal event → write EventID to Sheets\n- **Update**: parallel branches — delete old event + create path\n- This workflow itself is always skipped (name filter)\n\n---\n\n### Required credentials\n- **n8n API key** — Settings → API → Add key → credential `n8n account`\n- **Google Calendar OAuth2** — credential `Oauth GCalendar`\n  ⚠️ Expires periodically — reconnect from Settings → Credentials\n- **Google Service Account** — credential `GCP_SA`\n  Never expires. Used exclusively for Google Sheets\n\n---\n\n### Setup\n1. n8n Settings → API → create API key → credential `n8n account`\n2. GCP Console → create Service Account → download JSON key\n   → import in n8n as Google Service Account (`GCP_SA`)\n3. Share the Google Sheets with the SA email (Editor role)\n   Sheet: `YOUR_SPREADSHEET_ID` · Tab: `n8n Scheduling`\n4. GCP → OAuth 2.0 client ID → credential Google Calendar OAuth2 (`Oauth GCalendar`)\n   → click \"Connect\" in n8n to authorize\n5. Workflow Settings → Error Workflow = `YOUR_ERROR_WORKFLOW_ID`\n6. Activate the workflow — first run populates Sheets and Calendar\n\n---\n\n### Known limits\n- **Hourly**: 1 daily event at 00:MM, not 24 (avoids GCal rate limit)\n- **Cron / minutely**: always skipped, never appear on Calendar\n- **Webhook sub-flow** (section F): disconnected, manual maintenance only\n- **OAuth GCalendar**: expiry blocks sections D/E — monitor regularly\n",
+        "height": 1288,
+        "width": 680
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "__overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        48
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: parsing": {
+      "main": [
+        [
+          {
+            "node": "Code: save current values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Code: post-create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: RRULE": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events2": {
+      "main": [
+        [
+          {
+            "node": "Delete an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Code: RRULE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets:Lookup-ExistOnCalendar": {
+      "main": [
+        [
+          {
+            "node": "Code manual merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Code: parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many events2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: detect changes": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: save current values": {
+      "main": [
+        [
+          {
+            "node": "Sheets:Lookup-ExistOnCalendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code manual merge": {
+      "main": [
+        [
+          {
+            "node": "Code: detect changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code: split eventIds for delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: post-create": {
+      "main": [
+        [
+          {
+            "node": "Sheets:OnCalendar=YES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: split eventIds for delete": {
+      "main": [
+        [
+          {
+            "node": "Delete old event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  }
+}

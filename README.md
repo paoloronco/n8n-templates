@@ -317,7 +317,7 @@ Reads every workflow on your n8n instance every 30 minutes, extracts their sched
 
 📂 **Folder** → [`/free-templates/6 Sync n8n schedule to GoogleCalendar](./free-templates/6%Sync%n8n%schedule%to%GoogleCalendar)
 
-👥 **n8n Community Template**: coming soon
+👥 **n8n Community Template**: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
 
 📄 Files included:
 

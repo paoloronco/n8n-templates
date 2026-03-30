@@ -16,6 +16,12 @@ Schedule Trigger (30 min)
 
 State is stored in a Google Sheets tab (`n8n Scheduling`). The sheet acts as the single source of truth between runs.
 
+📕 Full documentation: https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link
+
+📂 **Folder** → [`/free-templates/6 Sync n8n schedule to GoogleCalendar](./free-templates/6%Sync%n8n%schedule%to%GoogleCalendar)
+
+👥 **n8n Community Template**: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
+
 ## What gets a Calendar event
 
 | Schedule type | Result |

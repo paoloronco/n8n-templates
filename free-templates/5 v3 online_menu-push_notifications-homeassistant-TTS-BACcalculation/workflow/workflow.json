@@ -1,0 +1,346 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking\n\n📖 [Full documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5)\n\n### How it works\n\n1. Receives a menu order through a webhook (POST body: `name`, `time`, `items[]`).\n2. Normalizes the customer name and formats the order string.\n3. Logs the order to a DataTable (item, person, alcohol_grams, date, order_time).\n4. Reads all of today's orders for that person from the DataTable.\n5. Calculates a cumulative BAC estimate using the Widmark formula.\n6. Sends a push notification via ntfy and announces the order via Home Assistant TTS.\n\n### Setup steps\n\n- [ ] Create a DataTable node with columns: `item`, `person`, `alcohol_grams`, `date`, `order_time`\n- [ ] Set up ntfy credentials (HTTP Header Auth) in the **Send Ntfy Notification** node\n- [ ] Set the ntfy URL to your server/topic (e.g. `https://ntfy.sh/your-topic`)\n- [ ] Set up Home Assistant credentials and update the script service name\n- [ ] Adjust the Widmark formula weight/factor if needed (default: 70 kg, 0.68)\n\n### Customization\n\nThe BAC thresholds, weight constant, and notification message format can all be adjusted in the **Calculate Cumulative BAC** node.",
+        "height": 800,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        368
+      ],
+      "id": "709a58d2-d2fe-422d-bb31-7c7ae04af1c3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Receive and prepare orders\n\nReceives the menu order via a webhook and prepares the data by normalizing and calculating necessary order information.",
+        "height": 304,
+        "width": 432,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        368
+      ],
+      "id": "9e8f77e4-7dcb-4647-a5e2-fb00028c5b16",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Log order and read data\n\nLogs the prepared order into the database and reads the accumulated orders for the day.",
+        "height": 304,
+        "width": 432,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        368
+      ],
+      "id": "067991b5-23c9-4174-b9a5-6b6bb6982808",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Calculate BAC and notify\n\nCalculates the cumulative BAC from today's orders and sends notifications followed by TTS announcements.",
+        "height": 304,
+        "width": 672,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        368
+      ],
+      "id": "efea2242-1257-4f84-ac0b-1c8d1281d491",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "menu",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1696,
+        496
+      ],
+      "id": "817f6c00-fbfd-4d4f-b0cf-0af68bc32893",
+      "name": "When Order Received",
+      "webhookId": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize name, calculate alcohol amount and order string for current order\nconst body        = $input.first().json.body;\nconst rawName     = (body.name || 'Anonymous').trim();\nconst name        = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();\nconst orderTime   = body.time || new Date().toLocaleString();\nconst items       = body.items || [];\nconst today       = new Date().toISOString().slice(0, 10);\n\nconst alcoholGrams = items.reduce((s, i) => s + (i.alcohol_grams || 0) * (i.quantity || 1), 0);\n\nconst orderStr = items\n  .map(i => {\n    let s = i.quantity + 'x ' + i.name;\n    if (i.detail) s += ' ' + i.detail;\n    return s;\n  })\n  .join(', ');\n\nreturn [{ json: { name, orderTime, items, orderStr, alcoholGrams: Math.round(alcoholGrams * 10) / 10, today } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        496
+      ],
+      "id": "a19b54cd-144d-4fd1-b0dc-0aa34f25a972",
+      "name": "Calculate Alcohol and Format Order"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "item": "={{ $json.orderStr }}",
+            "person": "={{ $json.name }}",
+            "alcohol_grams": "={{ $json.alcoholGrams }}",
+            "date": "={{ $json.today }}",
+            "order_time": "={{ $json.orderTime }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "person",
+              "displayName": "person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "alcohol_grams",
+              "displayName": "alcohol_grams",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "order_time",
+              "displayName": "order_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        496
+      ],
+      "id": "114d6f2c-17f4-422b-b6d9-6072b6b3e9aa",
+      "name": "Log Order to Database"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "person",
+              "keyValue": "={{ $('Calculate Alcohol and Format Order').item.json.name }}"
+            },
+            {
+              "keyName": "date",
+              "keyValue": "={{ $('Calculate Alcohol and Format Order').item.json.today }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2384,
+        496
+      ],
+      "id": "52f52c12-7940-4364-9b77-1fa63ecbd2c5",
+      "name": "Read Today's Orders"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate cumulative BAC by reading today's rows from the DataTable\n// rows = all orders for this person today (including the one just inserted)\nconst rows       = $input.all().map(i => i.json);\nconst name       = $('Calculate Alcohol and Format Order').item.json.name;\nconst orderTime  = $('Calculate Alcohol and Format Order').item.json.orderTime;\nconst orderStr   = $('Calculate Alcohol and Format Order').item.json.orderStr;\n\nconst totalAlcohol = Math.round(rows.reduce((s, r) => s + (r.alcohol_grams || 0), 0) * 10) / 10;\nconst orderCount   = rows.length;\nconst bac          = totalAlcohol > 0 ? totalAlcohol / (70 * 0.68) : 0;\nconst bacStr       = bac.toFixed(2);\n\nconst E_OK    = String.fromCodePoint(0x1F7E2);\nconst E_WARN  = String.fromCodePoint(0x1F7E1);\nconst E_OVER  = String.fromCodePoint(0x1F534);\nconst E_NONE  = String.fromCodePoint(0x2B1C);\nconst E_LIST  = String.fromCodePoint(0x1F4CB);\nconst E_CLOCK = String.fromCodePoint(0x1F552);\nconst E_DRINK = String.fromCodePoint(0x1F378);\nconst E_WATER = String.fromCodePoint(0x1F964);\nconst E_TIME  = String.fromCodePoint(0x1F550);\n\nlet bacLevel;\nif      (bac === 0)  bacLevel = E_NONE;\nelse if (bac < 0.2)  bacLevel = E_OK;\nelse if (bac < 0.5)  bacLevel = E_WARN;\nelse                  bacLevel = E_OVER;\n\n// Previous orders = all rows except the last one (just inserted)\nconst prevOrders = rows.slice(0, -1);\nconst historyStr = prevOrders.length > 0\n  ? '\\n' + E_LIST + ' Already ordered today (' + prevOrders.length + ' orders):\\n'\n    + prevOrders.map(r => '  - ' + r.item + '  ' + E_CLOCK + ' ' + r.order_time).join('\\n')\n  : '';\n\nconst bacRow = totalAlcohol > 0\n  ? '\\n' + E_DRINK + ' BAC ~' + bacStr + ' g/L  ' + bacLevel\n  : '\\n' + E_WATER + ' no alcohol';\n\nconst message = name + ': ' + orderStr\n  + '\\n' + E_TIME + ' ' + orderTime\n  + historyStr\n  + bacRow;\n\nreturn [{\n  json: {\n    name,\n    orderTime,\n    orderStr,\n    message,\n    bac:          bacStr,\n    bacLevel,\n    totalAlcohol,\n    alcoholGrams: $('Calculate Alcohol and Format Order').item.json.alcoholGrams,\n    orderCount,\n    today: $('Calculate Alcohol and Format Order').item.json.today\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2608,
+        496
+      ],
+      "id": "634dc78b-3e39-4b2e-b030-ba4c734f7548",
+      "name": "Calculate Cumulative BAC"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_NTFY_SERVER/YOUR_TOPIC",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2848,
+        496
+      ],
+      "id": "929d8f78-ead4-4545-8e45-77c32b8a5d16",
+      "name": "Send Ntfy Notification"
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "script",
+        "service": "announce_order",
+        "serviceAttributes": {
+          "attributes": [
+            {
+              "name": "message",
+              "value": "={{ $json.name }} HAS ORDERED {{ $('When Order Received').item.json.body.items[0].name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [
+        3088,
+        496
+      ],
+      "id": "e1accf02-8716-4f2e-ae39-9b1dbc6bd392",
+      "name": "Announce Order with Home Assistant"
+    }
+  ],
+  "connections": {
+    "When Order Received": {
+      "main": [
+        [
+          {
+            "node": "Calculate Alcohol and Format Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Alcohol and Format Order": {
+      "main": [
+        [
+          {
+            "node": "Log Order to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Order to Database": {
+      "main": [
+        [
+          {
+            "node": "Read Today's Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Today's Orders": {
+      "main": [
+        [
+          {
+            "node": "Calculate Cumulative BAC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Cumulative BAC": {
+      "main": [
+        [
+          {
+            "node": "Send Ntfy Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Ntfy Notification": {
+      "main": [
+        [
+          {
+            "node": "Announce Order with Home Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  }
+}

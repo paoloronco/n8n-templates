@@ -6,6 +6,10 @@
 
 Receive instant push notifications on your phone **and** voice announcements on your Google Home every time someone orders — with cumulative **BAC tracking** per person. Powered by **n8n**, [**ntfy.sh**](http://ntfy.sh), **Home Assistant**, and n8n **DataTable**.
 
+👥 **n8n Community Template**: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
+
+📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?pvs=74)
+
 ------
 
 ## Overview

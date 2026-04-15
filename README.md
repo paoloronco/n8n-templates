@@ -275,8 +275,6 @@ No third-party notification APIs. No cloud TTS fees. Fully self-hosted.
 
 📕 Full documentation: [Documentation: Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
 
-👥 **n8n Community Template** : coming soon
-
 📄 Files included:
 
 * **workflow/menu-order-notifications-with-tts.json** – Complete n8n importable workflow
@@ -296,7 +294,7 @@ Extension of template 5 v2. Adds **BAC (Blood Alcol Concentration)** logic on to
 
 📂 **Folder** → [`/free-templates/5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation`](./free-templates/5%20v3%20online_menu-push_notifications-homeassistant-TTS-BACcalculation)
 
-👥 **n8n Community Template**: coming soon
+👥 **n8n Community Template**: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 
 📄 Files included:
 

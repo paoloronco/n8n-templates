@@ -1,209 +1,141 @@
-**Full Workflow Description – “Tech & AI Daily Briefing (RSS → AI → Email)”**
+# 📰 Tech & AI Daily Briefing (RSS → AI → Email)
 
-This workflow automates the entire lifecycle of collecting, filtering, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.  
-It functions as a **fully autonomous editorial engine**, combining dozens of RSS feeds, structured data processing, and an LLM (Google Gemini) to transform a large volume of raw articles into a concise, high–value daily briefing delivered straight to your inbox.
+This workflow automates the entire lifecycle of collecting, filtering, deduplicating, summarizing, and delivering the most important daily news in **technology, artificial intelligence, cybersecurity, and the digital industry**.
 
-📕Full deploy guide: [paoloronco.it - Full deploy guide - Tech & AI Daily Briefing](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
+It works as a **fully autonomous editorial engine**: it ingests ~25 RSS feeds, normalizes and deduplicates the articles, and uses a **resilient multi-model AI chain** (OpenAI as primary, Google Gemini as fallback, and a deterministic renderer as the final safety net) to turn a large volume of raw articles into a concise, high-value daily briefing — delivered to a list of subscribers via email.
+
+📕 Full deploy guide: [paoloronco.it – Full deploy guide – Tech & AI Daily Briefing](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
 
 👥 n8n Community Template: [Curate and Send Tech News Digests with RSS, Gemini AI and Gmail](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 
 ![workflow](Assets/workflow.png)
 
-* * *
+---
 
-✅ **1. Scheduled Automation**
------------------------------
+## ⚙️ Setup
 
-The workflow begins with a **Schedule Trigger**, which runs at predefined intervals.  
-Every execution generates a fresh briefing that reflects the most relevant news from the **past 24 hours**.
+Before running the workflow, configure the following credentials and placeholders. The exported JSON is sanitized — no real keys, IDs, or recipients are included.
 
-* * *
+| Item | Where | What to set |
+|---|---|---|
+| **OpenAI API** | `OpenAI Chat Model - Primary` | Your OpenAI credential (primary model: `gpt-4.1-mini`) |
+| **Google Gemini (PaLM) API** | `LLM - News Summarizer` | Your Gemini credential (fallback model: `gemini-2.5-flash`) |
+| **Google Service Account** | `Get News Subscribers` | Service account with access to your subscribers Google Sheet |
+| **`YOUR_GOOGLE_SHEET_ID`** | `Get News Subscribers` | ID of the Sheet holding a `Subscriber_email` column |
+| **SMTP (e.g. Mailgun)** | `MailGun Send_News` | Your SMTP credential |
+| **`news@example.com`** | `MailGun Send_News` → *From* | Your verified sender address |
 
-✅ **2. Massive Multi-Source RSS Collection**
---------------------------------------------
+> **Test tip:** before going live, temporarily point the send node to a single explicit recipient instead of the full subscriber list.
 
-The workflow gathers content from over 25 curated RSS feeds covering:
+---
 
-### **🔐 Cybersecurity**
+## ✅ 1. Triggers
 
-(The Hacker News, Krebs on Security, SANS, CVE feeds, Google Cloud Threat Intelligence, Cisco Talos, etc.)
+The workflow can start in two ways, both feeding the same ingestion pipeline:
 
-### **🤖 Artificial Intelligence**
+- **Schedule Trigger** — runs daily at **07:30**, generating a fresh briefing from the **last 24 hours**.
+- **Webhook** (`/tech-news`) — manual entry point for on-demand testing without maintaining a separate test flow.
 
-(Google Research, MIT News, AI News, OpenAI News)
+---
 
-### **💻 Technology & Digital Industry**
+## ✅ 2. Massive Multi-Source RSS Collection
 
-(Il Sole 24 Ore, Cybersecurity360, Graham Cluley, and more)
+Content is gathered from ~25 curated RSS feeds, each handled by a **dedicated node** for source isolation, easier debugging, and no single point of failure. Every feed node uses `retryOnFail` and an error output, so a single broken provider never blocks the run.
 
-### **⚙️ Nvidia Ecosystem**
+Feeds are grouped by topic and consolidated through category-level **Merge** nodes:
 
-(Nvidia Newsroom, Nvidia Developer Blog, Nvidia Blog)
+### 🔐 Cybersecurity
+The Hacker News, Cybersecurity News, Krebs on Security, Dark Reading, Cisco Talos, ESET, Google Cloud Threat Intelligence, Il Sole 24 Ore (Cyber), Cybersecurity360.
 
-Each RSS feed is handled by a **dedicated node**, which ensures:
+### 🤖 Artificial Intelligence & Research
+Google Research, MIT, OpenAI, Anthropic, Google DeepMind.
 
-* source isolation
+### 💻 General Technology & Digital Industry
+TechCrunch, Ars Technica, Wired, The Verge, Reuters Tech, Il Sole 24 Ore (Tech).
 
-* easier debugging
+### ⚙️ NVIDIA Ecosystem
+NVIDIA Newsroom, NVIDIA Developer Blog, NVIDIA Blog.
 
-* no single point of failure
+---
 
-The feeds are grouped using category-specific **Merge** nodes (Cyber1/2/3, AI, Nvidia), enabling modular scalability.
+## ✅ 3. Unified Feed Aggregation
 
-* * *
+All category merges (`Merge_Cyber1`, `Merge_Cyber3`, `Merge_AI`, `Merge_Tech`, `Merge_Nvidia`) feed into a single **`Merge_All`** node, creating one combined dataset from every source.
 
-✅ **3. Unified Feed Aggregation**
----------------------------------
+---
 
-All category merges feed into the **Merge_All** node, creating a single combined dataset of articles from every source.
+## ✅ 4. Intelligent Filtering (last 24 hours)
 
-* * *
+The **Filter** node keeps only articles published in the **past 24 hours** (based on `isoDate`), discarding stale and invalid items so the briefing stays strictly current.
 
-✅ **4. Intelligent Filtering (last 24 hours only)**
----------------------------------------------------
+---
 
-The **Filter** node removes:
+## ✅ 5. Chronological Sorting
 
-* articles older than **24 hours** (based on `isoDate`)
+The **Sort – Articles by Date** node orders the remaining items by `isoDate` in descending order, prioritizing the most recent and time-sensitive news.
 
-* invalid items
+---
 
-* duplicated or redundant entries
+## ✅ 6. Normalization, Deduplication & Source Capping (JavaScript Code)
 
-This keeps the briefing strictly relevant to the current day.
+A dedicated **Code** node transforms the raw items into a clean, balanced dataset:
 
-* * *
+- **Normalizes** each article into `{ title, content, link, isoDate, source }`.
+- **Tags the human-readable source** from the article domain (e.g. `krebsonsecurity.com → Krebs on Security`).
+- **Deduplicates** near-identical stories via title word-overlap similarity (>65%).
+- **Caps each source to max 4 articles**, so no single outlet dominates the briefing.
 
-✅ **5. Chronological Sorting**
-------------------------------
+The output is a single object with an `articles` array, ready for the AI stage.
 
-The **Sort – Articles by Date** node orders all remaining items in descending date order.  
-More recent or time-sensitive news is therefore prioritized.
+---
 
-* * *
+## ✅ 7. Resilient AI Editorial Chain
 
-✅ **6. Data Normalization (JavaScript Code)**
----------------------------------------------
+This is the editorial brain of the workflow, designed so that **provider rate limits or malformed output never block delivery**:
 
-A dedicated Code node transforms all incoming items into **one clean JSON object**:
-    {
-      "articles": [
-        {
-          "title": "...",
-          "content": "...",
-          "link": "...",
-          "isoDate": "..."
-        }
-      ]
-    }
+1. **Primary — OpenAI AI Agent.** A deterministic senior-editor prompt selects 7–10 truly relevant stories, enforces topic diversity and per-category caps, deduplicates, and outputs **structured JSON only** (categories → articles with `title`, `summary`, `source_name`, `link`).
+2. **Fallback — Google Gemini.** On primary failure, Gemini runs the same prompt with retry/backoff (3 tries, 60s wait).
+3. **Final safety net — Deterministic renderer.** If both models fail, the HTML builder classifies and summarizes the pre-processed articles itself, so a briefing is always produced.
 
-This standardized structure becomes the input for the LLM summarization stage.
+The LLMs produce **data only** — all HTML rendering is owned by the next node. Strict anti-hallucination rules require links and sources to be copied verbatim from the input.
 
-* * *
+---
 
-✅ **7. AI Editorial Processing – Google Gemini**
-------------------------------------------------
-
-The node **LLM – News Summarizer** is the workflow’s editorial brain.
-
-A complex prompt instructs Gemini to behave like the **editor-in-chief of a major tech newspaper**, enforcing strict rules:
-
-### Selection rules:
-
-* choose only **8–10 truly important stories**
-
-* ignore low-value content (minor product releases, clickbait, rumors…)
-
-### Relevance criteria:
-
-* AI research & foundation models
-
-* Big Tech developments
-
-* cybersecurity incidents
-
-* regulation and digital policy
-
-* semiconductors, cloud, and infrastructure
-
-* digital rights, governance, sovereignty
-
-### Deduplication:
-
-If multiple feeds report the same story, only one version is kept.
-
-### Output format:
-
-Gemini must output **a valid JSON object** containing:
-
-* `subject`: the email subject line
-
-* `html`: a fully structured HTML body grouped into categories
-
-Each news item ends with a **clickable HTML source link**, NEVER plaintext URLs.
-
-This step condenses dozens of articles into a **polished, editorial-grade briefing**.
-
-* * *
-
-✅ **8. HTML Newsletter Assembly (Code Node)**
----------------------------------------------
+## ✅ 8. HTML Newsletter Assembly (Code Node)
 
 The **Build Final Newsletter HTML** node:
 
-* safely parses the JSON from the LLM
+- Robustly extracts and parses the JSON from any model output format (strips ```json fences, repairs trailing commas).
+- Falls back to the deterministic renderer when data is missing or invalid.
+- Escapes content and renders only valid `https?://` source links.
+- Embeds everything into a **modern, responsive HTML email template** grouped by category.
 
-* cleans any ```json fences or extra text
+Output: a single item with the final `subject` and `html`.
 
-* validates `subject` and `html` fields
+---
 
-* embeds the content into a **modern, responsive HTML email template**
+## ✅ 9. Subscriber Delivery
 
-The output is a single item containing:
-
-* the final email subject
-
-* the final HTML body  
-  Ready to be sent.
-
-* * *
-
-✅ **9. Automatic Email Delivery**
----------------------------------
-
-The **Send Final Digest Email** (Gmail node):
-
-* uses the generated subject
-
-* sends the curated HTML newsletter
-
-* delivers it to the configured recipient(s)
-
-* uses a custom sender name (“n8n News”)
+- **Get News Subscribers** (Google Sheets) loads the recipient list.
+- The **IF** node validates each address (non-empty and contains `@`).
+- **MailGun Send_News** (SMTP) sends the curated HTML newsletter to each valid subscriber from the configured sender address.
 
 The result is a fully automated **Tech & AI Daily Briefing** delivered with zero manual effort.
 
-* * *
+---
 
-**In Summary: What This Workflow Achieves**
-===========================================
+## In Summary: What This Workflow Achieves
 
-✔ Collects news from **25+ high-quality RSS sources**  
-✔ Normalizes, filters, and sorts all items automatically  
-✔ Uses **Google Gemini** to select only the stories that truly matter  
-✔ Generates a coherent, readable, professional-looking HTML newsletter  
-✔ Sends the result via email every day
+✔ Collects news from **~25 high-quality RSS sources**
+✔ Normalizes, filters, sorts, deduplicates, and caps sources automatically
+✔ Uses a **resilient OpenAI → Gemini → deterministic** chain to select only what matters
+✔ Generates a coherent, readable, professional HTML newsletter
+✔ Delivers it to a **subscriber list** via SMTP every day
 
-Perfect for:
+**Perfect for:**
 
-* daily executive briefings
-
-* technology and cybersecurity monitoring
-
-* automated newsletter production
-
-* internal knowledge distribution
-
-* competitive intelligence workflows
-
-
+- daily executive briefings
+- technology and cybersecurity monitoring
+- automated newsletter production
+- internal knowledge distribution
+- competitive intelligence workflows

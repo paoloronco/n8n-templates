@@ -1,19 +1,219 @@
 {
-  "name": "News_Tech_EN",
+  "name": "4 📰News_Tech",
   "nodes": [
     {
       "parameters": {
-        "url": "https://feeds.feedburner.com/TheHackersNews",
+        "content": "## 01 · Triggers\n\nDaily schedule and manual webhook entry point.\n\nBoth paths run through the same RSS ingestion pipeline, so manual tests exercise the production logic without maintaining a separate test flow.",
+        "height": 520,
+        "width": 360,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5488,
+        6432
+      ],
+      "id": "4b04792c-5b8d-48c2-987d-0b50128be4e7",
+      "name": "NOTE 01 - Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 02 · Cybersecurity Sources\n\nSecurity-focused RSS feeds are grouped here for clear ownership and easier troubleshooting.\n\nEach source is kept as a dedicated node. Category-level Merge nodes consolidate related feeds before the global merge, making it simple to disable, replace, or debug a single provider.",
+        "height": 1412,
+        "width": 1150,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6032,
+        5360
+      ],
+      "id": "6902d12d-cbbc-4f6f-8886-d2d5ac9285f4",
+      "name": "NOTE 02 - RSS Cybersecurity"
+    },
+    {
+      "parameters": {
+        "content": "## 03 · AI, Research & Semiconductors\n\nAI labs, research outlets, cloud/infra sources, and NVIDIA feeds are grouped separately from cybersecurity and general tech.\n\nThis keeps topic balance visible and prevents a single domain from dominating the final briefing.",
+        "height": 1160,
+        "width": 1150,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6032,
+        6816
+      ],
+      "id": "98f7b396-56d3-4392-9b32-310bd05192bd",
+      "name": "NOTE 03 - RSS AI and Chips"
+    },
+    {
+      "parameters": {
+        "content": "## 04 · General Technology Sources\n\nBroad technology coverage from TechCrunch, Ars Technica, Wired, The Verge, and Reuters Tech.\n\nThese feeds provide wider industry context and are merged separately before joining the global article stream.",
+        "height": 808,
+        "width": 1150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6032,
+        8032
+      ],
+      "id": "0e564b75-77aa-4636-88cf-37f53d3dc03b",
+      "name": "NOTE 04 - RSS Tech General"
+    },
+    {
+      "parameters": {
+        "content": "## 05 · Merge, Filter, Sort, Normalize\n\nAll topic streams converge into `Merge_All`.\n\nThe pipeline then keeps recent items only, sorts by publication date, deduplicates, caps noisy sources, and normalizes every article into a single `articles` array for downstream AI processing.",
+        "height": 592,
+        "width": 1080,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7424,
+        6496
+      ],
+      "id": "8a04748a-61a6-4d07-a770-61a6bd40aa6a",
+      "name": "NOTE 05 - Merge and Normalize"
+    },
+    {
+      "parameters": {
+        "content": "## 06 · Reliable AI Generation Chain\n\nPrimary: OpenAI AI Agent for the production-quality briefing.\n\nFallback: Gemini with retry/backoff when the primary path fails.\n\nFinal safety net: deterministic HTML renderer fallback, so provider rate limits or malformed LLM output never block delivery.",
+        "height": 600,
+        "width": 900,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8560,
+        6496
+      ],
+      "id": "e660efd2-aa69-4694-8181-c193818a7889",
+      "name": "NOTE 06 - Reliable AI Chain"
+    },
+    {
+      "parameters": {
+        "content": "## 07 · Render & Delivery\n\nThe renderer converts structured AI output into the final responsive HTML newsletter.\n\nSubscribers are loaded from Google Sheets, validated, and delivered through Mailgun. Test sends should temporarily route to an explicit single recipient only.",
+        "height": 432,
+        "width": 820,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9520,
+        6496
+      ],
+      "id": "cbd07720-b327-4aa8-bdc1-00843f542a0b",
+      "name": "NOTE 07 - Render and Send"
+    },
+    {
+      "parameters": {
+        "fromEmail": "news@example.com",
+        "toEmail": "={{ $json.Subscriber_email }}",
+        "subject": "News TECH",
+        "html": "={{ $('Build Final Newsletter HTML').item.json.html }}",
         "options": {}
       },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
       "position": [
-        -1040,
-        -448
+        10160,
+        6720
       ],
-      "id": "4da74104-9743-462b-8919-9cd595ce683a",
-      "name": "RSS_TheHackersNews"
+      "id": "ee903274-7071-438e-a5c5-9e74b6e81d46",
+      "name": "MailGun Send_News",
+      "webhookId": "5d72bf49-a23f-4f88-9a05-c696a4a806ec",
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Subscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Subscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        9648,
+        6736
+      ],
+      "id": "b8b7bac0-2d8f-4287-a102-2f09015f08ff",
+      "name": "Get News Subscribers",
+      "retryOnFail": true,
+      "credentials": {
+        "googleApi": {
+          "id": "YOUR_GOOGLE_SA_CREDENTIAL_ID",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e5324950-62e8-4849-bd32-6c77674af727",
+              "leftValue": "={{ $json.Subscriber_email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a09b4119-4275-4d90-9163-360242149eb2",
+              "leftValue": "={{ $json.Subscriber_email }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9888,
+        6736
+      ],
+      "id": "a1954142-5eb8-4c03-898b-b9cb7ee09edc",
+      "name": "If"
     },
     {
       "parameters": {
@@ -23,11 +223,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        -64
+        6224,
+        5520
       ],
-      "id": "d6c68cbe-61a3-4217-a90c-34da70f91ac7",
-      "name": "RSS_GrahamCluley"
+      "id": "13950794-b06b-43cd-ba1f-17a8e22051d3",
+      "name": "RSS_TheHackersNews",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -37,11 +239,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        -320
+        6224,
+        5648
       ],
-      "id": "9f7c8f2f-5261-4918-95bb-d3fba6420773",
-      "name": "RSS_cybersecuritynews"
+      "id": "c2f767f1-5b2e-49b6-85ef-a0f0eb2aed1a",
+      "name": "RSS_cybersecuritynews",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -51,11 +255,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1040
+        6224,
+        6256
       ],
-      "id": "301a3616-d053-4816-aafa-a7099f33eecb",
-      "name": "RSS_ilsole24ore Tech"
+      "id": "8d1b30b4-739c-41dc-9e19-9f7e986a5f09",
+      "name": "RSS_ilsole24ore Tech",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -65,11 +271,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        912
+        6224,
+        6144
       ],
-      "id": "67a27f78-8f18-4c01-ba07-9175b7b35396",
-      "name": "RSS_ilsole24ore Cyber"
+      "id": "2038e030-f456-48a7-b77d-7639472af9c7",
+      "name": "RSS_ilsole24ore Cyber",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -79,40 +287,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1168
+        6224,
+        6384
       ],
-      "id": "73d381f7-0589-4b1c-b5f0-3601b8ff32b3",
-      "name": "RSS_cybersecurity360"
-    },
-    {
-      "parameters": {
-        "content": "### CyberSecurity",
-        "height": 2096,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1104,
-        -512
-      ],
-      "id": "e872dc6b-e6bf-4da1-82bc-9218914722a4",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "url": "https://www.artificialintelligence-news.com/feed/",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        1632
-      ],
-      "id": "aafe97e9-8bcd-44f8-b486-e51ef3e438cf",
-      "name": "RSS_artificialintelligence-news."
+      "id": "a92f6d16-e268-47d8-91fc-9b7d8ceafa71",
+      "name": "RSS_cybersecurity360",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -122,11 +303,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1760
+        6224,
+        7232
       ],
-      "id": "85ebe282-13f3-484d-a4ac-27115596c0d8",
-      "name": "RSS_GoogleResearch"
+      "id": "f8499153-5e91-4556-afee-80cc3fa93551",
+      "name": "RSS_GoogleResearch",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -136,26 +319,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1888
+        6224,
+        7360
       ],
-      "id": "68ab41cb-f7f7-4de1-8e89-c3d437d01a0d",
-      "name": "RSS_MIT"
-    },
-    {
-      "parameters": {
-        "content": "### AI",
-        "height": 560,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1104,
-        1600
-      ],
-      "id": "4c11828a-01e7-41e4-8271-1a61db3b6838",
-      "name": "Sticky Note1"
+      "id": "2e796bae-65af-45a1-b7c0-f73fc21367af",
+      "name": "RSS_MIT",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -184,10 +354,10 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        160,
-        1216
+        7792,
+        6752
       ],
-      "id": "f43023df-1b86-4c72-878f-b6558dddba9d",
+      "id": "91070006-fb70-4c41-8a6a-bd444769cb77",
       "name": "Filter"
     },
     {
@@ -202,64 +372,40 @@
         },
         "options": {}
       },
-      "id": "1cb69db6-d8ff-4b90-875d-f54720058744",
+      "id": "59eb3344-31a9-41f5-8e74-98eb29173b69",
       "name": "Sort - Articles by Date",
       "type": "n8n-nodes-base.sort",
       "position": [
-        400,
-        1216
+        8064,
+        6752
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "jsCode": "// Take the output from the LLM - News Summarizer node\nconst item = items[0].json;\n\n// 1. Get raw text from Gemini format\nlet text = item?.content?.parts?.[0]?.text;\nif (!text) {\n  throw new Error(\n    \"Unexpected LLM output, missing content.parts[0].text:\\n\" +\n    JSON.stringify(item, null, 2)\n  );\n}\n\n// 2. If there is ```json ... ``` remove the fences\nconst fenced = text.match(/```json?[\\s\\n]*([\\s\\S]*?)```/i);\nif (fenced) {\n  text = fenced[1].trim();\n}\n\n// 3. Extract the first { ... } block (in case the model adds text before/after)\nlet candidate = text;\nconst start = candidate.indexOf(\"{\");\nconst end = candidate.lastIndexOf(\"}\");\nif (start === -1 || end === -1) {\n  throw new Error(\n    \"No JSON object found in LLM output:\\n\" + text\n  );\n}\ncandidate = candidate.slice(start, end + 1);\n\n// 4. Clean trailing commas before } or ]\ncandidate = candidate.replace(/,\\s*([}\\]])/g, \"$1\");\n\n// 5. Parse JSON\nlet data;\ntry {\n  data = JSON.parse(candidate);\n} catch (err) {\n  throw new Error(\n    \"JSON parse error (inner payload from LLM):\\n\" +\n    err.message +\n    \"\\n\\nPayload was:\\n\" +\n    candidate\n  );\n}\n\n// 6. Special cases: { \"text\": \"{...}\" } etc.\nif (data.text && (!data.subject || !data.html)) {\n  try {\n    const inner = JSON.parse(data.text);\n    if (inner.subject && inner.html) {\n      data = inner;\n    }\n  } catch {\n    // if it fails, keep data as-is and proceed\n  }\n}\n\n// 7. Final validation\nif (!data.subject || !data.html) {\n  throw new Error(\n    \"LLM JSON does not contain subject/html as expected:\\n\" +\n    JSON.stringify(data, null, 2)\n  );\n}\n\n// 8. HTML email template\nconst htmlEmail = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>${data.subject}</title>\n  <style>\n    body { font-family: Arial, sans-serif; line-height:1.5; color:#333; background-color:#f7f9fa; margin:0; padding:20px; }\n    .container { max-width:700px; margin:0 auto; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); overflow:hidden; }\n    .header { background:#2c3e50; color:#fff; padding:20px; text-align:center; }\n    .header h1 { margin:0; font-size:24px; }\n    .content { padding:20px; }\n    h2 { color:#e74c3c; border-bottom:2px solid #e74c3c; padding-bottom:5px; }\n    ul { padding-left:20px; }\n    li { margin-bottom:10px; }\n    a { color:#2980b9; text-decoration:none; }\n    a:hover { text-decoration:underline; }\n    .footer { background:#ecf0f1; text-align:center; padding:10px; font-size:12px; color:#7f8c8d; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>${data.subject}</h1>\n    </div>\n    <div class=\"content\">\n      ${data.html}\n    </div>\n    <div class=\"footer\">\n      <em>Briefing automatically sent on ${new Date().toLocaleDateString('en-US', {\n        year: 'numeric', month: 'long', day: 'numeric'\n      })}.</em>\n    </div>\n  </div>\n</body>\n</html>\n`.trim();\n\n// 9. Return data for the Gmail node\nreturn [\n  {\n    json: {\n      subject: data.subject,\n      html: htmlEmail,\n    },\n  },\n];\n"
+        "jsCode": "// ============================================================\n// Build Final Newsletter HTML\n// Input: structured JSON from OpenAI primary or Gemini fallback (categories array)\n// This node owns ALL HTML rendering — LLM produces data only.\n// ============================================================\nconst item = items[0].json;\n\n// ── STEP 1: Extract raw text from any Gemini output format ──\nlet rawText = null;\nfor (const c of [item?.text, item?.output, item?.content?.parts?.[0]?.text,\n                 item?.candidates?.[0]?.content?.parts?.[0]?.text, item?.response]) {\n  if (typeof c === 'string' && c.trim().length > 10) { rawText = c.trim(); break; }\n}\nif (!rawText) {\n  const find = (o, d) => {\n    if (d > 5) return null;\n    if (typeof o === 'string' && o.length > 30) return o;\n    if (!o || typeof o !== 'object') return null;\n    for (const v of Object.values(o)) { const r = find(v, d+1); if (r) return r; }\n    return null;\n  };\n  rawText = find(item, 0);\n}\n\n// ── STEP 2: Parse JSON from LLM output ──────────────────────\nlet data = null;\nif (rawText) {\n  let t = rawText;\n  const fence = t.match(/```(?:json)?\\s*([\\s\\S]*?)```/i);\n  if (fence) t = fence[1].trim();\n  const s = t.indexOf('{'), e = t.lastIndexOf('}');\n  if (s !== -1 && e !== -1) {\n    const candidate = t.slice(s, e+1).replace(/,\\s*([}\\]])/g, '$1');\n    try { data = JSON.parse(candidate); } catch(_) {}\n  }\n  if (!data) { try { data = JSON.parse(rawText); } catch(_) {} }\n}\n\n// ── STEP 3: Build date string ────────────────────────────────\nconst now = new Date();\nconst dateIT = data?.date || now.toLocaleDateString('it-IT', {weekday:'long', year:'numeric', month:'long', day:'numeric'});\nconst subjectDate = now.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});\n\n// ── STEP 4: Handle error / missing data ─────────────────────\n// If primary/fallback LLM hits quota/rate limits, the nodes are configured with error outputs\n// that carries the original pre-processed articles plus item.error. Build a\n// deterministic fallback briefing instead of silently ending the workflow.\nif (!data || data.error || !Array.isArray(data.categories) || data.categories.length === 0) {\n  const fallbackArticles = Array.isArray(item?.articles) ? item.articles : [];\n  if (fallbackArticles.length > 0) {\n    const allowedOrder = [\n      'Cybersecurity & Cyberwar',\n      'AI & Machine Learning',\n      'Big Tech & Industria Digitale',\n      'Regolazione & Politiche Digitali',\n      'Infrastrutture, Cloud & Chip',\n      'Economia Tech & Mercati',\n      'Società Digitale & Diritti',\n    ];\n    const classify = (a) => {\n      const t = `${a.title || ''} ${a.content || ''} ${a.source || ''}`.toLowerCase();\n      if (/hack|breach|ransom|malware|vulnerab|cve|cyber|security|threat|phishing|exploit|spy|token|oauth|claude code mcp/.test(t)) return 'Cybersecurity & Cyberwar';\n      if (/ai|artificial intelligence|machine learning|llm|model|gemini|openai|anthropic|deepmind|agent|nvidia|gpu/.test(t)) return 'AI & Machine Learning';\n      if (/cloud|datacenter|data center|chip|semiconductor|gpu|nvidia|infrastructure|server/.test(t)) return 'Infrastrutture, Cloud & Chip';\n      if (/regulation|regol|privacy|antitrust|dma|ai act|govern|policy|ue|european|law/.test(t)) return 'Regolazione & Politiche Digitali';\n      if (/market|funding|startup|ipo|layoff|acquisition|revenue|stock|invest/.test(t)) return 'Economia Tech & Mercati';\n      if (/privacy|surveillance|rights|misinformation|social|society/.test(t)) return 'Società Digitale & Diritti';\n      return 'Big Tech & Industria Digitale';\n    };\n    const summarize = (a) => {\n      const text = (a.content || '').replace(/\\s+/g, ' ').trim();\n      if (!text) return 'Notizia selezionata dalle fonti monitorate; apri il link originale per i dettagli completi.';\n      const words = text.split(/\\s+/).slice(0, 45).join(' ');\n      return words + (text.split(/\\s+/).length > 45 ? '…' : '');\n    };\n    const buckets = Object.fromEntries(allowedOrder.map(c => [c, []]));\n    const seen = new Set();\n    for (const a of fallbackArticles) {\n      if (!a?.title || !a?.link || seen.has(a.link)) continue;\n      seen.add(a.link);\n      const cat = classify(a);\n      if (buckets[cat].length < 3) {\n        buckets[cat].push({\n          title: a.title,\n          summary: summarize(a),\n          source_name: a.source || 'Fonte originale',\n          link: a.link,\n        });\n      }\n      const selected = Object.values(buckets).reduce((n, xs) => n + xs.length, 0);\n      if (selected >= 10) break;\n    }\n    data = {\n      date: dateIT,\n      fallback: true,\n      fallback_reason: item?.error || 'LLM non disponibile',\n      categories: allowedOrder.map(name => ({ name, articles: buckets[name] })).filter(c => c.articles.length > 0),\n    };\n  }\n}\n\nif (!data || data.error || !Array.isArray(data.categories) || data.categories.length === 0) {\n  const errDetail = data?.error || item?.error || 'Nessuna categoria trovata';\n  return [{\n    json: {\n      subject: `⚠️ Rassegna Tech ${subjectDate} — Errore`,\n      html: `<!DOCTYPE html><html lang=\"it\"><body style=\"font-family:Arial;padding:20px\">\n        <h2>⚠️ Errore nella generazione della rassegna</h2>\n        <p>${errDetail}</p>\n        <pre style=\"font-size:11px;background:#f5f5f5;padding:10px\">${(rawText||JSON.stringify(item)||'').substring(0,1000)}</pre>\n      </body></html>`\n    }\n  }];\n}\n\n// ── STEP 5: Category icons map ───────────────────────────────\nconst ICONS = {\n  'Cybersecurity & Cyberwar':        '🔐',\n  'AI & Machine Learning':           '🤖',\n  'Big Tech & Industria Digitale':   '🏢',\n  'Regolazione & Politiche Digitali':'⚖️',\n  'Infrastrutture, Cloud & Chip':    '🖥️',\n  'Economia Tech & Mercati':         '📈',\n  'Società Digitale & Diritti':      '🌐',\n};\n\n// ── STEP 6: Build HTML sections ─────────────────────────────\nconst categorySections = data.categories.map(cat => {\n  const icon = ICONS[cat.name] || '📌';\n  const articles = (cat.articles || []).map(a => {\n    const safeTitle   = (a.title   || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n    const safeSummary = (a.summary || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n    const safeName    = (a.source_name || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n    // Only render link if it looks like a valid URL\n    const isValidUrl  = /^https?:\\/\\/.+/.test(a.link || '');\n    const sourceTag   = isValidUrl\n      ? `<a href=\"${a.link}\" target=\"_blank\" rel=\"noopener\" style=\"color:#2980b9;text-decoration:none\">${safeName}</a>`\n      : `<span style=\"color:#7f8c8d\">${safeName}</span>`;\n    return `\n      <div style=\"border-left:3px solid #e74c3c;padding:10px 14px;margin-bottom:14px;background:#fafafa\">\n        <p style=\"margin:0 0 6px 0;font-weight:bold;font-size:14px;color:#2c3e50\">${safeTitle}</p>\n        <p style=\"margin:0 0 6px 0;font-size:13px;line-height:1.55;color:#444\">${safeSummary}</p>\n        <p style=\"margin:0;font-size:11px;color:#7f8c8d\">Fonte: ${sourceTag}</p>\n      </div>`;\n  }).join('');\n\n  return `\n    <div style=\"margin-bottom:28px\">\n      <h2 style=\"color:#2c3e50;border-bottom:2px solid #e74c3c;padding-bottom:6px;font-size:16px;margin-bottom:14px\">\n        ${icon} ${cat.name}\n      </h2>\n      ${articles}\n    </div>`;\n}).join('');\n\nconst totalArticles = data.categories.reduce((n, c) => n + (c.articles||[]).length, 0);\nconst subject = `📰 Rassegna Tech & AI — ${subjectDate}`;\n\n// ── STEP 7: Full HTML email ──────────────────────────────────\nconst html = `<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n  <title>${subject}</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f0f2f5;font-family:Arial,Helvetica,sans-serif\">\n  <div style=\"max-width:680px;margin:24px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10)\">\n\n    <!-- HEADER -->\n    <div style=\"background:linear-gradient(135deg,#1a252f 0%,#2c3e50 100%);padding:28px 24px;text-align:center\">\n      <div style=\"font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#95a5a6;margin-bottom:6px\">Rassegna Quotidiana</div>\n      <h1 style=\"margin:0;color:#ffffff;font-size:22px;font-weight:700\">Tech & AI Briefing</h1>\n      <div style=\"margin-top:8px;color:#bdc3c7;font-size:13px\">${dateIT}</div>\n    </div>\n\n    <!-- SUMMARY BAR -->\n    <div style=\"background:#2c3e50;padding:10px 24px;text-align:center\">\n      <span style=\"color:#ecf0f1;font-size:12px\">${totalArticles} notizie selezionate · ${data.categories.length} categorie</span>\n    </div>\n\n    <!-- CONTENT -->\n    <div style=\"padding:24px 28px\">\n      ${categorySections}\n    </div>\n\n    <!-- FOOTER -->\n    <div style=\"background:#ecf0f1;padding:16px 24px;text-align:center;border-top:1px solid #dde1e4\">\n      <p style=\"margin:0;font-size:11px;color:#95a5a6\">\n        Rassegna generata automaticamente · ${dateIT}<br>\n        Le notizie sono selezionate da fonti pubbliche. I link rimandano alle fonti originali.\n      </p>\n    </div>\n  </div>\n</body>\n</html>`;\n\nreturn [{ json: { subject, html } }];\n"
       },
-      "id": "64d14789-8049-4476-aa7a-9b92c5075c92",
+      "id": "a994a9d0-c000-4338-91fb-27af63bbc947",
       "name": "Build Final Newsletter HTML",
       "type": "n8n-nodes-base.code",
       "position": [
-        1168,
-        1216
+        9216,
+        6752
       ],
-      "typeVersion": 2
+      "typeVersion": 2,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "sendTo": "user@example.com",
-        "subject": "=News_Tech | n8n RSS",
-        "message": "={{ $json.html }}",
-        "options": {
-          "senderName": "n8n News"
-        }
-      },
-      "id": "f6e41658-fcb0-4b07-99cf-1c9df1ca2e99",
-      "name": "Send Final Digest Email",
-      "type": "n8n-nodes-base.gmail",
-      "position": [
-        1520,
-        1216
-      ],
-      "webhookId": "2dc19d78-fe57-437a-8ce2-6337f6ceff87",
-      "typeVersion": 2.1,
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Trasforma i 68 item in UN solo item con un array \"articles\"\nreturn [\n  {\n    json: {\n      articles: items.map(i => ({\n        title: i.json.title,\n        content: i.json.contentSnippet || i.json.content,\n        link: i.json.link,\n        isoDate: i.json.isoDate,\n      })),\n    },\n  },\n];"
+        "jsCode": "// ============================================================\n// Pre-processing: normalize, tag source, cap per-domain, deduplicate\n// CVE feeds removed upstream — no need to filter them here\n// ============================================================\nfunction domainLabel(url) {\n  if (!url) return 'Unknown';\n  let host;\n  try {\n    host = new URL(url).hostname.replace(/^www\\./, '');\n  } catch(_) {\n    const m = url.match(/https?:\\/\\/([^\\/]+)/);\n    host = m ? m[1].replace(/^www\\./, '') : 'unknown';\n  }\n  const map = {\n    'feeds.feedburner.com':      (url.includes('TheHackersNews') || url.includes('thehackernews') ? 'The Hacker News'\n                                 : url.includes('nvidiablog') ? 'NVIDIA'\n                                 : url.includes('eset') ? 'ESET'\n                                 : host),\n    'cloudblog.withgoogle.com':  'Google Cloud Blog',\n    'research.google':           'Google Research',\n    'isc.sans.edu':              'SANS ISC',\n    'nvidianews.nvidia.com':     'NVIDIA',\n    'developer.nvidia.com':      'NVIDIA Developer',\n    'news.mit.edu':              'MIT Technology Review',\n    'blog.talosintelligence.com':'Cisco Talos',\n    'feeds.arstechnica.com':     'Ars Technica',\n    'feeds.reuters.com':         'Reuters',\n    'thehackernews.com':         'The Hacker News',\n    'krebsonsecurity.com':       'Krebs on Security',\n    'darkreading.com':           'Dark Reading',\n    'cybersecuritynews.com':     'Cybersecurity News',\n    'cybersecurity360.it':       'Cybersecurity360',\n    'ilsole24ore.com':           'Il Sole 24 Ore',\n    'techcrunch.com':            'TechCrunch',\n    'arstechnica.com':           'Ars Technica',\n    'wired.com':                 'Wired',\n    'theverge.com':              'The Verge',\n    'reuters.com':               'Reuters',\n    'anthropic.com':             'Anthropic',\n    'deepmind.google':           'Google DeepMind',\n    'openai.com':                'OpenAI',\n    'checkpoint.com':            'Check Point Research',\n  };\n  return map[host] || host;\n}\n\nfunction simpleSimilarity(a, b) {\n  const wa = new Set(a.toLowerCase().split(/\\W+/).filter(w => w.length > 4));\n  const wb = new Set(b.toLowerCase().split(/\\W+/).filter(w => w.length > 4));\n  if (wa.size === 0 || wb.size === 0) return 0;\n  const inter = [...wa].filter(w => wb.has(w)).length;\n  return inter / Math.max(wa.size, wb.size);\n}\n\n// Normalize and tag source\nconst allArticles = items\n  .map(i => ({\n    title:   (i.json.title || '').trim(),\n    content: ((i.json.contentSnippet || i.json.content || '').trim()).substring(0, 500),\n    link:    (i.json.link || '').trim(),\n    isoDate: i.json.isoDate || '',\n    source:  domainLabel(i.json.link || ''),\n  }))\n  .filter(a => a.title && a.link && a.link.startsWith('http'));\n\n// Sort by date descending\nallArticles.sort((a, b) => (b.isoDate > a.isoDate ? 1 : -1));\n\n// Deduplicate by title similarity (>65% word overlap)\nconst deduped = [];\nfor (const art of allArticles) {\n  const isDup = deduped.some(seen => simpleSimilarity(seen.title, art.title) > 0.65);\n  if (!isDup) deduped.push(art);\n}\n\n// Cap: max 4 articles per source domain (avoid any single source dominating)\nconst domainCount = {};\nconst capped = [];\nfor (const art of deduped) {\n  const key = art.source;\n  domainCount[key] = (domainCount[key] || 0);\n  if (domainCount[key] < 4) {\n    capped.push(art);\n    domainCount[key]++;\n  }\n}\n\nreturn [{ json: { articles: capped, total: capped.length } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        608,
-        1216
+        8352,
+        6752
       ],
-      "id": "84e2fce2-bbac-4a12-badb-1275dde45e4b",
+      "id": "d85abb5c-7a24-4a09-ade6-4530aeb0fa41",
       "name": "Code in JavaScript"
     },
     {
@@ -273,26 +419,33 @@
         "messages": {
           "values": [
             {
-              "content": "=You are the editor-in-chief of a major technology newspaper.\n\nEvery day you receive dozens of tech, AI and cybersecurity news articles, but your job is NOT to summarize everything.\nYour job is to decide WHAT REALLY MATTERS for a smart reader interested in technology, innovation and digital power.\n\nThink like a front-page editor of a tech newspaper.\n\n━━━━━━━━━━━━━━━━━━━━\nEDITORIAL RULES\n━━━━━━━━━━━━━━━━━━━━\n\n### 1. SELECTION (most important rule)\n\n* From ALL provided articles, select at most 8–10 total news items.\n* Selecting fewer is perfectly acceptable.\n* Ignore minor updates, marketing announcements, product rumors, curiosities, lifestyle tech, speculative hype.\n\n---\n\n### 2. RELEVANCE CRITERIA (at least one)\n\nSelect only news that have real strategic importance, such as:\n\n* Artificial Intelligence (foundation models, regulation, major deployments, scientific or industrial breakthroughs)\n* Big Tech companies (OpenAI, Google, Microsoft, Meta, Apple, Amazon, Nvidia, etc.)\n* Cybersecurity incidents (data breaches, ransomware, state-sponsored cyberwarfare, critical infrastructure attacks)\n* Regulation & digital policy (EU AI Act, privacy, antitrust, platform regulation)\n* Semiconductors, cloud, digital infrastructure, networks\n* National or European technological sovereignty\n* Major industrial or economic impacts of technology\n* Democracy, misinformation, surveillance, digital rights\n\n---\n\n### 3. DEDUPLICATION\n\n* If multiple articles refer to the same event, keep only one.\n* Prefer the most complete, clear and authoritative article.\n\n---\n\n### 4. STRUCTURE BY TOPIC\n\nGroup the selected news into the following categories\n(use only those with at least one item):\n\n* AI & Machine Learning\n* Big Tech & Digital Industry\n* Cybersecurity & Cyberwar\n* Regulation & Digital Policy\n* Tech Economy & Markets\n* Infrastructure, Cloud & Chips\n* Digital Society & Rights\n\nDo NOT invent new categories.\n\n---\n\n### 5. WRITING STYLE + LINK (CRITICAL RULES)\n\n* Each news item: 1–2 sentences, journalistic and factual tone\n* No opinions, no commentary, no hype\n* Prefer context and implications over technical details\n\nMANDATORY LINK\n\n* Every news item must end with ONE source, formatted as a clickable HTML link on the name of the outlet only\n* DO NOT show the URL in plain text\n* DO NOT use markdown\n* DO NOT use parentheses, brackets or braces\n\n✅ ONLY ALLOWED FORMAT:\n\n<a href=\"ORIGINAL_URL\" target=\"_blank\">Outlet Name</a>\n\n✅ Correct example:\n\nAmazon Web Services introduced new chips and strengthened its AI services at the Re:Invent event, focusing on the integration of generative models for enterprises. <a href=\"https://www.ilsole24ore.com/...\" target=\"_blank\">Il Sole 24 Ore</a>\n\n---\n\n━━━━━━━━━━━━━━━━━━━━\nINPUT DATA\n━━━━━━━━━━━━━━━━━━━━\n\nYou receive the last 24 hours of tech news as a JSON array of articles:\n\n{{ JSON.stringify($json.articles) }}\n\nEach article includes:\n\n* title\n* content\n* link\n* isoDate\n\n---\n\n━━━━━━━━━━━━━━━━━━━━\nTASK\n━━━━━━━━━━━━━━━━━━━━\n\n1. Read all articles in \"articles\".\n2. Select only the most relevant tech / AI / cyber news (max 8–10).\n3. Deduplicate articles covering the same event.\n4. Organize the selected news into the defined categories.\n5. Build a clean, readable HTML output, ensuring every news item includes its formatted source link.\n\n---\n\n━━━━━━━━━━━━━━━━━━━━\nOUTPUT (MANDATORY)\n━━━━━━━━━━━━━━━━━━━━\n\nYou must return ONLY a valid JSON object.\nNo additional text, no explanations, no markdown, no code fences.\n\nExact format:\n\n{\n  \"subject\": \"Tech & AI Briefing – [Day Month Year]\",\n  \"html\": \"<h2>🧠 Tech, AI & Cyber – Top Stories</h2>...<p><em>Tech briefing automatically generated on [Day Month Year].</em></p>\"\n}\n\nIf you include even a single word outside this JSON object, the response is INVALID."
+              "content": "=You are a deterministic senior editor for an Italian daily tech briefing read by professionals.\n\nTODAY: {{ $now.setZone(\"Europe/Rome\").toFormat(\"cccc d MMMM yyyy\") }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nANTI-HALLUCINATION — ABSOLUTE RULE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n- Use ONLY articles from the INPUT JSON. Never invent facts, URLs, or sources.\n- \"link\" MUST be copied exactly from the input. Never modify or fabricate a URL.\n- \"source_name\" must reflect the human-readable name of the outlet (use the \"source\" field from input).\n- If a fact is not in the article content, omit it. Never infer or speculate.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nDETERMINISM RULE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSame input → same output, always. No variation in selection, ordering, or phrasing between runs.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSELECTION: choose 7 to 10 articles\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nThere are always enough articles. Never return an error. Always select at least 7.\n\nRULE 1 — MANDATORY DIVERSITY:\nFinal selection MUST include articles from AT LEAST 4 different categories.\n\nRULE 2 — CATEGORY CAPS:\n- \"Cybersecurity & Cyberwar\": max 3\n- \"AI & Machine Learning\": max 3\n- \"Big Tech & Industria Digitale\": max 2\n- All other categories: max 2 each\n\nRULE 3 — WHAT IS RELEVANT (select these):\n✅ AI model releases, major deployments, regulation, scientific breakthroughs\n✅ Big Tech strategy: acquisitions, major product launches, CEO/policy decisions\n✅ Cybersecurity: confirmed breaches, ransomware on major orgs, state-sponsored attacks, critical infrastructure\n✅ EU/IT regulation: AI Act, Digital Markets Act, privacy enforcement, antitrust\n✅ Semiconductors, hyperscaler infrastructure, cloud competition\n✅ Economic impact of tech: layoffs, major funding, market shifts\n✅ Digital rights, surveillance, misinformation at scale\n\nRULE 4 — WHAT TO EXCLUDE (skip these):\n❌ Consumer gadget reviews (robot vacuums, phones) — unless it's a major strategic launch\n❌ Virtual events, webinars, conference announcements\n❌ Vendor blog posts with no news (e.g. \"how to improve your security posture\")\n❌ CVE disclosures for niche/obscure software with no real-world impact\n❌ Speculative rumors, leaks with no confirmation\n❌ Marketing press releases\n\nRULE 5 — DEDUPLICATION:\nSame event from multiple sources → keep only the one with the most complete \"content\".\n\nRULE 6 — ORDERING within category: most recent isoDate first.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nALLOWED CATEGORIES (exact strings, fixed order)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOutput categories in this exact order (skip empty ones):\n1. \"Cybersecurity & Cyberwar\"\n2. \"AI & Machine Learning\"\n3. \"Big Tech & Industria Digitale\"\n4. \"Regolazione & Politiche Digitali\"\n5. \"Infrastrutture, Cloud & Chip\"\n6. \"Economia Tech & Mercati\"\n7. \"Società Digitale & Diritti\"\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSUMMARY STYLE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n- 1 to 2 sentences. Max 60 words. Italian. Factual, neutral, journalistic.\n- Structure: WHO + WHAT happened + one concrete implication or context.\n- No opinions, no hype, no evaluative adjectives (\"importante\", \"significativo\", etc.).\n- Do NOT start with the source name or \"Secondo [fonte]\".\n- Write the same summary every time for the same article.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nINPUT ARTICLES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n{{ JSON.stringify($json.articles) }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOUTPUT — VALID JSON ONLY, NOTHING ELSE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nReturn ONLY a valid JSON object. No markdown, no code fences, no text outside the JSON. Add a top-level field \"generation_provider\":\"gemini_fallback\".\n\n{\n  \"date\": \"{{ $now.setZone('Europe/Rome').toFormat('cccc d MMMM yyyy') }}\",\n  \"categories\": [\n    {\n      \"name\": \"EXACT_CATEGORY_NAME\",\n      \"articles\": [\n        {\n          \"title\": \"exact title from input\",\n          \"summary\": \"1-2 sentence Italian factual summary\",\n          \"source_name\": \"use the source field from input article\",\n          \"link\": \"exact URL from input — copy verbatim\"\n        }\n      ]\n    }\n  ]\n}\n"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "temperature": 0
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1,
       "position": [
-        816,
-        1216
+        8944,
+        6896
       ],
-      "id": "e6b6c2c8-876b-4023-b2ec-b2242ee98060",
+      "id": "6ba41d8f-f70f-474b-bc58-10976500b36f",
       "name": "LLM - News Summarizer",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000,
+      "alwaysOutputData": true,
       "credentials": {
         "googlePalmApi": {
-          "id": "odFC4MRUZfXkV4ZA",
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
           "name": "Google Gemini(PaLM) Api account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -302,11 +455,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        320
+        6224,
+        6000
       ],
-      "id": "4bcab353-1ec6-46ce-b06f-0c20f25b51b8",
-      "name": "RSS_darkreading"
+      "id": "e7f47bb5-bb67-48bd-8124-2993468b1a1a",
+      "name": "RSS_darkreading",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -316,11 +471,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        64
+        6224,
+        5888
       ],
-      "id": "6b138749-4c9c-4050-af9f-a02e078fe408",
-      "name": "RSS_GoogleCloudBlog"
+      "id": "8cd58ed4-5946-46d8-91a9-f8e0b9a882c8",
+      "name": "RSS_GoogleCloudBlog",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -330,26 +487,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        -192
+        6224,
+        5760
       ],
-      "id": "f3c1b42e-14fb-49bf-ac07-ba54359ee235",
-      "name": "RSS_krebsonsecurity"
-    },
-    {
-      "parameters": {
-        "content": "### Nvidia",
-        "height": 416,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1104,
-        2176
-      ],
-      "id": "1b1f01a4-1e4c-464f-92c8-6a33dedf030f",
-      "name": "Sticky Note2"
+      "id": "7e074c0e-8ea5-4de4-9e96-a4d9888c25c9",
+      "name": "RSS_krebsonsecurity",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -359,11 +503,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        2208
+        6224,
+        7600
       ],
-      "id": "a52e25c6-42e7-41bf-b379-1dfc74b51ac3",
-      "name": "RSS_Nvidia1"
+      "id": "0b4a86f6-a8e0-4892-94da-6c04803601fc",
+      "name": "RSS_Nvidia1",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -373,11 +519,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        2336
+        6224,
+        7712
       ],
-      "id": "6d17fd5a-1fe5-4922-b3e1-caa63a16cbb6",
-      "name": "RSS_Nvidia2"
+      "id": "f87569d5-70fd-460d-83b7-8af7fc55ad8f",
+      "name": "RSS_Nvidia2",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -387,11 +535,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        2464
+        6224,
+        7840
       ],
-      "id": "4df9ae9a-a0dc-4dc5-afb5-77cc75a3d305",
-      "name": "RSS_Nvidia3"
+      "id": "34e3f4f2-5801-4a9a-ab87-aa3ba723d515",
+      "name": "RSS_Nvidia3",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -401,52 +551,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        2016
+        6224,
+        7472
       ],
-      "id": "d740fd2e-7407-439a-982a-91a69d2e974b",
-      "name": "RSS_OpenAI"
-    },
-    {
-      "parameters": {
-        "url": "https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        624
-      ],
-      "id": "e101e47a-b74c-4239-98ad-5dc934a71496",
-      "name": "RSS_cve1"
-    },
-    {
-      "parameters": {
-        "url": "https://cvefeed.io/rssfeed/latest.xml",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        752
-      ],
-      "id": "9bf9fe97-16ae-4afa-8a1a-2c34b9665d5b",
-      "name": "RSS_cve2"
-    },
-    {
-      "parameters": {
-        "numberInputs": 3
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -736,
-        2336
-      ],
-      "id": "4c5f021e-91bd-4d04-a618-9f9ed5185049",
-      "name": "Merge_Nvidia"
+      "id": "d44ada6a-4218-4b67-bac9-2455624ac896",
+      "name": "RSS_OpenAI",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -455,35 +566,11 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -736,
-        1808
+        6848,
+        7712
       ],
-      "id": "31dd05a0-007f-420a-b998-861c4fde049e",
-      "name": "Merge_AI"
-    },
-    {
-      "parameters": {
-        "numberInputs": 8
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -736,
-        -16
-      ],
-      "id": "2021a80f-c837-4a47-a0fd-b3a542cd153b",
-      "name": "Merge_Cyber1"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -736,
-        704
-      ],
-      "id": "f62fbf89-cfd0-4051-867d-0bc0253eff45",
-      "name": "Merge_Cyber2"
+      "id": "0d42c79c-89a9-4845-8c6a-4d83c75c74c5",
+      "name": "Merge_Nvidia"
     },
     {
       "parameters": {
@@ -492,10 +579,49 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -736,
-        1104
+        6848,
+        7232
       ],
-      "id": "d75ca9e8-257b-4ec4-92cc-174ccb13372e",
+      "id": "ce807947-1193-43a7-a9ea-1dd668e75841",
+      "name": "Merge_AI"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6848,
+        5760
+      ],
+      "id": "8accdf80-089b-46c2-a049-df6e98ba12c8",
+      "name": "Merge_Cyber1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6848,
+        8448
+      ],
+      "id": "47ff8948-e481-4a30-ae06-1a2c4d588a7d",
+      "name": "Merge_Tech"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6848,
+        6352
+      ],
+      "id": "48aefbfb-4a34-4de9-9bc7-d669c97993d7",
       "name": "Merge_Cyber3"
     },
     {
@@ -505,39 +631,11 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -48,
-        1168
+        7504,
+        6704
       ],
-      "id": "96a345b0-bc85-4c9a-bd54-2576ad5f3177",
+      "id": "aac78bfe-3212-447e-b2a5-975f0e0720ca",
       "name": "Merge_All"
-    },
-    {
-      "parameters": {
-        "url": "https://research.checkpoint.com/feed/",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        192
-      ],
-      "id": "efa61ecf-3f45-4aed-8cd6-0125ce530d07",
-      "name": "RSS_darkreading1"
-    },
-    {
-      "parameters": {
-        "url": "https://isc.sans.edu/rssfeed_full.xml",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        464
-      ],
-      "id": "9bf679c2-a256-4d9f-88a7-1c88f3a0a242",
-      "name": "RSS_Sans"
     },
     {
       "parameters": {
@@ -547,11 +645,13 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1440
+        6224,
+        6624
       ],
-      "id": "4293ac0a-21aa-4a7c-a8c4-500f0f494d68",
-      "name": "RSS_CiscoTalos"
+      "id": "4c279e57-75d8-4dae-bef7-be9237a3424d",
+      "name": "RSS_CiscoTalos",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -561,207 +661,236 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -1040,
-        1296
+        6224,
+        6496
       ],
-      "id": "8f95b809-f398-4cd3-bb32-2b395282bc8b",
-      "name": "RSS Read"
+      "id": "a71da148-34dc-4ed2-84a2-5c7c9e72ab19",
+      "name": "RSS Read",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "rule": {
           "interval": [
-            {}
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 30
+            }
           ]
         }
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -2032,
-        1248
+        5600,
+        6768
       ],
-      "id": "5b07023a-66af-4b91-b587-76f837f4f076",
+      "id": "9c9d4d60-d112-4307-8d11-b0afc68393ba",
       "name": "Schedule Trigger"
     },
     {
       "parameters": {
-        "content": "## RSS Tech News to your inbox\n\nThis workflow automates the collection, normalization, and publication of content from a broad set of RSS feeds. The execution begins with a Schedule Trigger, which activates the entire pipeline at recurring intervals. Each feed is handled by its own individual RSS node, allowing full separation of sources and easier monitoring or troubleshooting. The collected items flow into a structured series of Merge nodes that consolidate all outputs into one unified data stream.\n\nAfter aggregation, the workflow performs filtering and transformation. A dedicated filtering step removes invalid or duplicate entries, while a custom Function node standardizes fields such as title, URL, timestamp, and raw content. This ensures that data coming from heterogeneous sources is normalized before further processing. The workflow also includes an AI-powered enrichment stage—via an OpenAI node—which generates summaries, tags, categories, or any other metadata needed to enhance the collected articles.\n\nThe pipeline concludes by delivering the processed content to a chosen destination (email, database, Notion, API endpoint, or social platform). The modular design allows new sources to be added effortlessly without altering the core logic, making the workflow scalable and easy to maintain.\nThis setup is ideal for automated newsletters, content curation, topic monitoring, or internal knowledge management systems.\n\nRead: [Full setup Guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)\n\n#### Youtube Video: \n[![RSS Tech News](https://img.youtube.com/vi/Gck8nmvx1UA/0.jpg)](https://www.youtube.com/watch?v=Gck8nmvx1UA \"RSS Tech News\")",
-        "height": 992,
-        "width": 592
+        "path": "tech-news",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
-        -224,
-        -528
+        5600,
+        6608
       ],
-      "id": "dabb8fc9-b658-4617-9534-b541baee78c7",
-      "name": "Sticky Note3"
+      "id": "faef6793-30f0-47b3-84a1-f2168af5131a",
+      "name": "Webhook",
+      "webhookId": "94d3fce9-e8bc-423b-a8db-5e0e24b601bf"
     },
     {
       "parameters": {
-        "content": "📌 Schedule Trigger\nStarts the entire workflow automatically at defined intervals—no manual execution required.",
-        "height": 288,
-        "width": 192,
-        "color": 7
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        -2064,
-        1104
+        6224,
+        8208
       ],
-      "id": "a7afaeb6-90ed-41e9-98da-acc7dcd53a6a",
-      "name": "Sticky Note4"
+      "id": "0ac193f7-e527-47aa-8ee5-763c45de2525",
+      "name": "RSS_TechCrunch",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 RSS Nodes (Multiple Sources)\n\nEach node fetches the latest entries from one feed. Using isolated nodes keeps the flow stable and simplifies debugging.",
-        "height": 192,
-        "width": 192,
-        "color": 7
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        -1408,
-        -512
+        6224,
+        8320
       ],
-      "id": "b589cb54-d7dd-4dbc-a796-3a840f647307",
-      "name": "Sticky Note5"
+      "id": "e63a524f-1655-49bc-98e2-363486c82b6b",
+      "name": "RSS_ArsTechnica",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 Merge Nodes\n\nCombine all feed outputs into one coherent dataset, preparing the workflow for global filtering and processing.",
-        "height": 416,
-        "width": 192,
-        "color": 7
+        "url": "https://www.wired.com/feed/rss",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        -96,
-        992
+        6224,
+        8448
       ],
-      "id": "0bcdb515-2676-45ae-b6fd-631ad65febd8",
-      "name": "Sticky Note6"
+      "id": "af6e39f2-1b05-478c-89f7-9043bc15d141",
+      "name": "RSS_Wired",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 Filter\n\nFilters out everything older than 24 hours by comparing each article’s isoDate to “now minus 24 hours”. Only fresh news is allowed through to keep the briefing truly daily and relevant.",
-        "height": 352,
-        "width": 208,
-        "color": 7
+        "url": "https://www.theverge.com/rss/index.xml",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        112,
-        992
+        6224,
+        8560
       ],
-      "id": "82e0d9b0-99f7-48c8-9e34-a1d6b31a4718",
-      "name": "Sticky Note7"
+      "id": "2753cf24-b968-46af-b979-b3cf16568848",
+      "name": "RSS_TheVerge",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 Gemini Node (AI Enrichment)\n\nGenerates summaries, keywords, topics, or enhanced textual representations of each article.",
-        "height": 352,
-        "width": 256,
-        "color": 7
+        "url": "https://feeds.reuters.com/reuters/technologyNews",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        800,
-        992
+        6224,
+        8688
       ],
-      "id": "e8f58b9c-f8c1-43fe-8347-c9ab83fb7528",
-      "name": "Sticky Note8"
+      "id": "8ebb9e14-2058-4f71-8799-82c72a87f7dc",
+      "name": "RSS_Reuters_Tech",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 Final Output Node (Email / Notion / API / etc.)\n\nSends the finished newsletter via Gmail.\nUses the subject from the Code node and the generated html as the email body, so you receive a curated Tech & AI briefing directly in your inbox with no manual work required.",
-        "height": 368,
-        "width": 256,
-        "color": 7
+        "url": "https://www.anthropic.com/rss.xml",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        1472,
-        992
+        6224,
+        6992
       ],
-      "id": "f3dcffd2-acb7-4a46-ab22-fd95b606909e",
-      "name": "Sticky Note9"
+      "id": "5a6f72ab-e055-4f20-b55f-c1d148b52eb0",
+      "name": "RSS_Anthropic",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌Sort – Articles by Date\n\nSorts all remaining articles by isoDate in descending order. This ensures that the most recent and time-sensitive stories are processed first and shown higher in the final briefing.",
-        "height": 352,
-        "width": 208,
-        "color": 7
+        "url": "https://deepmind.google/blog/rss.xml",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
       "position": [
-        336,
-        992
+        6224,
+        7120
       ],
-      "id": "214a64fc-a382-4080-b2c5-55efe456a4c5",
-      "name": "Sticky Note10"
+      "id": "1fc4ed0d-248e-44da-b86c-04b56fc636dd",
+      "name": "RSS_DeepMind",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌Sort – Code in JavaScript\n\nTakes all incoming RSS items and packs them into a single item with an articles array.\nFor each article it keeps: title, content or contentSnippet, link, isoDate\n",
-        "height": 352,
-        "width": 224,
-        "color": 7
+        "promptType": "define",
+        "text": "=You are a deterministic senior editor for an Italian daily tech briefing read by professionals.\n\nTODAY: {{ $now.setZone(\"Europe/Rome\").toFormat(\"cccc d MMMM yyyy\") }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nANTI-HALLUCINATION — ABSOLUTE RULE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n- Use ONLY articles from the INPUT JSON. Never invent facts, URLs, or sources.\n- \"link\" MUST be copied exactly from the input. Never modify or fabricate a URL.\n- \"source_name\" must reflect the human-readable name of the outlet (use the \"source\" field from input).\n- If a fact is not in the article content, omit it. Never infer or speculate.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nDETERMINISM RULE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSame input → same output, always. No variation in selection, ordering, or phrasing between runs.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSELECTION: choose 7 to 10 articles\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nThere are always enough articles. Never return an error. Always select at least 7.\n\nRULE 1 — MANDATORY DIVERSITY:\nFinal selection MUST include articles from AT LEAST 4 different categories.\n\nRULE 2 — CATEGORY CAPS:\n- \"Cybersecurity & Cyberwar\": max 3\n- \"AI & Machine Learning\": max 3\n- \"Big Tech & Industria Digitale\": max 2\n- All other categories: max 2 each\n\nRULE 3 — WHAT IS RELEVANT (select these):\n✅ AI model releases, major deployments, regulation, scientific breakthroughs\n✅ Big Tech strategy: acquisitions, major product launches, CEO/policy decisions\n✅ Cybersecurity: confirmed breaches, ransomware on major orgs, state-sponsored attacks, critical infrastructure\n✅ EU/IT regulation: AI Act, Digital Markets Act, privacy enforcement, antitrust\n✅ Semiconductors, hyperscaler infrastructure, cloud competition\n✅ Economic impact of tech: layoffs, major funding, market shifts\n✅ Digital rights, surveillance, misinformation at scale\n\nRULE 4 — WHAT TO EXCLUDE (skip these):\n❌ Consumer gadget reviews (robot vacuums, phones) — unless it's a major strategic launch\n❌ Virtual events, webinars, conference announcements\n❌ Vendor blog posts with no news (e.g. \"how to improve your security posture\")\n❌ CVE disclosures for niche/obscure software with no real-world impact\n❌ Speculative rumors, leaks with no confirmation\n❌ Marketing press releases\n\nRULE 5 — DEDUPLICATION:\nSame event from multiple sources → keep only the one with the most complete \"content\".\n\nRULE 6 — ORDERING within category: most recent isoDate first.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nALLOWED CATEGORIES (exact strings, fixed order)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOutput categories in this exact order (skip empty ones):\n1. \"Cybersecurity & Cyberwar\"\n2. \"AI & Machine Learning\"\n3. \"Big Tech & Industria Digitale\"\n4. \"Regolazione & Politiche Digitali\"\n5. \"Infrastrutture, Cloud & Chip\"\n6. \"Economia Tech & Mercati\"\n7. \"Società Digitale & Diritti\"\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSUMMARY STYLE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n- 1 to 2 sentences. Max 60 words. Italian. Factual, neutral, journalistic.\n- Structure: WHO + WHAT happened + one concrete implication or context.\n- No opinions, no hype, no evaluative adjectives (\"importante\", \"significativo\", etc.).\n- Do NOT start with the source name or \"Secondo [fonte]\".\n- Write the same summary every time for the same article.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nINPUT ARTICLES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n{{ JSON.stringify($json.articles) }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOUTPUT — VALID JSON ONLY, NOTHING ELSE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nReturn ONLY a valid JSON object. No markdown, no code fences, no text outside the JSON. Add a top-level field \"generation_provider\":\"openai_primary\".\n\n{\n  \"date\": \"{{ $now.setZone('Europe/Rome').toFormat('cccc d MMMM yyyy') }}\",\n  \"categories\": [\n    {\n      \"name\": \"EXACT_CATEGORY_NAME\",\n      \"articles\": [\n        {\n          \"title\": \"exact title from input\",\n          \"summary\": \"1-2 sentence Italian factual summary\",\n          \"source_name\": \"use the source field from input article\",\n          \"link\": \"exact URL from input — copy verbatim\"\n        }\n      ]\n    }\n  ]\n}\n",
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
       "position": [
-        560,
-        992
+        8656,
+        6752
       ],
-      "id": "1ebc2fb4-1105-4edf-92b1-8909e3d072d0",
-      "name": "Sticky Note11"
+      "id": "e3f57426-a167-40e6-9e11-9500f0d504b0",
+      "name": "AI Agent - OpenAI Primary",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 30000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "📌 Build Final Newsletter HTML (Code)\n\nThis Code node takes the JSON returned by the LLM and prepares the final email.\nIt removes any ```json wrappers, parses the JSON safely, and checks that subject and html exist.\nThen it inserts both fields into a clean, responsive HTML email template.\nThe output is a single item containing the final subject and html, ready for the Gmail node.",
-        "height": 368,
-        "width": 368,
-        "color": 7
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
       "position": [
-        1072,
-        992
+        8656,
+        6912
       ],
-      "id": "93992ebf-d965-4db0-a30f-933369648275",
-      "name": "Sticky Note12"
+      "id": "afba510b-0a34-4945-823e-725295984cd9",
+      "name": "OpenAI Chat Model - Primary",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
     }
   ],
   "pinData": {},
   "connections": {
-    "RSS_TheHackersNews": {
+    "Get News Subscribers": {
       "main": [
         [
           {
-            "node": "Merge_Cyber1",
+            "node": "If",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "RSS_artificialintelligence-news.": {
+    "If": {
       "main": [
         [
           {
-            "node": "Merge_AI",
+            "node": "MailGun Send_News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS_TheHackersNews": {
+      "main": [
+        [
+          {
+            "node": "Merge_Cyber1",
             "type": "main",
             "index": 0
           }
@@ -794,7 +923,7 @@
       "main": [
         [
           {
-            "node": "Send Final Digest Email",
+            "node": "Get News Subscribers",
             "type": "main",
             "index": 0
           }
@@ -805,7 +934,7 @@
       "main": [
         [
           {
-            "node": "LLM - News Summarizer",
+            "node": "AI Agent - OpenAI Primary",
             "type": "main",
             "index": 0
           }
@@ -829,7 +958,7 @@
           {
             "node": "Merge_AI",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -840,7 +969,7 @@
           {
             "node": "Merge_AI",
             "type": "main",
-            "index": 2
+            "index": 1
           }
         ]
       ]
@@ -895,17 +1024,6 @@
           {
             "node": "Merge_Cyber1",
             "type": "main",
-            "index": 4
-          }
-        ]
-      ]
-    },
-    "RSS_GrahamCluley": {
-      "main": [
-        [
-          {
-            "node": "Merge_Cyber1",
-            "type": "main",
             "index": 3
           }
         ]
@@ -928,7 +1046,7 @@
           {
             "node": "Merge_Cyber1",
             "type": "main",
-            "index": 6
+            "index": 4
           }
         ]
       ]
@@ -966,35 +1084,13 @@
         ]
       ]
     },
-    "RSS_cve1": {
-      "main": [
-        [
-          {
-            "node": "Merge_Cyber2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "RSS_cve2": {
-      "main": [
-        [
-          {
-            "node": "Merge_Cyber2",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
     "RSS_OpenAI": {
       "main": [
         [
           {
             "node": "Merge_AI",
             "type": "main",
-            "index": 3
+            "index": 2
           }
         ]
       ]
@@ -1006,28 +1102,6 @@
             "node": "Filter",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "RSS_darkreading1": {
-      "main": [
-        [
-          {
-            "node": "Merge_Cyber1",
-            "type": "main",
-            "index": 5
-          }
-        ]
-      ]
-    },
-    "RSS_Sans": {
-      "main": [
-        [
-          {
-            "node": "Merge_Cyber1",
-            "type": "main",
-            "index": 7
           }
         ]
       ]
@@ -1061,17 +1135,6 @@
             "node": "Merge_All",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge_Cyber2": {
-      "main": [
-        [
-          {
-            "node": "Merge_All",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
@@ -1128,32 +1191,7 @@
             "index": 0
           },
           {
-            "node": "RSS_GrahamCluley",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "RSS_GoogleCloudBlog",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_darkreading1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_Sans",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_cve1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_cve2",
             "type": "main",
             "index": 0
           },
@@ -1163,27 +1201,7 @@
             "index": 0
           },
           {
-            "node": "RSS_ilsole24ore Tech",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "RSS_cybersecurity360",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS Read",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_CiscoTalos",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "RSS_artificialintelligence-news.",
             "type": "main",
             "index": 0
           },
@@ -1221,6 +1239,304 @@
             "node": "RSS_darkreading",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "RSS_TechCrunch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_ArsTechnica",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Wired",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_TheVerge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Reuters_Tech",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Anthropic",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_DeepMind",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_ilsole24ore Tech",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_CiscoTalos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge_Nvidia",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "RSS_TheHackersNews",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_cybersecuritynews",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_krebsonsecurity",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_GoogleCloudBlog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_darkreading",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_ilsole24ore Cyber",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_cybersecurity360",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_CiscoTalos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_GoogleResearch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_MIT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Nvidia1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Nvidia2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Nvidia3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_TechCrunch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_ArsTechnica",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Wired",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_TheVerge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Reuters_Tech",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_Anthropic",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_DeepMind",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS_ilsole24ore Tech",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge_Nvidia",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "RSS_Anthropic": {
+      "main": [
+        [
+          {
+            "node": "Merge_AI",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "RSS_DeepMind": {
+      "main": [
+        [
+          {
+            "node": "Merge_AI",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "RSS_TechCrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge_Tech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS_ArsTechnica": {
+      "main": [
+        [
+          {
+            "node": "Merge_Tech",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "RSS_Wired": {
+      "main": [
+        [
+          {
+            "node": "Merge_Tech",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS_TheVerge": {
+      "main": [
+        [
+          {
+            "node": "Merge_Tech",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "RSS_Reuters_Tech": {
+      "main": [
+        [
+          {
+            "node": "Merge_Tech",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge_Tech": {
+      "main": [
+        [
+          {
+            "node": "Merge_All",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent - OpenAI Primary": {
+      "main": [
+        [
+          {
+            "node": "Build Final Newsletter HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM - News Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model - Primary": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - OpenAI Primary",
+            "type": "ai_languageModel",
+            "index": 0
           }
         ]
       ]
@@ -1228,37 +1544,13 @@
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "executionTimeout": 600
   },
-  "versionId": "01915da8-1071-4cf1-811d-9ec164adc58b",
+  "versionId": "fc4ca19f-78b1-44cd-b76e-56e93d396060",
   "meta": {
     "instanceId": "YOUR_ID"
   },
   "id": "V994vNilogCvoCug",
-  "tags": [
-    {
-      "updatedAt": "2025-09-04T13:51:20.972Z",
-      "createdAt": "2025-09-04T13:51:20.972Z",
-      "id": "7FnQEcGVfEQxsJCK",
-      "name": "AI"
-    },
-    {
-      "updatedAt": "2025-11-23T13:34:14.752Z",
-      "createdAt": "2025-11-23T13:34:14.752Z",
-      "id": "DNVBijE9cEya3mqW",
-      "name": "PROD"
-    },
-    {
-      "updatedAt": "2025-12-02T14:30:28.623Z",
-      "createdAt": "2025-12-02T14:30:28.623Z",
-      "id": "O6GI5lYnoKbDq2aN",
-      "name": "News"
-    },
-    {
-      "updatedAt": "2025-11-23T13:36:30.079Z",
-      "createdAt": "2025-11-23T13:36:30.079Z",
-      "id": "dsb6ypU8KgN6sZTl",
-      "name": "creator-to-publish"
-    }
-  ]
+  "tags": []
 }

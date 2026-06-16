@@ -1,9 +1,9 @@
-[![Available on GitHub](https://img.shields.io/badge/Available%20on-GitHub-181717?logo=github)](https://github.com/paoloronco/n8n-templates)
-[![Available on Gitea](https://img.shields.io/badge/Available%20on-Gitea-609926?logo=gitea)](https://gitea.com/paoloronco/n8n-templates)
-
 # n8n Templates — by Paolo Ronco
 
 A curated collection of ready-to-use [n8n](https://n8n.io) templates for automation, data extraction, integrations, and notification systems. Each template ships with a complete importable workflow, a setup guide, and supporting assets.
+
+[![Available on GitHub](https://img.shields.io/badge/Available_on-GitHub-181717?logo=github&logoColor=white)](https://github.com/paoloronco/n8n-templates)
+[![Available on Gitea](https://img.shields.io/badge/Available_on-Gitea-609926?logo=gitea&logoColor=white)](https://gitea.com/paoloronco/n8n-templates)
 
 ![n8n Templates](/assets/n8n-templates.png)
 

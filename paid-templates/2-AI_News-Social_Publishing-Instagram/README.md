@@ -1,6 +1,6 @@
 # AI News → Social Publishing Automation
 
-![AI News Social Publishing Automation](assets/banner.png)
+![AI News → Social Publishing Automation](assets/cover.png)
 
 ## Quick Overview
 

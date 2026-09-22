@@ -13,7 +13,7 @@ Receive orders from an online menu through an n8n webhook, send real-time push n
 
 ## Setup
 
-- **Import the workflow** — Import `workflow/menu-order-notifications.json` into n8n.
+- **Import the workflow** — Import `workflow/Online_Menu-Push_Notifications-V1.json` into n8n.
 - **Configure the website** — Copy the webhook Production URL and set it as `orderWebhook` in the included menu website configuration.
 - **Deploy ntfy** — Set up an ntfy server and create the user, token, and topic used for order notifications.
 - **Create n8n authentication** — Add an HTTP Header Auth credential containing the ntfy bearer token and select it in the notification node.

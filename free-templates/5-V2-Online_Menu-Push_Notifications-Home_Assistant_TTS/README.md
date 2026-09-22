@@ -14,7 +14,7 @@ Receive online menu orders through n8n, send push notifications with ntfy, log o
 
 ## Setup
 
-- **Import the workflow** — Import `workflow/menu-order-notifications-with-tts.json` into n8n.
+- **Import the workflow** — Import `workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-V2.json` into n8n.
 - **Configure the website** — Set the n8n webhook Production URL as the order endpoint used by your menu frontend.
 - **Configure ntfy** — Deploy ntfy, create authentication, select a topic, and add its bearer token as an n8n HTTP Header Auth credential.
 - **Configure the Data Table** — Create or select a table with `item` and `person` fields and assign it to the DB node.

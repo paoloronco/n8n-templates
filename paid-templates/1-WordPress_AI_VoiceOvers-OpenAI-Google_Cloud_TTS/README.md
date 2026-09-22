@@ -1,6 +1,6 @@
 # WordPress AI VoiceOvers — OpenAI + Google Cloud TTS
 
-![WordPress AI VoiceOver Automation](assets/banner.png)
+![WordPress AI VoiceOvers — OpenAI + Google Cloud TTS](assets/cover.png)
 
 ## Quick Overview
 

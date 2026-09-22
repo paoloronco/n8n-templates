@@ -1,63 +1,60 @@
 # Sync n8n Workflow Schedules to Google Calendar
 
-Reads every workflow on your n8n instance every 30 minutes, extracts their schedule triggers, and keeps a matching recurring event on Google Calendar — one event per workflow, forever in sync.
+## Quick Overview
 
-## How it works
+Scan n8n workflows, extract supported Schedule Trigger configurations, compare them with persisted Google Sheets state, and automatically create or update recurring Google Calendar events when workflow schedules change.
 
-```
-Schedule Trigger (30 min)
-  → GET /api/v1/workflows          — fetch all workflows
-  → Code: parsing                  — extract scheduleTrigger / cron nodes
-  → Sheets: Lookup                 — read saved state (schedule, On Calendar, EventID)
-  → Code: detect changes           — create / update / skip
-       ├─ create → build RRULE payload → Create event → write EventID to Sheets
-       └─ update → delete old event (parallel) + create new event → write to Sheets
-```
+## How It Works
 
-State is stored in a Google Sheets tab (`n8n Scheduling`). The sheet acts as the single source of truth between runs.
-
-📕 Full documentation: https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link
-
-📂 **Folder** → [`/free-templates/6 Sync n8n schedule to GoogleCalendar](./free-templates/6%Sync%n8n%schedule%to%GoogleCalendar)
-
-👥 **n8n Community Template**: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
-
-## What gets a Calendar event
-
-| Schedule type | Result |
-|---|---|
-| Daily | DAILY recurring event |
-| Weekly (with or without specific days) | WEEKLY recurring event |
-| Monthly | MONTHLY recurring event |
-| Hourly | 1 DAILY event at `00:MM` (not 24 — avoids GCal rate limit) |
-| Cron / minutely | Skipped — not supported by Google Calendar RRULE |
-| This workflow itself | Always skipped |
-
-## Prerequisites
-
-- n8n instance with API enabled
-- Google Cloud project with:
-  - Service Account (for Sheets — never expires)
-  - OAuth 2.0 client (for Google Calendar — expires periodically)
-- A Google Sheets spreadsheet shared with the Service Account
-- A Google Calendar to write events to
-
-## Credentials
-
-| n8n credential type | Used for |
-|---|---|
-| n8n API | Reading the workflow list |
-| Google Calendar OAuth2 API | Creating / deleting Calendar events |
-| Google Service Account | Reading and writing the Sheets state store |
-
-> ⚠️ The Google Calendar OAuth2 credential expires. Reconnect it from **Settings → Credentials** when Calendar nodes start failing.
+- **Scheduled scan** — The workflow runs every 30 minutes and retrieves workflows from the n8n REST API.
+- **Schedule parsing** — JavaScript identifies supported scheduled workflows and normalizes trigger settings into structured fields and human-readable schedule strings.
+- **State lookup** — Google Sheets stores each workflow's previous schedule, Calendar status, event IDs, and last synchronization information.
+- **Change detection** — Current n8n schedules are compared with saved state and classified as `create`, `update`, or `skip`.
+- **Calendar creation** — Supported schedules are converted into recurrence settings and created as recurring Google Calendar events.
+- **Schedule updates** — When a schedule changes, the workflow creates the replacement Calendar event and deletes previously stored event IDs.
+- **State persistence** — Created event IDs and synchronized schedule data are written back to Google Sheets for subsequent comparisons.
+- **Manual cleanup** — A separate disconnected webhook sub-flow can retrieve and delete Calendar events for maintenance.
 
 ## Setup
 
-Full step-by-step setup in [documentation.md](documentation.md).
+- **Import the workflow** — Import `workflow/sync-n8n-workflow-schedules-to-google-calendar.json` into n8n.
+- **Configure the n8n API** — Create an n8n API key and connect the credential used to retrieve workflows from your instance.
+- **Prepare Google Sheets** — Create the scheduling state sheet with the fields expected by the lookup and append/update nodes, then share it with your service account.
+- **Configure Google Sheets credentials** — Import or connect the Google service account used by the Sheets nodes and select your spreadsheet and scheduling tab.
+- **Connect Google Calendar** — Configure Google Calendar OAuth2 credentials and select the calendar where recurring workflow events should be created.
+- **Replace placeholders** — Update spreadsheet IDs, calendar IDs, credentials, and any environment-specific workflow values in the imported template.
+- **Test and activate** — Run manually, inspect create/update/skip decisions and Calendar events, then activate the 30-minute synchronization.
 
-## Known limits
+## Requirements
 
-- OAuth token expiry breaks sections D/E silently — set up the error workflow to get notified
-- Hourly schedules map to a single daily event (label includes `ogni ora :MM`)
-- The disconnected Webhook sub-flow (section F) is a manual maintenance utility — not part of the main pipeline
+- n8n instance with REST API access
+- n8n API key/credential
+- Google Sheets spreadsheet used as synchronization state
+- Google service account or compatible Sheets credentials
+- Google Calendar and OAuth2 credentials
+- Permission to create and delete events in the selected calendar
+
+### Optional
+
+- Public webhook access for the disconnected manual Calendar-cleanup flow
+- Dedicated Google Calendar for n8n schedules
+- Additional filtering rules for workflow names, tags, or environments
+- Error workflow for synchronization failures
+
+## Customization
+
+- **Sync frequency** — Change the 30-minute Schedule Trigger interval.
+- **Workflow filtering** — Adjust parsing logic to include or exclude workflows by name, tag, trigger type, or other metadata.
+- **Schedule support** — Extend the parser and recurrence logic for additional n8n scheduling patterns.
+- **Calendar representation** — Customize event names, descriptions, duration, recurrence behavior, and destination calendar.
+- **State storage** — Adapt the Google Sheets schema or replace it with another persistent state mechanism.
+- **Change handling** — Modify create, update, skip, or deletion behavior to match your preferred synchronization model.
+
+## Additional Info
+
+- Supported recurrence logic includes daily, weekly, monthly, and hourly schedules handled by the workflow's parser and Calendar conversion logic.
+- Cron, minutely, and other unsupported schedule types are skipped by the current implementation.
+- Hourly schedules are represented as one recurring daily Calendar event at the configured minute rather than 24 separate events.
+- Google Sheets acts as the synchronization state store, including `WorkflowID`, schedule data, `On Calendar`, and `Calendar_EventID`.
+- The manual webhook cleanup flow is separate from the main 30-minute synchronization pipeline.
+- [Full documentation](https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497)

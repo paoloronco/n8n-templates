@@ -29,7 +29,7 @@ n8n-templates/
 │   ├── 5 v1 -online_menu-push_notifications/
 │   ├── 5 v2 online_menu-push_notifications-homeassistant-TTS/
 │   ├── 5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation/
-│   └── 6 Sync n8n schedule to GoogleCalendar/
+│   ├── 6 Sync n8n schedule to GoogleCalendar/\n│   └── 7Splunk_Alert&Notifications/
 ├── paid-templates/
 │   ├── 1 - WordPress AI VoiceOvers with Google Cloud/
 │   ├── 2 - AI News - Social Publishing Automation/
@@ -150,6 +150,16 @@ Reads every workflow on your n8n instance every 30 minutes, extracts their sched
 - Folder: [`/free-templates/6 Sync n8n schedule to GoogleCalendar`](./free-templates/6%20Sync%20n8n%20schedule%20to%20GoogleCalendar)
 - Documentation: [n8n Workflow Scheduling Extraction — Setup docs](https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link)
 - n8n template: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
+
+</details>
+
+<details>
+<summary><strong>7. Splunk Alert Notifications — Email & Telegram</strong></summary>
+
+Receives Splunk alerts through an n8n webhook, normalizes the incoming payload, validates the alert, and routes notifications based on severity. **Critical** and **High** alerts are sent through both Email and Telegram, while **Medium**, **Low**, and **Informational** alerts are delivered by Email. If Splunk does not provide a severity, the workflow automatically derives one from the number of failed attempts.
+
+- Folder: [`/free-templates/7Splunk_Alert&Notifications`](./free-templates/7Splunk_Alert%26Notifications)
+- Setup guide: [README](./free-templates/7Splunk_Alert%26Notifications/README.md)
 
 </details>
 

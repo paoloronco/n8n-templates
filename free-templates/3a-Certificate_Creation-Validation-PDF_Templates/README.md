@@ -4,7 +4,7 @@
 
 Issue and verify digital certificates with n8n using reusable PDF Generator API templates, unique certificate IDs, an n8n Data Table registry, Gmail delivery, and a public verification endpoint.
 
-![Workflow](Assets/Workflow-image.png)
+![Workflow](assets/Workflow-image.png)
 
 ## How It Works
 
@@ -51,7 +51,7 @@ Issue and verify digital certificates with n8n using reusable PDF Generator API 
 
 ## Additional Info
 
-- [Example certificate](./Assets/Example-Certificate.pdf)
+- [Example certificate](./assets/Example-Certificate.pdf)
 - [Full deployment guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - [n8n Community Template](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 - [PDF Generator API](https://pdfgeneratorapi.com/)

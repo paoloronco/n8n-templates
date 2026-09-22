@@ -17,7 +17,7 @@ Automatically fetch Amazon Luna games included with Prime, detect newly added ti
 
 ## Setup
 
-- **Import the workflow** — Import `workflow.json` into n8n.
+- **Import the workflow** — Import `Amazon_Luna-Prime_Games-Google_Sheets.json` into n8n.
 - **Configure Amazon headers** — Update the Edit Fields node with the locale, marketplace ID, Origin, Referer, Accept-Language, and User-Agent for your target Amazon region.
 - **Connect Google Sheets** — Configure credentials, document, and sheet for reading the existing catalog and writing synchronized records.
 - **Configure Discord** — Connect Discord OAuth2 and select the target server and channel, or remove/replace this branch if notifications are not required.

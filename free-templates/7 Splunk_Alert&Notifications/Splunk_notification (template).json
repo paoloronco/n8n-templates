@@ -1,0 +1,298 @@
+{
+  "name": "Splunk Alert Notifications - Email & Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Splunk → n8n Alert Notifications\n\n### Flow\n1. Splunk sends a POST webhook.\n2. n8n normalizes the Splunk payload.\n3. Invalid alerts are discarded.\n4. Critical/High → urgent email + Telegram.\n5. Medium/Low/Informational → standard email.\n\n### Before activating\n- Configure SMTP credentials on both Email nodes.\n- Replace `alerts@yourdomain.com` and `you@example.com`.\n- Configure Telegram Bot credentials and replace `YOUR_TELEGRAM_CHAT_ID`.\n- In Splunk, point the webhook alert action to the **Production URL** of `When Splunk Notification Received`.\n- Run one test alert, then activate this workflow.\n\n### Default severity fallback\nIf Splunk does not send severity:\n- 20+ failed attempts → CRITICAL\n- 10–19 → HIGH\n- 3–9 → MEDIUM\n- 0–2 → LOW\n\nYou can change these thresholds in `Normalize Splunk Alert Payload`.",
+        "height": 768,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        592
+      ],
+      "id": "c272c20b-d28d-416a-a847-7fe39df071d9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Receive and normalize alerts\n\nWebhook ingests alerts then custom code standardizes fields for consistent downstream processing.",
+        "height": 304,
+        "width": 464,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        896
+      ],
+      "id": "97958856-b137-4386-bb64-58d58eef98a0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Validate and route by severity\n\nFilters out invalid alerts and branches based on severity (critical/high vs. others).",
+        "height": 304,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        896
+      ],
+      "id": "699200b5-a28e-4165-9b12-79b86f5cdb6c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Send alert notifications\n\nRight-side cluster sending notifications: urgent alerts go via email and Telegram; non-urgent alerts send a standard email.",
+        "height": 784,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        592
+      ],
+      "id": "95d911f4-3960-48c8-a574-65f9fcd23f96",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "splunk-notification",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2304,
+        1024
+      ],
+      "id": "a32e7582-691a-4a26-a33d-05d43de69ab4",
+      "name": "When Splunk Notification Received",
+      "webhookId": "a1b2c3d4-e5f6-4789-a123-456789abcdef"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const incoming = $input.item.json ?? {};\nconst body = incoming.body ?? incoming;\nconst result = body.result ?? {};\n\nfunction parseMultivalue(value) {\n  if (Array.isArray(value)) {\n    return value.map(v => String(v).trim()).filter(Boolean);\n  }\n  if (value === null || value === undefined || value === '') return [];\n  return String(value)\n    .split(/[\\n,]+/)\n    .map(v => v.trim())\n    .filter(Boolean);\n}\n\nfunction firstValue(...values) {\n  for (const value of values) {\n    if (value !== undefined && value !== null && String(value).trim() !== '') {\n      return value;\n    }\n  }\n  return '';\n}\n\nconst targetedUsers = parseMultivalue(\n  firstValue(result.targeted_users, result.user, result.users, result.target_user)\n);\nconst targetedHosts = parseMultivalue(\n  firstValue(result.targeted_hosts, result.host, result.hosts, result.dest_host)\n);\n\nconst failedAttempts = Number.parseInt(\n  firstValue(result.failed_attempts, result.count, result.event_count, 0),\n  10\n) || 0;\n\nlet severity = String(\n  firstValue(body.severity, body.urgency, result.severity, result.urgency)\n).toLowerCase().trim();\n\nconst aliases = {\n  crit: 'critical',\n  severe: 'critical',\n  warning: 'medium',\n  info: 'informational'\n};\nseverity = aliases[severity] ?? severity;\n\nconst validSeverities = ['critical', 'high', 'medium', 'low', 'informational'];\n\nif (!validSeverities.includes(severity)) {\n  if (failedAttempts >= 20) severity = 'critical';\n  else if (failedAttempts >= 10) severity = 'high';\n  else if (failedAttempts >= 3) severity = 'medium';\n  else severity = 'low';\n}\n\nconst severityMeta = {\n  critical: { color: '#b91c1c', emoji: '🔴', label: 'CRITICAL' },\n  high: { color: '#c2410c', emoji: '🟠', label: 'HIGH' },\n  medium: { color: '#a16207', emoji: '🟡', label: 'MEDIUM' },\n  low: { color: '#4d7c0f', emoji: '🟢', label: 'LOW' },\n  informational: { color: '#0369a1', emoji: '🔵', label: 'INFORMATIONAL' }\n};\n\nconst meta = severityMeta[severity];\n\nreturn {\n  json: {\n    alert_id: String(firstValue(body.sid, result.sid)),\n    search_name: String(firstValue(body.search_name, result.search_name, body.name, 'Splunk alert')),\n    app: String(firstValue(body.app, result.app)),\n    owner: String(firstValue(body.owner, result.owner)),\n    results_link: String(firstValue(body.results_link, result.results_link)),\n    severity,\n    severity_label: meta.label,\n    severity_color: meta.color,\n    severity_emoji: meta.emoji,\n    src_ip: String(firstValue(result.src_ip, result.source_ip, result.src, result.rhost)),\n    failed_attempts: failedAttempts,\n    targeted_users: targetedUsers,\n    targeted_users_str: targetedUsers.join(', ') || 'N/A',\n    targeted_hosts: targetedHosts,\n    targeted_hosts_str: targetedHosts.join(', ') || 'N/A',\n    unique_users: Number.parseInt(result.unique_users, 10) || targetedUsers.length,\n    unique_hosts: Number.parseInt(result.unique_hosts, 10) || targetedHosts.length,\n    first_seen: String(firstValue(result.first_seen, result.earliest_time)),\n    last_seen: String(firstValue(result.last_seen, result.latest_time)),\n    received_at: new Date().toISOString(),\n    raw_result: result\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        1024
+      ],
+      "id": "67a5a92f-7244-42e8-9a50-94df5e0873b5",
+      "name": "Normalize Splunk Alert Payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.search_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2832,
+        1024
+      ],
+      "id": "c6cfd474-d8bc-4006-86e1-a4171a60c851",
+      "name": "Filter Valid Alerts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.severity }}",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.severity }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3088,
+        1024
+      ],
+      "id": "2681fab5-6c52-4f27-bf9e-736eee8a7222",
+      "name": "If Severity Is Critical Or High"
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@yourdomain.com",
+        "toEmail": "you@example.com",
+        "subject": "={{ $json.severity_emoji }} [{{ $json.severity_label }}] Splunk: {{ $json.search_name }}",
+        "html": "=<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:650px;margin:0 auto;color:#111827\">\n<div style=\"background-color:{{ $json.severity_color }};color:#fff;padding:18px;border-radius:8px 8px 0 0\">\n<h2 style=\"margin:0\">{{ $json.severity_emoji }} Splunk Alert — {{ $json.severity_label }}</h2>\n</div>\n<div style=\"border:1px solid #e5e7eb;border-top:0;padding:18px;border-radius:0 0 8px 8px\">\n<table style=\"width:100%;border-collapse:collapse;font-size:14px\">\n<tr><td style=\"padding:7px 0;color:#6b7280\">Search</td><td style=\"padding:7px 0;font-weight:bold\">{{ $json.search_name }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">App</td><td>{{ $json.app || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Source IP</td><td style=\"font-weight:bold\">{{ $json.src_ip || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Failed attempts</td><td>{{ $json.failed_attempts }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Targeted users</td><td>{{ $json.targeted_users_str }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Targeted hosts</td><td>{{ $json.targeted_hosts_str }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">First seen</td><td>{{ $json.first_seen || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Last seen</td><td>{{ $json.last_seen || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Owner</td><td>{{ $json.owner || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Received</td><td>{{ $json.received_at }}</td></tr>\n</table>\n{{ $json.results_link ? '<p style=\"margin-top:18px\"><a href=\"' + $json.results_link + '\" style=\"background:#111827;color:#fff;padding:10px 16px;border-radius:5px;text-decoration:none\">Open results in Splunk</a></p>' : '' }}\n</div></div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3344,
+        832
+      ],
+      "id": "144e9c9c-bc52-4428-8ecc-623d8b42568e",
+      "name": "Send Urgent Alert Email",
+      "webhookId": "0c5ccfbc-193e-4f70-8269-f5b9c860b7b2"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.severity_emoji }} SPLUNK ALERT [{{ $json.severity_label }}]\n\nSearch: {{ $json.search_name }}\nSource IP: {{ $json.src_ip || 'N/A' }}\nFailed attempts: {{ $json.failed_attempts }}\nTargeted users: {{ $json.targeted_users_str }}\nTargeted hosts: {{ $json.targeted_hosts_str }}\nFirst seen: {{ $json.first_seen || 'N/A' }}\nLast seen: {{ $json.last_seen || 'N/A' }}\n\n{{ $json.results_link ? '🔗 ' + $json.results_link : '' }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3344,
+        1024
+      ],
+      "id": "1527ea48-75e5-4986-8da2-f192ee11aea9",
+      "name": "Send Urgent Telegram Alert",
+      "webhookId": "4ac9a01e-0de2-4f1e-a350-82361961b777"
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@yourdomain.com",
+        "toEmail": "you@example.com",
+        "subject": "={{ $json.severity_emoji }} [{{ $json.severity_label }}] Splunk: {{ $json.search_name }}",
+        "html": "=<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:650px;margin:0 auto;color:#111827\">\n<div style=\"background-color:{{ $json.severity_color }};color:#fff;padding:18px;border-radius:8px 8px 0 0\">\n<h2 style=\"margin:0\">{{ $json.severity_emoji }} Splunk Alert — {{ $json.severity_label }}</h2>\n</div>\n<div style=\"border:1px solid #e5e7eb;border-top:0;padding:18px;border-radius:0 0 8px 8px\">\n<table style=\"width:100%;border-collapse:collapse;font-size:14px\">\n<tr><td style=\"padding:7px 0;color:#6b7280\">Search</td><td style=\"padding:7px 0;font-weight:bold\">{{ $json.search_name }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">App</td><td>{{ $json.app || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Source IP</td><td style=\"font-weight:bold\">{{ $json.src_ip || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Failed attempts</td><td>{{ $json.failed_attempts }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Targeted users</td><td>{{ $json.targeted_users_str }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Targeted hosts</td><td>{{ $json.targeted_hosts_str }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">First seen</td><td>{{ $json.first_seen || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Last seen</td><td>{{ $json.last_seen || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Owner</td><td>{{ $json.owner || 'N/A' }}</td></tr>\n<tr><td style=\"padding:7px 0;color:#6b7280\">Received</td><td>{{ $json.received_at }}</td></tr>\n</table>\n{{ $json.results_link ? '<p style=\"margin-top:18px\"><a href=\"' + $json.results_link + '\" style=\"background:#111827;color:#fff;padding:10px 16px;border-radius:5px;text-decoration:none\">Open results in Splunk</a></p>' : '' }}\n</div></div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3344,
+        1216
+      ],
+      "id": "7803a17c-6541-4453-870b-c0ae2348ede4",
+      "name": "Send Standard Alert Email",
+      "webhookId": "4eac5567-f603-4b5d-ba0b-585883d8d0ae"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Splunk Notification Received": {
+      "main": [
+        [
+          {
+            "node": "Normalize Splunk Alert Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Splunk Alert Payload": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Alerts": {
+      "main": [
+        [
+          {
+            "node": "If Severity Is Critical Or High",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Severity Is Critical Or High": {
+      "main": [
+        [
+          {
+            "node": "Send Urgent Alert Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Urgent Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Standard Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f5e0d762-03ad-4c5b-87c0-a80c0b5d054d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
+  },
+  "nodeGroups": [],
+  "id": "RCxeODwpOkolYCrB",
+  "tags": []
+}

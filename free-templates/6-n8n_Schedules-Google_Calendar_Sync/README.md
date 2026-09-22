@@ -17,7 +17,7 @@ Scan n8n workflows, extract supported Schedule Trigger configurations, compare t
 
 ## Setup
 
-- **Import the workflow** — Import `workflow/sync-n8n-workflow-schedules-to-google-calendar.json` into n8n.
+- **Import the workflow** — Import `workflow/n8n_Schedules-Google_Calendar_Sync.json` into n8n.
 - **Configure the n8n API** — Create an n8n API key and connect the credential used to retrieve workflows from your instance.
 - **Prepare Google Sheets** — Create the scheduling state sheet with the fields expected by the lookup and append/update nodes, then share it with your service account.
 - **Configure Google Sheets credentials** — Import or connect the Google service account used by the Sheets nodes and select your spreadsheet and scheduling tab.

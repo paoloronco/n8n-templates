@@ -19,7 +19,7 @@ Automatically collect invoice PDFs from Gmail, archive them in Google Drive or a
 
 ## Setup
 
-- **Import the workflow** — Import `workflow.json` into n8n.
+- **Import the workflow** — Import `Email_Invoices-AI_Extraction-Archiving.json` into n8n.
 - **Connect Gmail** — Configure Gmail OAuth2 and update sender/message filters for the providers you want to process.
 - **Connect Google Drive** — Configure Drive OAuth2 and select the destination folder for invoice PDFs.
 - **Configure OpenRouter** — Add OpenRouter credentials and select the model used by the extraction agent.

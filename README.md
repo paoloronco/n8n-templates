@@ -29,7 +29,7 @@ n8n-templates/
 │   ├── 5 v1 -online_menu-push_notifications/
 │   ├── 5 v2 online_menu-push_notifications-homeassistant-TTS/
 │   ├── 5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation/
-│   ├── 6 Sync n8n schedule to GoogleCalendar/\n│   └── 7Splunk_Alert&Notifications/
+│   ├── 6 Sync n8n schedule to GoogleCalendar/\n│   └── 7 Splunk_Alert&Notifications/
 ├── paid-templates/
 │   ├── 1 - WordPress AI VoiceOvers with Google Cloud/
 │   ├── 2 - AI News - Social Publishing Automation/
@@ -47,9 +47,9 @@ Each template folder typically contains the workflow JSON, a `README.md` setup g
 ## Free templates
 
 <details>
-<summary><strong>1. Amazon Luna — Fetch "Included with Prime" games and notify</strong></summary>
+<summary><strong>1. Amazon Luna — Sync Prime Games to Google Sheets</strong></summary>
 
-Automatically fetch and maintain an updated catalog of Amazon Luna "Included with Prime" games. Queries Amazon's official Luna endpoint, extracts the full metadata, and syncs it into Google Sheets without duplicates — then notifies you of changes.
+Fetches the current Amazon Luna **Included with Prime** catalog, extracts game metadata, detects newly added titles, keeps Google Sheets synchronized, and can send Discord notifications for new games.
 
 - Folder: [`/free-templates/1-amazonluna-fetch`](./free-templates/1-amazonluna-fetch)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
@@ -58,9 +58,9 @@ Automatically fetch and maintain an updated catalog of Amazon Luna "Included wit
 </details>
 
 <details>
-<summary><strong>2. Save Invoices</strong></summary>
+<summary><strong>2. Automated Invoice Archiving & AI Data Extraction</strong></summary>
 
-Fetches invoice emails from your ISP or utility provider, downloads the attached PDF, stores it in Google Drive (or FTP/SFTP), extracts the invoice details with AI, and logs everything into Google Sheets.
+Collects invoice PDFs from Gmail, archives them in Google Drive or optionally FTP/SFTP, extracts structured invoice data with AI through OpenRouter, and records the results in Google Sheets.
 
 - Folder: [`/free-templates/2-SaveInvoices`](./free-templates/2-SaveInvoices)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
@@ -69,9 +69,9 @@ Fetches invoice emails from your ISP or utility provider, downloads the attached
 </details>
 
 <details>
-<summary><strong>3. Certificate Creation & Validation</strong></summary>
+<summary><strong>3. Digital Certificate Creation & Validation — HTML-based PDF</strong></summary>
 
-A complete end-to-end digital certification system: it automates the full lifecycle of a certificate — creation, PDF generation, and verification via API or a user-friendly HTML page.
+Creates certificates from webhook requests, generates unique IDs, stores them in an n8n Data Table, renders the certificate from **HTML/CSS inside the workflow**, emails the PDF through Gmail, and exposes a public verification endpoint.
 
 - Folder: [`/free-templates/3-Certification-Creation&Validation`](./free-templates/3-Certification-Creation&Validation)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
@@ -80,41 +80,31 @@ A complete end-to-end digital certification system: it automates the full lifecy
 </details>
 
 <details>
-<summary><strong>3a. Certificate Creation & Validation — with PDF Templates</strong></summary>
+<summary><strong>3a. Digital Certificate Creation & Validation — PDF Generator API Templates</strong></summary>
 
-The evolved version of template 3. Instead of generating PDFs from raw HTML, it uses **PDF Generator API templates** for a cleaner, more maintainable, and more scalable approach.
-
-Key differences from the HTML version:
-- No HTML inside the workflow.
-- PDF layout managed through the PDF Generator API template UI.
-- Clear separation between automation logic and visual design.
-- Easier customization and production-ready structure.
+A template-based variant of workflow 3. The certificate lifecycle is the same, but visual design is moved out of n8n into a reusable **PDF Generator API template**, separating automation logic from PDF layout and branding.
 
 - Folder: [`/free-templates/3a-Certification-Creation&Validation With PDF Templates`](./free-templates/3a-Certification-Creation&Validation%20With%20PDF%20Templates)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - n8n template: [Create & Validate Digital Certificates with PDF Generator API](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 
-> Recommended for new implementations. The HTML-based version is kept for backward compatibility and educational purposes.
-
 </details>
 
 <details>
-<summary><strong>4. Tech News Digest — RSS → AI → Email</strong></summary>
+<summary><strong>4. Tech & AI Daily Briefing — RSS → AI → Email</strong></summary>
 
-Collects, filters, deduplicates, summarizes, and delivers a daily briefing on technology, AI, and cybersecurity. It ingests ~25 curated RSS feeds, normalizes and caps each source, and uses a resilient multi-model AI chain (OpenAI primary, Gemini fallback, deterministic renderer) to produce a concise HTML newsletter, delivered to a subscriber list via SMTP.
+Aggregates technology, AI, cybersecurity, cloud, and digital-industry news from curated RSS feeds, filters and deduplicates recent stories, processes them through a resilient AI pipeline, builds an HTML newsletter, and sends it to subscribers via SMTP.
 
 - Folder: [`/free-templates/4-RSS_News_Tech`](./free-templates/4-RSS_News_Tech)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
 - n8n template: [Curate and Send Tech News Digests with RSS, AI and Email](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 
-Files: `News_Tech_EN.json` (workflow), `readme.md` (GitHub setup guide), `readme-n8n.md` (n8n marketplace description), `Assets/` (workflow diagram).
-
 </details>
 
 <details>
-<summary><strong>5 v1. Online Menu — Push notifications from customer orders</strong></summary>
+<summary><strong>5 v1. Online Menu — ntfy Push Notifications</strong></summary>
 
-Receive instant push notifications whenever a customer places an order on your menu website — powered by n8n and a self-hosted ntfy.sh instance. No third-party notification APIs, no paid plans. Includes a ready-to-host static menu website with a customer order page and a password-protected admin panel.
+Receives customer orders through an n8n webhook, sends real-time push notifications through a self-hosted **ntfy** server, and logs basic order information in an n8n Data Table.
 
 - Folder: [`/free-templates/5 v1 -online_menu-push_notifications`](./free-templates/5%20v1%20-online_menu-push_notifications)
 - Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
@@ -122,9 +112,9 @@ Receive instant push notifications whenever a customer places an order on your m
 </details>
 
 <details>
-<summary><strong>5 v2. Online Menu — Push notifications + Home Assistant voice announcements</strong></summary>
+<summary><strong>5 v2. Online Menu — ntfy + Home Assistant TTS</strong></summary>
 
-Extends 5 v1: receive a push notification **and** trigger a voice announcement on your Google Home every time an order comes in — powered by n8n, ntfy.sh, and Home Assistant TTS. Fully self-hosted, no cloud TTS fees.
+Extends v1 with **Home Assistant TTS**: every order is logged and sent through ntfy, while n8n also calls a Home Assistant script to announce the new order on a configured speaker.
 
 - Folder: [`/free-templates/5 v2 online_menu-push_notifications-homeassistant-TTS`](./free-templates/5%20v2%20online_menu-push_notifications-homeassistant-TTS)
 - Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
@@ -132,20 +122,22 @@ Extends 5 v1: receive a push notification **and** trigger a voice announcement o
 </details>
 
 <details>
-<summary><strong>5 v3. Online Menu — Push notifications + Home Assistant TTS + BAC tracking</strong></summary>
+<summary><strong>5 v3. Online Menu — ntfy + Home Assistant TTS + BAC Estimation</strong></summary>
 
-Extends 5 v2 with Blood Alcohol Concentration (BAC) logic on top of push notifications and Home Assistant TTS announcements.
+Extends v2 with richer order logging and daily per-person history. Alcohol grams configured in menu items are accumulated and used for a **simplified BAC estimate**, which is included in the ntfy notification alongside previous orders.
 
 - Folder: [`/free-templates/5 v3 online_menu-push_notifications-homeassistant-TTS-BACcalculation`](./free-templates/5%20v3%20online_menu-push_notifications-homeassistant-TTS-BACcalculation)
 - Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?pvs=74)
 - n8n template: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 
+> The BAC value is a simplified estimate and must not be used to determine driving safety, legal compliance, or medical decisions.
+
 </details>
 
 <details>
-<summary><strong>6. Sync n8n schedules to Google Calendar</strong></summary>
+<summary><strong>6. Sync n8n Workflow Schedules to Google Calendar</strong></summary>
 
-Reads every workflow on your n8n instance every 30 minutes, extracts their schedule triggers, and keeps a matching recurring event on Google Calendar — one event per workflow, always in sync.
+Scans n8n workflows every 30 minutes, extracts supported schedules, compares them with state stored in Google Sheets, and automatically creates or replaces matching recurring Google Calendar events when schedules change.
 
 - Folder: [`/free-templates/6 Sync n8n schedule to GoogleCalendar`](./free-templates/6%20Sync%20n8n%20schedule%20to%20GoogleCalendar)
 - Documentation: [n8n Workflow Scheduling Extraction — Setup docs](https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link)
@@ -156,10 +148,10 @@ Reads every workflow on your n8n instance every 30 minutes, extracts their sched
 <details>
 <summary><strong>7. Splunk Alert Notifications — Email & Telegram</strong></summary>
 
-Receives Splunk alerts through an n8n webhook, normalizes the incoming payload, validates the alert, and routes notifications based on severity. **Critical** and **High** alerts are sent through both Email and Telegram, while **Medium**, **Low**, and **Informational** alerts are delivered by Email. If Splunk does not provide a severity, the workflow automatically derives one from the number of failed attempts.
+Receives Splunk alerts through an n8n webhook, normalizes and validates the payload, derives severity when necessary, and routes notifications by priority: Critical/High alerts to Email and Telegram, and lower-severity alerts to Email.
 
-- Folder: [`/free-templates/7Splunk_Alert&Notifications`](./free-templates/7Splunk_Alert%26Notifications)
-- Setup guide: [README](./free-templates/7Splunk_Alert%26Notifications/README.md)
+- Folder: [`/free-templates/7 Splunk_Alert&Notifications`](./free-templates/7%20Splunk_Alert%26Notifications)
+- Setup guide: [README](./free-templates/7%20Splunk_Alert%26Notifications/README.md)
 
 </details>
 

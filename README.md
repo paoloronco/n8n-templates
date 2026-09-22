@@ -32,10 +32,10 @@ n8n-templates/
 │   ├── 6-n8n_Schedules-Google_Calendar_Sync/
 │   └── 7-Splunk_Alerts-Email-Telegram_Notifications/
 ├── paid-templates/
-│   ├── 1 - WordPress AI VoiceOvers with Google Cloud/
-│   ├── 2 - AI News - Social Publishing Automation/
-│   ├── 3 - Reliable Backup & Sync Execution Validation (Log-Driven)/
-│   └── 4 - WordPress AI Chatbot/
+│   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
+│   ├── 2-AI_News-Social_Publishing-Instagram/
+│   ├── 3-Backup_Sync-Log_Validation-Monitoring/
+│   └── 4-WordPress_AI_Chatbot-RAG/
 └── README.md
 ```
 
@@ -165,7 +165,7 @@ Receives Splunk alerts through an n8n webhook, normalizes and validates the payl
 
 Transforms WordPress articles into multilingual, human-sounding audio, powered by n8n, OpenAI, Google Cloud Text-to-Speech (Long Audio), and Google Sheets. Handles text cleaning, translation, long-form TTS generation, WordPress publishing, and status tracking — fully automatic and production-ready.
 
-- Folder: [`/paid-templates/1 - WordPress AI VoiceOvers with Google Cloud`](./paid-templates/1%20-%20WordPress%20AI%20VoiceOvers%20with%20Google%20Cloud)
+- Folder: [`/paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS`](./paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS)
 - n8n template: [Convert WordPress articles to multilingual voiceovers](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
 - Gumroad: [WordPress AI VoiceOvers](https://paoloronco.gumroad.com/l/ailfum)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
@@ -177,7 +177,7 @@ Transforms WordPress articles into multilingual, human-sounding audio, powered b
 
 Collects the latest news from any topic via RSS feeds, analyzes it with AI, and automatically produces ready-to-post Instagram content — title, caption, and AI-generated image. Ideal for creators and brands that want consistent, on-trend social channels without manual content drafting.
 
-- Folder: [`/paid-templates/2 - AI News - Social Publishing Automation`](./paid-templates/2%20-%20AI%20News%20-%20Social%20Publishing%20Automation)
+- Folder: [`/paid-templates/2-AI_News-Social_Publishing-Instagram`](./paid-templates/2-AI_News-Social_Publishing-Instagram)
 - n8n template: [Automate RSS to Instagram with AI-generated content](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 - Gumroad: [AI News — Social Publishing](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
@@ -195,7 +195,7 @@ Design principles:
 - No SSH, no server access, no execution coupling.
 - Safe to run in untrusted or restricted environments.
 
-- Folder: [`/paid-templates/3 - Reliable Backup & Sync Execution Validation (Log-Driven)`](./paid-templates/3%20-%20Reliable%20Backup%20&%20Sync%20Execution%20Validation%20(Log-Driven))
+- Folder: [`/paid-templates/3-Backup_Sync-Log_Validation-Monitoring`](./paid-templates/3%20-%20Reliable%20Backup%20&%20Sync%20Execution%20Validation%20(Log-Driven))
 - n8n template: [Monitor backup and sync logs with GCS, GitHub, Gmail, OpenAI, and GLPI](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
 - Gumroad: [Backup & Sync Execution Validation](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
@@ -221,7 +221,7 @@ A production-ready AI chatbot for WordPress sites using n8n, a vector database, 
   </a>
 </p>
 
-Folder: [`/paid-templates/4 - WordPress AI Chatbot`](./paid-templates/4%20-%20WordPress%20AI%20Chatbot) · Video: [YouTube walkthrough](https://www.youtube.com/watch?v=vg33xcdU9gE)
+Folder: [`/paid-templates/4-WordPress_AI_Chatbot-RAG`](./paid-templates/4-WordPress_AI_Chatbot-RAG) · Video: [YouTube walkthrough](https://www.youtube.com/watch?v=vg33xcdU9gE)
 
 **Key capabilities**
 - No coding required — import workflows and configure.

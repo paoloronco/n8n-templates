@@ -1,41 +1,60 @@
 # AI News → Social Publishing Automation
 
-An advanced automation that collects the latest news from **any topic or industry** via RSS feeds, analyzes them with AI, and automatically creates **ready-to-post Instagram content** — complete with title, caption, and AI-generated image.
+![AI News Social Publishing Automation](assets/banner.png)
 
-Ideal for creators, media professionals, and brands that want to keep their social channels **active, consistent, and always on-trend** — without manual research or content drafting.
+## Quick Overview
 
-![Banner](assets/banner.png)
+Turn RSS news into publishable Instagram content automatically. The workflow collects articles, uses AI to select and transform relevant stories, generates captions and visuals, uploads media through Cloudinary, and publishes to Instagram through the Meta Graph API.
 
-👉 **Gumroad:** [n8n Workflow: “AI News → Social Publishing Automation”](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+## How It Works
 
-👉 **paoloronco.it Store:** [n8n Workflow: “AI News → Social Publishing Automation”](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
+- **RSS collection** — The workflow reads one or more configurable RSS feeds for the topics or industries you want to monitor.
+- **AI selection** — AI evaluates incoming stories and selects content suitable for social publishing.
+- **Copy generation** — The selected article is transformed into a social headline and Instagram-ready caption.
+- **Image generation** — AI creates a visual associated with the selected story and publishing context.
+- **Media hosting** — Cloudinary stores the generated image and provides the media URL required by the publishing flow.
+- **Instagram publishing** — The Meta Graph API publishes the generated image and caption to the configured Instagram account.
+- **Scheduling** — The complete pipeline can run automatically on a configurable schedule.
 
-👉 **n8n Marketplace** [Automate RSS to Instagram with AI-Generated Content and Cloudinary](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+## Setup
 
+- **Purchase the complete package** — Obtain the importable workflow and full deployment documentation from Gumroad or the store.
+- **Configure RSS feeds** — Replace or extend the source feeds for your target niche, publication set, or topic.
+- **Configure AI services** — Add the required AI credentials and review prompts for selection, copy, and image generation.
+- **Configure Cloudinary** — Connect the account used to host generated social images.
+- **Configure Meta** — Connect the required Instagram/Meta Graph API credentials and target professional account.
+- **Review the schedule** — Set a publishing frequency appropriate for your content strategy.
+- **Test before publishing** — Run the workflow with controlled inputs and verify copy, image, upload, and Instagram publishing.
 
+## Requirements
 
-### **What it does**
+- n8n instance
+- One or more RSS feeds
+- AI provider/API credentials required by the purchased workflow
+- Cloudinary account
+- Meta/Instagram professional account with Graph API access
+- Required Meta application permissions and credentials
 
-* Reads and aggregates news from one or more RSS feeds (customizable by category).
-* Uses AI to select the most relevant or engaging articles.
-* Generates a caption and headline with a natural, professional tone.
-* Creates a realistic AI-generated image to match the topic.
-* Uploads the image to Cloudinary and publishes the post directly to Instagram through the Meta Graph API.
-* Runs automatically on schedule (default: every 5 hours) — no manual steps required.
+### Optional
 
-### **Why it’s different**
+- Additional RSS categories or source lists
+- Alternative AI models or providers
+- Additional moderation or approval step before publishing
+- Additional social publishing destinations
 
-* Works with any subject or niche, from tech to fashion, news, travel, and more.
-* Includes a guide with curated RSS feed sources by category — ready to plug in.
-* AI-driven content generation for text and visuals, tuned for professional results.
-* Fully automated workflow — from discovery to publishing.
-* Self-hosted and scalable, with no vendor lock-in.
+## Customization
 
-### **What’s included**
+- **Topics and sources** — Replace the RSS feeds to target technology, fashion, travel, business, or another niche.
+- **Editorial behavior** — Modify AI prompts for article selection, tone, headline style, and caption structure.
+- **Visual generation** — Adapt image prompts and generation settings to your brand or content style.
+- **Publishing frequency** — Change the schedule or add approval gates before publication.
+- **Distribution** — Extend the workflow beyond Instagram with additional social channels.
+- **Branding** — Add recurring brand instructions, hashtags, CTA rules, or visual constraints.
 
-* Workflow JSON file (import-ready for n8n).
-* PDF deployment guide (written together), covering:
-* how to set up RSS sources by category;
-* configuring APIs (OpenAI, Cloudinary, Meta Graph);
-* scheduling and testing the workflow;
-* recommended best practices for stability and scaling.
+## Additional Info
+
+- [n8n Community Template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+- [Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+- [Paolo Ronco Store](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
+- The purchased package includes the importable workflow and complete setup documentation covering RSS sources, APIs, scheduling, testing, and operational guidance.
+- This public repository contains the product overview and promotional assets; the complete paid workflow is delivered with the purchased package.

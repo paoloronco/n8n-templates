@@ -1,6 +1,6 @@
 # Reliable Backup & Sync Execution Validation — Log-Driven Monitoring
 
-![Reliable Backup & Sync Execution Validation](assets/banner.png)
+![Reliable Backup & Sync Execution Validation — Log-Driven Monitoring](assets/cover.png)
 
 ## Quick Overview
 

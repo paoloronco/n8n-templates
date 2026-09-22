@@ -1,120 +1,68 @@
-# 🎧 WordPress AI VoiceOver Automation
-
-### Convert WordPress Articles into Multilingual Audio — Fully Automated with n8n, OpenAI & Google Cloud
-
-This repository showcases the complete automation workflow that transforms your WordPress posts into **professional, multilingual voiceovers**—entirely hands-free.
-
-The workflow is publicly available for purchase here:
-
-👉 **Gumroad:** [https://paoloronco.gumroad.com/l/ailfum](https://paoloronco.gumroad.com/l/ailfum)
-
-👉 **paoloronco.it Store:** [https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
-
-👉 **n8n Marketplace:** [Convert WordPress Articles to Multilingual Voiceovers with Google TTS and OpenAI](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) 
-
+# WordPress AI VoiceOvers — OpenAI + Google Cloud TTS
 
 ![WordPress AI VoiceOver Automation](assets/banner.png)
 
+## Quick Overview
 
----
+Automatically transform WordPress articles into multilingual audio. The solution cleans and translates article content with OpenAI, generates long-form speech through Google Cloud Text-to-Speech, publishes audio back to WordPress, and tracks processing in Google Sheets.
 
-## 🎧 Example generated voiceovers
+## How It Works
 
-### Example voiceover: My Github Pages Website
-<audio controls>
-  <source src="https://storage.googleapis.com/wp-voiceovers/631EN.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+- **WordPress ingestion** — The workflow retrieves WordPress articles selected for voiceover processing.
+- **AI text preparation** — OpenAI cleans and normalizes article content so markup and formatting do not degrade speech generation.
+- **Translation** — Content can be translated between configured languages before speech synthesis.
+- **Long-form TTS** — Google Cloud generates audio suitable for longer WordPress content through the included TTS architecture.
+- **Publishing** — Generated audio is associated with the WordPress content so visitors can listen to the article.
+- **Tracking** — Google Sheets records processing state and provides traceability across articles and generated voiceovers.
 
-### Example voiceover: n8n Template - fetch AmazonLuna Games
-<audio controls>
-  <source src="https://storage.googleapis.com/wp-voiceovers/1767EN.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+## Setup
 
-### Example voiceover: Github paoloronco/lynx
-<audio controls>
-  <source src="https://storage.googleapis.com/wp-voiceovers/1685EN.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+- **Purchase the complete package** — Obtain the workflow, TTS microservice, configuration files, and deployment documentation from Gumroad or the store.
+- **Configure WordPress** — Connect the target WordPress site and review the content-selection and publishing configuration.
+- **Configure OpenAI** — Add the required credentials and review cleaning, translation, and language settings.
+- **Deploy Google Cloud TTS** — Follow the included documentation to configure Google Cloud and the supplied FastAPI/Docker TTS component.
+- **Connect Google Sheets** — Configure the tracking spreadsheet and credentials used by the workflow.
+- **Test the pipeline** — Process a sample article end-to-end before enabling scheduled production runs.
 
----
+## Requirements
 
-## 🚀 What This Automation Does
+- n8n instance
+- WordPress site with suitable API access
+- OpenAI API credentials
+- Google Cloud project with Text-to-Speech services configured
+- Google Sheets and credentials
+- Environment capable of running the supplied TTS service
 
-This advanced n8n workflow automatically:
+### Optional
 
-* **Fetches your WordPress posts**
-* **Cleans and normalizes text** using OpenAI for flawless TTS input
-* **Translates content** (IT ↔ EN by default — expandable to any language)
-* **Generates high-quality audio** using Google Cloud Long-Form Text-to-Speech
-* **Publishes audio players directly on your WordPress site**
-* **Logs every processed post** inside Google Sheets for full traceability
-* **Runs on autopilot**, processing posts on schedule
+- Additional languages and voices
+- Custom WordPress audio-player presentation
+- Additional status notifications or monitoring
+- Alternative scheduling and article-selection rules
 
-Perfect for creators, publishers, agencies, educators, and anyone wanting to offer **accessible audio content** without manual work.
+## Customization
 
----
+- **Languages** — Extend the default language flow with additional translation and TTS combinations.
+- **Voices** — Change Google Cloud voices, language codes, and speech configuration.
+- **AI processing** — Adapt the OpenAI prompts used for cleaning and translation.
+- **Publishing** — Customize where and how generated audio is presented in WordPress.
+- **Tracking** — Extend Google Sheets with additional metadata, status fields, or reporting.
+- **Workflow extensions** — Add notifications, approval steps, storage targets, or downstream publishing channels.
 
-## ✨ Key Features
+## Additional Info
 
-### 🔊 High-Quality Voiceovers
+- [n8n Community Template](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
+- [Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+- [Paolo Ronco Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
+- The complete paid package includes the n8n workflow, Google Cloud TTS microservice, setup documentation, Google Sheets template, and troubleshooting material.
+- This public repository intentionally contains the product overview and media samples rather than the complete paid workflow package.
 
-Uses Google Cloud’s **Long Audio TTS**, delivering natural, human-like audio for long-form content.
+## Media Samples
 
-### 🌍 Multilingual by Design
+The repository includes generated audio examples under `assets/`:
 
-Ships with Italian → English voiceover generation, but fully customizable for any language combination.
+- `GitHubPagesWebsite.mp3`
+- `n8n-template-fetch-amazonlunagames.mp3`
+- `Github-paoloronco-Lynx.mp3`
 
-### 🧹 Smart AI Text Cleaning
-
-OpenAI removes noise, formatting, special characters, and unnecessary markup for optimal TTS output.
-
-### 📝 Google Sheets Tracking
-
-Every article is stored, cleaned, processed, and logged with real-time status.
-
-### 🔄 Automated WordPress Publishing
-
-Audio players are inserted directly into your dedicated VoiceOver page.
-
-### 🧩 Modular & Extensible
-
-Add languages, change voices, integrate notifications, or expand the workflow as your project grows.
-
----
-
-## 📦 What You Get
-
-When purchasing the workflow:
-
-* ✔ Complete **n8n automation JSON**
-* ✔ **Google Cloud TTS microservice** (FastAPI + Docker)
-* ✔ Full **setup documentation** (WordPress + Google Cloud + n8n)
-* ✔ Google Sheets template
-* ✔ Troubleshooting and optimization guides
-* ✔ Free lifetime documentation updates
-
----
-
-## 🛠️ Why This Workflow Exists
-
-Manually creating audio content is slow, repetitive, and expensive.
-This automation solves that by providing:
-
-* A **reliable**, production-ready process
-* A **scalable** foundation for multilingual audio content
-* A **no-code/low-code** solution built entirely on robust APIs
-* A clean, modular architecture anyone can extend
-
-If you publish content on WordPress, this automation instantly transforms your articles into an audio library your users will love.
-
----
-
-## ⭐ Want a Feature Demo or Custom Workflow?
-
-Feel free to open an issue or contact me directly.
-Custom integrations, multilingual setups, and enterprise deployments are available on request.
-
----
-
+These samples demonstrate output generated by the voiceover pipeline.

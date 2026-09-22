@@ -1,7 +1,7 @@
 # WordPress AI Chatbot — RAG with n8n
 
 <p align="center">
-  <img src="assets/promotional.png" alt="WordPress AI Chatbot" width="800"/>
+  <img src="assets/cover.png" alt="WordPress AI Chatbot — RAG with n8n" width="800"/>
 </p>
 
 ## Quick Overview

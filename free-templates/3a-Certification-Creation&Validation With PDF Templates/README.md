@@ -1,324 +1,61 @@
-📄 Certificate Creation&Validation with PDFgenerationAPI Templates (n8n)
-===============================
+# Create and Validate Digital Certificates with PDF Generator API Templates
 
-This template provides a **complete and reusable solution to automatically create, distribute, and verify digital certificates using n8n**, with **PDF Generator API templates** for PDF generation.
+## Quick Overview
 
-The workflow is designed to cover the **entire lifecycle of a certificate**, from the initial request to public verification, in a clean and maintainable way.
+Issue and verify digital certificates with n8n using reusable PDF Generator API templates, unique certificate IDs, an n8n Data Table registry, Gmail delivery, and a public verification endpoint.
 
-It is an **MVP**, but already **fully functional, tested, and production-ready**, and can be reused with minimal configuration in different environments.
+![Workflow](Assets/Workflow-image.png)
 
-![image](assets/Workflow-image.png)
+## How It Works
 
-[Example-certificate](./Assets/Example-Certificate.pdf)
+- **Certificate creation** — A POST webhook receives the candidate's name, surname, course, and email address.
+- **Unique ID validation** — The workflow generates a Certification ID and checks the Data Table to prevent identifier collisions.
+- **Registry storage** — Issued certificate records are persisted in an n8n Data Table for later lookup and verification.
+- **Template-based PDF generation** — PDF Generator API receives JSON containing candidate, course, date, and ID values mapped to placeholders in a reusable visual template.
+- **Email delivery** — Gmail sends the generated certificate PDF to the recipient supplied in the creation request.
+- **Public verification** — The verification endpoint searches the registry by Certification ID and returns whether the certificate is valid and who it belongs to.
 
-📕 Full deploy guide:
- [n8n Template – Certificate Creator & Checker (PDF Templates)](https://paoloronco.it/n8n-template-certification-creator-checker/)
+## Setup
 
-👥 n8n Community Template: [Create & Validate Digital Certificates with PDF Generator API and Gmail](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
+- **Import the workflow** — Import the included workflow JSON into n8n.
+- **Create the Data Table** — Add `Name`, `Surname`, and `CertificationID` fields and configure the insert and lookup nodes.
+- **Import the PDF template** — Import the provided PDF Generator API template and verify its placeholders match the JSON keys sent by the workflow.
+- **Configure PDF Generator API** — Add credentials and select the imported template in the PDF generation node.
+- **Connect Gmail** — Configure Gmail OAuth2 credentials for certificate delivery.
+- **Test and activate** — Create a sample certificate, confirm PDF mapping and email delivery, then test verification before activation.
 
-***
+## Requirements
 
-### 📁 Repository Structure:
+- n8n instance
+- n8n Data Table with `Name`, `Surname`, and `CertificationID`
+- PDF Generator API account and credentials
+- Imported PDF Generator API certificate template
+- Gmail OAuth2 credentials
+- Publicly reachable webhooks when exposed externally
 
-```textile
-3-Certificate_Creation&Validation/
-├── PDFgeneratorAPI-Template/
-│   └── template_export_1560735.json
-├── Assets/
-│   ├── Example-Certificate.pdf
-│   └── Workflow-image.png
-├── README.md
-└── workflow.json
-```
+### Optional
 
+- Custom PDF Generator API template design
+- QR code or additional visual elements
+- Additional registry fields
+- Frontend, LMS, or portal consuming the verification endpoint
 
+## Customization
 
-****
+- **Template design** — Change layout, fonts, colors, logos, signatures, QR codes, and other visual elements without embedding HTML in n8n.
+- **Template variables** — Extend the JSON payload and matching placeholders with additional certificate information.
+- **Certificate ID** — Replace the default ID-generation logic with another identifier format.
+- **Email delivery** — Customize Gmail subject, body, attachment name, and recipient logic.
+- **Verification response** — Extend the API response with additional non-sensitive certificate metadata.
+- **External integrations** — Connect certificate creation to forms, an LMS, CRM, e-commerce flow, or another application.
 
-## What problem this template solves
+## Additional Info
 
-In many real-world scenarios, certificates are still:
-
-- generated manually
-- created with fragile scripts
-- hard to verify
-- visually inconsistent
-- difficult to maintain over time
-
-This template solves those problems by providing:
-
-- automated certificate creation
-- a unique and verifiable Certification ID
-- consistent PDF output using templates
-- a public verification endpoint
-- a clear separation between automation logic and visual design
-
----
-
-## 🚀 What makes this version different
-
-This workflow is the **evolution of the original HTML-based version**.
-
-### Why templates instead of HTML?
-
-- No HTML inside the workflow
-- Clean separation between logic and layout
-- Visual template editor
-- Easier maintenance and customization
-- Better collaboration between developers and designers
-
-The PDF layout is managed **entirely through PDF Generator API templates**.
-
-![image](assets/PDFgenerationAPI-Template.png)
-
-------
-
-## 🔍 High-level overview
-
-The system exposes **two main endpoints**:
-
-### 1️⃣ Certificate creation
-
-```
-POST /certifications2
-```
-
-Handles:
-
-- candidate input
-- unique ID generation
-- data persistence
-- PDF generation (template-based)
-- email delivery
-
-------
-
-### 2️⃣ Certificate verification
-
-```
-GET /certificationscheck
-```
-
-Allows anyone to verify:
-
-- if a certificate exists
-- who it belongs to
-
-------
-
-## 🔥 What this workflow does
-
-### 🎓 1. Certificate creation
-
-- Triggered via **POST webhook** (`/certifications2`)
-- Accepts candidate data:
-  - name
-  - surname
-  - course
-  - email
-- Generates a **unique Certification ID**
-- Prevents collisions via ID existence checks
-
-------
-
-### 🗂 2. Data storage
-
-Each certificate is stored in an **n8n Data Table**, creating a persistent registry.
-
-Stored fields:
-
-- Name
-- Surname
-- CertificationID
-
-This registry is used both for validation and auditing.
-
-------
-
-### 🧾 3. PDF generation (Template-based)
-
-The workflow uses **PDF Generator API – Generate a PDF document** node.
-
-Instead of HTML, it sends a **JSON payload** that maps directly to template placeholders.
-
-Example:
-
-```
-{
-  "DueDate": "{{$now.toISODate()}}",
-  "Candidate": "{{$('Webhook_Creation').item.json.headers.name}} {{$('Webhook_Creation').item.json.headers.surname}}",
-  "CourseName": "{{ $('Webhook_Creation').item.json.headers.course }}",
-  "ID": "{{ $('Generate_Certification_ID').item.json.id }}"
-}
-```
-
-⚠️ The JSON must be valid and keys must match the template placeholders exactly.
-
-------
-
-### ✉️ 4. Email delivery
-
-- Uses **Gmail OAuth2**
-- Sends the generated PDF as attachment
-- Fully customizable subject and body
-
-------
-
-### 🔍 5. Certificate verification
-
-The verification endpoint:
-
-```
-GET /certificationscheck?id=CERTIFICATION-ID
-```
-
-Returns:
-
-**If valid**
-
-```
-{
-  "ok": true,
-  "name": "John",
-  "surname": "Doe"
-}
-```
-
-**If not valid**
-
-```
-{
-  "ok": false
-}
-```
-
-This makes certificates **publicly verifiable and tamper-resistant**.
-
-------
-
-## 🧠 PDF Generator API Template
-
-### What is included
-
-The repository includes:
-
-- a ready-to-use **PDF Generator API template**
-- placeholders such as:
-  - `{Candidate}`
-  - `{CourseName}`
-  - `{DueDate}`
-  - `{ID}`
-
-You can freely customize:
-
-- layout
-- fonts
-- colors
-- logos
-- signatures
-- date formatting
-- QR codes
-
-No workflow changes are required when updating the template.
-
-------
-
-## 🤖 AI-powered template editing (Gemini)
-
-PDF Generator API provides an **AI Gem powered by Gemini** to help users create and refine templates.
-
-👉 AI Gem link:
- https://gemini.google.com/gem/1RrpDHQocP7E7C7Bpsc7yhDT-AkuKNuT_?usp=sharing
-
-You can:
-
-- describe the layout in natural language
-- generate or modify templates
-- iterate faster without manual positioning
-
-------
-
-## 🛠 Requirements
-
-Before importing the workflow, you need:
-
-1. **n8n instance** (Cloud or self-hosted)
-2. **n8n Data Table** with fields:
-   - `Name` (string)
-   - `Surname` (string)
-   - `CertificationID` (string)
-3. **PDF Generator API account**
-4. **Gmail OAuth2 credentials**
-5. Ability to call HTTP webhooks
-
-------
-
----
-
-## 🚀 Installation
-
-### 1. Import the workflow
-
-- Go to **n8n → Workflows → Import**
-- Paste `workflow.json`
-
-------
-
-### 2. Configure Data Table
-
-Update these nodes:
-
-- `Insert_Certification`
-- `Find_Certification_By_ID`
-- `Find_Certification_By_ID1`
-
-------
-
-### 3. Configure credentials
-
-- PDF Generator API node → set credentials
-- Gmail node → set OAuth2 credentials
-
-------
-
-### 4. Activate the workflow
-
-Click **Activate** and you’re ready to go.
-
-------
-
----
-
-## 🧪 Status: MVP (but production-ready)
-
-This project started as an MVP, but it is:
-
-- fully functional
-- tested
-- modular
-- easy to extend
-
-You can use it **for free**, adapt it to your needs, and deploy it in production with minimal changes.
-
-------
-
-## 🌍 Why this matters
-
-This repository demonstrates how:
-
-- low-code automation
-- clean API design
-- reusable templates
-- community-driven sharing
-
-can produce **real-world, production-grade solutions**, not just demos.
-
-------
-
-## 📎 Links
-
-- [n8n workflow on Creators Hub](coming soon)
-- [YouTube Video](https://youtu.be/eqSWoPndVUg)
-- [Project article and documentation](https://paoloronco.it/n8n-template-certification-creator-checker/)
+- [Example certificate](./Assets/Example-Certificate.pdf)
+- [Full deployment guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
+- [n8n Community Template](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 - [PDF Generator API](https://pdfgeneratorapi.com/)
-- [Template AI Gem]()
+- [Video guide](https://youtu.be/eqSWoPndVUg)
+- The reusable PDF template is included under `PDFgeneratorAPI-Template/`.
+- Keep template placeholder names synchronized with the JSON keys sent by the workflow.
+- Review webhook exposure, personal-data handling, authentication, and abuse prevention before production use.

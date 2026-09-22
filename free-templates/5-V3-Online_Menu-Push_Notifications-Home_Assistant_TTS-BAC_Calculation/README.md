@@ -16,7 +16,7 @@ Process online menu orders with n8n, log daily orders, send ntfy push notificati
 
 ## Setup
 
-- **Import the workflow** — Import `workflow/workflow.json` into n8n.
+- **Import the workflow** — Import `workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation-V3.json` into n8n.
 - **Configure the Data Table** — Create `item`, `person`, `alcohol_grams`, `date`, and `order_time` fields and select the table in both Data Table nodes.
 - **Configure menu data** — Ensure each relevant menu item sends the expected `alcohol_grams` value along with name, quantity, and optional detail.
 - **Configure ntfy** — Set the server/topic URL and add the required HTTP Header Auth credential.

@@ -4,7 +4,7 @@
 
 Create personalized digital certificates through an n8n webhook, generate unique certificate IDs, store issued records, produce PDF certificates, email them to recipients, and expose a public endpoint for certificate verification.
 
-![Workflow](Assets/Workflow-image.png)
+![Workflow](assets/Workflow-image.png)
 
 ## How It Works
 
@@ -50,7 +50,7 @@ Create personalized digital certificates through an n8n webhook, generate unique
 
 ## Additional Info
 
-- [Example certificate](./Assets/Example-Certificate.pdf)
+- [Example certificate](./assets/Example-Certificate.pdf)
 - [Project guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - [n8n Community Template](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
 - Review authentication, abuse prevention, exposed personal data, and webhook security before production use.

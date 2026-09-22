@@ -4,7 +4,7 @@
 
 Aggregate technology, AI, cybersecurity, cloud, and digital-industry news from curated RSS feeds, filter and deduplicate recent stories, summarize them with a resilient AI pipeline, build an HTML newsletter, and email it automatically to subscribers.
 
-![Workflow](Assets/workflow.png)
+![Workflow](assets/workflow.png)
 
 ## How It Works
 
@@ -19,7 +19,7 @@ Aggregate technology, AI, cybersecurity, cloud, and digital-industry news from c
 
 ## Setup
 
-- **Import the workflow** — Import `News_Tech_EN.json` into n8n.
+- **Import the workflow** — Import `Tech_AI_Daily_Briefing-RSS-AI-Email.json` into n8n.
 - **Configure OpenAI** — Add OpenAI credentials to the primary chat model and review the selected model and editorial prompt.
 - **Configure the fallback model** — Add credentials required by the secondary LLM path so processing can continue if the primary AI path fails.
 - **Connect Google Sheets** — Configure the service account, select the subscriber spreadsheet, and ensure it contains the expected `Subscriber_email` column.

@@ -147,12 +147,22 @@ Scans n8n workflows every 30 minutes, extracts supported schedules, compares the
 </details>
 
 <details>
-<summary><strong>7. Splunk Alert Notifications — Email & Telegram</strong></summary>
+<summary><strong>7 v1. Splunk Alert Notifications — Email & Telegram</strong></summary>
 
 Receives Splunk alerts through an n8n webhook, normalizes and validates the payload, derives severity when necessary, and routes notifications by priority: Critical/High alerts to Email and Telegram, and lower-severity alerts to Email.
 
-- Folder: [`/free-templates/7-Splunk_Alerts-Email-Telegram_Notifications`](./free-templates/7-Splunk_Alerts-Email-Telegram_Notifications)
-- Setup guide: [README](./free-templates/7-Splunk_Alerts-Email-Telegram_Notifications/README.md)
+- Folder: [`/free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications`](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications)
+- Setup guide: [README](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications/README.md)
+
+</details>
+
+<details>
+<summary><strong>7 v2. Splunk Security Alert Enrichment, Deduplication & Smart Notifications</strong></summary>
+
+Turns raw Splunk security alerts into deduplicated, threat-enriched and risk-scored incidents. The workflow suppresses repeated alerts, enriches public IPv4 sources with AbuseIPDB, stores incident history in an n8n Data Table, routes Critical/High/Medium/Low notifications by calculated risk, and sends a daily 24-hour security digest.
+
+- Folder: [`/free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications`](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications)
+- Setup guide: [README](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/README.md)
 
 </details>
 

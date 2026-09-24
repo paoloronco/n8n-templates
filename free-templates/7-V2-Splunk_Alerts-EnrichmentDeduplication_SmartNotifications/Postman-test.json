@@ -1,0 +1,151 @@
+{
+  "info": {
+    "_postman_id": "7f11b6da-26c6-4c2e-a54d-86b37f21cc47",
+    "name": "Splunk → n8n Security Alert Tests",
+    "description": "Postman collection to test the n8n Splunk Security Alert Enrichment, Deduplication & Smart Notifications workflow. Set n8n_base_url to your n8n URL. Use /webhook-test/ while listening for a test event in the editor, or /webhook/ for an active production workflow.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "n8n_base_url",
+      "value": "https://YOUR-N8N-DOMAIN",
+      "type": "string"
+    },
+    {
+      "key": "webhook_path",
+      "value": "splunk-security-alert",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Critical SSH Brute Force (Public IP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"search_name\": \"Linux - Multiple Failed SSH Logins\",\n  \"severity\": \"critical\",\n  \"app\": \"search\",\n  \"owner\": \"admin\",\n  \"sid\": \"scheduler_test_critical_001\",\n  \"results_link\": \"https://splunk.example.com/app/search/search\",\n  \"result\": {\n    \"src_ip\": \"8.8.8.8\",\n    \"failed_attempts\": 58,\n    \"targeted_users\": \"root,admin,ubuntu,test\",\n    \"targeted_hosts\": \"webserver01,webserver02\",\n    \"unique_users\": 4,\n    \"unique_hosts\": 2,\n    \"first_seen\": \"2026-09-24T10:00:00+02:00\",\n    \"last_seen\": \"2026-09-24T10:12:00+02:00\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{n8n_base_url}}/webhook-test/{{webhook_path}}",
+          "host": [
+            "{{n8n_base_url}}"
+          ],
+          "path": [
+            "webhook-test",
+            "{{webhook_path}}"
+          ]
+        },
+        "description": "High-volume public-IP test. Expected to exercise AbuseIPDB enrichment and produce a high/critical calculated risk."
+      }
+    },
+    {
+      "name": "02 - High SSH Alert (Private IP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"search_name\": \"Linux - Failed SSH Authentication\",\n  \"severity\": \"high\",\n  \"result\": {\n    \"src_ip\": \"10.10.10.50\",\n    \"failed_attempts\": 14,\n    \"targeted_users\": [\n      \"root\",\n      \"admin\"\n    ],\n    \"targeted_hosts\": [\n      \"securitylab\"\n    ],\n    \"first_seen\": \"2026-09-24T10:20:00+02:00\",\n    \"last_seen\": \"2026-09-24T10:24:00+02:00\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{n8n_base_url}}/webhook-test/{{webhook_path}}",
+          "host": [
+            "{{n8n_base_url}}"
+          ],
+          "path": [
+            "webhook-test",
+            "{{webhook_path}}"
+          ]
+        },
+        "description": "Private IP test. Threat-intelligence lookup should be skipped."
+      }
+    },
+    {
+      "name": "03 - Duplicate Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"search_name\": \"Linux - Multiple Failed SSH Logins\",\n  \"severity\": \"critical\",\n  \"result\": {\n    \"src_ip\": \"8.8.8.8\",\n    \"failed_attempts\": 58,\n    \"targeted_users\": \"root,admin,ubuntu,test\",\n    \"targeted_hosts\": \"webserver01,webserver02\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{n8n_base_url}}/webhook-test/{{webhook_path}}",
+          "host": [
+            "{{n8n_base_url}}"
+          ],
+          "path": [
+            "webhook-test",
+            "{{webhook_path}}"
+          ]
+        },
+        "description": "Send twice within 15 minutes. The second execution should follow the duplicate/suppression branch."
+      }
+    },
+    {
+      "name": "04 - Production Webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"search_name\": \"Linux - Multiple Failed SSH Logins\",\n  \"severity\": \"high\",\n  \"result\": {\n    \"src_ip\": \"8.8.4.4\",\n    \"failed_attempts\": 25,\n    \"targeted_users\": \"root,admin\",\n    \"targeted_hosts\": \"server01\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{n8n_base_url}}/webhook/{{webhook_path}}",
+          "host": [
+            "{{n8n_base_url}}"
+          ],
+          "path": [
+            "webhook",
+            "{{webhook_path}}"
+          ]
+        },
+        "description": "Production endpoint. Activate the n8n workflow before using this request."
+      }
+    }
+  ]
+}

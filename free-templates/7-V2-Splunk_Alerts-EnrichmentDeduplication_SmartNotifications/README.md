@@ -63,6 +63,3 @@ The default calculated risk levels are:
         30--49 Medium     Email
          0--29 Low        Store only
 
-Before publishing or sharing the workflow, make sure API keys, email
-addresses, Telegram Chat IDs, internal Splunk URLs, and
-instance-specific credentials are not included in the exported template.

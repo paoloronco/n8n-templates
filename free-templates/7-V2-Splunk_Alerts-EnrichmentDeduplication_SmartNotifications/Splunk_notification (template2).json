@@ -1,0 +1,1520 @@
+{
+  "name": "Splunk Security Alert Enrichment, Deduplication & Smart Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Splunk Security Alert Enrichment, Deduplication & Smart Notifications\n\n### How it works\n\n1. Receives Splunk alerts via webhook, then normalizes and validates each payload.\n2. Fingerprints alerts and looks up recent incidents to detect duplicates within a time window.\n3. Branches on public IPv4s to enrich with AbuseIPDB or bypass enrichment when not applicable.\n4. Calculates a risk score, stores enriched or suppressed incidents, and routes notifications by severity (email/Telegram).\n5. Generates and emails a daily 24-hour security digest from stored incidents.\n\n### Setup steps\n\n- - [ ] Configure the Webhook URL in Splunk to point to the \"When Splunk Alert Received\" node’s endpoint.\n- - [ ] Set up Data Table resources/collections for incidents and suppressed incidents referenced by dataTable nodes.\n- - [ ] Add the AbuseIPDB API key to HTTP Request headers (e.g., Key: X-Api-Key) in \"Get AbuseIPDB IP Reputation\".\n- - [ ] Provide SMTP/email credentials for all Email nodes and set sender/recipients.\n- - [ ] Configure Telegram Bot API credentials and target chat/channel for the Telegram node.\n- - [ ] Define the deduplication window and fingerprint fields in the relevant Code nodes (environment variables or node params).\n- - [ ] Review and set severity thresholds used by \"Calculate Incident Risk Score\" and branching If nodes.\n- - [ ] Adjust the schedule in \"Every Day at 6 PM\" to your preferred time zone and delivery time.\n- - [ ] Use the \"Manual Setup Trigger\" once to initialize or create the incident table schema if required by your Data Table implementation.\n\n### Customization\n\n- Tune risk scoring weights and severity thresholds in the scoring code.\n- Modify fingerprint composition to better reflect your environment and alert types.\n- Customize email/Telegram templates and recipients per severity.\n- Extend enrichment to additional threat intel sources alongside AbuseIPDB.\n- Change the daily digest timeframe or include per-source sections.",
+        "height": 1136,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12864,
+        1504
+      ],
+      "id": "065ca625-c5f2-4241-95f8-231482392ed3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Manual setup and table\n\nTop-left setup cluster to manually initialize and create the incident data table.",
+        "height": 304,
+        "width": 464,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13424,
+        1504
+      ],
+      "id": "2972c8f6-a127-4a97-97b9-fa4cc18ab30e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Receive and normalize alerts\n\nWebhook intake for Splunk alerts and initial normalization, located on the left mid-row.",
+        "height": 304,
+        "width": 464,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13424,
+        1952
+      ],
+      "id": "48b2a896-0d7f-44f3-93d1-c0036fe87d48",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Filter and fingerprint alerts\n\nValidates normalized alerts and builds a deterministic fingerprint; adjacent mid-row cluster.",
+        "height": 304,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13952,
+        1952
+      ],
+      "id": "64d693cc-267b-4bde-8f4e-eee0c462936e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Match incidents and dedupe\n\nFetches latest matching incident, evaluates dedup window, then branches on duplicate status.",
+        "height": 304,
+        "width": 720,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        14464,
+        1952
+      ],
+      "id": "230181e2-92b5-45e1-9747-87ddc2f2026b",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Prepare and store duplicates\n\nLower-right of the dedupe fork: formats suppressed duplicate incidents and stores them.",
+        "height": 304,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        15248,
+        2112
+      ],
+      "id": "18263acc-e78f-4ad1-afd1-e58c16bebffa",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Public IP branch and bypass\n\nUpper-right branch from dedupe: decides on public IPv4 and supports a bypass path to scoring.",
+        "height": 448,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        15248,
+        1632
+      ],
+      "id": "d5f8318d-baf6-4826-990a-06f7f495547e",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## AbuseIPDB enrichment path\n\nCompact top-right cluster that caches the alert, queries AbuseIPDB, and attaches intel.",
+        "height": 304,
+        "width": 608,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        15760,
+        1536
+      ],
+      "id": "e0b6afa4-3cef-46ce-9916-829c9cedc223",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Risk scoring and storage\n\nCentral-right cluster calculating incident risk and persisting enriched incident records.",
+        "height": 304,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16544,
+        1840
+      ],
+      "id": "5607aa09-5336-4565-ab2c-2e53db32085c",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Critical/high severity notifications\n\nSeverity gate and high-priority notifications: email and Telegram for critical/high incidents.",
+        "height": 464,
+        "width": 464,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        17056,
+        1696
+      ],
+      "id": "45915f32-3759-4651-b800-981b6d07cf73",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## Medium and low handling\n\nMedium branch sends email; low severity is marked as stored-only; tight lower-right cluster.",
+        "height": 464,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        17328,
+        2192
+      ],
+      "id": "a54715b2-1433-4b2e-9d0a-f88579737819",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Daily digest generation\n\nBottom row schedule that fetches last 24h incidents, builds, and emails a daily digest.",
+        "height": 272,
+        "width": 976,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13424,
+        3008
+      ],
+      "id": "4f7a9fb8-d41b-4d9f-855d-c428877a387b",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        13472,
+        1632
+      ],
+      "id": "a808648b-5d59-478c-8511-a77e3b6e95f0",
+      "name": "When Manually Started"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "Splunk Security Incidents",
+        "columns": {
+          "column": [
+            {
+              "name": "received_at"
+            },
+            {
+              "name": "received_epoch",
+              "type": "number"
+            },
+            {
+              "name": "fingerprint"
+            },
+            {
+              "name": "is_duplicate",
+              "type": "boolean"
+            },
+            {
+              "name": "search_name"
+            },
+            {
+              "name": "src_ip"
+            },
+            {
+              "name": "splunk_severity"
+            },
+            {
+              "name": "risk_score",
+              "type": "number"
+            },
+            {
+              "name": "risk_level"
+            },
+            {
+              "name": "failed_attempts",
+              "type": "number"
+            },
+            {
+              "name": "targeted_users"
+            },
+            {
+              "name": "targeted_hosts"
+            },
+            {
+              "name": "abuse_score",
+              "type": "number"
+            },
+            {
+              "name": "country_code"
+            },
+            {
+              "name": "isp"
+            },
+            {
+              "name": "total_reports",
+              "type": "number"
+            },
+            {
+              "name": "results_link"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        13744,
+        1632
+      ],
+      "id": "27333bd3-2f3a-46ca-a754-214c278f0a99",
+      "name": "Initialize Incident Data Table"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "splunk-security-alert",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        13472,
+        2080
+      ],
+      "id": "e8ebbe02-2806-4410-b0f3-35b8a96bedf5",
+      "name": "When Splunk Alert Arrives",
+      "webhookId": "59750d7e-398d-471d-9170-92191472e00d"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const x=$input.item.json??{},b=x.body??x,r=b.result??{};const f=(...v)=>v.find(z=>z!==undefined&&z!==null&&String(z).trim()!=='')??'';const mv=v=>Array.isArray(v)?v.map(String):v?String(v).split(/[\n,]+/).map(s=>s.trim()).filter(Boolean):[];const u=mv(f(r.targeted_users,r.user,r.users,r.target_user)),h=mv(f(r.targeted_hosts,r.host,r.hosts,r.dest_host));const a=parseInt(f(r.failed_attempts,r.count,r.event_count,0),10)||0;let s=String(f(b.severity,b.urgency,r.severity,r.urgency)).toLowerCase();s=({crit:'critical',severe:'critical',warning:'medium',info:'informational'})[s]??s;if(!['critical','high','medium','low','informational'].includes(s))s=a>=20?'critical':a>=10?'high':a>=3?'medium':'low';const ip=String(f(r.src_ip,r.source_ip,r.src,r.rhost)).trim();const p=ip.split('.').map(Number);const pub=p.length===4&&!p.some(n=>!Number.isInteger(n)||n<0||n>255)&&p[0]!==10&&p[0]!==127&&p[0]!==0&&p[0]<224&&!(p[0]===169&&p[1]===254)&&!(p[0]===172&&p[1]>=16&&p[1]<=31)&&!(p[0]===192&&p[1]===168)&&!(p[0]===100&&p[1]>=64&&p[1]<=127);const now=new Date();return{json:{search_name:String(f(b.search_name,r.search_name,b.name,'Splunk alert')),results_link:String(f(b.results_link,r.results_link)),splunk_severity:s,src_ip:ip,is_public_ipv4:pub,failed_attempts:a,targeted_users:u,targeted_users_str:u.join(', ')||'N/A',targeted_hosts:h,targeted_hosts_str:h.join(', ')||'N/A',unique_users:parseInt(r.unique_users,10)||u.length,unique_hosts:parseInt(r.unique_hosts,10)||h.length,received_at:now.toISOString(),received_epoch:now.getTime()}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13744,
+        2080
+      ],
+      "id": "67292295-2274-40fd-a695-f64b84b49b8c",
+      "name": "Normalize Splunk Alert Payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "be4bcab5-2a56-4dc0-9f70-6ad69195db76",
+              "leftValue": "=",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        14000,
+        2080
+      ],
+      "id": "9bd4cad4-2a9e-4a9e-adba-4f9e62bcf649",
+      "name": "Filter Valid Security Alerts"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const i=$json;\nconst canonical=[\n  i.search_name||'',\n  i.src_ip||'',\n  ...(i.targeted_users||[]).sort(),\n  ...(i.targeted_hosts||[]).sort()\n].join('|').toLowerCase();\n\nlet h=2166136261;\nfor(let x=0;x<canonical.length;x++){\n  h^=canonical.charCodeAt(x);\n  h=Math.imul(h,16777619);\n}\nconst fingerprint=(h>>>0).toString(16).padStart(8,'0');\n\nconst current_alert={...i,fingerprint};\nconst state=$getWorkflowStaticData('global');\nstate._splunkPending=state._splunkPending||{};\nstate._splunkPending[fingerprint]=current_alert;\nreturn {json:{...current_alert,_current_alert_json:JSON.stringify(current_alert)}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14256,
+        2080
+      ],
+      "id": "6425f77a-7a7e-41f0-8c87-a116dfd801de",
+      "name": "Generate Alert Fingerprint"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Splunk Security Incidents"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "fingerprint",
+              "keyValue": "="
+            }
+          ]
+        },
+        "returnAll": "=false",
+        "orderBy": true,
+        "orderByColumn": "received_epoch"
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        14512,
+        2080
+      ],
+      "id": "f80e5526-f8c1-40db-adb0-5d0fb4d5beac",
+      "name": "Get Latest Matching Incident",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const previous=$json||{};\nconst state=$getWorkflowStaticData('global');\nconst pending=state._splunkPending||{};\nconst fingerprint=String(previous.fingerprint||'');\n\n// A Data Table match contains fingerprint. If no row was found, recover the only\n// pending alert for this execution. This keeps the workflow independent of node names.\nlet current = fingerprint ? pending[fingerprint] : null;\nif (!current) {\n  const keys=Object.keys(pending);\n  current=keys.length ? pending[keys[keys.length-1]] : {};\n}\n\nconst previousEpoch=Number(previous.received_epoch||0);\nconst cooldownMinutes=15;\nconst isDuplicate=previousEpoch>0 &&\n  (Number(current.received_epoch||Date.now())-previousEpoch)<cooldownMinutes*60*1000;\n\nif (current.fingerprint) delete pending[current.fingerprint];\n\nreturn {\n  json:{\n    ...current,\n    is_duplicate:isDuplicate,\n    previous_received_at:previous.received_at||'',\n    dedup_cooldown_minutes:cooldownMinutes\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14784,
+        2080
+      ],
+      "id": "7f9d2719-2ed7-4ce9-b7bd-b6bc42b6c0a2",
+      "name": "Evaluate Deduplication Time Window"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "793bd80a-09b2-46b6-9faa-64ca76e06b96",
+              "leftValue": "=",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        15040,
+        2080
+      ],
+      "id": "c1e99356-7dba-45c9-a78e-a6016a8a8b3e",
+      "name": "If Incident Is Duplicate"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return{json:{...$json,risk_score:0,risk_level:'suppressed',threat_intel:{abuse_confidence_score:0,country_code:'N/A',isp:'N/A',total_reports:0}}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15296,
+        2240
+      ],
+      "id": "1b860c87-e16d-470d-b761-004cf62395f9",
+      "name": "Prepare Suppressed Duplicate Record"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fa6116a1-941e-4630-92d5-f84c5496fd00",
+              "leftValue": "=",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        15296,
+        1760
+      ],
+      "id": "23750e65-6f7f-4029-827a-a44606daeddb",
+      "name": "If IPv4 Is Public"
+    },
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ipAddress",
+              "value": "="
+            },
+            {
+              "name": "maxAgeInDays",
+              "value": "90"
+            },
+            {
+              "name": "verbose",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Key",
+              "value": "YOUR_ABUSEIPDB_API_KEY"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16000,
+        1664
+      ],
+      "id": "03d58ff5-453c-4f27-91e8-8cb54a61c28f",
+      "name": "Fetch AbuseIPDB IP Reputation"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const response=$json??{};\nconst d=response.data??{};\nconst state=$getWorkflowStaticData('global');\nconst cache=state._splunkEnrichment||{};\n\n// AbuseIPDB returns the checked IP as data.ipAddress.\nconst key=String(d.ipAddress||'__no_ip__');\nconst base=cache[key]||{};\nif (cache[key]) delete cache[key];\n\nreturn {json:{\n  ...base,\n  threat_intel:{\n    abuse_confidence_score:Number(d.abuseConfidenceScore||0),\n    country_code:d.countryCode||'N/A',\n    isp:d.isp||'N/A',\n    total_reports:Number(d.totalReports||0)\n  }\n}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16208,
+        1664
+      ],
+      "id": "3e1b72af-737e-4935-994a-5748fa8d6079",
+      "name": "Attach AbuseIPDB Enrichment"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return{json:{...$json,threat_intel:{abuse_confidence_score:0,country_code:'N/A',isp:'N/A',total_reports:0}}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15552,
+        1904
+      ],
+      "id": "9dc4732e-8d99-4afe-a4b0-7dfb03db5540",
+      "name": "Bypass Threat Intelligence Step"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const i=$json;let s=({critical:50,high:35,medium:20,low:5,informational:0})[i.splunk_severity]??0,a=+i.failed_attempts||0;s+=a>=50?25:a>=20?15:a>=10?10:a>=3?5:0;const ab=+i.threat_intel.abuse_confidence_score||0;s+=ab>=90?30:ab>=70?20:ab>=40?10:0;const u=+i.unique_users||0,h=+i.unique_hosts||0;s+=u>=10?15:u>=5?10:0;s+=h>=5?15:h>=2?5:0;s=Math.min(100,s);const l=s>=75?'critical':s>=50?'high':s>=30?'medium':'low',m={critical:['CRITICAL','🔴','#b91c1c'],high:['HIGH','🟠','#c2410c'],medium:['MEDIUM','🟡','#a16207'],low:['LOW','🟢','#4d7c0f']}[l];return{json:{...i,risk_score:s,risk_level:l,risk_label:m[0],risk_emoji:m[1],risk_color:m[2]}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16592,
+        1968
+      ],
+      "id": "2c4ee686-34b8-4a64-bfdf-a865adf5e68e",
+      "name": "Compute Incident Risk Score"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Splunk Security Incidents"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "=",
+            "received_epoch": "=",
+            "fingerprint": "=",
+            "is_duplicate": "=",
+            "search_name": "=",
+            "src_ip": "=",
+            "splunk_severity": "=",
+            "risk_score": "=",
+            "risk_level": "=",
+            "failed_attempts": "=",
+            "targeted_users": "=",
+            "targeted_hosts": "=",
+            "abuse_score": "=",
+            "country_code": "=",
+            "isp": "=",
+            "total_reports": "=",
+            "results_link": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "received_epoch",
+              "displayName": "received_epoch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "is_duplicate",
+              "displayName": "is_duplicate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "search_name",
+              "displayName": "search_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "src_ip",
+              "displayName": "src_ip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "splunk_severity",
+              "displayName": "splunk_severity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "failed_attempts",
+              "displayName": "failed_attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "targeted_users",
+              "displayName": "targeted_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "targeted_hosts",
+              "displayName": "targeted_hosts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "abuse_score",
+              "displayName": "abuse_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "country_code",
+              "displayName": "country_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isp",
+              "displayName": "isp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total_reports",
+              "displayName": "total_reports",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "results_link",
+              "displayName": "results_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        15552,
+        2240
+      ],
+      "id": "98d06cd9-4a64-42fd-bfef-bfaee4861c9f",
+      "name": "Store Suppressed Incident Record"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Splunk Security Incidents"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "=",
+            "received_epoch": "=",
+            "fingerprint": "=",
+            "is_duplicate": "=",
+            "search_name": "=",
+            "src_ip": "=",
+            "splunk_severity": "=",
+            "risk_score": "=",
+            "risk_level": "=",
+            "failed_attempts": "=",
+            "targeted_users": "=",
+            "targeted_hosts": "=",
+            "abuse_score": "=",
+            "country_code": "=",
+            "isp": "=",
+            "total_reports": "=",
+            "results_link": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "received_epoch",
+              "displayName": "received_epoch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "is_duplicate",
+              "displayName": "is_duplicate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "search_name",
+              "displayName": "search_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "src_ip",
+              "displayName": "src_ip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "splunk_severity",
+              "displayName": "splunk_severity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "failed_attempts",
+              "displayName": "failed_attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "targeted_users",
+              "displayName": "targeted_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "targeted_hosts",
+              "displayName": "targeted_hosts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "abuse_score",
+              "displayName": "abuse_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "country_code",
+              "displayName": "country_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isp",
+              "displayName": "isp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total_reports",
+              "displayName": "total_reports",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "results_link",
+              "displayName": "results_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        16848,
+        1968
+      ],
+      "id": "251e19d1-2387-49fa-856d-03fc6855f5f0",
+      "name": "Store Enriched Incident"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aa2c196c-a3e5-4a2c-a8a0-7fd7ecbfaef4",
+              "leftValue": "=",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "01775fc4-c344-4ce4-8977-1094490ed185",
+              "leftValue": "=",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        17104,
+        1968
+      ],
+      "id": "acfafc49-4977-4525-954c-221745385252",
+      "name": "If Severity Is Critical or High"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5dd8f557-2cb8-4c81-bd89-755998d9af14",
+              "leftValue": "=",
+              "rightValue": "medium",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        17376,
+        2352
+      ],
+      "id": "7647b7f0-4b31-432c-98b2-71ffbe0426e7",
+      "name": "If Severity Is Medium"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        17632,
+        2480
+      ],
+      "id": "cc93513f-336f-426a-b623-702aed141ba3",
+      "name": "Mark Low Severity as Stored Only"
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@yourdomain.com",
+        "toEmail": "you@example.com",
+        "subject": "= [ · /100] Splunk: ",
+        "html": "=<div style=\"font-family:Arial,sans-serif;max-width:680px;margin:auto\"><div style=\"background:;color:#fff;padding:18px\"><h2> Splunk Security Alert — </h2><b>Risk /100</b></div><div style=\"padding:18px;border:1px solid #ddd\"><p><b>Search:</b> </p><p><b>Source IP:</b> N/A</p><p><b>Splunk severity:</b> </p><p><b>Failed attempts:</b> </p><p><b>Users:</b> </p><p><b>Hosts:</b> </p><p><b>AbuseIPDB:</b> /100 ·  · </p></div></div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        17376,
+        1824
+      ],
+      "id": "678a8cea-6a0c-43f2-b873-fe9e70331543",
+      "name": "Send High Priority Email Alert",
+      "webhookId": "7e180411-00ea-4e48-b96a-da27e953c0c2"
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@yourdomain.com",
+        "toEmail": "you@example.com",
+        "subject": "= [ · /100] Splunk: ",
+        "html": "=<div style=\"font-family:Arial,sans-serif;max-width:680px;margin:auto\"><div style=\"background:;color:#fff;padding:18px\"><h2> Splunk Security Alert — </h2><b>Risk /100</b></div><div style=\"padding:18px;border:1px solid #ddd\"><p><b>Search:</b> </p><p><b>Source IP:</b> N/A</p><p><b>Splunk severity:</b> </p><p><b>Failed attempts:</b> </p><p><b>Users:</b> </p><p><b>Hosts:</b> </p><p><b>AbuseIPDB:</b> /100 ·  · </p></div></div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        17632,
+        2320
+      ],
+      "id": "9fde0539-7fc7-488d-8738-17ee204c690e",
+      "name": "Send Medium Severity Email",
+      "webhookId": "9cc0c033-fbb4-4897-9829-227554c41b9e"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "= SPLUNK SECURITY ALERT []\n\nRisk: /100\nSearch: \nSource IP: N/A\nSplunk severity: \nFailed attempts: \nUsers: \nHosts: \nAbuseIPDB: /100\nCountry: \nISP: \n\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        17376,
+        1984
+      ],
+      "id": "2eaf1177-4cef-4063-b5a8-9a433472c7af",
+      "name": "Send Critical Telegram Message",
+      "webhookId": "896e1174-11c7-4dd1-a486-cd56d44cd4c1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        13472,
+        3120
+      ],
+      "id": "2168e2a9-b6d9-4de4-9655-65422af4639e",
+      "name": "Daily 6 PM Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Splunk Security Incidents"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "received_epoch",
+              "condition": "gte",
+              "keyValue": "=1790164837063"
+            }
+          ]
+        },
+        "returnAll": true,
+        "orderBy": true,
+        "orderByColumn": "received_epoch"
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        13744,
+        3120
+      ],
+      "id": "5bc0fb9e-1491-4624-94f9-596997082952",
+      "name": "Fetch Incidents from Last 24 Hours",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(x=>x.json).filter(x=>x.received_epoch);const real=rows.filter(x=>!x.is_duplicate),dup=rows.filter(x=>x.is_duplicate).length;const counts={critical:0,high:0,medium:0,low:0};for(const r of real)if(counts[r.risk_level]!==undefined)counts[r.risk_level]++;const top=(key)=>{const m={};for(const r of real){const v=r[key];if(v)m[v]=(m[v]||0)+1}return Object.entries(m).sort((a,b)=>b[1]-a[1])[0]||['N/A',0]};const ip=top('src_ip'),host=top('targeted_hosts'),max=real.reduce((m,r)=>Math.max(m,+r.risk_score||0),0);return[{json:{total:rows.length,unique:real.length,suppressed:dup,critical:counts.critical,high:counts.high,medium:counts.medium,low:counts.low,top_ip:ip[0],top_ip_count:ip[1],top_host:host[0],top_host_count:host[1],max_risk:max,generated_at:new Date().toISOString()}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14000,
+        3120
+      ],
+      "id": "40e2c536-a99c-40dc-ac85-93e7c5200a2c",
+      "name": "Build Daily Security Digest"
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@yourdomain.com",
+        "toEmail": "you@example.com",
+        "subject": "=🛡️ Splunk Security Digest —  unique alerts /  suppressed",
+        "html": "=<div style=\"font-family:Arial,sans-serif;max-width:680px;margin:auto\"><h2>Splunk Security Digest — Last 24 Hours</h2><p><b>Total received:</b>  · <b>Unique:</b>  · <b>Suppressed duplicates:</b> </p><table style=\"width:100%;border-collapse:collapse\"><tr><td>Critical</td><td><b></b></td></tr><tr><td>High</td><td><b></b></td></tr><tr><td>Medium</td><td><b></b></td></tr><tr><td>Low</td><td><b></b></td></tr><tr><td>Highest risk score</td><td><b>/100</b></td></tr><tr><td>Top source IP</td><td> ()</td></tr><tr><td>Top targeted host(s)</td><td> ()</td></tr></table><p style=\"color:#6b7280\">Generated </p></div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        14256,
+        3120
+      ],
+      "id": "60c90df8-5ea4-482a-b1fd-2b5d82d34448",
+      "name": "Send Daily Security Digest",
+      "webhookId": "3fd3e3cc-e003-4e2e-a0de-d03387545df4"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const i=$json;\nconst state=$getWorkflowStaticData('global');\nstate._splunkEnrichment=state._splunkEnrichment||{};\nstate._splunkEnrichment[i.src_ip||'__no_ip__']=i;\nreturn {json:i};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15808,
+        1664
+      ],
+      "id": "ab9fc1b4-6c8e-4a47-93a8-35fbb5322717",
+      "name": "Cache Alert for IP Check"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Manually Started": {
+      "main": [
+        [
+          {
+            "node": "Initialize Incident Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Splunk Alert Arrives": {
+      "main": [
+        [
+          {
+            "node": "Normalize Splunk Alert Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Splunk Alert Payload": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Security Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Security Alerts": {
+      "main": [
+        [
+          {
+            "node": "Generate Alert Fingerprint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Alert Fingerprint": {
+      "main": [
+        [
+          {
+            "node": "Get Latest Matching Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Latest Matching Incident": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Deduplication Time Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Deduplication Time Window": {
+      "main": [
+        [
+          {
+            "node": "If Incident Is Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Incident Is Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Prepare Suppressed Duplicate Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If IPv4 Is Public",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Suppressed Duplicate Record": {
+      "main": [
+        [
+          {
+            "node": "Store Suppressed Incident Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If IPv4 Is Public": {
+      "main": [
+        [
+          {
+            "node": "Cache Alert for IP Check",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bypass Threat Intelligence Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch AbuseIPDB IP Reputation": {
+      "main": [
+        [
+          {
+            "node": "Attach AbuseIPDB Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach AbuseIPDB Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Compute Incident Risk Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bypass Threat Intelligence Step": {
+      "main": [
+        [
+          {
+            "node": "Compute Incident Risk Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Incident Risk Score": {
+      "main": [
+        [
+          {
+            "node": "Store Enriched Incident",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If Severity Is Critical or High",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Severity Is Critical or High": {
+      "main": [
+        [
+          {
+            "node": "Send High Priority Email Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Critical Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Severity Is Medium",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Severity Is Medium": {
+      "main": [
+        [
+          {
+            "node": "Send Medium Severity Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Low Severity as Stored Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 6 PM Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Incidents from Last 24 Hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Incidents from Last 24 Hours": {
+      "main": [
+        [
+          {
+            "node": "Build Daily Security Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Daily Security Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Security Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Alert for IP Check": {
+      "main": [
+        [
+          {
+            "node": "Fetch AbuseIPDB IP Reputation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6edb3d77-fe04-4ce2-9000-7713fdb082fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
+  },
+  "nodeGroups": [],
+  "id": "9Wo3MdVcL5e1a3Zz",
+  "tags": []
+}

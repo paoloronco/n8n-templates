@@ -44,6 +44,12 @@ severity-based notifications via email and Telegram plus a daily email digest.
 -   Customize email and Telegram message templates, recipients, and the daily digest contents.
 -   Change the digest schedule or reporting window to match your operational requirements.
 
+## n8n Template
+
+Published on the official n8n workflow library:
+
+https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/
+
 ## Additional info
 
 The workflow keeps the original normalized Splunk severity separate from the calculated risk level. This allows an alert reported as `high` by Splunk to be promoted to `critical` when additional context such as

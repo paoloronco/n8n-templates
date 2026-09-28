@@ -163,6 +163,7 @@ Turns raw Splunk security alerts into deduplicated, threat-enriched and risk-sco
 
 - Folder: [`/free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications`](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications)
 - Setup guide: [README](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/README.md)
+- n8n template: [Enrich and route Splunk security alerts via AbuseIPDB, Email and Telegram](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/)
 
 </details>
 

@@ -39,7 +39,7 @@ n8n-templates/
 └── README.md
 ```
 
-Each template folder typically contains the workflow JSON, a `README.md` setup guide, an `assets/` directory, and — where relevant — additional `docs/` or supporting files.
+Free template folders typically contain the importable workflow JSON, a `README.md` setup guide, and supporting assets. Paid template folders contain public documentation and promotional assets only; the complete workflow packages are delivered through their purchase channels.
 
 </details>
 

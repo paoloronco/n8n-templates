@@ -35,7 +35,7 @@ n8n-templates/
 │   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
 │   ├── 2-AI_News-Social_Publishing-Instagram/
 │   ├── 3-Backup_Sync-Log_Validation-Monitoring/
-│   └── 4-WordPress_AI_Chatbot-RAG/
+│   ├── 4-WordPress_AI_Chatbot-RAG/\n│   └── WebSite_AIchatbot/
 └── README.md
 ```
 
@@ -246,6 +246,18 @@ Folder: [`/paid-templates/4-WordPress_AI_Chatbot-RAG`](./paid-templates/4-WordPr
 - **Semantic search** — meaning-based retrieval with Cohere reranking and intelligent document chunking.
 - **Security** — bearer-token webhook auth, input sanitization, server-side API key management, HTTPS-only.
 - **User experience** — responsive chat UI, simple `[wp_ai_chatbot]` shortcode, customizable styling, mobile-optimized.
+
+</details>
+
+<details>
+<summary><strong>5. Website AI Chatbot — RAG, Qdrant, OpenAI & Cohere</strong></summary>
+
+A production-oriented website AI chatbot backend built with n8n. It classifies incoming messages, routes smalltalk and rejected requests separately, retrieves relevant website knowledge from Qdrant, reranks results with Cohere, and generates grounded structured responses with OpenAI.
+
+- Folder: [`/paid-templates/WebSite_AIchatbot`](./paid-templates/WebSite_AIchatbot)
+- Gumroad: [Website AI Chatbot](https://paoloronco.gumroad.com/l/ai-website-chatbot)
+
+> The workflow JSON is not included in this repository. The complete ready-to-import workflow is delivered after purchase through Gumroad.
 
 </details>
 

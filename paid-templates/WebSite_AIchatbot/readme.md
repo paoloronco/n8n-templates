@@ -1,8 +1,18 @@
 # Website AI Chatbot with RAG, Qdrant & Intent Routing
 
+![Website AI Chatbot](./assets/cover.png)
+
 A production-oriented n8n workflow for building an AI chatbot that answers questions using your website's own content.
 
 The workflow combines intent classification, safety routing, vector search with Qdrant, OpenAI embeddings, Cohere reranking, and structured AI-generated responses exposed through a webhook API.
+
+<p align="center">
+  <a href="https://paoloronco.gumroad.com/l/ai-website-chatbot" target="_blank">
+    <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
+  </a>
+</p>
+
+> **Paid template:** the workflow JSON is intentionally not included in this repository. It is delivered after purchase through Gumroad.
 
 ## Quick Overview
 
@@ -68,14 +78,15 @@ Intent Classification
 
 ## Setup
 
-1. Import the workflow JSON into n8n.
-2. Configure the webhook authentication credentials.
-3. Add your OpenAI credentials.
-4. Configure your Qdrant instance and select your website knowledge collection.
-5. Add your Cohere API credentials for reranking.
-6. Select or adjust the OpenAI models used for classification, smalltalk, embeddings, and answer generation.
-7. Review the prompts and adapt them to your website or use case.
-8. Activate the workflow and connect your website or frontend to the production webhook URL.
+1. Purchase and download the workflow JSON from [Gumroad](https://paoloronco.gumroad.com/l/ai-website-chatbot).
+2. Import the workflow JSON into n8n.
+3. Configure the webhook authentication credentials.
+4. Add your OpenAI credentials.
+5. Configure your Qdrant instance and select your website knowledge collection.
+6. Add your Cohere API credentials for reranking.
+7. Select or adjust the OpenAI models used for classification, smalltalk, embeddings, and answer generation.
+8. Review the prompts and adapt them to your website or use case.
+9. Activate the workflow and connect your website or frontend to the production webhook URL.
 
 ## Requirements
 
@@ -83,13 +94,10 @@ Intent Classification
 - OpenAI API account
 - Qdrant instance
 - A Qdrant collection containing your website knowledge
+- Cohere API account for result reranking
 - Website or frontend capable of calling the webhook endpoint
 
-### Optional / Recommended
-
-- Cohere API account for result reranking
-- Webhook authentication
-- A website ingestion workflow or pipeline to keep the Qdrant knowledge base updated
+> **Note:** This template handles the chatbot query and response pipeline. Your website content must already be indexed in Qdrant. Website crawling, content ingestion, chunking, and synchronization are not included.
 
 ## Response Types
 
@@ -100,7 +108,6 @@ The workflow separates requests into three main paths:
 Questions related to your website are answered using retrieved knowledge rather than unrestricted model knowledge.
 
 The final response can contain:
-
 - Query
 - Relevant results
 - Original source URLs
@@ -119,15 +126,13 @@ Unsafe, private, credential-related, internal, system-prompt, or unrelated reque
 
 The answer-generation agent is explicitly instructed to use only the context retrieved from the website knowledge base.
 
-Retrieved documents are deduplicated by URL, ranked, converted into concise context, and passed to the final AI agent.
-
-This helps reduce hallucinations and keeps answers connected to actual website content.
+Retrieved documents are deduplicated by URL, ranked, converted into concise context, and passed to the final AI agent. This helps reduce hallucinations and keeps answers connected to actual website content.
 
 ## Structured Output
 
 Knowledge responses follow a predictable JSON structure:
 
-```
+```json
 {
   "type": "search_results",
   "query": "user question",
@@ -147,9 +152,31 @@ This makes the workflow easier to integrate with custom chat interfaces, website
 ## Customization
 
 You can adapt the workflow by changing:
-
 - Intent classification rules
 - Safety and rejection behavior
 - Smalltalk personality
 - OpenAI models
-- 
+- Qdrant collection
+- Retrieval depth
+- Cohere reranking
+- Context-building logic
+- Answer-generation prompts
+- Structured output schema
+- Final webhook response format
+
+## Use Cases
+
+- Website AI chatbots
+- Documentation assistants
+- SaaS help centers
+- Product knowledge assistants
+- Customer self-service portals
+- Internal knowledge bots
+- Documentation search
+- RAG-powered support experiences
+
+## Purchase
+
+The complete ready-to-import workflow is available on Gumroad:
+
+**[Get the Website AI Chatbot workflow](https://paoloronco.gumroad.com/l/ai-website-chatbot)**

@@ -10,6 +10,9 @@ The workflow combines intent classification, safety routing, vector search with 
   <a href="https://paoloronco.gumroad.com/l/ai-website-chatbot" target="_blank">
     <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
   </a>
+  <a href="https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/" target="_blank">
+    <img src="https://img.shields.io/badge/%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="n8n"/>
+  </a>
 </p>
 
 > **Paid template:** the workflow JSON is intentionally not included in this repository. It is delivered after purchase through Gumroad.

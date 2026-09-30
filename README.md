@@ -255,6 +255,7 @@ Folder: [`/paid-templates/4-WordPress_AI_Chatbot-RAG`](./paid-templates/4-WordPr
 A production-oriented website AI chatbot backend built with n8n. It classifies incoming messages, routes smalltalk and rejected requests separately, retrieves relevant website knowledge from Qdrant, reranks results with Cohere, and generates grounded structured responses with OpenAI.
 
 - Folder: [`/paid-templates/5-Website_AI_Chatbot-RAG-Qdrant`](./paid-templates/5-Website_AI_Chatbot-RAG-Qdrant)
+- n8n template: [Run an English website chatbot with OpenAI GPT-5 and Qdrant](https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/)
 - Gumroad: [Website AI Chatbot](https://paoloronco.gumroad.com/l/ai-website-chatbot)
 
 > The workflow JSON is not included in this repository. The complete ready-to-import workflow is delivered after purchase through Gumroad.

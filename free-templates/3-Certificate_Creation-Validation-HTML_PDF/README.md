@@ -50,6 +50,8 @@ Create personalized digital certificates through an n8n webhook, generate unique
 
 ## Additional Info
 
+- [YouTube walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=6)
+
 - [Example certificate](./assets/Example-Certificate.pdf)
 - [Project guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - [n8n Community Template](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)

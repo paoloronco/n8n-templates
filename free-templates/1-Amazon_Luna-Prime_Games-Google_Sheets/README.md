@@ -47,6 +47,8 @@ Automatically fetch Amazon Luna games included with Prime, detect newly added ti
 
 ## Additional Info
 
+- [YouTube walkthrough](https://www.youtube.com/watch?v=rgee4kPZO7c)
+
 - [Full deployment guide](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
 - [Video guide](https://youtu.be/PS6qdCbc5fU)
 - [n8n Community Template](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)

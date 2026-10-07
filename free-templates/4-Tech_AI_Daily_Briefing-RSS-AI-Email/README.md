@@ -56,6 +56,9 @@ Aggregate technology, AI, cybersecurity, cloud, and digital-industry news from c
 
 ## Additional Info
 
+- [YouTube walkthrough](https://youtu.be/Gck8nmvx1UA)
+- [Gumroad](https://paoloronco.gumroad.com/l/tech-news)
+
 - [Full deployment guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
 - [n8n Community Template](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 - The workflow JSON is sanitized and does not include production API keys, account IDs, or subscriber addresses.

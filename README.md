@@ -30,7 +30,9 @@ n8n-templates/
 │   ├── 5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS/
 │   ├── 5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation/
 │   ├── 6-n8n_Schedules-Google_Calendar_Sync/
-│   └── 7-Splunk_Alerts-Email-Telegram_Notifications/
+│   ├── 7-V1-Splunk_Alerts-Email-Telegram_Notifications/
+│   ├── 7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/
+│   └── 8-Newsletter_Subscribe+New_Release_Notification/
 ├── paid-templates/
 │   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
 │   ├── 2-AI_News-Social_Publishing-Instagram/
@@ -164,6 +166,16 @@ Turns raw Splunk security alerts into deduplicated, threat-enriched and risk-sco
 - Folder: [`/free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications`](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications)
 - Setup guide: [README](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/README.md)
 - n8n template: [Enrich and route Splunk security alerts via AbuseIPDB, Email and Telegram](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/)
+
+</details>
+
+<details>
+<summary><strong>8. Newsletter Subscription + New Release Notification</strong></summary>
+
+Collects and validates newsletter subscriptions through a webhook, stores subscribers in an n8n Data Table, sends welcome emails, and distributes product release notifications generated from GitHub README/changelog content. Release emails can use OpenAI structured output with a deterministic fallback, while explicit send validation helps prevent accidental bulk delivery.
+
+- Folder: [`/free-templates/8-Newsletter_Subscribe+New_Release_Notification`](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification)
+- Setup guide: [README](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification/README.md)
 
 </details>
 

@@ -49,6 +49,11 @@ Process online menu orders with n8n, log daily orders, send ntfy push notificati
 - **Home Assistant** — Change the announcement script, target speaker, message, or TTS implementation.
 - **Frontend** — Replace the included mockup with another ordering interface using the same webhook contract.
 
+## Links
+
+- **n8n Creator:** [View template](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
+- **Gumroad:** Not Published
+
 ## Additional Info
 
 - This version extends Workflow 5 v2 with normalized order processing, richer Data Table logging, daily per-person history, and a cumulative BAC estimate.

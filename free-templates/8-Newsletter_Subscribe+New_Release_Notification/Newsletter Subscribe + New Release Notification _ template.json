@@ -1,0 +1,960 @@
+{
+  "name": "Newsletter Subscribe + New Release Notification | template",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newsletter-subscribe",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d18a53dc-91c3-4cb7-aadd-8340e56f2f8e",
+      "name": "Newsletter Subscribe Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3312,
+        448
+      ],
+      "webhookId": "c5bca24c-f35f-44df-a3d2-58fc242ffb94",
+      "notes": "Your website/app calls POST https://<your-n8n>/webhook/newsletter-subscribe with body { \"email\": \"...\" }. Configure header auth if you want to protect the endpoint."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "email",
+              "type": "string",
+              "value": "={{ ($json.body?.email || $json.email || '').toString().trim().toLowerCase() }}"
+            },
+            {
+              "id": "a2",
+              "name": "subscribed_at",
+              "type": "string",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "64b5ea76-d0ac-4387-b8b4-a050b9eadb48",
+      "name": "Normalize Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3088,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond_email",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "362dc7b6-2cbf-4259-b5f8-9ac5d08f5139",
+      "name": "Is Email Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2864,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"message\": \"Invalid email address\" } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "ce13f026-c0a1-463a-816e-b6bd3978885c",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2784,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_NEWSLETTER_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Newsletter subscribers"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "fbd89cf7-185c-416e-a65e-a50b7635fe9e",
+      "name": "Check Existing Subscriber",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -2640,
+        384
+      ],
+      "alwaysOutputData": true,
+      "notes": "With Always Output Data enabled: if no row is found, the original item continues without an id field. If an existing row is found, that row continues with its id field."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond_new",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ccd3c5de-b035-42d7-aa0a-ba9ad13fc4dc",
+      "name": "Is New Subscriber?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2416,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_NEWSLETTER_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Newsletter subscribers"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Normalize Email').first().json.email }}"
+          },
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "530afb0c-ecd4-4141-a34b-a03e3b313746",
+      "name": "Save New Subscriber",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -2192,
+        304
+      ],
+      "notes": "If you add subscribed_at or active columns to the table later, also add them here in value."
+    },
+    {
+      "parameters": {
+        "jsCode": "const meta = $('Normalize Email').first().json;\n\nconst html = `\n<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1e2327;\">\n  <h1 style=\"font-size:20px;\">Welcome to Your Product updates</h1>\n  <p>Thanks for subscribing. You will receive concise emails when important product releases are published.</p>\n  <p>Before using this template, replace this copy with your product name, support links, unsubscribe language, and any legal footer your audience requires.</p>\n  <p style=\"font-size:12px;color:#666;margin-top:32px;\">\n    You are receiving this email because you subscribed to product updates.\n  </p>\n</div>`;\n\nreturn [{ json: { email: meta.email, subject: 'Welcome to Your Product updates', html } }];"
+      },
+      "id": "b0e0577d-28f1-4461-8bbc-8615e6cbb25c",
+      "name": "Build Welcome Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "newsletter@example.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "b191991c-fb23-47db-a0d5-4f6bd30cbd8a",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -1744,
+        304
+      ],
+      "webhookId": "d52a54bb-abd0-496c-a8b2-6ebdb3eadf09"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Subscription registered, welcome email sent\" } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "59c039d9-05f0-40a8-ab22-635cd17060cd",
+      "name": "New Subscriber Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1520,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"You were already subscribed; no new email was sent\" } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "91f993b6-85a8-49ce-8f52-9699f97ad41a",
+      "name": "Existing Subscriber Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2192,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "notify-release",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ec7e0ea6-4039-4253-a33c-4bc68b79de96",
+      "name": "New Release Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3312,
+        992
+      ],
+      "webhookId": "f9066ea3-3f12-447b-b5e5-7291047b4eb4",
+      "notes": "Production webhook. Required JSON fields: version and SEND_EMAIL=YES. Optional: changelog. Empty/missing fields now fail before any subscriber email is sent."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "manual_version",
+              "name": "version",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "manual_changelog",
+              "name": "changelog",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "manual_send",
+              "name": "SEND_EMAIL",
+              "type": "string",
+              "value": "NO"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "29a184dd-d0f2-4265-b307-c873054af2e5",
+      "name": "Configure Manual Send",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3088,
+        1184
+      ],
+      "notesInFlow": true,
+      "notes": "Manual path: edit these plain text fields before pressing Execute. version accepts v7.15.1 v7.15.2 v7.15.3, 7.15.1 7.15.2 7.15.3, or comma-separated versions. Set SEND_EMAIL exactly to YES only when you really want to send to subscribers."
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/your-org/your-repo/main/README.md",
+        "options": {}
+      },
+      "id": "5dcd44e6-5962-4c72-a902-2723facc8082",
+      "name": "Read README from GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2640,
+        992
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "notes": "If the repository default branch is master instead of main, update the URL. Automatic retry is enabled for transient network errors."
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst prepared = $('Validate Newsletter Send').first().json;\nconst requestedVersions = Array.isArray(prepared.versions) ? prepared.versions : [];\nconst customNote = String(prepared.custom_note || '').trim();\n\nif (!requestedVersions.length) {\n  throw new Error('No requested versions found after validation. Aborting before subscriber send.');\n}\n\nfunction findText(value, depth = 0) {\n  if (value == null || depth > 6) return '';\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value)) return value.map(v => findText(v, depth + 1)).find(Boolean) || '';\n  if (typeof value === 'object') {\n    for (const key of ['data', 'body', 'content', 'text', 'raw']) {\n      const found = findText(value[key], depth + 1);\n      if (found) return found;\n    }\n  }\n  return '';\n}\n\nfunction normalizeText(text) {\n  return String(text || '')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\r\\n/g, '\\n');\n}\n\nfunction cleanNote(line) {\n  return String(line || '')\n    .replace(/^[-*]\\s+/, '')\n    .replace(/^•\\s+/, '')\n    .replace(/`/g, '')\n    .trim();\n}\n\nfunction isVersionHeading(line, version) {\n  const escaped = version.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  return new RegExp(`^\\\\s*(?:#{1,6}\\\\s*)?v?${escaped}\\\\s*$`, 'i').test(line);\n}\n\nfunction parseSections(text) {\n  const lines = normalizeText(text).split('\\n');\n  const sections = {};\n  let current = null;\n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const heading = line.match(/^(?:#{1,6}\\s*)?v?(\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?)\\s*$/i);\n    if (heading) {\n      current = heading[1];\n      if (!sections[current]) sections[current] = [];\n      continue;\n    }\n    if (!current) continue;\n    const note = cleanNote(line);\n    if (!note || /^[-*_]{3,}$/.test(note)) continue;\n    sections[current].push(note);\n  }\n  return sections;\n}\n\nfunction findMarkdownSection(text, version) {\n  const lines = normalizeText(text).split('\\n');\n  let capture = false;\n  const notes = [];\n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const anyVersionHeading = /^(?:#{1,6}\\s*)?v?\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?\\s*$/i.test(line);\n    if (isVersionHeading(line, version)) { capture = true; continue; }\n    if (capture && anyVersionHeading) break;\n    if (!capture) continue;\n    const note = cleanNote(line);\n    if (!note || /^[-*_]{3,}$/.test(note)) continue;\n    notes.push(note);\n  }\n  return notes;\n}\n\nconst readmeText = normalizeText(findText(raw) || JSON.stringify(raw));\nconst manualText = normalizeText(customNote);\nconst manualSections = parseSections(manualText);\nconst sections = [];\nconst missing = [];\nfor (const version of requestedVersions) {\n  let notes = manualSections[version] || [];\n  if (!notes.length) notes = findMarkdownSection(readmeText, version);\n  if (!notes.length) missing.push(version);\n  else sections.push({ version, notes });\n}\nif (missing.length) {\n  throw new Error(`Requested changelog version(s) not found in manual_changelog or README: ${missing.join(', ')}. Aborting before subscriber send.`);\n}\n\nfunction versionLabel(versions) {\n  if (versions.length === 1) return versions[0];\n  return versions.join(' + ');\n}\nfunction sentence(s) {\n  const t = String(s || '').trim();\n  return t ? t.charAt(0).toUpperCase() + t.slice(1).replace(/[.!?]?$/, '.') : '';\n}\nfunction classify(note) {\n  const l = note.toLowerCase();\n  if (/(security|privacy|permission|auth|login|token)/.test(l)) return { title: 'Security and access', explanation: sentence(note), importance: 100 };\n  if (/(new|add|feature|support|enable|introduce)/.test(l)) return { title: 'New capability', explanation: sentence(note), importance: 90 };\n  if (/(fix|bug|issue|error|crash|broken)/.test(l)) return { title: 'Fixes', explanation: sentence(note), importance: 80 };\n  if (/(ui|design|layout|screen|button|form|menu|copy)/.test(l)) return { title: 'User interface', explanation: sentence(note), importance: 70 };\n  if (/(performance|speed|cache|load|slow)/.test(l)) return { title: 'Performance', explanation: sentence(note), importance: 60 };\n  return { title: 'Release note', explanation: sentence(note), importance: 50 };\n}\nconst seen = new Set();\nconst editorialHighlights = [];\nfor (const section of sections) {\n  for (const note of section.notes) {\n    const h = classify(note);\n    const key = `${h.title}:${h.explanation}`.toLowerCase();\n    if (seen.has(key)) continue;\n    seen.add(key);\n    editorialHighlights.push({ ...h, sources: [note] });\n  }\n}\neditorialHighlights.sort((a, b) => b.importance - a.importance);\n\nconst label = versionLabel(requestedVersions);\nconst changelogRaw = sections.map(s => `v${s.version}\\n${s.notes.map(n => `- ${n}`).join('\\n')}`).join('\\n\\n');\nconst editorialBrief = [\n  `Announce Your Product v${label}.`,\n  'Write in English, concise and factual. Do not mention tests. Do not announce any version that is not listed below.',\n  'Focus on user-visible changes first. Avoid generic marketing phrases; every sentence must map to a changelog item.'\n].join('\\n');\n\nconst releaseLinks = requestedVersions.map(v => ({\n  version: v,\n  url: `https://example.com/releases/v${v}`\n}));\n\nreturn [{ json: {\n  version: requestedVersions[requestedVersions.length - 1],\n  versions: requestedVersions,\n  version_label: label,\n  is_aggregated_release: requestedVersions.length > 1,\n  custom_note: customNote,\n  sections,\n  editorial_highlights: editorialHighlights.slice(0, 6),\n  editorial_brief: editorialBrief,\n  changelog_raw: changelogRaw,\n  release_links: releaseLinks,\n  release_url: releaseLinks[releaseLinks.length - 1].url,\n  website_url: 'https://example.com'\n}}];"
+      },
+      "id": "4b1e6fa8-8aec-4515-be0a-bb7eaebfa61e",
+      "name": "Extract Requested Release Versions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2416,
+        992
+      ],
+      "notes": "Parses requested versions, extracts changelog sections, groups real features into unique user-facing highlights, and filters technical noise before email generation."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Version(s) to announce: {{ $json.version_label || $json.version }}\nIncluded versions: {{ ($json.versions || [$json.version]).join(', ') }}\n\nEditorial brief:\n{{ $json.editorial_brief }}\n\nGrouped changelog:\n{{ $json.changelog_raw }}\n\nPrepared highlights:\n{{ JSON.stringify($json.editorial_highlights || []) }}\n\nWrite a subscriber release email in English. Keep it concrete and similar in tone to a polished test announcement: short intro, clear section-style highlights, no hype, no \"test\", no version outside the included versions. Return only the structured fields required by the parser.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the official copywriter for \"Your Product\", the product configured for this workflow.\n\nABSOLUTE LANGUAGE RULE:\n- Write ONLY in English.\n- Never use Italian words, Italian sentences, or Italian UI labels in the email content.\n- If the changelog or developer note contains Italian, translate it to natural English before using it.\n\nEDITORIAL RULES — ANTI AI-SLOP:\n- The email must focus only on real, user-visible changes: new features, visible behavior changes, important bug fixes, privacy/permission changes, or documentation that materially changes what users understand.\n- Do not make internal maintenance sound like a feature. Ignore version bumps, dependency updates, refactors, linting, CI, build chores, formatting, and generic docs polish unless they directly affect users.\n- Use the Editorial brief as the main source and priority order. Use the raw changelog only to fact-check.\n- If there are no meaningful user-visible changes, write honestly that this is a small maintenance update; do not invent benefits.\n\nFORBIDDEN GENERIC PHRASES:\n- Do not write: \"latest improvements\", \"enhanced experience\", \"seamless\", \"powerful\", \"various fixes\", \"better performance\", \"improved reliability\", \"new version is available\", \"full changelog\", or \"complete release notes\" unless immediately followed by a concrete sourced detail.\n- Do not use marketing filler. Every highlight needs a specific changed thing and why it matters.\n\nCONTEXT:\n- You are writing the email subscribers receive when one or more versions are announced together.\n- Current label: {{ $json.version_label || $json.version }}.\n- If multiple versions are included, write one aggregated update, not separate mini-emails.\n\nFACT-CHECKING RULES:\n- Every sentence must be directly supported by the editorial brief, changelog, README context, or developer note.\n- Do not add setup, pricing, paid-plan, unlimited sync, future guarantees, or convenience claims unless the source explicitly says them.\n- Prefer precise, modest wording over marketing claims.\n\nSTYLE RULES:\n- Tone: friendly, clear, and useful. Never corporate, never hype.\n- Explain important changes from the user's point of view: what changed, why it matters, and whether the user needs to do anything.\n- Maximum 5 highlights, ordered by user value across all included versions.\n- Each highlight must be self-contained and specific.\n- Do not mention reviews, welcome text, or subscription: this email is only for existing subscribers and only about the release update.\n\nOUTPUT:\nReturn ONLY the requested structured schema (subject, intro, highlights, closing). No extra text outside the schema."
+        }
+      },
+      "id": "f19a2c21-d2f2-4ecc-8fd4-d1f65d594c57",
+      "name": "AI Agent - Copywriter Release",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -2416,
+        992
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "notes": "If retries and parser auto-fix still do not produce valid output, the error is caught and the flow continues through the No AI fallback branch."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2448,
+        1216
+      ],
+      "id": "2d087e9d-eac9-4517-b7dd-592bb3021f85",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": { \"type\": \"string\", \"description\": \"Short, direct email subject in English only. Mention the product and either the version label or the strongest concrete user-visible change. No generic marketing phrases.\" },\n    \"intro\": { \"type\": \"string\", \"description\": \"1-2 opening sentences in English only. Summarize the real user-visible change(s). If there are no meaningful user-visible changes, say this is a small maintenance update without hype.\" },\n    \"highlights\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" },\n      \"description\": \"Maximum 5 specific user-focused highlights in English only. Each item must say what changed and why it matters. No vague phrases like latest improvements, enhanced experience, seamless, or various fixes.\"\n    },\n    \"closing\": { \"type\": \"string\", \"description\": \"Closing sentence in English only. State whether the user needs to do anything.\"\n  } },\n  \"required\": [\"subject\", \"intro\", \"highlights\", \"closing\"]\n}",
+        "autoFix": true
+      },
+      "id": "d1344c19-97cf-404b-9ca0-5f3cb185e700",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -2272,
+        1280
+      ],
+      "notes": "Auto-fix is enabled: if the model output does not match the schema, the node asks the model for one automatic JSON correction before throwing an error. If your n8n version does not keep the toggle enabled after import, enable Auto-Fix Format manually in the node parameters."
+    },
+    {
+      "parameters": {
+        "jsCode": "const ai = $input.first().json.output || {};\nconst meta = $('Extract Requested Release Versions').first().json;\n\nconst escapeHtml = (value) => String(value ?? '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst label = meta.version_label || meta.version;\nconst editorial = Array.isArray(meta.editorial_highlights) ? meta.editorial_highlights : [];\nconst sections = Array.isArray(meta.sections) ? meta.sections : [];\n\nfunction splitHighlight(value) {\n  const text = String(value || '').trim();\n  const m = text.match(/^([^:]{3,70}):\\s*(.+)$/);\n  if (m) return { title: m[1].trim(), text: m[2].trim() };\n  return { title: 'What changed', text };\n}\n\nconst forbiddenPattern = /\\b(test|testing|latest improvements|enhanced experience|seamless|powerful|various fixes|better performance|improved reliability|new version is available|overall experience)\\b/i;\nconst combined = [ai.subject, ai.intro, ...(ai.highlights || []), ai.closing].filter(Boolean).join(' ');\nconst aiUsable = Array.isArray(ai.highlights)\n  && ai.highlights.length > 0\n  && !forbiddenPattern.test(combined)\n  && ai.highlights.every(h => String(h || '').trim().length >= 25);\n\nconst fallbackHighlights = editorial.map(h => ({\n  title: h.title || 'What changed',\n  text: h.explanation || (Array.isArray(h.sources) ? h.sources[0] : '') || ''\n})).filter(h => h.text).slice(0, 5);\n\nconst highlights = aiUsable ? ai.highlights.slice(0, 5).map(splitHighlight) : fallbackHighlights;\nconst safeSubject = aiUsable && ai.subject && !forbiddenPattern.test(ai.subject)\n  ? ai.subject\n  : `Your Product v${label}: ${highlights[0]?.title || 'release update'}`;\nconst safeIntro = aiUsable && ai.intro && !forbiddenPattern.test(ai.intro)\n  ? ai.intro\n  : `Your Product v${label} is now available. This email summarizes the user-visible changes included in the release.`;\nconst safeClosing = aiUsable && ai.closing && !forbiddenPattern.test(ai.closing)\n  ? ai.closing\n  : 'No manual action is needed unless your release notes say otherwise.';\n\nconst highlightsHtml = highlights.length\n  ? highlights.map(h => `\n      <tr>\n        <td style=\"padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;\">\n          <div style=\"font-weight:700;color:#111827;margin-bottom:4px;\">${escapeHtml(h.title)}</div>\n          <div style=\"color:#374151;line-height:22px;\">${escapeHtml(h.text)}</div>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;font-size:10px;line-height:10px;\">&nbsp;</td></tr>`).join('')\n  : '';\n\nconst detailsHtml = sections.length\n  ? `<h2 style=\"font-size:18px;margin:24px 0 10px;color:#111827;\">Included changelog</h2>` + sections.map(section => `\n      <div style=\"margin:0 0 14px 0;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;\">\n        <div style=\"font-weight:700;color:#111827;margin-bottom:8px;\">v${escapeHtml(section.version)}</div>\n        <ul style=\"margin:0;padding-left:20px;color:#374151;line-height:22px;\">\n          ${(section.notes || []).slice(0, 8).map(note => `<li>${escapeHtml(note)}</li>`).join('')}\n        </ul>\n      </div>`).join('')\n  : '';\n\nconst html = `<!doctype html>\n<html>\n  <body style=\"margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;\">\n    <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#f3f4f6;padding:24px 0;\">\n      <tr><td align=\"center\">\n        <table role=\"presentation\" width=\"640\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:640px;max-width:94%;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e5e7eb;\">\n          <tr><td style=\"padding:28px 32px;background:linear-gradient(135deg,#111827,#2563eb);color:#ffffff;\">\n            <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;\">Release update</div>\n            <h1 style=\"margin:8px 0 0 0;font-size:28px;line-height:34px;\">Your Product v${escapeHtml(label)}</h1>\n          </td></tr>\n          <tr><td style=\"padding:28px 32px;\">\n            <p style=\"margin:0 0 18px 0;font-size:16px;line-height:24px;color:#374151;\">${escapeHtml(safeIntro)}</p>\n            <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">${highlightsHtml}</table>\n            ${detailsHtml}\n            <div style=\"margin:18px 0;padding:14px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;color:#1e3a8a;line-height:22px;\">${escapeHtml(safeClosing)}</div>\n            <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin-top:20px;\"><tr>\n              <td><a href=\"${escapeHtml(meta.website_url)}\" style=\"display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;\">Open the website</a></td>\n              <td style=\"width:10px;\">&nbsp;</td>\n              <td><a href=\"${escapeHtml(meta.release_url)}\" style=\"display:inline-block;background:#ffffff;color:#2563eb;text-decoration:none;padding:10px 15px;border-radius:10px;font-weight:700;border:1px solid #bfdbfe;\">Release notes</a></td>\n            </tr></table>\n          </td></tr>\n          <tr><td style=\"padding:18px 32px;background:#f9fafb;color:#6b7280;font-size:12px;line-height:18px;\">\n            You are receiving this because you subscribed to Your Product updates.<br>\n            Replace this footer with your legal, privacy, and unsubscribe information.\n          </td></tr>\n        </table>\n      </td></tr>\n    </table>\n  </body>\n</html>`;\n\nreturn [{ json: { subject: safeSubject, html, ai_used: aiUsable, quality_gate: aiUsable ? 'ai_passed' : 'deterministic_editorial_fallback', highlights_count: highlights.length, version_label: label } }];"
+      },
+      "id": "a44c4540-4b0a-439e-97a7-dff661582435",
+      "name": "Build Release Email Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2032,
+        976
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const ai = {}; // deterministic fallback branch\nconst meta = $('Extract Requested Release Versions').first().json;\n\nconst escapeHtml = (value) => String(value ?? '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst label = meta.version_label || meta.version;\nconst editorial = Array.isArray(meta.editorial_highlights) ? meta.editorial_highlights : [];\nconst sections = Array.isArray(meta.sections) ? meta.sections : [];\n\nfunction splitHighlight(value) {\n  const text = String(value || '').trim();\n  const m = text.match(/^([^:]{3,70}):\\s*(.+)$/);\n  if (m) return { title: m[1].trim(), text: m[2].trim() };\n  return { title: 'What changed', text };\n}\n\nconst forbiddenPattern = /\\b(test|testing|latest improvements|enhanced experience|seamless|powerful|various fixes|better performance|improved reliability|new version is available|overall experience)\\b/i;\nconst combined = [ai.subject, ai.intro, ...(ai.highlights || []), ai.closing].filter(Boolean).join(' ');\nconst aiUsable = Array.isArray(ai.highlights)\n  && ai.highlights.length > 0\n  && !forbiddenPattern.test(combined)\n  && ai.highlights.every(h => String(h || '').trim().length >= 25);\n\nconst fallbackHighlights = editorial.map(h => ({\n  title: h.title || 'What changed',\n  text: h.explanation || (Array.isArray(h.sources) ? h.sources[0] : '') || ''\n})).filter(h => h.text).slice(0, 5);\n\nconst highlights = aiUsable ? ai.highlights.slice(0, 5).map(splitHighlight) : fallbackHighlights;\nconst safeSubject = aiUsable && ai.subject && !forbiddenPattern.test(ai.subject)\n  ? ai.subject\n  : `Your Product v${label}: ${highlights[0]?.title || 'release update'}`;\nconst safeIntro = aiUsable && ai.intro && !forbiddenPattern.test(ai.intro)\n  ? ai.intro\n  : `Your Product v${label} is now available. This email summarizes the user-visible changes included in the release.`;\nconst safeClosing = aiUsable && ai.closing && !forbiddenPattern.test(ai.closing)\n  ? ai.closing\n  : 'No manual action is needed unless your release notes say otherwise.';\n\nconst highlightsHtml = highlights.length\n  ? highlights.map(h => `\n      <tr>\n        <td style=\"padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;\">\n          <div style=\"font-weight:700;color:#111827;margin-bottom:4px;\">${escapeHtml(h.title)}</div>\n          <div style=\"color:#374151;line-height:22px;\">${escapeHtml(h.text)}</div>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;font-size:10px;line-height:10px;\">&nbsp;</td></tr>`).join('')\n  : '';\n\nconst detailsHtml = sections.length\n  ? `<h2 style=\"font-size:18px;margin:24px 0 10px;color:#111827;\">Included changelog</h2>` + sections.map(section => `\n      <div style=\"margin:0 0 14px 0;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;\">\n        <div style=\"font-weight:700;color:#111827;margin-bottom:8px;\">v${escapeHtml(section.version)}</div>\n        <ul style=\"margin:0;padding-left:20px;color:#374151;line-height:22px;\">\n          ${(section.notes || []).slice(0, 8).map(note => `<li>${escapeHtml(note)}</li>`).join('')}\n        </ul>\n      </div>`).join('')\n  : '';\n\nconst html = `<!doctype html>\n<html>\n  <body style=\"margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;\">\n    <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#f3f4f6;padding:24px 0;\">\n      <tr><td align=\"center\">\n        <table role=\"presentation\" width=\"640\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:640px;max-width:94%;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e5e7eb;\">\n          <tr><td style=\"padding:28px 32px;background:linear-gradient(135deg,#111827,#2563eb);color:#ffffff;\">\n            <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;\">Release update</div>\n            <h1 style=\"margin:8px 0 0 0;font-size:28px;line-height:34px;\">Your Product v${escapeHtml(label)}</h1>\n          </td></tr>\n          <tr><td style=\"padding:28px 32px;\">\n            <p style=\"margin:0 0 18px 0;font-size:16px;line-height:24px;color:#374151;\">${escapeHtml(safeIntro)}</p>\n            <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">${highlightsHtml}</table>\n            ${detailsHtml}\n            <div style=\"margin:18px 0;padding:14px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;color:#1e3a8a;line-height:22px;\">${escapeHtml(safeClosing)}</div>\n            <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin-top:20px;\"><tr>\n              <td><a href=\"${escapeHtml(meta.website_url)}\" style=\"display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;\">Open the website</a></td>\n              <td style=\"width:10px;\">&nbsp;</td>\n              <td><a href=\"${escapeHtml(meta.release_url)}\" style=\"display:inline-block;background:#ffffff;color:#2563eb;text-decoration:none;padding:10px 15px;border-radius:10px;font-weight:700;border:1px solid #bfdbfe;\">Release notes</a></td>\n            </tr></table>\n          </td></tr>\n          <tr><td style=\"padding:18px 32px;background:#f9fafb;color:#6b7280;font-size:12px;line-height:18px;\">\n            You are receiving this because you subscribed to Your Product updates.<br>\n            Replace this footer with your legal, privacy, and unsubscribe information.\n          </td></tr>\n        </table>\n      </td></tr>\n    </table>\n  </body>\n</html>`;\n\nreturn [{ json: { subject: safeSubject, html, ai_used: aiUsable, quality_gate: aiUsable ? 'ai_passed' : 'deterministic_editorial_fallback', highlights_count: highlights.length, version_label: label } }];"
+      },
+      "id": "3d7f2624-a28f-4cbf-8bcf-654ab993ef65",
+      "name": "Release Email Fallback (No AI)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2032,
+        1120
+      ],
+      "notes": "Deterministic English-only fallback. Uses grouped changelog notes for single or multi-version release notifications and avoids generic placeholder copy."
+    },
+    {
+      "parameters": {},
+      "id": "13533682-fa5a-4510-a257-613df2eeea53",
+      "name": "Prepared Email Content",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        992
+      ],
+      "notes": "Convergence point: receives output from either the successful AI branch or the fallback branch. Downstream nodes always read from this node, regardless of which branch produced the content."
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_NEWSLETTER_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Newsletter subscribers"
+        },
+        "filters": {
+          "conditions": []
+        }
+      },
+      "id": "5dd8dac9-0d0e-484c-817c-41c9ee871a72",
+      "name": "Read Subscribers",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        992
+      ],
+      "notes": "Empty filter = all rows. If you add an active column later, filter here with active=true to manage unsubscribes."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f1973b36-1c14-4d11-baef-769bd3c6d135",
+      "name": "Loop Subscribers",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1232,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "newsletter@example.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $('Prepared Email Content').first().json.subject }}",
+        "html": "={{ $('Prepared Email Content').first().json.html }}",
+        "options": {}
+      },
+      "id": "87dcbff4-85a5-4969-9380-32725cfd86db",
+      "name": "Send Release Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -1024,
+        1040
+      ],
+      "webhookId": "5efb6ecc-9f5b-4cf5-99f2-0a71a68fef8c"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "ef8d095a-deb0-4b91-bd68-8fd220e96dd0",
+      "name": "Throttle Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        1040
+      ],
+      "webhookId": "655c657c-c138-4e66-9aa0-086fe3a90535"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Notification sent\", \"version\": $('Extract Requested Release Versions').first().json.version_label, \"versions\": $('Extract Requested Release Versions').first().json.versions, \"recipients\": $('Read Subscribers').all().length, \"quality_gate\": $('Prepared Email Content').first().json.quality_gate } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "990d523c-6e88-4997-a0a2-7c1ab866c6b3",
+      "name": "Notification Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1024,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2272,
+        1424
+      ],
+      "id": "e17b5439-c179-45ec-991a-296815470fca",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "content": "Release notification test area\n\nProduction path uses Data Table → Loop Subscribers → Send Release Email.\nFor single-recipient tests, duplicate the workflow or replace Read Subscribers with one temporary Code/Set item using test@example.com, then restore the Data Table node before production use.",
+        "height": 244,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        720
+      ],
+      "id": "0b685df4-02ba-4664-98df-34bc0cc2959a",
+      "name": "Release Notification Test Area"
+    },
+    {
+      "parameters": {},
+      "id": "4902e213-97c0-48a1-92a4-7eb2466abd11",
+      "name": "Start Newsletter Send",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3312,
+        1184
+      ],
+      "notesInFlow": true,
+      "notes": "Manual production trigger. Edit \"Configure Manual Send\" first: version=<versions>, SEND_EMAIL=YES. Missing values fail before any email node."
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst versionText = String(input.version || '').trim();\nconst confirm = String(input.SEND_EMAIL || '').trim();\nconst changelogText = String(input.changelog || '').trim();\n\nfunction parseVersions(text) {\n  const matches = String(text || '').match(/v?\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?/gi) || [];\n  const seen = new Set();\n  return matches.map(v => v.replace(/^v/i, '')).filter(v => {\n    const key = v.toLowerCase();\n    if (seen.has(key)) return false;\n    seen.add(key);\n    return true;\n  });\n}\n\nconst versions = parseVersions(versionText);\nif (!versions.length) {\n  throw new Error('Missing required field: version. Put versions in the manual Set node or webhook payload, e.g. \"v7.15.1 v7.15.2 v7.15.3\" or \"7.15.1, 7.15.2, 7.15.3\". No subscriber email was sent.');\n}\nif (confirm !== 'YES') {\n  throw new Error('Real subscriber send is blocked. Required field SEND_EMAIL must be exactly YES. No subscriber email was sent.');\n}\n\nreturn [{\n  json: {\n    ...input,\n    versions,\n    release_version: versions.join(' '),\n    custom_note: changelogText,\n    manual_changelog: changelogText,\n    release_versions: versions.join(' '),\n    SEND_EMAIL: confirm,\n  }\n}];"
+      },
+      "id": "28527e6a-c6e4-4aff-8a0c-9e3ca263851f",
+      "name": "Validate Newsletter Send",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2864,
+        1088
+      ],
+      "notesInFlow": true,
+      "notes": "Hard stop: version must contain at least one x.y.z version and SEND_EMAIL must be exactly YES. Otherwise the workflow errors before reading subscribers or sending emails."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "webhook_version",
+              "name": "version",
+              "type": "string",
+              "value": "={{ $json.body?.version || $json.body?.release_versions || $json.version || $json.release_versions || '' }}"
+            },
+            {
+              "id": "webhook_changelog",
+              "name": "changelog",
+              "type": "string",
+              "value": "={{ $json.body?.changelog || $json.body?.manual_changelog || $json.body?.note || $json.changelog || $json.manual_changelog || $json.note || '' }}"
+            },
+            {
+              "id": "webhook_send",
+              "name": "SEND_EMAIL",
+              "type": "string",
+              "value": "={{ $json.body?.SEND_EMAIL || $json.body?.send_email || $json.SEND_EMAIL || $json.send_email || $json.body?.['SEND_' + 'mail'] || $json.body?.['send_' + 'mail'] || $json['SEND_' + 'mail'] || $json['send_' + 'mail'] || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "614acfb3-bfd4-4b6b-908a-680aab1e1ae0",
+      "name": "Configure Webhook Send",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3088,
+        992
+      ],
+      "notesInFlow": true,
+      "notes": "Webhook path: send JSON fields version, optional changelog, and SEND_EMAIL=YES. Empty or missing version, or missing SEND_EMAIL=YES, stops before any email node."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize Email": {
+      "main": [
+        [
+          {
+            "node": "Is Email Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Email Valid?": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Subscriber",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Subscriber": {
+      "main": [
+        [
+          {
+            "node": "Is New Subscriber?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Subscriber?": {
+      "main": [
+        [
+          {
+            "node": "Save New Subscriber",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Existing Subscriber Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save New Subscriber": {
+      "main": [
+        [
+          {
+            "node": "Build Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "New Subscriber Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Release Webhook": {
+      "main": [
+        [
+          {
+            "node": "Configure Webhook Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read README from GitHub": {
+      "main": [
+        [
+          {
+            "node": "Extract Requested Release Versions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Requested Release Versions": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Copywriter Release",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Copywriter Release": {
+      "main": [
+        [
+          {
+            "node": "Build Release Email Template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Release Email Fallback (No AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Copywriter Release",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent - Copywriter Release",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Release Email Template": {
+      "main": [
+        [
+          {
+            "node": "Prepared Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Email Fallback (No AI)": {
+      "main": [
+        [
+          {
+            "node": "Prepared Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepared Email Content": {
+      "main": [
+        [
+          {
+            "node": "Read Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Loop Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Notification Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Release Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Release Email": {
+      "main": [
+        [
+          {
+            "node": "Throttle Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Throttle Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Newsletter Send": {
+      "main": [
+        [
+          {
+            "node": "Configure Manual Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Newsletter Send": {
+      "main": [
+        [
+          {
+            "node": "Read README from GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure Webhook Send": {
+      "main": [
+        [
+          {
+            "node": "Validate Newsletter Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure Manual Send": {
+      "main": [
+        [
+          {
+            "node": "Validate Newsletter Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "26bdb2d2-6530-434a-889d-502815ea8661",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "1234test"
+  },
+  "nodeGroups": [],
+  "id": "mAOTgVMcQ0l6oN0V",
+  "tags": []
+}

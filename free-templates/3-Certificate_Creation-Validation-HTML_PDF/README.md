@@ -48,11 +48,14 @@ Create personalized digital certificates through an n8n webhook, generate unique
 - **Verification UI** — Adapt the included page's branding, language, messages, layout, and endpoint.
 - **Integrations** — Connect issuance or verification to an LMS, form, portal, CRM, or another workflow.
 
-## Additional Info
+## Links
 
-- [YouTube walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=6)
+- **n8n Creator:** [View template](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
+- **Gumroad:** Not Published
+- **YouTube:** [Watch video](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=6)
+
+## Additional Info
 
 - [Example certificate](./assets/Example-Certificate.pdf)
 - [Project guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
-- [n8n Community Template](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
 - Review authentication, abuse prevention, exposed personal data, and webhook security before production use.

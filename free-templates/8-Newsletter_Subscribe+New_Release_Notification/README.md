@@ -2,7 +2,9 @@
 
 ## Quick Overview
 
-Manage newsletter subscriptions and product release notifications in one n8n workflow. It validates and stores subscribers, sends welcome emails, extracts release notes from your changelog or GitHub README, and sends polished update emails using OpenAI with a deterministic fallback.
+This workflow provides a complete lightweight newsletter flow for product updates: it collects and validates subscriber emails through a webhook, stores subscribers in an n8n Data Table, sends a welcome email to new subscribers, and distributes release notifications generated from your changelog or GitHub README.
+
+Release emails can be prepared with OpenAI using structured output, while a deterministic fallback ensures the notification can still be generated if the AI branch fails.
 
 ## How It Works
 

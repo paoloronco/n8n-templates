@@ -320,7 +320,10 @@ Created and maintained by **Paolo Ronco**.
 - Website: https://paoloronco.it
 - n8n Creator profile: https://n8n.io/creators/paoloronco/
 
+## Links
+
+- **n8n Creator:** Not Published
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/n8n-splunknotifications?layout=profile)
 
 ## Additional Info
 
-- [Gumroad](https://paoloronco.gumroad.com/l/n8n-splunknotifications?layout=profile)

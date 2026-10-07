@@ -49,15 +49,17 @@ Issue and verify digital certificates with n8n using reusable PDF Generator API 
 - **Verification response** — Extend the API response with additional non-sensitive certificate metadata.
 - **External integrations** — Connect certificate creation to forms, an LMS, CRM, e-commerce flow, or another application.
 
-## Additional Info
+## Links
 
-- [YouTube walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=5)
+- **n8n Creator:** [View template](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
+- **Gumroad:** Not Published
+- **YouTube:** [Watch video](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=5)
+
+## Additional Info
 
 - [Example certificate](./assets/Example-Certificate.pdf)
 - [Full deployment guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
-- [n8n Community Template](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
 - [PDF Generator API](https://pdfgeneratorapi.com/)
-- [Video guide](https://youtu.be/eqSWoPndVUg)
 - The reusable PDF template is included under `PDFgeneratorAPI-Template/`.
 - Keep template placeholder names synchronized with the JSON keys sent by the workflow.
 - Review webhook exposure, personal-data handling, authentication, and abuse prevention before production use.

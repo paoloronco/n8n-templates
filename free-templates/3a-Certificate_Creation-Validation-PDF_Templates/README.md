@@ -51,6 +51,8 @@ Issue and verify digital certificates with n8n using reusable PDF Generator API 
 
 ## Additional Info
 
+- [YouTube walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=5)
+
 - [Example certificate](./assets/Example-Certificate.pdf)
 - [Full deployment guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - [n8n Community Template](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)

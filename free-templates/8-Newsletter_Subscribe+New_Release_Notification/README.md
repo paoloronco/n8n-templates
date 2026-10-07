@@ -63,6 +63,8 @@ Release emails can be prepared with OpenAI using structured output, while a dete
 
 ## Additional Info
 
+- [Gumroad](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
+
 - The subscription webhook accepts an email address, normalizes it to lowercase, validates the format, and does not send another welcome email when the subscriber already exists.
 - Release sending is deliberately protected by a hard validation step: the workflow will stop unless a valid release version is supplied and `SEND_EMAIL` is exactly `YES`.
 - Multiple versions can be announced in the same execution, for example `7.15.1, 7.15.2, 7.15.3`.

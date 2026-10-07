@@ -45,13 +45,15 @@ Automatically fetch Amazon Luna games included with Prime, detect newly added ti
 - **Notifications** — Replace Discord with another n8n-supported messaging, email, or webhook integration.
 - **Multi-region tracking** — Duplicate the fetch, parsing, synchronization, and notification logic for separate regional catalogs.
 
+## Links
+
+- **n8n Creator:** [View template](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
+- **Gumroad:** Not Published
+- **YouTube:** [Watch video](https://www.youtube.com/watch?v=rgee4kPZO7c)
+
 ## Additional Info
 
-- [YouTube walkthrough](https://www.youtube.com/watch?v=rgee4kPZO7c)
-
 - [Full deployment guide](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
-- [Video guide](https://youtu.be/PS6qdCbc5fU)
-- [n8n Community Template](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
 - Additional technical notes are available in the `docs/` directory.
 - Amazon may change Luna endpoints or request requirements; review the request configuration if fetching stops working.
 - Amazon data remains subject to Amazon's applicable terms and policies.

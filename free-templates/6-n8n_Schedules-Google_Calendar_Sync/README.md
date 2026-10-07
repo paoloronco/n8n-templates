@@ -52,6 +52,8 @@ Scan n8n workflows, extract supported Schedule Trigger configurations, compare t
 
 ## Additional Info
 
+- [Gumroad](https://paoloronco.gumroad.com/l/n8n-schedule-googlesheets-googlecalendar)
+
 - Supported recurrence logic includes daily, weekly, monthly, and hourly schedules handled by the workflow's parser and Calendar conversion logic.
 - Cron, minutely, and other unsupported schedule types are skipped by the current implementation.
 - Hourly schedules are represented as one recurring daily Calendar event at the configured minute rather than 24 separate events.

@@ -50,9 +50,12 @@ Scan n8n workflows, extract supported Schedule Trigger configurations, compare t
 - **State storage** — Adapt the Google Sheets schema or replace it with another persistent state mechanism.
 - **Change handling** — Modify create, update, skip, or deletion behavior to match your preferred synchronization model.
 
-## Additional Info
+## Links
 
-- [Gumroad](https://paoloronco.gumroad.com/l/n8n-schedule-googlesheets-googlecalendar)
+- **n8n Creator:** [View template](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/n8n-schedule-googlesheets-googlecalendar)
+
+## Additional Info
 
 - Supported recurrence logic includes daily, weekly, monthly, and hourly schedules handled by the workflow's parser and Calendar conversion logic.
 - Cron, minutely, and other unsupported schedule types are skipped by the current implementation.

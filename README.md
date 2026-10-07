@@ -57,6 +57,8 @@ Fetches the current Amazon Luna **Included with Prime** catalog, extracts game m
 - Folder: [`/free-templates/1-Amazon_Luna-Prime_Games-Google_Sheets`](./free-templates/1-Amazon_Luna-Prime_Games-Google_Sheets)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
 - n8n template: [Sync Amazon Luna Prime Games to Google Sheets](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
+- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=rgee4kPZO7c)
+- YouTube playlist: [n8n guides](https://youtu.be/PS6qdCbc5fU)
 
 </details>
 
@@ -68,6 +70,8 @@ Collects invoice PDFs from Gmail, archives them in Google Drive or optionally FT
 - Folder: [`/free-templates/2-Email_Invoices-AI_Extraction-Archiving`](./free-templates/2-Email_Invoices-AI_Extraction-Archiving)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
 - n8n template: [Automatic Email Invoice Archiving & Data Extraction](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/)
+- YouTube: [Workflow walkthrough](https://youtu.be/0s-95L8cmyE)
+- Gumroad: [Automated Invoice Archiving & AI Data Extraction](https://paoloronco.gumroad.com/l/invoice-archiving)
 
 </details>
 
@@ -79,6 +83,7 @@ Creates certificates from webhook requests, generates unique IDs, stores them in
 - Folder: [`/free-templates/3-Certificate_Creation-Validation-HTML_PDF`](./free-templates/3-Certificate_Creation-Validation-HTML_PDF)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - n8n template: [Automated Digital Certificate Creator & Validator](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
+- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=6)
 
 </details>
 
@@ -90,6 +95,7 @@ A template-based variant of workflow 3. The certificate lifecycle is the same, b
 - Folder: [`/free-templates/3a-Certificate_Creation-Validation-PDF_Templates`](./free-templates/3a-Certification-Creation&Validation%20With%20PDF%20Templates)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
 - n8n template: [Create & Validate Digital Certificates with PDF Generator API](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
+- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=5)
 
 </details>
 
@@ -101,6 +107,8 @@ Aggregates technology, AI, cybersecurity, cloud, and digital-industry news from 
 - Folder: [`/free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email`](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email)
 - Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
 - n8n template: [Curate and Send Tech News Digests with RSS, AI and Email](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
+- YouTube: [Workflow walkthrough](https://youtu.be/Gck8nmvx1UA)
+- Gumroad: [Tech & AI Daily Briefing](https://paoloronco.gumroad.com/l/tech-news)
 
 </details>
 
@@ -111,6 +119,7 @@ Receives customer orders through an n8n webhook, sends real-time push notificati
 
 - Folder: [`/free-templates/5-V1-Online_Menu-Push_Notifications`](./free-templates/5-V1-Online_Menu-Push_Notifications)
 - Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
+- Gumroad: [Online Menu — Push Notifications](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 
 </details>
 
@@ -145,6 +154,7 @@ Scans n8n workflows every 30 minutes, extracts supported schedules, compares the
 - Folder: [`/free-templates/6-n8n_Schedules-Google_Calendar_Sync`](./free-templates/6-n8n_Schedules-Google_Calendar_Sync)
 - Documentation: [n8n Workflow Scheduling Extraction — Setup docs](https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link)
 - n8n template: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
+- Gumroad: [n8n Schedule → Google Sheets & Google Calendar](https://paoloronco.gumroad.com/l/n8n-schedule-googlesheets-googlecalendar)
 
 </details>
 
@@ -155,6 +165,7 @@ Receives Splunk alerts through an n8n webhook, normalizes and validates the payl
 
 - Folder: [`/free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications`](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications)
 - Setup guide: [README](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications/README.md)
+- Gumroad: [Splunk Alert Notifications](https://paoloronco.gumroad.com/l/n8n-splunknotifications?layout=profile)
 
 </details>
 
@@ -166,6 +177,7 @@ Turns raw Splunk security alerts into deduplicated, threat-enriched and risk-sco
 - Folder: [`/free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications`](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications)
 - Setup guide: [README](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/README.md)
 - n8n template: [Enrich and route Splunk security alerts via AbuseIPDB, Email and Telegram](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/)
+- Gumroad: [Splunk Security Alert Enrichment & Smart Notifications](https://paoloronco.gumroad.com/l/splunk-securityalert)
 
 </details>
 

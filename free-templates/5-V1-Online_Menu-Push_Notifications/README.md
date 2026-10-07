@@ -43,9 +43,12 @@ Receive orders from an online menu through an n8n webhook, send real-time push n
 - **Notification provider** — Replace ntfy with another messaging or notification service supported by n8n.
 - **Webhook path** — Change the endpoint path if `/menu` conflicts with another workflow or application.
 
-## Additional Info
+## Links
 
-- [Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
+- **n8n Creator:** Not Published
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
+
+## Additional Info
 
 - Full setup instructions are available in the included `docs/` directory.
 - The repository includes a `website-mockup/` example that can be connected to the webhook.

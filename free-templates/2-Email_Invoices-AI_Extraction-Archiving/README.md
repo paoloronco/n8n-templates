@@ -51,10 +51,13 @@ Automatically collect invoice PDFs from Gmail, archive them in Google Drive or a
 - **Retention behavior** — Keep or remove Gmail messages and temporary Drive files according to your archival requirements.
 - **Schedule** — Change how frequently the inbox is checked.
 
-## Additional Info
+## Links
 
-- [YouTube walkthrough](https://youtu.be/0s-95L8cmyE)
-- [Gumroad](https://paoloronco.gumroad.com/l/invoice-archiving)
+- **n8n Creator:** [View template](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/)
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/invoice-archiving)
+- **YouTube:** [Watch video](https://youtu.be/0s-95L8cmyE)
+
+## Additional Info
 
 - [Full deployment guide](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
 - Invoice documents may contain personal and financial information. Protect credentials, storage locations, spreadsheets, and FTP/SFTP access appropriately.

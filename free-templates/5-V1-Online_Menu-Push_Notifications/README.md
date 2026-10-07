@@ -45,6 +45,8 @@ Receive orders from an online menu through an n8n webhook, send real-time push n
 
 ## Additional Info
 
+- [Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
+
 - Full setup instructions are available in the included `docs/` directory.
 - The repository includes a `website-mockup/` example that can be connected to the webhook.
 - Protect public webhook endpoints and authenticated ntfy topics appropriately before exposing them to the internet.

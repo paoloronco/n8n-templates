@@ -48,8 +48,6 @@ severity-based notifications via email and Telegram plus a daily email digest.
 
 Published on the official n8n workflow library:
 
-https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/
-
 ## Additional info
 
 The workflow keeps the original normalized Splunk severity separate from the calculated risk level. This allows an alert reported as `high` by Splunk to be promoted to `critical` when additional context such as
@@ -69,8 +67,10 @@ The default calculated risk levels are:
         30--49 Medium     Email
          0--29 Low        Store only
 
+## Links
 
+- **n8n Creator:** [View template](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/)
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/splunk-securityalert)
 
 ## Additional Info
 
-- [Gumroad](https://paoloronco.gumroad.com/l/splunk-securityalert)

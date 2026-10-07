@@ -48,6 +48,11 @@ Receive online menu orders through n8n, send push notifications with ntfy, log o
 - **Frontend** — Connect any website, kiosk, tablet, or application capable of sending the expected webhook payload.
 - **Notification provider** — Replace ntfy or add additional n8n notification channels.
 
+## Links
+
+- **n8n Creator:** Not Published
+- **Gumroad:** Not Published
+
 ## Additional Info
 
 - This version extends Workflow 5 v1 by adding Home Assistant TTS while retaining ntfy notifications and Data Table logging.

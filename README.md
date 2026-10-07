@@ -29,7 +29,6 @@ n8n-templates/
 │   ├── 5-V1-Online_Menu-Push_Notifications/
 │   ├── 5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS/
 │   ├── 5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation/
-│   ├── 6-n8n_Schedules-Google_Calendar_Sync/
 │   ├── 7-V1-Splunk_Alerts-Email-Telegram_Notifications/
 │   ├── 7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/
 │   └── 8-Newsletter_Subscribe+New_Release_Notification/
@@ -143,18 +142,6 @@ Extends v2 with richer order logging and daily per-person history. Alcohol grams
 - n8n template: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 
 > The BAC value is a simplified estimate and must not be used to determine driving safety, legal compliance, or medical decisions.
-
-</details>
-
-<details>
-<summary><strong>6. Sync n8n Workflow Schedules to Google Calendar</strong></summary>
-
-Scans n8n workflows every 30 minutes, extracts supported schedules, compares them with state stored in Google Sheets, and automatically creates or replaces matching recurring Google Calendar events when schedules change.
-
-- Folder: [`/free-templates/6-n8n_Schedules-Google_Calendar_Sync`](./free-templates/6-n8n_Schedules-Google_Calendar_Sync)
-- Documentation: [n8n Workflow Scheduling Extraction — Setup docs](https://paoloronco.notion.site/n8n-Workflow-Scheduling-Extraction-Setup-Docs-330f0ba27c3280ef99b2c5e8e7dfd497?source=copy_link)
-- n8n template: [Sync workflow schedules between Google Sheets and Google Calendar](https://n8n.io/workflows/14397-sync-workflow-schedules-between-google-sheets-and-google-calendar/)
-- Gumroad: [n8n Schedule → Google Sheets & Google Calendar](https://paoloronco.gumroad.com/l/n8n-schedule-googlesheets-googlecalendar)
 
 </details>
 

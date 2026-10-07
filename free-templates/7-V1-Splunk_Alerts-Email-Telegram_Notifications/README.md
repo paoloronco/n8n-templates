@@ -319,3 +319,8 @@ Created and maintained by **Paolo Ronco**.
 - GitHub: https://github.com/paoloronco
 - Website: https://paoloronco.it
 - n8n Creator profile: https://n8n.io/creators/paoloronco/
+
+
+## Additional Info
+
+- [Gumroad](https://paoloronco.gumroad.com/l/n8n-splunknotifications?layout=profile)

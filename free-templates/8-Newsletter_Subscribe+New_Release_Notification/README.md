@@ -61,9 +61,12 @@ Release emails can be prepared with OpenAI using structured output, while a dete
 - **Notification channels** — Extend the workflow with Telegram, Slack, Discord, Microsoft Teams, push notifications, or another delivery channel.
 - **Segmentation** — Filter subscribers by language, plan, product, environment, or release channel before entering the send loop.
 
-## Additional Info
+## Links
 
-- [Gumroad](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
+- **n8n Creator:** Not Published
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
+
+## Additional Info
 
 - The subscription webhook accepts an email address, normalizes it to lowercase, validates the format, and does not send another welcome email when the subscriber already exists.
 - Release sending is deliberately protected by a hard validation step: the workflow will stop unless a valid release version is supplied and `SEND_EMAIL` is exactly `YES`.

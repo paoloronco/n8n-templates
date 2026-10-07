@@ -69,3 +69,8 @@ The default calculated risk levels are:
         30--49 Medium     Email
          0--29 Low        Store only
 
+
+
+## Additional Info
+
+- [Gumroad](https://paoloronco.gumroad.com/l/splunk-securityalert)

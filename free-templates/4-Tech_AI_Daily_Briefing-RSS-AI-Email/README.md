@@ -54,13 +54,15 @@ Aggregate technology, AI, cybersecurity, cloud, and digital-industry news from c
 - **Newsletter design** — Edit the HTML builder to change typography, layout, sections, branding, and subject formatting.
 - **Distribution** — Replace Google Sheets subscriber storage or SMTP delivery with other n8n-supported services.
 
+## Links
+
+- **n8n Creator:** [View template](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
+- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/tech-news)
+- **YouTube:** [Watch video](https://youtu.be/Gck8nmvx1UA)
+
 ## Additional Info
 
-- [YouTube walkthrough](https://youtu.be/Gck8nmvx1UA)
-- [Gumroad](https://paoloronco.gumroad.com/l/tech-news)
-
 - [Full deployment guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
-- [n8n Community Template](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
 - The workflow JSON is sanitized and does not include production API keys, account IDs, or subscriber addresses.
 - RSS endpoints and publisher availability can change over time; review failing feed nodes when a source stops responding.
 - AI-generated summaries should be treated as automated editorial output and may require validation for high-stakes use cases.

@@ -175,6 +175,7 @@ Collects and validates newsletter subscriptions through a webhook, stores subscr
 
 - Folder: [`/free-templates/8-Newsletter_Subscribe+New_Release_Notification`](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification)
 - Setup guide: [README](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification/README.md)
+- n8n template: [Send newsletter welcomes and release announcements with GitHub, OpenAI and SMTP](https://n8n.io/workflows/20636-send-newsletter-welcomes-and-release-announcements-with-github-openai-and-smtp/)
 - Gumroad: [Newsletter Subscription + New Release Notification](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
 
 </details>

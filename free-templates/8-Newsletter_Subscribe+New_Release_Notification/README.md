@@ -63,7 +63,7 @@ Release emails can be prepared with OpenAI using structured output, while a dete
 
 ## Links
 
-- **n8n Creator:** Not Published
+- **n8n Creator:** [Send newsletter welcomes and release announcements with GitHub, OpenAI and SMTP](https://n8n.io/workflows/20636-send-newsletter-welcomes-and-release-announcements-with-github-openai-and-smtp/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
 
 ## Additional Info

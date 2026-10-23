@@ -53,12 +53,11 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Links
 
-
 - **n8n Creator:** [View template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
+- **Paolo Ronco Store:** [View on Store](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 
 ## Additional Info
 
-- [Paolo Ronco Store](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 - The purchased package includes the importable workflow and complete setup documentation covering RSS sources, APIs, scheduling, testing, and operational guidance.
 - This public repository contains the product overview and promotional assets; the complete paid workflow is delivered with the purchased package.

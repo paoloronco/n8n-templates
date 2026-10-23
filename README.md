@@ -100,15 +100,15 @@ A template-based variant of workflow 3. The certificate lifecycle is the same, b
 </details>
 
 <details>
-<summary><strong>4. Tech & AI Daily Briefing — RSS → AI → Email</strong></summary>
+<summary><strong>4. Tech & AI News Intelligence — RSS, OpenAI, Gemini & Email</strong></summary>
 
-Aggregates technology, AI, cybersecurity, cloud, and digital-industry news from curated RSS feeds, filters and deduplicates recent stories, processes them through a resilient AI pipeline, builds an HTML newsletter, and sends it to subscribers via SMTP.
+Collects news from 20 English-language RSS feeds, ranks stories by relevance, groups related events, and suppresses previously delivered stories. OpenAI selects and summarizes articles, with Gemini and deterministic fallback paths. Validated stories are delivered in an HTML newsletter via SMTP, with Google Sheets subscriber management and basic execution reporting.
 
 - Folder: [`/free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email`](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email)
-- Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
-- n8n template: [Curate and Send Tech News Digests with RSS, AI and Email](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
-- YouTube: [Workflow walkthrough](https://youtu.be/Gck8nmvx1UA)
-- Gumroad: [Tech & AI Daily Briefing](https://paoloronco.gumroad.com/l/tech-news)
+- Workflow JSON: [Download](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email/Tech_AI_Daily_Briefing-RSS-AI-Email.json)
+- Setup guide: [README](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email/README.md)
+- Deployment article: [paoloronco.it](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/) (earlier version)
+- n8n Creator: [Profile](https://n8n.io/creators/paoloronco/) — updated template submission pending
 
 </details>
 

@@ -1,68 +1,64 @@
-# Tech & AI Daily Briefing — RSS to AI to Email
+# Tech & AI News Intelligence
 
-## Quick Overview
+## Quick overview
 
-Aggregate technology, AI, cybersecurity, cloud, and digital-industry news from curated RSS feeds, filter and deduplicate recent stories, summarize them with a resilient AI pipeline, build an HTML newsletter, and email it automatically to subscribers.
+Collect news from cybersecurity, AI, and technology RSS feeds, rank and group related stories, and deliver a curated English-language email briefing. OpenAI handles selection and summaries, Gemini provides an AI fallback, and a deterministic fallback keeps the digest available when both fail.
 
-![Workflow](assets/workflow.png)
+## How it works
 
-## How It Works
-
-- **Scheduled or manual start** — The workflow runs from its Schedule Trigger and also exposes a webhook for on-demand testing or execution.
-- **Multi-source RSS ingestion** — Dedicated RSS nodes collect stories from technology, cybersecurity, AI research, cloud, industry, and vendor sources before merging them into one stream.
-- **Recency filtering** — Articles outside the configured recent-news window are removed before editorial processing.
-- **Sorting and normalization** — Articles are ordered by publication date and normalized into a consistent structure containing title, content, link, date, and source.
-- **Deduplication and balancing** — JavaScript removes near-duplicate stories and caps articles per source so one publisher does not dominate the briefing.
-- **AI editorial processing** — OpenAI handles primary summarization and categorization, while a secondary LLM path is available when primary processing fails.
-- **HTML generation** — A Code node validates structured output, handles unavailable or malformed model responses, and renders selected stories into a responsive HTML email.
-- **Subscriber delivery** — Google Sheets supplies subscriber addresses, an IF node validates them, and SMTP sends the completed newsletter to valid recipients.
+1. **Collect:** A daily schedule or manual trigger starts the RSS readers. Their results are combined into one stream.
+2. **Filter:** Keep recently published articles, validate links and dates, and normalize article metadata.
+3. **Rank and group:** Assign heuristic relevance scores, cluster stories with similar headlines, and exclude events recorded in the delivery history.
+4. **Select and summarize:** OpenAI selects up to 10 stories and writes short English summaries. Invalid or unavailable output is routed to Gemini, then to a deterministic fallback if necessary.
+5. **Validate and render:** Check AI-selected article IDs and summary fields against the collected input, then build a responsive HTML newsletter with source links and a dynamic subject line.
+6. **Deliver and record:** Read subscriber addresses from Google Sheets, send via SMTP, and store delivered event keys and a basic execution report in n8n workflow static data.
 
 ## Setup
 
-- **Import the workflow** — Import `Tech_AI_Daily_Briefing-RSS-AI-Email.json` into n8n.
-- **Configure OpenAI** — Add OpenAI credentials to the primary chat model and review the selected model and editorial prompt.
-- **Configure the fallback model** — Add credentials required by the secondary LLM path so processing can continue if the primary AI path fails.
-- **Connect Google Sheets** — Configure the service account, select the subscriber spreadsheet, and ensure it contains the expected `Subscriber_email` column.
-- **Configure SMTP** — Add SMTP credentials to the send node and replace the placeholder sender with a verified address.
-- **Review triggers** — Adjust the schedule and webhook configuration to match your delivery and testing requirements.
-- **Test before activation** — Send to a controlled test recipient, verify article selection and HTML rendering, then activate the workflow.
+1. **Import the workflow JSON** into n8n.
+2. **Configure the AI providers:** Select your OpenAI credentials in `OpenAI Chat Model - Primary` and Gemini credentials in `LLM - News Summarizer`.
+3. **Connect Google Sheets:** In `Get News Subscribers`, select your own spreadsheet and worksheet. Add a header named `Subscriber_email`, with one email address per row.
+4. **Configure SMTP:** In `MailGun Send_News`, select your SMTP credentials and set an authorized `fromEmail` address. Mailgun is the original provider, but another compatible SMTP service may be used.
+5. **Review the RSS sources:** Disable, remove, or replace feeds that are unavailable or irrelevant. Check that all remaining sources are connected to `Merge_All`.
+6. **Set the schedule:** Adjust `Schedule Trigger` (configured for 07:30) and confirm your n8n workflow timezone.
+7. **Test safely:** Use a spreadsheet with **one test recipient** and run `Manual Trigger`. Inspect `Rank Cluster and Check History`, both AI validation paths, the generated HTML, and the delivery result before enabling scheduled runs.
+
+> **Important:** Replace the spreadsheet selection and sender address included in the exported workflow. Verify all imported credential selections before execution. A manual run can send real emails.
 
 ## Requirements
 
-- n8n instance with the required core and AI nodes
-- OpenAI API credentials
-- Credentials for the configured fallback LLM
-- Google Sheets document containing subscriber email addresses
-- Google service account or compatible Google Sheets credentials
-- SMTP account and verified sender address
-- Network access to the configured RSS feeds
+- A running n8n instance with the nodes used in the imported workflow, including a Merge node supporting multiple inputs.
+- OpenAI API credentials and access to the configured chat model.
+- Google Gemini API credentials and access to the configured Gemini model.
+- Google Sheets access, with a `Subscriber_email` column.
+- SMTP credentials and an authorized sender address.
+- Outbound access to the configured RSS feeds and API endpoints.
 
-### Optional
-
-- Public webhook access for on-demand execution
-- Custom RSS feeds or additional source categories
-- Alternative SMTP/email provider
-- Modified AI models for different cost, latency, or quality requirements
+API usage and email delivery may incur provider charges.
 
 ## Customization
 
-- **RSS sources** — Add, remove, or replace feeds to adapt the briefing to your preferred publications and topics.
-- **Editorial categories** — Modify the AI prompt to change topic taxonomy, article limits, selection criteria, or summary language.
-- **Recency window** — Change the filter to cover a different publication period.
-- **Deduplication** — Tune title-similarity and per-source limits in the JavaScript preprocessing logic.
-- **AI models** — Replace primary or fallback models while preserving the expected structured output.
-- **Newsletter design** — Edit the HTML builder to change typography, layout, sections, branding, and subject formatting.
-- **Distribution** — Replace Google Sheets subscriber storage or SMTP delivery with other n8n-supported services.
+- **Sources:** Edit the RSS Read nodes and update the corresponding inputs to `Merge_All`.
+- **Topics and editorial criteria:** Adjust the OpenAI and Gemini prompts, plus the ranking logic in `Rank Cluster and Check History`.
+- **Number of stories:** Update the AI selection limits and matching validation rules together; the current configuration targets up to 10 stories.
+- **Newsletter design:** Edit `Build Final Newsletter HTML` to change the layout, typography, colors, subject, and footer.
+- **Delivery:** Change the Google Sheets worksheet, SMTP sender, recipient list, or schedule.
+- **History:** Adjust the 30-day retention logic in `Rank Cluster and Check History` if a different repeat-prevention window is needed.
 
 ## Links
 
-- **n8n Creator:** [View template](https://n8n.io/workflows/11466-curate-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/)
-- **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/tech-news)
-- **YouTube:** [Watch video](https://youtu.be/Gck8nmvx1UA)
+- [Repository overview](../../README.md)
+- [Original deployment guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/) (may describe an earlier version)
+- [n8n Creator profile](https://n8n.io/creators/paoloronco/)
 
-## Additional Info
+## Additional info
 
-- [Full deployment guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/)
-- The workflow JSON is sanitized and does not include production API keys, account IDs, or subscriber addresses.
-- RSS endpoints and publisher availability can change over time; review failing feed nodes when a source stops responding.
-- AI-generated summaries should be treated as automated editorial output and may require validation for high-stakes use cases.
+- **Language:** The briefing and AI summaries are configured in English. Original RSS titles are retained, so an external source could still supply a non-English title.
+- **Scoring and clustering:** These are heuristic methods, not fact-checking. Similar events may be missed or unrelated headlines may occasionally be grouped.
+- **Source fidelity:** Summaries are based on the information available from RSS entries; readers should consult the linked articles for full context.
+- **AI fallback:** If both providers fail validation, the workflow uses available article metadata to create a non-AI digest.
+- **Persistent history:** The workflow uses n8n **workflow static data**, which is saved for active production executions, not reliably during manual testing. It is not a separate database or a full audit trail.
+- **Delivery reporting:** The current report records a successful email item; it does **not** provide a consolidated delivery count or guarantee delivery to every subscriber. Review SMTP execution results for failures.
+- **Testing:** The workflow JSON has been prepared for import, but integrations, feed availability, and delivery behavior depend on your n8n environment. Test end to end before production use.
+
+This workflow uses public RSS content and links to original publishers. Respect each source's usage terms and your email recipients' consent and unsubscribe requirements.

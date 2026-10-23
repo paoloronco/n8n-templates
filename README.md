@@ -205,7 +205,6 @@ Transforms WordPress articles into multilingual, human-sounding audio, powered b
 
 - Folder: [`/paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS`](./paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS)
 - n8n template: [Convert WordPress articles to multilingual voiceovers](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
-- Documentation: [WordPress AI TTS VoiceOvers with Google Cloud](https://app.notion.com/p/paoloronco/Documentation-WordPress-AI-TTS-VoiceOvers-with-Google-Cloud-3f5f0ba27c3280478f82ccabfa9a0b7c?source=copy_link)
 - Gumroad: [WordPress AI VoiceOvers](https://paoloronco.gumroad.com/l/ailfum)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
@@ -218,7 +217,6 @@ Collects the latest news from any topic via RSS feeds, analyzes it with AI, and 
 
 - Folder: [`/paid-templates/2-AI_News-Social_Publishing-Instagram`](./paid-templates/2-AI_News-Social_Publishing-Instagram)
 - n8n template: [Automate RSS to Instagram with AI-generated content](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
-- Documentation: [RSS AI Instagram Publishing](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-1-3f5f0ba27c32806ba425f7d84c72961a?pvs=73)
 - Gumroad: [AI News — Social Publishing](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 

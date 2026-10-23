@@ -218,6 +218,7 @@ Collects the latest news from any topic via RSS feeds, analyzes it with AI, and 
 
 - Folder: [`/paid-templates/2-AI_News-Social_Publishing-Instagram`](./paid-templates/2-AI_News-Social_Publishing-Instagram)
 - n8n template: [Automate RSS to Instagram with AI-generated content](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+- Documentation: [RSS AI Instagram Publishing](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-1-3f5f0ba27c32806ba425f7d84c72961a?pvs=73)
 - Gumroad: [AI News — Social Publishing](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
 

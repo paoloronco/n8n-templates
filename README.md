@@ -31,7 +31,8 @@ n8n-templates/
 │   ├── 5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation/
 │   ├── 7-V1-Splunk_Alerts-Email-Telegram_Notifications/
 │   ├── 7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/
-│   └── 8-Newsletter_Subscribe+New_Release_Notification/
+│   ├── 8-Newsletter_Subscribe+New_Release_Notification/
+│   └── 9-GoogleCloud_Inventory/
 ├── paid-templates/
 │   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
 │   ├── 2-AI_News-Social_Publishing-Instagram/
@@ -179,6 +180,19 @@ Collects and validates newsletter subscriptions through a webhook, stores subscr
 - Gumroad: [Newsletter Subscription + New Release Notification](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
 
 </details>
+
+<details>
+<summary><strong>9. Google Cloud Inventory & Change Audit</strong></summary>
+
+Automatically discovers Google Cloud projects accessible to a Service Account, collects supported resources through Cloud Asset Inventory, and stores historical BigQuery snapshots. Compares completed scans to detect added, modified, and removed resources, with transactional integrity checks.
+
+- Folder: [`/free-templates/9-GoogleCloud_Inventory`](./free-templates/9-GoogleCloud_Inventory)
+- Setup guide: [Google Cloud Inventory & Change Audit — Notion](https://www.notion.so/402f0ba27c32801ba303f2549dbe9fa2)
+- n8n template: **In Review** (n8n Creator Portal)
+- Gumroad: [Google Cloud Inventory & Change Audit — Free](https://paoloronco.gumroad.com/l/GoogleCloud-InventoryChangeAudit)
+
+</details>
+
 
 ---
 

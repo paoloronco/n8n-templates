@@ -114,7 +114,7 @@ Files: `News_Tech_EN.json` (workflow), `readme.md` (GitHub setup guide), `readme
 Receive instant push notifications whenever a customer places an order on your menu website — powered by n8n and a self-hosted ntfy.sh instance. No third-party notification APIs, no paid plans. Includes a ready-to-host static menu website with a customer order page and a password-protected admin panel.
 
 - Folder: [`/free-templates/5-V1-Online_Menu-Push_Notifications`](./free-templates/5-V1-Online_Menu-Push_Notifications)
-- Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
+- Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-48bf0ba27c3282fcb5e50148e52fb8cd)
 
 </details>
 
@@ -124,7 +124,7 @@ Receive instant push notifications whenever a customer places an order on your m
 Extends 5 v1: receive a push notification **and** trigger a voice announcement on your Google Home every time an order comes in — powered by n8n, ntfy.sh, and Home Assistant TTS. Fully self-hosted, no cloud TTS fees.
 
 - Folder: [`/free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS`](./free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
+- Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 
 </details>
 
@@ -134,7 +134,7 @@ Extends 5 v1: receive a push notification **and** trigger a voice announcement o
 Extends 5 v2 with Blood Alcohol Concentration (BAC) logic on top of push notifications and Home Assistant TTS announcements.
 
 - Folder: [`/free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation`](./free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?pvs=74)
+- Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 - n8n template: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 
 </details>

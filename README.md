@@ -118,7 +118,7 @@ Aggregates technology, AI, cybersecurity, cloud, and digital-industry news from 
 Receives customer orders through an n8n webhook, sends real-time push notifications through a self-hosted **ntfy** server, and logs basic order information in an n8n Data Table.
 
 - Folder: [`/free-templates/5-V1-Online_Menu-Push_Notifications`](./free-templates/5-V1-Online_Menu-Push_Notifications)
-- Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-website-receive-notification-from-orders-32ef0ba27c3280acb9b0f8241a9292f7?pvs=73)
+- Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-48bf0ba27c3282fcb5e50148e52fb8cd)
 - Gumroad: [Online Menu — Push Notifications](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 
 </details>
@@ -129,7 +129,7 @@ Receives customer orders through an n8n webhook, sends real-time push notificati
 Extends v1 with **Home Assistant TTS**: every order is logged and sent through ntfy, while n8n also calls a Home Assistant script to announce the new order on a configured speaker.
 
 - Folder: [`/free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS`](./free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
+- Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 
 </details>
 
@@ -139,7 +139,7 @@ Extends v1 with **Home Assistant TTS**: every order is logged and sent through n
 Extends v2 with richer order logging and daily per-person history. Alcohol grams configured in menu items are accumulated and used for a **simplified BAC estimate**, which is included in the ntfy notification alongside previous orders.
 
 - Folder: [`/free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation`](./free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-BAC-32ff0ba27c328075a886d89ebfbf5ce5?pvs=74)
+- Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 - n8n template: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 
 > The BAC value is a simplified estimate and must not be used to determine driving safety, legal compliance, or medical decisions.

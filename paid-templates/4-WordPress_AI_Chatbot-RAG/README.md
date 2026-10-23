@@ -57,11 +57,11 @@ Build a WordPress chatbot that answers questions from your site content using Re
 
 - **n8n Creator:** [View template](https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/wordpress-aichatbot)
+- **Paolo Ronco Store:** [View on Store](https://shop.paoloronco.it)
 - **YouTube:** [Watch video](https://www.youtube.com/watch?v=vg33xcdU9gE)
 
 ## Additional Info
 
-- [Paolo Ronco Store](https://shop.paoloronco.it)
 - [Detailed feature reference](FEATURES.md)
 - [License](LICENSE.md)
 - The complete purchased package includes two n8n workflows, WordPress integration, test frontend, setup/customization documentation, and supporting tools.

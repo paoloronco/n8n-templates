@@ -1,0 +1,574 @@
+{
+  "name": "Google Cloud Inventory & Change Audit",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 05 · Audit & verify\nAfter the loop, SQL compares this run with the last `COMPLETE` run of the **same scope** and writes changes. `Verify audit` checks the BigQuery response.\n\n**Validate in BigQuery:**\n- `scan_runs`: latest run has `status = COMPLETE`\n- `resources`: count rows for that `run_id`\n- `changes`: review differences after a second run\n\n**Before production:** repeat with no changes, test a controlled addition/removal, and test failure handling. BigQuery streaming visibility and volatile metadata can affect comparisons.",
+        "height": 790,
+        "width": 676,
+        "color": 7
+      },
+      "id": "c3ec683f-9b16-4fa8-9745-9642324f0e61",
+      "name": "05 - Audit and validation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 04 · Persist inventory\n`Batch loop` writes each batch to BigQuery `resources` via `tabledata.insertAll`. `Verify inserted batch` rejects reported insert errors.\n\n**Credential:** Google Service Account API; enable **Set up for use in HTTP Request node** and set OAuth scope `https://www.googleapis.com/auth/cloud-platform`.\n\nAll HTTP Request nodes must use the same authorized credential.",
+        "height": 790,
+        "width": 760,
+        "color": 7
+      },
+      "id": "24252c6f-1a7f-48d0-8644-112a4abf007a",
+      "name": "04 - Persist batches",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 03 · Asset discovery\nEnable **Cloud Asset API**. Grant **Cloud Asset Viewer** on the chosen scope; access to other projects is not automatic.\n\n`Search Cloud Assets` calls `searchAllResources`. Pagination passes `nextPageToken` as query `pageToken` and stops when no token remains. `Normalize & batch` prepares batches of up to 250 rows.\n\nCoverage depends on supported asset types and IAM visibility.",
+        "height": 652,
+        "width": 570,
+        "color": 7
+      },
+      "id": "71292d74-41de-4ef4-a46e-2b40a22a2649",
+      "name": "03 - Asset discovery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 02 · BigQuery setup\nEnable **BigQuery API**. Pre-create the dataset or grant temporary dataset-creation rights. These nodes create/check `cloud_inventory` and its tables: `resources`, `scan_runs`, `changes`.\n\n**IAM:** BigQuery Job User on the execution project; dataset-scoped Data Editor for writing. Avoid project-wide BigQuery Admin. Dataset creation needs additional project-level permission.",
+        "height": 652,
+        "width": 1100,
+        "color": 7
+      },
+      "id": "c57d5b93-3573-4b3a-848d-541e311de675",
+      "name": "02 - BigQuery preparation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 01 · Run & scope\n**Daily schedule:** 03:15 in the workflow timezone; or use **Manual start**.\n\nIn **Configuration**, set `scope`, `billingProject`, `dataset`, and `location` (`EU` by default). Example scope: `projects/PROJECT_ID`. `Initialize run` assigns a unique run ID.\n\n**Start with a small project.** Schedule only after validation.",
+        "height": 652,
+        "width": 880,
+        "color": 7
+      },
+      "id": "a266657b-43be-4567-b8d9-ff038a1e4838",
+      "name": "01 - Run and scope",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Google Cloud Inventory & Change Audit\n\n**Automated Google Cloud asset discovery, inventory snapshots, and change detection with n8n and BigQuery.**\n\nThis workflow automatically discovers Google Cloud projects accessible to a Service Account, collects resource metadata using **Cloud Asset Inventory**, and stores historical snapshots in **BigQuery**. It compares consecutive completed scans to identify resources that have been **added, modified, or removed**.\n\n## How it works\n\n1. **Discover** — Automatically find accessible Google Cloud organizations, folders, and projects.\n2. **Inventory** — Collect supported cloud resources using Cloud Asset Inventory API with pagination.\n3. **Store** — Normalize resource metadata and persist historical snapshots in BigQuery.\n4. **Audit** — Compare each snapshot against the previous completed scan to detect `ADDED`, `MODIFIED`, and `REMOVED` resources.\n5. **Validate** — Verify snapshot integrity and prevent incomplete scans from being marked as complete.\n\nRuns manually or automatically using a configurable daily schedule.\n\n## Setup\n\n1. **Google Cloud** — Enable Cloud Resource Manager, Cloud Asset Inventory, and BigQuery APIs.\n2. **Service Account** — Create a dedicated Service Account with `Browser`, `Cloud Asset Viewer`, `BigQuery Job User`, and `BigQuery Data Editor` roles, assigned at the appropriate scopes.\n3. **n8n Credentials** — Configure a **Google Service Account API** credential with HTTP Request support and the `cloud-platform` OAuth scope. Assign it to all HTTP Request nodes.\n4. **Configuration** — Set `inventoryProjectId` to the Google Cloud project hosting BigQuery. Other settings have defaults.\n5. **Run & Validate** — Execute manually, verify the BigQuery results, then activate the schedule.\n\n**No custom IAM roles or manual target-project lists required.** Discovery is based on the Service Account's effective permissions.\n\n## Output & limitations\n\n- **BigQuery tables:** `resources`, `scan_runs`, `changes`.\n- **Safety:** Transactional snapshots, integrity checks, pagination validation, and failure-safe completion.\n- **Limit:** 5 MiB normalized resource payload per project.\n- **Coverage:** IAM permissions and Cloud Asset Inventory-supported resource types determine visibility.\n\nErrors stop execution rather than silently completing partial scans. Configure an n8n Error Workflow for notifications.\n\n**[Full documentation, setup guide & SQL queries → Notion](https://www.notion.so/402f0ba27c32801ba303f2549dbe9fa2)**\n\n---\n\n> **Need help deploying this workflow?**\n>\n> For managed setup, Google Cloud IAM and BigQuery configuration, private-environment deployment, troubleshooting, or custom automation consulting:\n>\n> **Email:** [info@paoloronco.it](mailto:info@paoloronco.it)  \n> **Website:** [paoloronco.it](https://paoloronco.it)",
+        "height": 996,
+        "width": 808,
+        "color": 3
+      },
+      "id": "621ee4ce-b718-4b3d-8544-01ce9435fe22",
+      "name": "00 - Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1712,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json;if(r.errors?.length||r.jobComplete===false)throw Error('Audit SQL incomplete: '+JSON.stringify(r));return [{json:{status:'COMPLETE',runId:$('Initialize run').first().json.runId,scope:$('Initialize run').first().json.scope}}];"
+      },
+      "id": "c025b53a-c72b-437f-badb-cf890adc939c",
+      "name": "Verify audit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2944,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{ $('Initialize run').first().json.billingProject }}/queries",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { const cfg = $('Initialize run').first().json; return JSON.stringify({query:`DECLARE current_run STRING DEFAULT '${cfg.runId}'; DECLARE current_scope STRING DEFAULT '${cfg.scope}'; DECLARE previous_run STRING; SET previous_run=(SELECT run_id FROM \\`${cfg.billingProject}.${cfg.dataset}.scan_runs\\` WHERE scope=current_scope AND status='COMPLETE' ORDER BY finished_at DESC LIMIT 1); INSERT INTO \\`${cfg.billingProject}.${cfg.dataset}.changes\\` (run_id,scope,asset_name,change_type,detected_at) WITH cur AS (SELECT asset_name,metadata_json FROM \\`${cfg.billingProject}.${cfg.dataset}.resources\\` WHERE run_id=current_run), prev AS (SELECT asset_name,metadata_json FROM \\`${cfg.billingProject}.${cfg.dataset}.resources\\` WHERE run_id=previous_run) SELECT current_run,current_scope,COALESCE(c.asset_name,p.asset_name),CASE WHEN p.asset_name IS NULL THEN 'ADDED' WHEN c.asset_name IS NULL THEN 'REMOVED' ELSE 'MODIFIED' END,CURRENT_TIMESTAMP() FROM cur c FULL OUTER JOIN prev p USING(asset_name) WHERE previous_run IS NOT NULL AND (c.asset_name IS NULL OR p.asset_name IS NULL OR c.metadata_json!=p.metadata_json); INSERT INTO \\`${cfg.billingProject}.${cfg.dataset}.scan_runs\\` (run_id,scope,started_at,finished_at,status,asset_count) SELECT current_run,current_scope,TIMESTAMP('${cfg.startedAt}'),CURRENT_TIMESTAMP(),'COMPLETE',COUNT(*) FROM \\`${cfg.billingProject}.${cfg.dataset}.resources\\` WHERE run_id=current_run;`,useLegacySql:false,location:cfg.location,timeoutMs:200000}); })() }}",
+        "options": {}
+      },
+      "id": "da483637-bdea-4230-8b68-f907b010fe9e",
+      "name": "Audit complete snapshot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        2672,
+        512
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json;if(r.insertErrors?.length||r.error) throw Error('BigQuery insert errors: '+JSON.stringify(r));return [{json:{ok:true}}];"
+      },
+      "id": "b482979b-54a4-40f6-af33-e8a8620c3c62",
+      "name": "Verify inserted batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2336,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{$json.billingProject}}/datasets/{{$json.dataset}}/tables/resources/insertAll",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({kind:\"bigquery#tableDataInsertAllRequest\",skipInvalidRows:false,ignoreUnknownValues:false,rows:$json.rows}) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "9616f6a9-d615-44e5-815d-70fdc763202c",
+      "name": "Write resource batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        2080,
+        672
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6c9d13fd-4036-42a2-9247-4b9cf4622b26",
+      "name": "Batch loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1808,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg=$('Initialize run').first().json;const pages=$input.all().map(x=>x.json);const assets=[];if(pages.length && pages[pages.length-1].nextPageToken) throw Error('Pagination incomplete: final page has nextPageToken');for(const p of pages){if(p.error) throw Error('Asset API error: '+JSON.stringify(p.error));for(const a of (p.results||[])){assets.push({insertId:cfg.runId+'|'+a.name,json:{run_id:cfg.runId,observed_at:cfg.startedAt,scope:cfg.scope,asset_name:a.name||'',asset_type:a.assetType||'',project:a.project||'',location:a.location||'',display_name:a.displayName||'',metadata_json:JSON.stringify(a)}})}}const batches=[];for(let i=0;i<assets.length;i+=250)batches.push({json:{...cfg,rows:assets.slice(i,i+250),batch:i/250}});if(!batches.length)batches.push({json:{...cfg,rows:[],batch:0}});return batches;"
+      },
+      "id": "b08d6c19-259f-4ad9-9e88-ee5d53a72fb0",
+      "name": "Normalize & batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://cloudasset.googleapis.com/v1/{{$json.scope}}:searchAllResources",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pageSize",
+              "value": "={{$json.pageSize}}"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "pageToken",
+                    "value": "={{ $response.body.nextPageToken || \"\" }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.nextPageToken }}",
+              "limitPagesFetched": true,
+              "maxRequests": "={{ $json.maxPages }}"
+            }
+          }
+        }
+      },
+      "id": "0b642cd8-9510-46cf-a9a9-5f58a1590eb8",
+      "name": "Search Cloud Assets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1232,
+        528
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json;if(r.errors?.length||r.jobComplete===false) throw Error('BigQuery DDL failed/incomplete: '+JSON.stringify(r));return [{json:$('Initialize run').first().json}];"
+      },
+      "id": "f98b8a42-57be-4fbb-b4da-3a3103c7d276",
+      "name": "Check table setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{$json.billingProject}}/queries",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({query:`CREATE TABLE IF NOT EXISTS \\`${$json.billingProject}.${$json.dataset}.resources\\` (run_id STRING, observed_at TIMESTAMP, scope STRING, asset_name STRING, asset_type STRING, project STRING, location STRING, display_name STRING, metadata_json STRING) PARTITION BY DATE(observed_at) CLUSTER BY scope,asset_type; CREATE TABLE IF NOT EXISTS \\`${$json.billingProject}.${$json.dataset}.scan_runs\\` (run_id STRING, scope STRING, started_at TIMESTAMP, finished_at TIMESTAMP, status STRING, asset_count INT64); CREATE TABLE IF NOT EXISTS \\`${$json.billingProject}.${$json.dataset}.changes\\` (run_id STRING, scope STRING, asset_name STRING, change_type STRING, detected_at TIMESTAMP);`,useLegacySql:false,location:$json.location,timeoutMs:200000}) }}",
+        "options": {}
+      },
+      "id": "6f9463ff-8c8c-4488-a734-626c487aab12",
+      "name": "Create tables",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        624,
+        528
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json; if(r.error && r.error.code!==409) throw Error('Dataset setup: '+JSON.stringify(r.error)); return [{json:$('Initialize run').first().json}];"
+      },
+      "id": "414ec045-a9b5-4cf9-bc55-3218afcdd31b",
+      "name": "Dataset check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{$json.billingProject}}/datasets",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({datasetReference:{projectId:$json.billingProject,datasetId:$json.dataset},location:$json.location}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "2c403532-a934-491f-94d4-141d1b9c89bd",
+      "name": "Create dataset",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        128,
+        528
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$input.first().json; if(!/^(projects|folders|organizations)\\/[A-Za-z0-9_-]+$/.test(c.scope)) throw Error('Invalid scope'); for(const k of ['billingProject','dataset']) if(!/^[A-Za-z0-9_-]+$/.test(c[k])) throw Error('Invalid '+k); const runId=String(Date.now())+'-'+Math.random().toString(36).slice(2,10); return [{json:{...c,runId,startedAt:new Date().toISOString()}}];"
+      },
+      "id": "7f11a765-6e79-4c12-aaf0-dbf15fd555c4",
+      "name": "Initialize run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\"scope\": \"projects/YOUR_GCP_PROJECT_ID\", \"billingProject\": \"YOUR_GCP_PROJECT_ID\", \"dataset\": \"cloud_inventory\", \"location\": \"EU\", \"pageSize\": 500, \"maxPages\": 1000}",
+        "options": {}
+      },
+      "id": "67416936-a783-47e9-90e6-712afdbfb24c",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        528
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3bea2908-ed7e-4445-af89-04f96020f54c",
+      "name": "Manual start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "4edff68a-3ece-4a75-90a7-a0c0a4141f62",
+      "name": "Daily schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -784,
+        528
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Audit complete snapshot": {
+      "main": [
+        [
+          {
+            "node": "Verify audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify inserted batch": {
+      "main": [
+        [
+          {
+            "node": "Batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write resource batch": {
+      "main": [
+        [
+          {
+            "node": "Verify inserted batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch loop": {
+      "main": [
+        [
+          {
+            "node": "Audit complete snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write resource batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & batch": {
+      "main": [
+        [
+          {
+            "node": "Batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Cloud Assets": {
+      "main": [
+        [
+          {
+            "node": "Normalize & batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check table setup": {
+      "main": [
+        [
+          {
+            "node": "Search Cloud Assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create tables": {
+      "main": [
+        [
+          {
+            "node": "Check table setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dataset check": {
+      "main": [
+        [
+          {
+            "node": "Create tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create dataset": {
+      "main": [
+        [
+          {
+            "node": "Dataset check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize run": {
+      "main": [
+        [
+          {
+            "node": "Create dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Initialize run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual start": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily schedule": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d8918fea-96a5-4ab6-b1e4-1a1876996af5",
+  "meta": {
+    "instanceId": "123456789"
+  },
+  "nodeGroups": [],
+  "id": "3UfLXXL47d0byaSP",
+  "tags": []
+}

@@ -51,13 +51,12 @@ Automatically transform WordPress articles into multilingual audio. The solution
 
 ## Links
 
-
 - **n8n Creator:** [View template](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+- **Paolo Ronco Store:** [View on Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 
 ## Additional Info
 
-- [Paolo Ronco Store](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 - The complete paid package includes the n8n workflow, Google Cloud TTS microservice, setup documentation, Google Sheets template, and troubleshooting material.
 - This public repository intentionally contains the product overview and media samples rather than the complete paid workflow package.
 

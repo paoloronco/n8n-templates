@@ -53,6 +53,8 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Links
 
+- **Documentation:** [Full setup guide](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-1-3f5f0ba27c32806ba425f7d84c72961a?pvs=73)
+
 - **n8n Creator:** [View template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 

@@ -54,10 +54,10 @@ Monitor backup and synchronization jobs by validating structured execution logs 
 
 - **n8n Creator:** [View template](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
+- **Paolo Ronco Store:** [View on Store](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
 
 ## Additional Info
 
-- [Paolo Ronco Store](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
 - Reference scripts are preserved under `job-templates/`: `rsync_job-Template.sh` and `rclone_job-Template.sh`.
 - The monitoring design is intentionally decoupled from job execution: n8n validates evidence produced by external jobs rather than connecting to servers to run them.
 - The complete purchased package includes the workflow and detailed deployment/configuration documentation.

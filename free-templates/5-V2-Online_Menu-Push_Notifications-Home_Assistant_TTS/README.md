@@ -50,6 +50,8 @@ Receive online menu orders through n8n, send push notifications with ntfy, log o
 
 ## Links
 
+- **Documentation:** [Setup guide](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+
 - **n8n Creator:** Not Published
 - **Gumroad:** Not Published
 

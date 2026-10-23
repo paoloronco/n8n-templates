@@ -205,6 +205,7 @@ Transforms WordPress articles into multilingual, human-sounding audio, powered b
 
 - Folder: [`/paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS`](./paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS)
 - n8n template: [Convert WordPress articles to multilingual voiceovers](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
+- Documentation: [WordPress AI TTS VoiceOvers with Google Cloud](https://app.notion.com/p/paoloronco/Documentation-WordPress-AI-TTS-VoiceOvers-with-Google-Cloud-3f5f0ba27c3280478f82ccabfa9a0b7c?source=copy_link)
 - Gumroad: [WordPress AI VoiceOvers](https://paoloronco.gumroad.com/l/ailfum)
 - Shop: [shop.paoloronco.it](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
 

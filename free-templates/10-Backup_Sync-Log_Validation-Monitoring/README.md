@@ -54,6 +54,12 @@ This workflow **monitors backup and sync executions; it does not run the backup 
 
 **[Complete Setup Guide & Technical Documentation](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)**
 
+
+### Project Links
+
+- n8n Creators: [View template](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
+- Gumroad: [View product](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
+
 ### Professional Services & Consulting
 
 For professional consulting, tailored solutions, or collaboration opportunities, feel free to get in touch.

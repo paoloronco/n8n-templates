@@ -1,0 +1,19 @@
+{
+  "schema": "sync-monitor/v1",
+  "jobs": [
+    {
+      "id": "documents",
+      "log_file": "OracleCloud_Documents-rsync.log",
+      "required": true,
+      "frequency": "daily",
+      "cron_time": "02:00"
+    },
+    {
+      "id": "photos",
+      "log_file": "Hetzner_Photos-rclone.log",
+      "required": true,
+      "frequency": "daily",
+      "cron_time": "03:00"
+    }
+  ]
+}

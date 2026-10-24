@@ -32,11 +32,11 @@ n8n-templates/
 │   ├── 7-V1-Splunk_Alerts-Email-Telegram_Notifications/
 │   ├── 7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/
 │   ├── 8-Newsletter_Subscribe+New_Release_Notification/
-│   └── 9-GoogleCloud_Inventory/
+│   ├── 9-GoogleCloud_Inventory/
+│   └── 10-Backup_Sync-Log_Validation-Monitoring/
 ├── paid-templates/
 │   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
 │   ├── 2-AI_News-Social_Publishing-Instagram/
-│   ├── 3-Backup_Sync-Log_Validation-Monitoring/
 │   ├── 4-WordPress_AI_Chatbot-RAG/\n│   └── 5-Website_AI_Chatbot-RAG-Qdrant/
 └── README.md
 ```
@@ -194,6 +194,18 @@ Automatically discovers Google Cloud projects accessible to a Service Account, c
 </details>
 
 
+<details>
+<summary><strong>10. Reliable Backup & Sync Execution Validation (Log-Driven)</strong></summary>
+
+Monitors backup and sync logs stored in Google Cloud Storage. Checks expected jobs defined in GitHub, detects failed or missing executions, and sends Gmail alerts with optional OpenAI analysis.
+
+- Folder: [`/free-templates/10-Backup_Sync-Log_Validation-Monitoring`](./free-templates/10-Backup_Sync-Log_Validation-Monitoring)
+- Setup guide: [GUIDE.md](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/GUIDE.md)
+- Workflow JSON: [Download](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/workflow/Backup_Sync_V2.json)
+- Documentation: [Notion](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)
+
+</details>
+
 ---
 
 ## Paid templates
@@ -222,25 +234,7 @@ Collects the latest news from any topic via RSS feeds, analyzes it with AI, and 
 
 </details>
 
-<details>
-<summary><strong>3. Reliable Backup & Sync Execution Validation (Log-Driven)</strong></summary>
 
-Monitors filesystem sync and backup jobs by validating their execution logs — not by running or inspecting the jobs themselves.
-
-Design principles:
-- Log-driven, evidence-based monitoring.
-- One job = one log = one source of truth.
-- No SSH, no server access, no execution coupling.
-- Safe to run in untrusted or restricted environments.
-
-- Folder: [`/paid-templates/3-Backup_Sync-Log_Validation-Monitoring`](./paid-templates/3%20-%20Reliable%20Backup%20&%20Sync%20Execution%20Validation%20(Log-Driven))
-- n8n template: [Monitor backup and sync logs with GCS, GitHub, Gmail, OpenAI, and GLPI](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
-- Gumroad: [Backup & Sync Execution Validation](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
-- Shop: [shop.paoloronco.it](https://shop.paoloronco.it/23-backup-sync-execution-validation-log-driven.html)
-
-> After purchase you receive the `workflow.json`, reference sync-job shell script templates that generate compatible logs, and complete setup documentation.
-
-</details>
 
 <details>
 <summary><strong>4. WordPress AI Chatbot</strong></summary>

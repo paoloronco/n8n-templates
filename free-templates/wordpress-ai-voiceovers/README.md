@@ -43,8 +43,8 @@ The current v1.3 documentation describes completion checks for long-running synt
 
 ## Links
 
-- [n8n Creator listing](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (listing title may reference the previous OpenAI-based version)
-- [Gumroad](https://paoloronco.gumroad.com/l/ailfum)
+- [n8n Creator listing](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing; currently displays a paid price and outdated OpenAI requirements — updated free submission is under review)
+- [Gumroad](https://paoloronco.gumroad.com/l/wordpress-voiceovers)
 - [Project website](https://paoloronco.it)
 
 For implementation assistance, contact [info@paoloronco.it](mailto:info@paoloronco.it).

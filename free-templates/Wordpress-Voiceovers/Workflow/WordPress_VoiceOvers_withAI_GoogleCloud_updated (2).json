@@ -1,0 +1,1054 @@
+{
+  "name": "WordPress VoiceOvers v1.3",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "after": "={{ $now.minus({ days: 30 }).toISO() }}",
+          "orderBy": "=date"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -272
+      ],
+      "id": "2e401eaa-68dc-47d3-993e-ef9ad0db7c9f",
+      "name": "Wordpress",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "wordpressApi": {
+          "id": "y9ebiKFv0xoczUDX",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const entities = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '\"', '&#39;': \"'\", '&nbsp;': ' ' };\nconst rawHtml = $json.content?.rendered ?? '';\nconst text = rawHtml\n  .replace(/<(script|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, ' ')\n  .replace(/<br\\s*\\/?>/gi, '. ')\n  .replace(/<\\/(p|li|h[1-6])>/gi, '. ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#(\\d+);/g, (_, code) => String.fromCodePoint(Number(code)))\n  .replace(/&[a-zA-Z#0-9]+;/g, match => entities[match] ?? match)\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nif (!text) throw new Error('The WordPress post has no readable text');\nreturn { text };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -272
+      ],
+      "id": "65256b4d-6ce3-4a10-a533-e7c5fff760ad",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Tab Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Content": "={{ $json.text }}",
+            "Link": "={{ $('Wordpress').item.json.link }}",
+            "Title": "={{ $('Wordpress').item.json.title.rendered }}",
+            "Date": "={{ $('Wordpress').item.json.date_gmt }}",
+            "ID": "={{ $('Wordpress').item.json.id }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        688,
+        -272
+      ],
+      "id": "f2e74199-5635-4a8c-8e6a-96b72dc3589f",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        -272
+      ],
+      "id": "51598b24-c0be-4e37-839b-8694f5024715",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Tab Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "done",
+            "ID": "={{ $('Google Sheets2').first().json.ID }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2656,
+        224
+      ],
+      "id": "32570a57-1fc0-4fcb-989b-1b3a0d594e29",
+      "name": "Google Sheets | Mark Done",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = ($json.translatedText ?? '').replace(/\\s+/g, ' ').trim();\nif (!text) throw new Error('Google Translate returned empty text');\nreturn { text };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "1d42c7cb-217c-41a2-a470-4e4c9d83da7f",
+      "name": "Code | EN Clean",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = `${$json.Title}. ${$json.Content}`.replace(/\\s+/g, ' ').trim();\nif (!text) throw new Error('The Italian text is empty');\nreturn { text };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        656
+      ],
+      "id": "7044c9be-72e9-4224-80d5-c8b5feae9e82",
+      "name": "Code | IT Clean",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_CLOUD_RUN_URL/long-tts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { text: $json.text, language: 'it-IT', voice: 'it-IT-Neural2-F', filename: $('Google Sheets2').item.json.ID + '.wav' } }}",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1392,
+        544
+      ],
+      "id": "51160276-4057-4471-8561-566c8bfa7a6e",
+      "name": "HTTP GCP TTS IT",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "get",
+        "pageId": "1523",
+        "options": {
+          "context": "edit"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        176
+      ],
+      "id": "7af4f541-addf-45d3-b224-8fed88ecda79",
+      "name": "Wordpress | GET VoiceOvers Page EN",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "wordpressApi": {
+          "id": "y9ebiKFv0xoczUDX",
+          "name": "Wordpress account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "get",
+        "pageId": "1172",
+        "options": {
+          "context": "edit"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        800
+      ],
+      "id": "423eeb2d-c387-4d91-8251-e8595b2d8918",
+      "name": "Wordpress | GET VoiceOvers Page IT",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "wordpressApi": {
+          "id": "y9ebiKFv0xoczUDX",
+          "name": "Wordpress account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "update",
+        "pageId": "1523",
+        "updateFields": {
+          "content": "={{ ($json.content.raw || '').includes('<!-- wp-voiceover:' + $('Code | Clean').item.json.ID + ':en -->') ? ($json.content.raw || '') : ($json.content.raw || '') + '\\n\\n<!-- wp-voiceover:' + $('Code | Clean').item.json.ID + ':en -->\\n<p>🎧 VoiceOver: ' + $('Code | Clean').item.json.Title + '</p>\\n<p>Date: ' + $('Code | Clean').item.json.Date + '</p>\\n<p><a href=\"' + $('Code | Clean').item.json.Link + '\">Read the article</a></p>\\n<audio controls preload=\"none\"><source src=\"https://storage.googleapis.com/YOUR_BUCKET_NAME/' + $('Code | Clean').item.json.ID + 'EN.wav\" type=\"audio/wav\"></audio>' }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        80
+      ],
+      "id": "943554d8-0a11-4499-8dec-e2e7cb067229",
+      "name": "Wordpress | Update VoiceOvers Page EN",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "wordpressApi": {
+          "id": "y9ebiKFv0xoczUDX",
+          "name": "Wordpress account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "update",
+        "pageId": "1172",
+        "updateFields": {
+          "content": "={{ ($json.content.raw || '').includes('<!-- wp-voiceover:' + $('Code | Clean').item.json.ID + ':it -->') ? ($json.content.raw || '') : ($json.content.raw || '') + '\\n\\n<!-- wp-voiceover:' + $('Code | Clean').item.json.ID + ':it -->\\n<p>🎧 VoiceOver: ' + $('Code | Clean').item.json.Title + '</p>\\n<p>Data: ' + $('Code | Clean').item.json.Date + '</p>\\n<p><a href=\"' + $('Code | Clean').item.json.Link + '\">Leggi l’articolo</a></p>\\n<audio controls preload=\"none\"><source src=\"https://storage.googleapis.com/YOUR_BUCKET_NAME/' + $('Code | Clean').item.json.ID + '.wav\" type=\"audio/wav\"></audio>' }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        624
+      ],
+      "id": "164587c7-f023-4673-9a79-2f8581a06a10",
+      "name": "Wordpress | Update VoiceOvers Page IT",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "wordpressApi": {
+          "id": "y9ebiKFv0xoczUDX",
+          "name": "Wordpress account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filtra righe con Status vuoto e ordina per data crescente\nconst filtered = items\n  .filter(item => !item.json.Status || item.json.Status.trim() === \"\")\n  .sort((a, b) => {\n    const dateA = new Date(a.json.Date);\n    const dateB = new Date(b.json.Date);\n    return dateA - dateB;\n  });\n\n// Ritorna solo la prima riga da processare\nreturn filtered.length > 0 ? [filtered[0]] : [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        96
+      ],
+      "id": "b365d867-5a8d-4775-be8d-8ab33164bbf6",
+      "name": "Code | Clean"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "text": "={{ $json.Title + '. ' + $json.Content }}",
+        "translateTo": "en"
+      },
+      "type": "n8n-nodes-base.googleTranslate",
+      "typeVersion": 2,
+      "position": [
+        816,
+        256
+      ],
+      "id": "27a8b356-e83d-481c-a8c4-2d26e8bfb61d",
+      "name": "Google Translate",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_CLOUD_RUN_URL/long-tts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { text: $json.text, language: 'en-US', voice: 'en-US-Neural2-D', filename: $('Google Sheets2').item.json.ID + 'EN.wav' } }}",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        160
+      ],
+      "id": "4a65ffa9-0cdb-4067-aa12-ccb69a7af8ee",
+      "name": "HTTP GCP TTS EN",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1-DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Tab Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        272,
+        96
+      ],
+      "id": "e1b4ecd6-f248-46e9-ad5f-664fd8e96828",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        -272
+      ],
+      "id": "a0b06ea2-334a-40c7-88af-a08099e61920",
+      "name": "Wait",
+      "webhookId": "404a36ce-4a54-46e7-bd19-b8f759eddd6a"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "empty"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2480,
+        224
+      ],
+      "id": "a312cf5e-6112-41f5-85a7-f614dd597f28",
+      "name": "Merge | EN + IT Complete"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Your Sheet Tab Name",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-DOCUMENT_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "={{ 'failed: ' + ($json.error?.message || $json.error || $json.message || 'unknown error').toString().slice(0, 400) }}",
+            "ID": "={{ $('Google Sheets2').first().json.ID }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2656,
+        496
+      ],
+      "id": "c9ef2faf-70b6-4a8f-bcc0-96fb567bb3f8",
+      "name": "Google Sheets | Mark Failed",
+      "credentials": {
+        "googleApi": {
+          "id": "we0h2NciO4DyqxUU",
+          "name": "paoloronco2000 | inventory  | GCP SA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# WordPress VoiceOvers – AI-Powered Text-to-Speech\n\nAutomatically convert WordPress articles into Italian and English audio using Google Cloud Text-to-Speech. The workflow retrieves published content, generates multilingual voiceovers, stores audio in Google Cloud Storage, and updates dedicated WordPress pages with embedded audio players.\n\n## How It Works\n\n1. **Fetch Posts** – Retrieves recent WordPress articles on a daily schedule.\n2. **Prepare Content** – Extracts readable text from HTML and stores article metadata in Google Sheets.\n3. **Manage Queue** – Selects the oldest unprocessed article to avoid duplicate processing.\n4. **Translate Content** – Uses Google Translate to prepare the English version while preserving the original Italian text.\n5. **Generate Voiceovers** – Sends both versions to a Google Cloud Run Text-to-Speech service, which generates WAV audio files.\n6. **Publish Audio** – Updates dedicated WordPress pages with audio players linked to Google Cloud Storage.\n7. **Track Execution** – Marks completed articles as `done` or records processing errors in Google Sheets.\n\n## Requirements\n\n- WordPress website with REST API access\n- Google Cloud project with Text-to-Speech, Cloud Run, Cloud Storage and Translation services\n- Google Sheets for article tracking and processing status\n- Google Cloud service account with appropriate permissions\n- Cloud Run TTS endpoint with API key authentication\n\n## Setup\n\n1. Connect your WordPress and Google Cloud credentials.\n2. Configure the Google Sheets document and worksheet.\n3. Deploy and configure the Cloud Run Text-to-Speech service.\n4. Replace the Cloud Run endpoint and configure the `X-API-Key` authentication header.\n5. Set the Google Cloud Storage bucket name and target WordPress page IDs.\n6. Test the workflow with one article before enabling the schedule.\n\n## Customization\n\nAdjust the execution schedule, article retrieval window, TTS voices, languages and WordPress audio player formatting to match your website.\n\n## Documentation & Support\n\n**Documentation:** [Full Setup & Technical Documentation](https://app.notion.com/p/3f5f0ba27c3280478f82ccabfa9a0b7c)\n\nFor custom implementation, workflow integration, troubleshooting or consulting services, contact me through [paoloronco.it](https://paoloronco.it).\n\n---\n\n**Note:** This template requires your own Google Cloud infrastructure and credentials. Cloud services may incur usage costs. Review all configuration values and permissions before activating the workflow.",
+        "height": 1184,
+        "width": 592,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -384
+      ],
+      "id": "d7fe23e2-a6ef-45f5-b14b-11226f7c4acb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "##  1. Trigger & Post Fetch\nRuns on schedule and retrieves recent WordPress posts to be processed.\n",
+        "height": 256,
+        "width": 384,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -384
+      ],
+      "id": "da08e402-81c0-40d8-ac43-ac419a9e9a86",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Content Cleanup & Backup\nCleans HTML content and stores post data in Google Sheets as a processing queue.\n",
+        "height": 256,
+        "width": 416,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -384
+      ],
+      "id": "f52d5a02-cfc7-42d5-be75-3c1521af893d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 5. Queue Management\nSelects the oldest unprocessed post from Google Sheets to avoid duplicates.\n",
+        "height": 256,
+        "width": 416,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -48
+      ],
+      "id": "1d493107-a4ed-4a7b-b764-43e4a1187260",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Translation & TTS text\nEnglish uses Google Translate. Both language branches only normalize whitespace; no LLM deletes technical content.",
+        "height": 848,
+        "width": 592,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "9587ce80-ef20-4874-8f41-bd933ae006c6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Text-to-Speech generation\nThe HTTP calls use object-valued JSON, a secret Header Auth credential and a 15-minute timeout. The service returns only after the WAV exists.",
+        "height": 1008,
+        "width": 432,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -32
+      ],
+      "id": "1ca832eb-552c-44a2-9698-681db7988c82",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Idempotent WordPress update\nReads raw editable content and appends a player only when its `wp-voiceover:<postID>:<lang>` marker is absent.",
+        "height": 1008,
+        "width": 560,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        -32
+      ],
+      "id": "f6ddc20c-5daf-4f1e-a08a-0d3b2be69b9a",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Final status\nMerge waits for EN and IT before writing `done`. A handled branch error writes `failed: <reason>` to the queue.",
+        "height": 1008,
+        "width": 496,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        -32
+      ],
+      "id": "8f01fbda-cdd4-40bf-9d08-9ba83dddf972",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1648,
+        448
+      ],
+      "id": "95d3fa2e-1628-4180-8b21-2d57060942a6",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Code | Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code | Clean": {
+      "main": [
+        [
+          {
+            "node": "Google Translate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code | IT Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Translate": {
+      "main": [
+        [
+          {
+            "node": "Code | EN Clean",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code | EN Clean": {
+      "main": [
+        [
+          {
+            "node": "HTTP GCP TTS EN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code | IT Clean": {
+      "main": [
+        [
+          {
+            "node": "HTTP GCP TTS IT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP GCP TTS EN": {
+      "main": [
+        [
+          {
+            "node": "Wordpress | GET VoiceOvers Page EN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP GCP TTS IT": {
+      "main": [
+        [
+          {
+            "node": "Wordpress | GET VoiceOvers Page IT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wordpress | GET VoiceOvers Page EN": {
+      "main": [
+        [
+          {
+            "node": "Wordpress | Update VoiceOvers Page EN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress | GET VoiceOvers Page IT": {
+      "main": [
+        [
+          {
+            "node": "Wordpress | Update VoiceOvers Page IT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress | Update VoiceOvers Page EN": {
+      "main": [
+        [
+          {
+            "node": "Merge | EN + IT Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress | Update VoiceOvers Page IT": {
+      "main": [
+        [
+          {
+            "node": "Merge | EN + IT Complete",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge | EN + IT Complete": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets | Mark Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets | Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6cb60ea5-9654-41f4-a865-f63908a7eda0",
+  "meta": {
+    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
+  },
+  "nodeGroups": [],
+  "id": "gOCWEwu3Vu3fjqqG",
+  "tags": []
+}

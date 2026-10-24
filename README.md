@@ -203,6 +203,8 @@ Monitors backup and sync logs stored in Google Cloud Storage. Checks expected jo
 - Setup guide: [GUIDE.md](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/GUIDE.md)
 - Workflow JSON: [Download](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/workflow/Backup_Sync_V2.json)
 - Documentation: [Notion](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)
+- n8n Creators: [View template](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
+- Gumroad: [View product](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
 
 </details>
 

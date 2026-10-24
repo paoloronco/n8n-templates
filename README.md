@@ -1,315 +1,61 @@
-# n8n Templates — by Paolo Ronco
+# n8n Templates — Paolo Ronco
 
-A curated collection of ready-to-use [n8n](https://n8n.io) templates for automation, data extraction, integrations, and notification systems. Each template ships with a complete importable workflow, a setup guide, and supporting assets.
+A curated collection of n8n automation workflows, practical implementation guides and reusable assets. Templates are organized by solution, with variants and releases grouped together.
 
-[![Available on GitHub](https://img.shields.io/badge/Available_on-GitHub-181717?logo=github&logoColor=white)](https://github.com/paoloronco/n8n-templates)
-[![Available on Gitea](https://img.shields.io/badge/Available_on-Gitea-609926?logo=gitea&logoColor=white)](https://gitea.com/paoloronco/n8n-templates)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/paoloronco/n8n-templates) [![n8n Creators](https://img.shields.io/badge/n8n-Creator_Profile-FF6D5A?logo=n8n)](https://n8n.io/creators/paoloronco/)
 
-![n8n Templates](/assets/n8n-templates.png)
+![n8n Templates](assets/n8n-templates.png)
 
-- **Free templates** — fully documented, ready to import.
-- **Paid templates** — production-grade, end-to-end automations.
-- **My n8n Creator profile:** [n8n.io/creators/paoloronco](https://n8n.io/creators/paoloronco/)
+## Template catalog
 
----
+**Free** workflows include importable JSON and setup resources. **Paid** entries retain their existing delivery model; paid workflow JSON files are not publicly distributed here. No commercial status has changed in this reorganization.
 
-## Repository structure
+### Free templates
 
-<details>
-<summary><strong>Show structure</strong></summary>
+| Template | Description |
+|---|---|
+| [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
+| [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). |
+| [Digital Certificate Creation & Validation](./free-templates/digital-certificates/) | HTML/CSS PDF or PDF Generator API variants. |
+| [Tech & AI News Digest](./free-templates/tech-ai-news-digest/) | RSS collection, AI ranking, summaries and email delivery. |
+| [Menu Order Notifications](./free-templates/menu-order-notifications/) | Basic ntfy, Home Assistant TTS and BAC tracking variants. |
+| [Splunk Security Alert Notifications](./free-templates/splunk-alert-notifications/) | Basic notifications and enriched/deduplicated alert processing. |
+| [Newsletter & Release Announcements](./free-templates/newsletter-automation/) | Subscriber management, welcomes and GitHub release emails. |
+| [Google Cloud Inventory & Change Audit](./free-templates/google-cloud-inventory/) | Resource inventory and change tracking. |
+| [Backup & Sync Execution Validation](./free-templates/backup-sync-monitoring/) | Log-driven validation of scheduled backup/sync jobs. |
 
-```
-n8n-templates/
-├── free-templates/
-│   ├── 1-Amazon_Luna-Prime_Games-Google_Sheets/
-│   ├── 2-Email_Invoices-AI_Extraction-Archiving/
-│   ├── 3-Certificate_Creation-Validation-HTML_PDF/
-│   ├── 3a-Certificate_Creation-Validation-PDF_Templates/
-│   ├── 4-Tech_AI_Daily_Briefing-RSS-AI-Email/
-│   ├── 5-V1-Online_Menu-Push_Notifications/
-│   ├── 5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS/
-│   ├── 5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation/
-│   ├── 7-V1-Splunk_Alerts-Email-Telegram_Notifications/
-│   ├── 7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/
-│   ├── 8-Newsletter_Subscribe+New_Release_Notification/
-│   ├── 9-GoogleCloud_Inventory/
-│   └── 10-Backup_Sync-Log_Validation-Monitoring/
-├── paid-templates/
-│   ├── 1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS/
-│   ├── 2-AI_News-Social_Publishing-Instagram/
-│   ├── 4-WordPress_AI_Chatbot-RAG/\n│   └── 5-Website_AI_Chatbot-RAG-Qdrant/
-└── README.md
-```
+### Paid templates
 
-Free template folders typically contain the importable workflow JSON, a `README.md` setup guide, and supporting assets. Paid template folders contain public documentation and promotional assets only; the complete workflow packages are delivered through their purchase channels.
+| Template | Description |
+|---|---|
+| [WordPress AI Voiceovers](./paid-templates/wordpress-ai-voiceovers/) | WordPress multilingual voiceovers with AI and Google Cloud TTS. |
+| [AI News to Instagram](./paid-templates/ai-instagram-publishing/) | RSS-to-Instagram AI content production. |
+| [WordPress RAG Chatbot](./paid-templates/wordpress-rag-chatbot/) | RAG chatbot for WordPress websites. |
+| [Website RAG Chatbot](./paid-templates/website-rag-chatbot/) | Website chatbot backend using Qdrant and AI. |
 
-</details>
+## Folder conventions
 
----
+- `free-templates/` and `paid-templates/` remain separate until the distribution model changes.
+- Solution directories use descriptive, lowercase kebab-case names without numeric prefixes.
+- Functional alternatives use descriptive names (e.g. `basic/`, `home-assistant-tts/`); successive releases use `v1/`, `v2/`.
+- Each solution has a README with variant selection, import instructions and relevant resources. Existing assets, examples and supporting documentation are retained.
+- For menu order notifications, shared website mockups and common setup documentation live once in the solution folder.
 
-## Free templates
+## Importing a workflow
 
-<details>
-<summary><strong>1. Amazon Luna — Sync Prime Games to Google Sheets</strong></summary>
+1. Open the relevant template folder and read its README.
+2. Download the applicable workflow JSON (free templates) or obtain the paid package through its linked distribution channel.
+3. Import the JSON into n8n and configure credentials, endpoints and environment-specific values.
+4. Test manually before activating production triggers.
 
-Fetches the current Amazon Luna **Included with Prime** catalog, extracts game metadata, detects newly added titles, keeps Google Sheets synchronized, and can send Discord notifications for new games.
+## Professional services
 
-- Folder: [`/free-templates/1-Amazon_Luna-Prime_Games-Google_Sheets`](./free-templates/1-Amazon_Luna-Prime_Games-Google_Sheets)
-- Deploy guide: [paoloronco.it](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
-- n8n template: [Sync Amazon Luna Prime Games to Google Sheets](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/)
-- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=rgee4kPZO7c)
-- YouTube playlist: [n8n guides](https://youtu.be/PS6qdCbc5fU)
+Need help implementing or adapting these workflows to your environment? For consulting and implementation inquiries, contact [info@paoloronco.it](mailto:info@paoloronco.it) or visit [paoloronco.it](https://paoloronco.it).
 
-</details>
+## Resources
 
-<details>
-<summary><strong>2. Automated Invoice Archiving & AI Data Extraction</strong></summary>
+- [n8n Creator profile](https://n8n.io/creators/paoloronco/)
+- [n8n guides](https://paoloronco.it/portfolio/n8n-guides/)
+- [n8n documentation](https://docs.n8n.io/)
 
-Collects invoice PDFs from Gmail, archives them in Google Drive or optionally FTP/SFTP, extracts structured invoice data with AI through OpenRouter, and records the results in Google Sheets.
-
-- Folder: [`/free-templates/2-Email_Invoices-AI_Extraction-Archiving`](./free-templates/2-Email_Invoices-AI_Extraction-Archiving)
-- Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
-- n8n template: [Automatic Email Invoice Archiving & Data Extraction](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/)
-- YouTube: [Workflow walkthrough](https://youtu.be/0s-95L8cmyE)
-- Gumroad: [Automated Invoice Archiving & AI Data Extraction](https://paoloronco.gumroad.com/l/invoice-archiving)
-
-</details>
-
-<details>
-<summary><strong>3. Digital Certificate Creation & Validation — HTML-based PDF</strong></summary>
-
-Creates certificates from webhook requests, generates unique IDs, stores them in an n8n Data Table, renders the certificate from **HTML/CSS inside the workflow**, emails the PDF through Gmail, and exposes a public verification endpoint.
-
-- Folder: [`/free-templates/3-Certificate_Creation-Validation-HTML_PDF`](./free-templates/3-Certificate_Creation-Validation-HTML_PDF)
-- Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
-- n8n template: [Automated Digital Certificate Creator & Validator](https://n8n.io/workflows/11097-automated-digital-certificate-creator-and-validator-with-pdf-generation/)
-- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=6)
-
-</details>
-
-<details>
-<summary><strong>3a. Digital Certificate Creation & Validation — PDF Generator API Templates</strong></summary>
-
-A template-based variant of workflow 3. The certificate lifecycle is the same, but visual design is moved out of n8n into a reusable **PDF Generator API template**, separating automation logic from PDF layout and branding.
-
-- Folder: [`/free-templates/3a-Certificate_Creation-Validation-PDF_Templates`](./free-templates/3a-Certification-Creation&Validation%20With%20PDF%20Templates)
-- Deploy guide: [paoloronco.it](https://paoloronco.it/n8n-template-certification-creator-checker/)
-- n8n template: [Create & Validate Digital Certificates with PDF Generator API](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/)
-- YouTube: [Workflow walkthrough](https://www.youtube.com/watch?v=eqSWoPndVUg&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9&index=5)
-
-</details>
-
-<details>
-<summary><strong>4. Tech & AI News Intelligence — RSS, OpenAI, Gemini & Email</strong></summary>
-
-Collects news from 20 English-language RSS feeds, ranks stories by relevance, groups related events, and suppresses previously delivered stories. OpenAI selects and summarizes articles, with Gemini and deterministic fallback paths. Validated stories are delivered in an HTML newsletter via SMTP, with Google Sheets subscriber management and basic execution reporting.
-
-- Folder: [`/free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email`](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email)
-- Workflow JSON: [Download](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email/Tech_AI_Daily_Briefing-RSS-AI-Email.json)
-- Setup guide: [README](./free-templates/4-Tech_AI_Daily_Briefing-RSS-AI-Email/README.md)
-- Deployment article: [paoloronco.it](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/) (earlier version)
-- n8n Creator: [Profile](https://n8n.io/creators/paoloronco/) — updated template submission pending
-
-</details>
-
-<details>
-<summary><strong>5 v1. Online Menu — ntfy Push Notifications</strong></summary>
-
-Receives customer orders through an n8n webhook, sends real-time push notifications through a self-hosted **ntfy** server, and logs basic order information in an n8n Data Table.
-
-- Folder: [`/free-templates/5-V1-Online_Menu-Push_Notifications`](./free-templates/5-V1-Online_Menu-Push_Notifications)
-- Documentation: [Menu website — receive notifications from orders](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-48bf0ba27c3282fcb5e50148e52fb8cd)
-- Gumroad: [Online Menu — Push Notifications](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
-
-</details>
-
-<details>
-<summary><strong>5 v2. Online Menu — ntfy + Home Assistant TTS</strong></summary>
-
-Extends v1 with **Home Assistant TTS**: every order is logged and sent through ntfy, while n8n also calls a Home Assistant script to announce the new order on a configured speaker.
-
-- Folder: [`/free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS`](./free-templates/5-V2-Online_Menu-Push_Notifications-Home_Assistant_TTS)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
-
-</details>
-
-<details>
-<summary><strong>5 v3. Online Menu — ntfy + Home Assistant TTS + BAC Estimation</strong></summary>
-
-Extends v2 with richer order logging and daily per-person history. Alcohol grams configured in menu items are accumulated and used for a **simplified BAC estimate**, which is included in the ntfy notification alongside previous orders.
-
-- Folder: [`/free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation`](./free-templates/5-V3-Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation)
-- Documentation: [Menu Order Push Notifications + Home Assistant TTS + BAC](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
-- n8n template: [Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
-
-> The BAC value is a simplified estimate and must not be used to determine driving safety, legal compliance, or medical decisions.
-
-</details>
-
-<details>
-<summary><strong>7 v1. Splunk Alert Notifications — Email & Telegram</strong></summary>
-
-Receives Splunk alerts through an n8n webhook, normalizes and validates the payload, derives severity when necessary, and routes notifications by priority: Critical/High alerts to Email and Telegram, and lower-severity alerts to Email.
-
-- Folder: [`/free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications`](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications)
-- Setup guide: [README](./free-templates/7-V1-Splunk_Alerts-Email-Telegram_Notifications/README.md)
-- Gumroad: [Splunk Alert Notifications](https://paoloronco.gumroad.com/l/n8n-splunknotifications?layout=profile)
-
-</details>
-
-<details>
-<summary><strong>7 v2. Splunk Security Alert Enrichment, Deduplication & Smart Notifications</strong></summary>
-
-Turns raw Splunk security alerts into deduplicated, threat-enriched and risk-scored incidents. The workflow suppresses repeated alerts, enriches public IPv4 sources with AbuseIPDB, stores incident history in an n8n Data Table, routes Critical/High/Medium/Low notifications by calculated risk, and sends a daily 24-hour security digest.
-
-- Folder: [`/free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications`](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications)
-- Setup guide: [README](./free-templates/7-V2-Splunk_Alerts-EnrichmentDeduplication_SmartNotifications/README.md)
-- n8n template: [Enrich and route Splunk security alerts via AbuseIPDB, Email and Telegram](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/)
-- Gumroad: [Splunk Security Alert Enrichment & Smart Notifications](https://paoloronco.gumroad.com/l/splunk-securityalert)
-
-</details>
-
-<details>
-<summary><strong>8. Newsletter Subscription + New Release Notification</strong></summary>
-
-Collects and validates newsletter subscriptions through a webhook, stores subscribers in an n8n Data Table, sends welcome emails, and distributes product release notifications generated from GitHub README/changelog content. Release emails can use OpenAI structured output with a deterministic fallback, while explicit send validation helps prevent accidental bulk delivery.
-
-- Folder: [`/free-templates/8-Newsletter_Subscribe+New_Release_Notification`](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification)
-- Setup guide: [README](./free-templates/8-Newsletter_Subscribe%2BNew_Release_Notification/README.md)
-- n8n template: [Send newsletter welcomes and release announcements with GitHub, OpenAI and SMTP](https://n8n.io/workflows/20636-send-newsletter-welcomes-and-release-announcements-with-github-openai-and-smtp/)
-- Gumroad: [Newsletter Subscription + New Release Notification](https://paoloronco.gumroad.com/l/newslettersub-newrelease)
-
-</details>
-
-<details>
-<summary><strong>9. Google Cloud Inventory & Change Audit</strong></summary>
-
-Automatically discovers Google Cloud projects accessible to a Service Account, collects supported resources through Cloud Asset Inventory, and stores historical BigQuery snapshots. Compares completed scans to detect added, modified, and removed resources, with transactional integrity checks.
-
-- Folder: [`/free-templates/9-GoogleCloud_Inventory`](./free-templates/9-GoogleCloud_Inventory)
-- Setup guide: [Google Cloud Inventory & Change Audit — Notion](https://www.notion.so/402f0ba27c32801ba303f2549dbe9fa2)
-- n8n template: **In Review** (n8n Creator Portal)
-- Gumroad: [Google Cloud Inventory & Change Audit — Free](https://paoloronco.gumroad.com/l/GoogleCloud-InventoryChangeAudit)
-
-</details>
-
-
-<details>
-<summary><strong>10. Reliable Backup & Sync Execution Validation (Log-Driven)</strong></summary>
-
-Monitors backup and sync logs stored in Google Cloud Storage. Checks expected jobs defined in GitHub, detects failed or missing executions, and sends Gmail alerts with optional OpenAI analysis.
-
-- Folder: [`/free-templates/10-Backup_Sync-Log_Validation-Monitoring`](./free-templates/10-Backup_Sync-Log_Validation-Monitoring)
-- Setup guide: [GUIDE.md](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/GUIDE.md)
-- Workflow JSON: [Download](./free-templates/10-Backup_Sync-Log_Validation-Monitoring/workflow/Backup_Sync_V2.json)
-- Documentation: [Notion](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)
-- n8n Creators: [View template](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/)
-- Gumroad: [View product](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation)
-
-</details>
-
----
-
-## Paid templates
-
-<details>
-<summary><strong>1. WordPress → AI VoiceOver Automation</strong></summary>
-
-Transforms WordPress articles into multilingual, human-sounding audio, powered by n8n, OpenAI, Google Cloud Text-to-Speech (Long Audio), and Google Sheets. Handles text cleaning, translation, long-form TTS generation, WordPress publishing, and status tracking — fully automatic and production-ready.
-
-- Folder: [`/paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS`](./paid-templates/1-WordPress_AI_VoiceOvers-OpenAI-Google_Cloud_TTS)
-- n8n template: [Convert WordPress articles to multilingual voiceovers](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/)
-- Gumroad: [WordPress AI VoiceOvers](https://paoloronco.gumroad.com/l/ailfum)
-- Shop: [shop.paoloronco.it](https://shop.paoloronco.it/21-n8n-workflow-wordpress-ai-voiceovers-with-google-cloud.html)
-
-</details>
-
-<details>
-<summary><strong>2. AI News — Social Publishing Automation</strong></summary>
-
-Collects the latest news from any topic via RSS feeds, analyzes it with AI, and automatically produces ready-to-post Instagram content — title, caption, and AI-generated image. Ideal for creators and brands that want consistent, on-trend social channels without manual content drafting.
-
-- Folder: [`/paid-templates/2-AI_News-Social_Publishing-Instagram`](./paid-templates/2-AI_News-Social_Publishing-Instagram)
-- n8n template: [Automate RSS to Instagram with AI-generated content](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
-- Gumroad: [AI News — Social Publishing](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
-- Shop: [shop.paoloronco.it](https://shop.paoloronco.it/20-n8n-workflow-ai-news-social-publishing-automation.html)
-
-</details>
-
-
-
-<details>
-<summary><strong>4. WordPress AI Chatbot</strong></summary>
-
-A production-ready AI chatbot for WordPress sites using n8n, a vector database, and OpenAI. Provides semantic search across your content with Retrieval-Augmented Generation (RAG).
-
-<p align="center">
-  <a href="https://paoloronco.gumroad.com/l/wordpress-aichatbot" target="_blank">
-    <img src="https://img.shields.io/badge/Buy%20on%20Gumroad-FF90E8?style=for-the-badge&logo=gumroad&logoColor=white" alt="Buy on Gumroad"/>
-  </a>
-  <a href="https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/" target="_blank">
-    <img src="https://img.shields.io/badge/%20n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" alt="n8n"/>
-  </a>
-  <a href="https://shop.paoloronco.it" target="_blank">
-    <img src="https://img.shields.io/badge/Paolo%20Ronco%20Shop-0088CC?style=for-the-badge&logo=prestashop&logoColor=white" alt="Shop"/>
-  </a>
-</p>
-
-Folder: [`/paid-templates/4-WordPress_AI_Chatbot-RAG`](./paid-templates/4-WordPress_AI_Chatbot-RAG) · Video: [YouTube walkthrough](https://www.youtube.com/watch?v=vg33xcdU9gE)
-
-**Key capabilities**
-- No coding required — import workflows and configure.
-- Semantic search using vector embeddings (Qdrant or MongoDB Atlas).
-- Built-in authentication and GDPR-compliant logging (SHA3-256 IP hashing).
-- Multilingual support (English and Italian, extensible).
-- Works with the free tiers of all required services.
-
-**Features**
-- **Intent classification** — routes queries between small talk, content search, and optional profile/skills lookups.
-- **Semantic search** — meaning-based retrieval with Cohere reranking and intelligent document chunking.
-- **Security** — bearer-token webhook auth, input sanitization, server-side API key management, HTTPS-only.
-- **User experience** — responsive chat UI, simple `[wp_ai_chatbot]` shortcode, customizable styling, mobile-optimized.
-
-</details>
-
-<details>
-<summary><strong>5. Website AI Chatbot — RAG, Qdrant, OpenAI & Cohere</strong></summary>
-
-A production-oriented website AI chatbot backend built with n8n. It classifies incoming messages, routes smalltalk and rejected requests separately, retrieves relevant website knowledge from Qdrant, reranks results with Cohere, and generates grounded structured responses with OpenAI.
-
-- Folder: [`/paid-templates/5-Website_AI_Chatbot-RAG-Qdrant`](./paid-templates/5-Website_AI_Chatbot-RAG-Qdrant)
-- n8n template: [Run an English website chatbot with OpenAI GPT-5 and Qdrant](https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/)
-- Gumroad: [Website AI Chatbot](https://paoloronco.gumroad.com/l/ai-website-chatbot)
-
-> The workflow JSON is not included in this repository. The complete ready-to-import workflow is delivered after purchase through Gumroad.
-
-</details>
-
----
-
-## Requirements
-
-- n8n (self-hosted or cloud).
-- A basic understanding of nodes and credentials.
-- Service-specific credentials depending on the template — e.g. Google APIs, OpenAI/Gemini, SMTP, ntfy.sh, or bot tokens. Each template's README lists exactly what it needs.
-
-## How to use a template
-
-1. Open n8n.
-2. Import the workflow JSON of your chosen template.
-3. Configure the required credentials.
-4. Read the template's README (and any `docs/` files) for advanced configuration.
-5. Run once manually, then enable the schedule or trigger.
-
-## Useful links
-
-- n8n: https://n8n.io · [Docs](https://docs.n8n.io) · [Community](https://community.n8n.io) · [Node reference](https://docs.n8n.io/integrations/)
-- My n8n Creator profile: https://n8n.io/creators/paoloronco/
-- My n8n guides: https://paoloronco.it/portfolio/n8n-guides/
-- My YouTube n8n playlist: https://www.youtube.com/watch?v=PS6qdCbc5fU&list=PLGQVHrmz2asRssvauRMP2ak3vOG4xDGm9
-
-## About
-
-Maintained by **Paolo Ronco**. Templates aim to be modular, clean, easy to customize, and production-ready.
-
-To contribute, suggest ideas, or request new templates, open an issue. If these templates help you, consider starring the repository — more are on the way.
+Maintained by [Paolo Ronco](https://paoloronco.it).

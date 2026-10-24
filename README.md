@@ -8,13 +8,14 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 ## Template catalog
 
-**Free** workflows include importable JSON and setup resources. **Paid** entries retain their existing delivery model; paid workflow JSON files are not publicly distributed here. WordPress Voiceovers is now free; the remaining paid entries retain their existing distribution model.
+**Free** workflows include importable JSON and setup resources, including WordPress Voiceovers. **Paid** templates retain their existing delivery model; their workflow JSON files are not publicly distributed here.
 
 ### Free templates
 
 | Template | Description |
 |---|---|
-| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate Italian and English WordPress audio with Google Cloud TTS, Translate, and Cloud Run; includes workflow and service code. |\n| [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
+| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate Italian and English WordPress audio with Google Cloud TTS, Translate, and Cloud Run; includes workflow and service code. |
+| [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
 | [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). |
 | [Digital Certificate Creation & Validation](./free-templates/digital-certificates/) | HTML/CSS PDF or PDF Generator API variants. |
 | [Tech & AI News Digest](./free-templates/tech-ai-news-digest/) | RSS collection, AI ranking, summaries and email delivery. |
@@ -28,7 +29,6 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description |
 |---|---|
-| [WordPress AI Voiceovers](./paid-templates/wordpress-ai-voiceovers/) | WordPress multilingual voiceovers with AI and Google Cloud TTS. |
 | [AI News to Instagram](./paid-templates/ai-instagram-publishing/) | RSS-to-Instagram AI content production. |
 | [WordPress RAG Chatbot](./paid-templates/wordpress-rag-chatbot/) | RAG chatbot for WordPress websites. |
 | [Website RAG Chatbot](./paid-templates/website-rag-chatbot/) | Website chatbot backend using Qdrant and AI. |

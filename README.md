@@ -14,7 +14,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description |
 |---|---|
-| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate Italian and English WordPress audio with Google Cloud TTS, Translate, and Cloud Run; includes workflow and service code. |
+| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate multilingual WordPress audio with Google Cloud TTS and Translate. [Free download](https://paoloronco.gumroad.com/l/wordpress-voiceovers) · [n8n Creators](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing). |
 | [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
 | [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). |
 | [Digital Certificate Creation & Validation](./free-templates/digital-certificates/) | HTML/CSS PDF or PDF Generator API variants. |

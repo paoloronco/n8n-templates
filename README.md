@@ -33,7 +33,6 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description |
 |---|---|
-| [Website RAG Chatbot](./paid-templates/website-rag-chatbot/) | Website chatbot backend using Qdrant and AI. |
 
 ## Folder conventions
 

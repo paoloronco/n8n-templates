@@ -8,13 +8,13 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 ## Template catalog
 
-**Free** workflows include importable JSON and setup resources, including WordPress Voiceovers. **Paid** templates retain their existing delivery model; their workflow JSON files are not publicly distributed here.
+**Free** workflows include importable JSON and setup resources. **Paid** templates retain their existing delivery model; their workflow JSON files are not publicly distributed here.
 
 ### Free templates
 
 | Template | Description |
 |---|---|
-| [AI News to Instagram](./free-templates/ai-instagram-publishing/) | RSS-to-Instagram AI content production. [n8n Creators](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/) · [Documentation](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-3f5f0ba27c32806ba425f7d84c72961a?pvs=74) · [Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing). |
+| [WordPress AI Chatbot — RAG](./free-templates/wordpress-rag-chatbot/) | Bilingual WordPress chatbot with Qdrant semantic search, OpenAI, Cohere reranking and optional MongoDB Atlas skills retrieval. [Documentation](https://app.notion.com/p/404f0ba27c3281c796fbfc177b050bef) · [n8n Creators](https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/) · [Gumroad](https://paoloronco.gumroad.com/l/wordpress-aichatbot). |\n| [AI News to Instagram](./free-templates/ai-instagram-publishing/) | RSS-to-Instagram AI content production. [n8n Creators](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/) · [Documentation](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-3f5f0ba27c32806ba425f7d84c72961a?pvs=74) · [Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing). |
 | [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate multilingual WordPress audio with Google Cloud TTS and Translate. [Free download](https://paoloronco.gumroad.com/l/wordpress-voiceovers) · [n8n Creators](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing). |
 | [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
 | [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). |

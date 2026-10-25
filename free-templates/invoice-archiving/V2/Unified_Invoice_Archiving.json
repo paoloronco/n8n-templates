@@ -1,9 +1,9 @@
 {
-  "name": "Unified Invoice Archiving — v3 (safe multi-PDF)",
+  "name": "Unified Invoice Archiving - Generic Template",
   "nodes": [
     {
       "parameters": {
-        "content": "# Unified Invoice Archiving v3\n### Gmail → PDF → Validation → SFTP + Google Sheets\n\n**Purpose**  Automatically archive invoice PDFs and register invoice metadata without relying on an LLM.\n\n**Supported providers**  Octopus Energy (electricity/gas), Dimensione, Google Cloud, Hetzner.\n\n**Flow**\n1. Start manually or on the schedule.\n2. Retrieve matching Gmail messages and split PDF attachments into individual items.\n3. Extract PDF text, identify provider and validate invoice fields.\n4. Route to the provider's SFTP folder and Google Sheets worksheet.\n5. Keep the source email; successful paths end at the Completed nodes.\n\n**First-time setup**\n- Connect **Gmail OAuth2**, **SFTP**, and **Google Sheets service account** credentials.\n- Set the Gmail sender query and `newer_than:450d` lookback window.\n- Configure each provider's SFTP target directory in **Parse invoice and canonical name**.\n- Verify Google Sheets document IDs, tabs and matching columns in all four upsert nodes.\n- Run the **Manual Trigger** with representative invoices for every provider before activating the schedule.\n\n**Operational notes**\n- Only text-based PDFs are supported; scanned PDFs need OCR.\n- Emails are **not deleted**.\n- SFTP uploads and Sheets writes are not atomic. Reprocessing can rewrite a file at the same path.\n- There is no durable exactly-once registry or centralized error alerting. Configure an n8n Error Workflow and monitor executions.\n- This export has not been validated against live accounts. Keep the workflow inactive until testing is complete.",
+        "content": "# Unified Invoice Archiving — Generic Template\n\n**Gmail → PDF extraction → Validation → SFTP → Google Sheets**\n\nFour configurable example providers (A–D). No real vendor information or personal credentials are included.\n\n## Setup\n1. Configure the four profiles in **Configure Providers**: sender, regex patterns, SFTP folder.\n2. Connect Gmail OAuth2, SFTP and Google Sheets credentials.\n3. Set the Gmail search query, spreadsheet ID and four worksheet names.\n4. Create columns: `uniqueKey`, `Provider`, `Invoice Number`, `Date`, `Amount`, `Currency`, `Service`, `File`.\n5. Run manual tests with actual text-based invoices and confirm all output fields.\n6. Enable the six-hour schedule only after successful testing.\n\n**Limitations:** No OCR or AI, no exactly-once SFTP deduplication, no automatic error notifications. Emails are retained. Parsing patterns are examples and require adaptation.",
         "height": 1000,
         "width": 636,
         "color": 3
@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "content": "## 01 · Start\n**Manual Trigger** — run a controlled test.\n\n**Schedule Trigger** — periodic mailbox polling. Verify the interval before activation; keep the workflow inactive while testing.\n\n**Tip:** avoid simultaneous manual and scheduled runs when processing the same backlog.",
+        "content": "## 01 — Triggers\nManual or scheduled every six hours. Keep inactive until configured.",
         "height": 578,
         "width": 362,
         "color": 7
@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "content": "## 02 · Gmail intake\n**Gmail - Get invoice messages** filters the four sender addresses and retrieves attachments.\n\n**Setup:** connect Gmail OAuth2; review sender addresses, `filename:pdf` and the 450-day backfill window.\n\n**Keep messages with attachments** excludes messages without binary attachments.\n\n**Normalize PDF binary** splits eligible PDFs into separate items. Non-PDF attachments are ignored.\n\n**Security:** Gmail sender filters alone do not establish invoice authenticity; verify unexpected senders and attachments.",
+        "content": "## 02 — Gmail intake\nFetch PDF attachments, filter by type and split multiple PDFs into independent items. Configure Gmail search and OAuth2.",
         "height": 578,
         "width": 904,
         "color": 7
@@ -51,9 +51,9 @@
     },
     {
       "parameters": {
-        "content": "## 03 · PDF extraction and validation\n**Extract PDF text** reads text-based PDFs (no OCR).\n\n**Parse invoice and canonical name** identifies the provider, extracts invoice number, date and amount, and produces a canonical filename and SFTP path.\n\n**Hetzner:** validates net + VAT against gross total.\n\n**Failure:** missing or ambiguous required fields stop execution. Inspect n8n Executions and adjust the provider parser; do not silently archive invalid records.",
+        "content": "## 03 — Configure, extract & validate\n**Configure Providers** defines four example providers. Extract PDF text, identify the sender and parse invoice number, date, total and optional service. Edit regex patterns for your own invoice formats.",
         "height": 578,
-        "width": 638,
+        "width": 800,
         "color": 7
       },
       "id": "fc954940-c150-411d-b3db-0366be3f6305",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2864,
+        2832,
         -128
       ]
     },
     {
       "parameters": {
-        "content": "## 04 — STORAGE & COMPLETION\n\nAll four provider branches share the same processing pattern:\n\n1. **Filter** — route the parsed invoice to its provider branch.\n2. **SFTP upload** — save the PDF to its configured destination.\n3. **Restore parsed item** — preserve the invoice metadata and binary data after upload.\n4. **Google Sheets upsert** — create or update the invoice record.\n5. **Completed** — finish without deleting the source Gmail message.\n\n**Providers:** Octopus Energy, Dimensione, Google Cloud, Hetzner.\n\n**Setup:** verify each SFTP destination, Google Sheets document/tab, service-account permissions, and provider filters before enabling the schedule.\n\n**Important:** a Sheets upsert is not a preventive SFTP duplicate check. Test repeated runs and verify uploads and sheet rows. Emails remain in Gmail.",
+        "content": "## 04 — Storage & completion\nFour branches: **Filter → SFTP → Restore → Google Sheets upsert → Completed**. Configure paths, credentials and sheets. Email is retained. Reprocessing may upload the same PDF again.",
         "height": 1088,
-        "width": 1266,
+        "width": 1200,
         "color": 7
       },
       "id": "524d0142-afdd-468f-8894-926c781d7d7d",
@@ -77,7 +77,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3520,
+        3600,
         -336
       ]
     },
@@ -117,7 +117,7 @@
         "operation": "getAll",
         "simple": false,
         "filters": {
-          "q": "{from:YOUR_OCTOPUS_EMAIL from:YOUR_HETZNER_EMAIL from:YOUR_ISP_EMAIL from:YOUR_GOOGLE_EMAIL} has:attachment filename:pdf newer_than:30d",
+          "q": "has:attachment filename:pdf newer_than:30d",
           "readStatus": "both"
         },
         "options": {
@@ -169,7 +169,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const out=[];\nfor (let i=0;i<items.length;i++) {\n const it=items[i]; const from=String(it.json.from?.text||it.json.from||it.json.sender||'').toLowerCase();\n const subject=String(it.json.subject||'').toLowerCase();\n for (const [key,b] of Object.entries(it.binary||{})) {\n  const name=String(b.fileName||b.filename||'');\n  const mime=String(b.mimeType||'').toLowerCase();\n  if (!(name.toLowerCase().endsWith('.pdf')||mime==='application/pdf')) continue;\n  if ((from.includes('octopus')||subject.includes('octopus')) && !(/fattura|bolletta/i.test(name+' '+subject))) continue;\n  if (b.fileSize && Number(String(b.fileSize).replace(/[^0-9.]/g,''))>20*1024*1024) throw new Error('PDF exceeds 20MB: '+name);\n  out.push({json:{...it.json,attachmentKey:key,originalFileName:name},binary:{data:{...b,fileName:name||'invoice.pdf'}},pairedItem:{item:i}});\n }\n}\nreturn out;"
+        "jsCode": "const out=[];for(let i=0;i<items.length;i++){const it=items[i];for(const [key,b] of Object.entries(it.binary||{})){const name=String(b.fileName||'');if(!name.toLowerCase().endsWith('.pdf')&&String(b.mimeType||'').toLowerCase()!=='application/pdf')continue;out.push({json:{...it.json,attachmentKey:key},binary:{data:{...b,fileName:name||'invoice.pdf'}},pairedItem:{item:i}});}}return out;"
       },
       "id": "f75593c0-aead-4d45-85a7-5a6a585a7bc0",
       "name": "Normalize PDF binary",
@@ -190,21 +190,21 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        2960,
+        3080,
         192
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const source = $('Normalize PDF binary').item;\nif (!source?.json) throw new Error('Missing paired source PDF');\nconst bin = source.binary || {};\nconst b = bin.data || {};\nconst text = String(item.json.text || item.json.data || item.json.output || item.json.content || item.json.document || '').replace(/\\r/g,'');\nif (text.trim().length < 30) throw new Error('Empty or image-only PDF: OCR needed');\nconst subject = String(source.json.subject || '');\nconst from = String(source.json.from?.text || source.json.from || source.json.sender || '').toLowerCase();\nfunction normDate(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}\nfunction ymd(s){return String(s||'').replace(/-/g,'')}\nfunction money(v){ if(v==null) return null; let s=String(v).replace(/\\s|€/g,''); if(s.includes(',')&&s.includes('.')) s=s.replace(/\\./g,'').replace(',','.'); else s=s.replace(',','.'); const n=Number(s.replace(/[^0-9.-]/g,'')); return Number.isFinite(n)?Math.round(n*100)/100:null; }\nfunction m1(pat){ const m=text.match(pat); return m?m[1]:null; }\nfunction dateFromText(){\n for (const pat of [/(?:Data fattura|DATA FATTURA|Data del documento|Documento del|Invoice date|Data)\\D{0,35}(\\d{1,2})[/-](\\d{1,2})[/-](20\\d{2})/i,/(\\d{1,2})[/-](\\d{1,2})[/-](20\\d{2})/]) { const m=text.match(pat); if(m) return normDate(m[3],m[2],m[1]); }\n for (const pat of [/(?:Invoice date|Date of invoice|Rechnungsdatum)\\D{0,35}(\\d{1,2})[./-](\\d{1,2})[./-](20\\d{2})/i, /(?:Invoice date|Date of invoice|Rechnungsdatum)\\D{0,35}(20\\d{2})[-/.](\\d{1,2})[-/.](\\d{1,2})/i]) { const m=text.match(pat); if(m) return m[1].length===4?normDate(m[1],m[2],m[3]):normDate(m[3],m[2],m[1]); }\n return '';\n}\nlet provider='', type='', invoice='', date='', amount=null, account='', tab='', folder='';\nif (from.includes('octopus') || /Octopus/i.test(text+subject)) {\n provider='OctopusEnergy';\n const head=(text.slice(0,5000)+' '+subject);\n const luce=/bolletta\\s+luce/i.test(head) || /fornitura:\\s*energia\\s+elettrica/i.test(head) || /\\bkWh\\b/i.test(head);\n const gas=/bolletta\\s+gas/i.test(head) || /fornitura:\\s*gas/i.test(head) || /\\bSmc\\b/i.test(head);\n if (luce && !gas) type='luce'; else if (gas && !luce) type='gas'; else throw new Error(`Octopus type ambiguous: luce=${luce} gas=${gas} file=${b.fileName||''} subject=${subject}`);\n invoice=m1(/(A-\\d{4}A\\d+-\\d+)/i) || (b.fileName||'').match(/(A-\\d{4}A\\d+-\\d+)/i)?.[1] || m1(/(?:NUMERO FATTURA ELETTRONICA VALIDA AI FINI FISCALI|Fattura n:)\\s*([A-Z0-9-]+)/i) || '';\n date=dateFromText();\n amount=money(m1(/Questo mese dovrai pagare\\s*\\n\\s*([0-9]+[,.][0-9]{2})\\s*€/i) || m1(/Totale:\\s*([0-9]+[,.][0-9]{2})\\s*€/i) || m1(/Totale importo da pagare\\s*\\n\\s*€?\\s*([0-9]+[,.][0-9]{2})/i) || m1(/Totale \\(IVA inclusa\\)\\s*:?\\s*([0-9]+[,.][0-9]{2})/i) || m1(/TOTALE DA PAGARE\\s*([0-9]+[,.][0-9]{2})/i));\n tab='Fatture-luce'; folder=`/YOUR_SFTP_ROOT/CASA/UTENZE-LuceGas/OctopusEnergy/${type}`;\n} else if (from.includes('dimensione') || /Dimensione/i.test(text+subject)) {\n provider='Dimensione'; type='internet'; invoice=(text.match(/(\\d{5,})\\s*\\/\\s*([A-Z])\\s*\\/\\s*(20\\d{2})/)||[]).slice(1).join('-') || '';\n date=dateFromText(); amount=money(m1(/TOTALE\\s+FATTURA\\s*([0-9]+[,.][0-9]{2})/i)); tab='Fatture-ISP'; folder='/YOUR_SFTP_ROOT/CASA/ISP/Dimensione/Fatture';\n} else if (from.includes('hetzner.com') || /Hetzner\\s+(?:Online|Cloud)|Hetzner Online GmbH/i.test(text+subject)) {\n provider='Hetzner'; type='cloud';\n invoice=m1(/(?:Invoice\\s*(?:number|no\\.?|#)|Rechnungs(?:nummer|nr\\.? )|Invoice\\s*No\\.?|Fattura\\s*n\\.?)[\\s:#-]*([A-Z0-9][A-Z0-9\\/-]{3,})/i) || String(b.fileName||'').match(/(?:invoice|rechnung)[-_\\s]*([0-9]{5,})/i)?.[1] || '';\n date=dateFromText();\n // Hetzner overview: Service | Period | Total (excl. VAT) | Tax | Total.\n // Read the final total on the overview row, not the net amount.\n // PDF extraction may put each table cell on a separate line.\n // Restrict extraction to Overview, before payment instructions / product details.\n const overview=text.match(/\\bOverview\\b([\\s\\S]*?)(?:Please pay|Click here|Due upon receipt|\\bProduct\\s+count\\b)/i)?.[1] || '';\n const overviewLines=overview.split('\\n').map(x=>x.trim()).filter(Boolean);\n let gross=null, net=null, vat=null, service='';\n const amounts=[...overview.matchAll(/€\\s*([\\d.,]+[.,]\\d{2})(?!\\d)/g)].map(m=>money(m[1]));\n // In the Hetzner Overview each service row ends in net, tax, gross.\n // The last three monetary values in the overview are the final totals.\n if(amounts.length>=3 && amounts.length%3===0) {\n   net=amounts[amounts.length-3];\n   vat=amounts[amounts.length-2];\n   gross=amounts[amounts.length-1];\n }\n // Require arithmetic consistency; never silently fall back to net.\n if(gross===null || net===null || vat===null || Math.abs((net+vat)-gross)>0.02)\n   throw new Error(`Hetzner Overview totals invalid: monetary values=${JSON.stringify(amounts)}`);\n amount=gross;\n const productMatch=text.match(/\\b(BX\\d+\\s+Storage Box|(?:CX|CPX|CCX|AX|EX|PX)\\d+[A-Z0-9-]*\\s+[^\\n€]{0,65}|Storage Box|Cloud Server)\\b/i);\n service=productMatch?.[1]?.trim() || overviewLines.find(l=>/^(?:Storage|Cloud|Server|Domain|Web Hosting|Managed|Networking)\\s+\\d{2}\\/20\\d{2}/i.test(l))?.split(/\\s+\\d{2}\\/20\\d{2}/)[0] || '';\n account=m1(/(?:Customer\\s*(?:number|ID)|Kundennummer|Client\\s*ID)[\\s:#-]*([A-Z0-9-]+)/i)||'';\n item.json.service=service;\n item.json.netAmount=net;\n item.json.vatAmount=vat;\n tab='Hetzner'; folder='/YOUR_SFTP_ROOT/ACQUISTI/Hetzner';\n} else if (from.includes('google') || /Google Cloud/i.test(text+subject)) {\n provider='GoogleCloud'; type='cloud'; invoice=m1(/(GCITD\\d+)/i) || ''; date=dateFromText(); account=m1(/ID account\\s*([0-9A-Z-]+)/i)||'';\n amount=money(m1(/([0-9]+[,.][0-9]{2})\\s*€?\\s*Totale in EUR/i) || m1(/Totale in EUR\\s*([0-9]+[,.][0-9]{2})/i) || m1(/Importo totale\\s*([0-9]+[,.][0-9]{2})/i)); tab='GoogleCloud'; folder='/YOUR_SFTP_ROOT/ACQUISTI/GoogleCloud';\n}\nif(!provider || !type || !invoice || !date || amount===null) throw new Error(`Cannot parse invoice: provider=${provider} type=${type} invoice=${invoice} date=${date} amount=${amount} file=${b.fileName||''} subject=${subject}`);\nconst fileName = `${ymd(date)} ${type} ${provider} ${invoice}.pdf`;\nreturn {json:{provider,type,invoiceNumber:invoice,uniqueKey:`${provider}:${invoice}`, date,amount,account,service:item.json.service||'',netAmount:item.json.netAmount??null,vatAmount:item.json.vatAmount??null,tab,fileName,targetPath:`${folder}/${fileName}`,sourceMessageId:source.json.id||source.json.messageId||'',sourceAttachmentKey:source.json.attachmentKey||'',subject}, binary:{data:{...b,fileName}}};"
+        "jsCode": "const source=$('Configure Providers').item;\nif(!source?.binary?.data)throw new Error('Missing paired PDF');\nconst b=source.binary.data;\nconst text=String(item.json.text||item.json.data||item.json.output||'').replace(/\\r/g,'');\nif(text.trim().length<30)throw new Error('Empty or scanned PDF; OCR required');\nconst from=String(source.json.from?.text||source.json.from||source.json.sender||'').toLowerCase();\nconst profile=(source.json.providerProfiles||[]).find(p=>p.senderContains&&from.includes(p.senderContains.toLowerCase()));\nif(!profile)throw new Error('No configured provider matches the sender');\nfunction cap(pattern){const m=text.match(new RegExp(pattern,'i'));return m?String(m[1]||'').trim():'';}\nfunction money(v){if(!v)return null;let s=v.replace(/[^0-9,.-]/g,'');const c=s.lastIndexOf(','),d=s.lastIndexOf('.');if(c>=0&&d>=0)s=c>d?s.replace(/\\./g,'').replace(',','.'):s.replace(/,/g,'');else if(c>=0)s=s.replace(',','.');const n=Number(s);return Number.isFinite(n)?Math.round(n*100)/100:null;}\nfunction iso(s){const m=s.match(/^(\\d{1,2})[./-](\\d{1,2})[./-](20\\d{2})$/);if(!m)return '';const d=+m[1],mo=+m[2],y=+m[3],dt=new Date(Date.UTC(y,mo-1,d));return dt.getUTCDate()===d&&dt.getUTCMonth()===mo-1?`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`:'';}\nconst invoiceNumber=cap(profile.invoicePattern),date=iso(cap(profile.datePattern)),amount=money(cap(profile.amountPattern)),service=cap(profile.servicePattern);\nif(!invoiceNumber||!date||amount===null)throw new Error(`Invalid invoice: ${profile.id}; adjust provider regex patterns`);\nif(!profile.folder||profile.folder.includes('YOUR_SFTP_ROOT'))throw new Error('Configure a real SFTP destination folder');\nconst fileName=`${date.replace(/-/g,'')} ${profile.id} ${invoiceNumber.replace(/[^A-Za-z0-9._-]/g,'-')}.pdf`;\nreturn {json:{provider:profile.id,providerName:profile.name,invoiceNumber,date,amount,service,currency:profile.currency||'EUR',uniqueKey:`${profile.id}:${invoiceNumber}`,fileName,targetPath:`${profile.folder.replace(/\\/$/,'')}/${fileName}`,sourceMessageId:source.json.id||source.json.messageId||''},binary:{data:{...b,fileName}}};"
       },
       "id": "2e5e1e44-85c1-4f61-9b5f-07d4aab3056a",
       "name": "Parse invoice and canonical name",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3264,
+        3328,
         192
       ]
     },
@@ -221,7 +221,7 @@
             {
               "id": "60c4293a-55e6-4837-bd05-db61f50af88e",
               "leftValue": "={{ $json.provider }}",
-              "rightValue": "OctopusEnergy",
+              "rightValue": "PROVIDER_A",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -233,7 +233,7 @@
         "options": {}
       },
       "id": "3eb3111f-36b1-49ab-a388-0f3ea9f46686",
-      "name": "Filter Octopus",
+      "name": "Filter Provider A",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
@@ -249,7 +249,7 @@
         "options": {}
       },
       "id": "3ac1870c-a82b-48eb-a782-99524105be6a",
-      "name": "SFTP upload Octopus",
+      "name": "SFTP upload Provider A",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
       "position": [
@@ -271,18 +271,19 @@
         },
         "sheetName": {
           "__rl": true,
-          "value": 1842419144,
-          "mode": "list"
+          "value": "Invoices-Provider-A",
+          "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Fornitore": "OctopusEnergy",
-            "Tipo": "={{ $json.type }}",
-            "Data": "={{ $json.date }}",
-            "Importo": "={{ $json.amount }}",
-            "invoiceNumber": "={{ $json.invoiceNumber }}",
             "uniqueKey": "={{ $json.uniqueKey }}",
+            "Provider": "={{ $json.providerName }}",
+            "Invoice Number": "={{ $json.invoiceNumber }}",
+            "Date": "={{ $json.date }}",
+            "Amount": "={{ $json.amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Service": "={{ $json.service }}",
             "File": "={{ $json.fileName }}"
           },
           "matchingColumns": [
@@ -290,53 +291,62 @@
           ],
           "schema": [
             {
-              "id": "Fornitore",
-              "displayName": "Fornitore",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Tipo",
-              "displayName": "Tipo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Data",
-              "displayName": "Data",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Importo",
-              "displayName": "Importo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "invoiceNumber",
-              "displayName": "invoiceNumber",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
               "id": "uniqueKey",
               "displayName": "uniqueKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Provider",
+              "displayName": "Provider",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -359,7 +369,7 @@
         "options": {}
       },
       "id": "16925a0b-ad7f-4f3e-8d44-be52337c2647",
-      "name": "Sheets upsert Fatture-luce",
+      "name": "Sheets upsert Provider A",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
@@ -383,7 +393,7 @@
             {
               "id": "37c89354-7a2a-43d3-aa15-2b395a8c9c63",
               "leftValue": "={{ $json.provider }}",
-              "rightValue": "Dimensione",
+              "rightValue": "PROVIDER_B",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -395,7 +405,7 @@
         "options": {}
       },
       "id": "108fc623-b97c-4a5c-a722-abc05b42f201",
-      "name": "Filter Dimensione",
+      "name": "Filter Provider B",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
@@ -411,7 +421,7 @@
         "options": {}
       },
       "id": "74ced2de-6f73-4da7-9316-245e1bb94f23",
-      "name": "SFTP upload Dimensione",
+      "name": "SFTP upload Provider B",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
       "position": [
@@ -433,18 +443,19 @@
         },
         "sheetName": {
           "__rl": true,
-          "value": 1160723129,
-          "mode": "list"
+          "value": "Invoices-Provider-B",
+          "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Fornitore": "Dimensione",
-            "Tipo": "internet",
-            "Data": "={{ $json.date }}",
-            "Importo": "={{ $json.amount }}",
-            "invoiceNumber": "={{ $json.invoiceNumber }}",
             "uniqueKey": "={{ $json.uniqueKey }}",
+            "Provider": "={{ $json.providerName }}",
+            "Invoice Number": "={{ $json.invoiceNumber }}",
+            "Date": "={{ $json.date }}",
+            "Amount": "={{ $json.amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Service": "={{ $json.service }}",
             "File": "={{ $json.fileName }}"
           },
           "matchingColumns": [
@@ -452,53 +463,62 @@
           ],
           "schema": [
             {
-              "id": "Fornitore",
-              "displayName": "Fornitore",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Tipo",
-              "displayName": "Tipo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Data",
-              "displayName": "Data",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Importo",
-              "displayName": "Importo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "invoiceNumber",
-              "displayName": "invoiceNumber",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
               "id": "uniqueKey",
               "displayName": "uniqueKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Provider",
+              "displayName": "Provider",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -521,7 +541,7 @@
         "options": {}
       },
       "id": "983dfd18-ee7f-4129-b924-663b4db77200",
-      "name": "Sheets upsert Fatture-ISP",
+      "name": "Sheets upsert Provider B",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
@@ -545,7 +565,7 @@
             {
               "id": "9008b05a-bb71-46a2-a164-b9577617d347",
               "leftValue": "={{ $json.provider }}",
-              "rightValue": "GoogleCloud",
+              "rightValue": "PROVIDER_C",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -557,7 +577,7 @@
         "options": {}
       },
       "id": "5d4c7f5d-d314-450e-891e-f6a08014f608",
-      "name": "Filter GoogleCloud",
+      "name": "Filter Provider C",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
@@ -573,7 +593,7 @@
         "options": {}
       },
       "id": "6ff0cbab-80da-48f3-8d13-109cb4bcb8c3",
-      "name": "SFTP upload GoogleCloud",
+      "name": "SFTP upload Provider C",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
       "position": [
@@ -595,27 +615,28 @@
         },
         "sheetName": {
           "__rl": true,
-          "value": 7865760,
-          "mode": "list"
+          "value": "Invoices-Provider-C",
+          "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "GoogleCloud": "Google Cloud",
-            "Account": "={{ $json.account }}",
-            "Data Fattura": "={{ $json.date }}",
-            "Numero Fattura": "={{ $json.invoiceNumber }}",
-            "IMPORTO": "={{ $json.amount }}",
-            "TOTALE": "={{ $json.amount }}",
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "Provider": "={{ $json.providerName }}",
+            "Invoice Number": "={{ $json.invoiceNumber }}",
+            "Date": "={{ $json.date }}",
+            "Amount": "={{ $json.amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Service": "={{ $json.service }}",
             "File": "={{ $json.fileName }}"
           },
           "matchingColumns": [
-            "Numero Fattura"
+            "uniqueKey"
           ],
           "schema": [
             {
-              "id": "GoogleCloud",
-              "displayName": "GoogleCloud",
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -623,8 +644,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Account",
-              "displayName": "Account",
+              "id": "Provider",
+              "displayName": "Provider",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -632,8 +653,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Data Fattura",
-              "displayName": "Data Fattura",
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -641,8 +662,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Numero Fattura",
-              "displayName": "Numero Fattura",
+              "id": "Date",
+              "displayName": "Date",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -650,8 +671,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "IMPORTO",
-              "displayName": "IMPORTO",
+              "id": "Amount",
+              "displayName": "Amount",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -659,8 +680,17 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "TOTALE",
-              "displayName": "TOTALE",
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -683,7 +713,7 @@
         "options": {}
       },
       "id": "9e531e5e-fc4c-4adb-a6a0-d4de3abea630",
-      "name": "Sheets upsert GoogleCloud",
+      "name": "Sheets upsert Provider C",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
@@ -705,7 +735,7 @@
         -48
       ],
       "id": "e622f5a2-9ad9-4c2d-b716-9218d0dd5607",
-      "name": "Restore parsed item Octopus"
+      "name": "Restore parsed item Provider A"
     },
     {
       "parameters": {},
@@ -716,7 +746,7 @@
         -48
       ],
       "id": "fb63faaf-c506-4101-ac4a-af9fa3eba1ff",
-      "name": "Completed Octopus (email retained)"
+      "name": "Completed Provider A (email retained)"
     },
     {
       "parameters": {
@@ -729,7 +759,7 @@
         160
       ],
       "id": "429973fe-fa4a-4d4e-afdd-cea9b84c69f3",
-      "name": "Restore parsed item Dimensione"
+      "name": "Restore parsed item Provider B"
     },
     {
       "parameters": {},
@@ -740,7 +770,7 @@
         160
       ],
       "id": "80612bf2-103f-408d-b8b7-7c5fe406bd50",
-      "name": "Completed Dimensione (email retained)"
+      "name": "Completed Provider B (email retained)"
     },
     {
       "parameters": {
@@ -753,7 +783,7 @@
         368
       ],
       "id": "dddc89e0-b8b9-4a7b-bb84-3c82769fc550",
-      "name": "Restore parsed item GoogleCloud"
+      "name": "Restore parsed item Provider C"
     },
     {
       "parameters": {},
@@ -764,7 +794,7 @@
         368
       ],
       "id": "467c3ac4-2d3a-45d4-97f7-5626086a447f",
-      "name": "Completed GoogleCloud (email retained)"
+      "name": "Completed Provider C (email retained)"
     },
     {
       "parameters": {
@@ -774,7 +804,7 @@
         "options": {}
       },
       "id": "67fd5403-3c9b-4ae2-8768-e55e40de2ca0",
-      "name": "SFTP upload Hetzner",
+      "name": "SFTP upload Provider D",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
       "position": [
@@ -796,60 +826,96 @@
         },
         "sheetName": {
           "__rl": true,
-          "value": "Hetzner",
+          "value": "Invoices-Provider-D",
           "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Data Fattura": "={{ $json.date }}",
-            "Numero Fattura": "={{ $json.invoiceNumber }}",
-            "IMPORTO": "={{ $json.amount }}",
-            "Servizio": "={{ $json.service }}"
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "Provider": "={{ $json.providerName }}",
+            "Invoice Number": "={{ $json.invoiceNumber }}",
+            "Date": "={{ $json.date }}",
+            "Amount": "={{ $json.amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Service": "={{ $json.service }}",
+            "File": "={{ $json.fileName }}"
           },
           "matchingColumns": [
-            "Numero Fattura"
+            "uniqueKey"
           ],
           "schema": [
             {
-              "id": "Servizio",
-              "displayName": "Servizio",
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
-              "id": "Data Fattura",
-              "displayName": "Data Fattura",
+              "id": "Provider",
+              "displayName": "Provider",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
-              "id": "Numero Fattura",
-              "displayName": "Numero Fattura",
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
-              "id": "IMPORTO",
-              "displayName": "IMPORTO",
+              "id": "Date",
+              "displayName": "Date",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -858,7 +924,7 @@
         "options": {}
       },
       "id": "b70e0544-e4d6-40fd-8718-56a23e8e28c5",
-      "name": "Sheets upsert Hetzner",
+      "name": "Sheets upsert Provider D",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
@@ -880,7 +946,7 @@
         576
       ],
       "id": "909cab1a-6044-40fc-810e-6d4ffc23303e",
-      "name": "Restore parsed item Hetzner"
+      "name": "Restore parsed item Provider D"
     },
     {
       "parameters": {},
@@ -891,7 +957,7 @@
         576
       ],
       "id": "99ab4456-8c4a-48a0-9cce-a9a80b56099a",
-      "name": "Completed Hetzner (email retained)"
+      "name": "Completed Provider D (email retained)"
     },
     {
       "parameters": {
@@ -906,7 +972,7 @@
             {
               "id": "9008b05a-bb71-46a2-a164-b9577617d347",
               "leftValue": "={{ $json.provider }}",
-              "rightValue": "Hetzner",
+              "rightValue": "PROVIDER_D",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -918,12 +984,25 @@
         "options": {}
       },
       "id": "e8e29842-2d77-4f0a-baab-c65a56b4ae68",
-      "name": "Filter Hetzner",
+      "name": "Filter Provider D",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
         3632,
         576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// EDIT THE FOUR EXAMPLE PROFILES. Patterns are JavaScript regular expression source strings.\nconst providers = [\n  {\n    \"id\": \"PROVIDER_A\",\n    \"name\": \"Provider A\",\n    \"senderContains\": \"billing@provider-a.example\",\n    \"invoicePattern\": \"(?:Invoice\\\\s*(?:Number|No\\\\.?|#)|Fattura\\\\s*n\\\\.?)\\\\s*[:#-]?\\\\s*([A-Z0-9/-]+)\",\n    \"datePattern\": \"(?:Invoice\\\\s*Date|Date|Data\\\\s*fattura)\\\\s*[:#-]?\\\\s*(\\\\d{1,2}[./-]\\\\d{1,2}[./-]20\\\\d{2})\",\n    \"amountPattern\": \"(?:Grand\\\\s*Total|Total\\\\s*Due|Totale\\\\s*da\\\\s*pagare)\\\\s*[:€ ]*([0-9.,]+)\",\n    \"servicePattern\": \"(?:Service|Servizio)\\\\s*[:#-]?\\\\s*([^\\\\n]+)\",\n    \"currency\": \"EUR\",\n    \"folder\": \"/YOUR_SFTP_ROOT/provider-a\"\n  },\n  {\n    \"id\": \"PROVIDER_B\",\n    \"name\": \"Provider B\",\n    \"senderContains\": \"billing@provider-b.example\",\n    \"invoicePattern\": \"(?:Invoice\\\\s*(?:Number|No\\\\.?|#)|Fattura\\\\s*n\\\\.?)\\\\s*[:#-]?\\\\s*([A-Z0-9/-]+)\",\n    \"datePattern\": \"(?:Invoice\\\\s*Date|Date|Data\\\\s*fattura)\\\\s*[:#-]?\\\\s*(\\\\d{1,2}[./-]\\\\d{1,2}[./-]20\\\\d{2})\",\n    \"amountPattern\": \"(?:Grand\\\\s*Total|Total\\\\s*Due|Totale\\\\s*da\\\\s*pagare)\\\\s*[:€ ]*([0-9.,]+)\",\n    \"servicePattern\": \"(?:Service|Servizio)\\\\s*[:#-]?\\\\s*([^\\\\n]+)\",\n    \"currency\": \"EUR\",\n    \"folder\": \"/YOUR_SFTP_ROOT/provider-b\"\n  },\n  {\n    \"id\": \"PROVIDER_C\",\n    \"name\": \"Provider C\",\n    \"senderContains\": \"billing@provider-c.example\",\n    \"invoicePattern\": \"(?:Invoice\\\\s*(?:Number|No\\\\.?|#)|Fattura\\\\s*n\\\\.?)\\\\s*[:#-]?\\\\s*([A-Z0-9/-]+)\",\n    \"datePattern\": \"(?:Invoice\\\\s*Date|Date|Data\\\\s*fattura)\\\\s*[:#-]?\\\\s*(\\\\d{1,2}[./-]\\\\d{1,2}[./-]20\\\\d{2})\",\n    \"amountPattern\": \"(?:Grand\\\\s*Total|Total\\\\s*Due|Totale\\\\s*da\\\\s*pagare)\\\\s*[:€ ]*([0-9.,]+)\",\n    \"servicePattern\": \"(?:Service|Servizio)\\\\s*[:#-]?\\\\s*([^\\\\n]+)\",\n    \"currency\": \"EUR\",\n    \"folder\": \"/YOUR_SFTP_ROOT/provider-c\"\n  },\n  {\n    \"id\": \"PROVIDER_D\",\n    \"name\": \"Provider D\",\n    \"senderContains\": \"billing@provider-d.example\",\n    \"invoicePattern\": \"(?:Invoice\\\\s*(?:Number|No\\\\.?|#)|Fattura\\\\s*n\\\\.?)\\\\s*[:#-]?\\\\s*([A-Z0-9/-]+)\",\n    \"datePattern\": \"(?:Invoice\\\\s*Date|Date|Data\\\\s*fattura)\\\\s*[:#-]?\\\\s*(\\\\d{1,2}[./-]\\\\d{1,2}[./-]20\\\\d{2})\",\n    \"amountPattern\": \"(?:Grand\\\\s*Total|Total\\\\s*Due|Totale\\\\s*da\\\\s*pagare)\\\\s*[:€ ]*([0-9.,]+)\",\n    \"servicePattern\": \"(?:Service|Servizio)\\\\s*[:#-]?\\\\s*([^\\\\n]+)\",\n    \"currency\": \"EUR\",\n    \"folder\": \"/YOUR_SFTP_ROOT/provider-d\"\n  }\n];\nreturn items.map(it=>({json:{...it.json,providerProfiles:providers},binary:it.binary,pairedItem:it.pairedItem}));"
+      },
+      "id": "f9e82f5e-d920-48d7-bf6b-64389f613a0d",
+      "name": "Configure Providers",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2856,
+        192
       ]
     }
   ],
@@ -977,7 +1056,7 @@
       "main": [
         [
           {
-            "node": "Extract PDF text",
+            "node": "Configure Providers",
             "type": "main",
             "index": 0
           }
@@ -999,198 +1078,209 @@
       "main": [
         [
           {
-            "node": "Filter Octopus",
+            "node": "Filter Provider A",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter Dimensione",
+            "node": "Filter Provider B",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter GoogleCloud",
+            "node": "Filter Provider C",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter Hetzner",
+            "node": "Filter Provider D",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Octopus": {
+    "Filter Provider A": {
       "main": [
         [
           {
-            "node": "SFTP upload Octopus",
+            "node": "SFTP upload Provider A",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload Octopus": {
+    "SFTP upload Provider A": {
       "main": [
         [
           {
-            "node": "Restore parsed item Octopus",
+            "node": "Restore parsed item Provider A",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert Fatture-luce": {
+    "Sheets upsert Provider A": {
       "main": [
         [
           {
-            "node": "Completed Octopus (email retained)",
+            "node": "Completed Provider A (email retained)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Dimensione": {
+    "Filter Provider B": {
       "main": [
         [
           {
-            "node": "SFTP upload Dimensione",
+            "node": "SFTP upload Provider B",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload Dimensione": {
+    "SFTP upload Provider B": {
       "main": [
         [
           {
-            "node": "Restore parsed item Dimensione",
+            "node": "Restore parsed item Provider B",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert Fatture-ISP": {
+    "Sheets upsert Provider B": {
       "main": [
         [
           {
-            "node": "Completed Dimensione (email retained)",
+            "node": "Completed Provider B (email retained)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter GoogleCloud": {
+    "Filter Provider C": {
       "main": [
         [
           {
-            "node": "SFTP upload GoogleCloud",
+            "node": "SFTP upload Provider C",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload GoogleCloud": {
+    "SFTP upload Provider C": {
       "main": [
         [
           {
-            "node": "Restore parsed item GoogleCloud",
+            "node": "Restore parsed item Provider C",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert GoogleCloud": {
+    "Sheets upsert Provider C": {
       "main": [
         [
           {
-            "node": "Completed GoogleCloud (email retained)",
+            "node": "Completed Provider C (email retained)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item Octopus": {
+    "Restore parsed item Provider A": {
       "main": [
         [
           {
-            "node": "Sheets upsert Fatture-luce",
+            "node": "Sheets upsert Provider A",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item Dimensione": {
+    "Restore parsed item Provider B": {
       "main": [
         [
           {
-            "node": "Sheets upsert Fatture-ISP",
+            "node": "Sheets upsert Provider B",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item GoogleCloud": {
+    "Restore parsed item Provider C": {
       "main": [
         [
           {
-            "node": "Sheets upsert GoogleCloud",
+            "node": "Sheets upsert Provider C",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload Hetzner": {
+    "SFTP upload Provider D": {
       "main": [
         [
           {
-            "node": "Restore parsed item Hetzner",
+            "node": "Restore parsed item Provider D",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert Hetzner": {
+    "Sheets upsert Provider D": {
       "main": [
         [
           {
-            "node": "Completed Hetzner (email retained)",
+            "node": "Completed Provider D (email retained)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item Hetzner": {
+    "Restore parsed item Provider D": {
       "main": [
         [
           {
-            "node": "Sheets upsert Hetzner",
+            "node": "Sheets upsert Provider D",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Hetzner": {
+    "Filter Provider D": {
       "main": [
         [
           {
-            "node": "SFTP upload Hetzner",
+            "node": "SFTP upload Provider D",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure Providers": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF text",
             "type": "main",
             "index": 0
           }
@@ -1200,10 +1290,9 @@
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
-  "meta": {},
-  "nodeGroups": [],
-  "tags": []
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
 }

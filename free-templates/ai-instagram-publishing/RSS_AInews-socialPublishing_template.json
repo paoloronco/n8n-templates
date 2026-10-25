@@ -1,0 +1,946 @@
+{
+  "name": "RSS AI News to Instagram Publishing - Public Template",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 3,
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "fef7ad34-d7c5-4b63-aa29-da1b4f9eb658",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        16,
+        624
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://follow.it/thehackernews/rss",
+        "options": {}
+      },
+      "id": "7953a309-9988-43ad-99c3-e9abc510ce12",
+      "name": "RSS Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        176,
+        624
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title"
+            },
+            {
+              "fieldToAggregate": "content"
+            },
+            {
+              "fieldToAggregate": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3967fd7a-287e-4f7f-9e42-a89508dcf347",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        320,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I want you to analyze the following for my company. Find me the best articles to use in my medium post. My company is about AI Agents & Automation. Pick up to 3. Reply ONLY with a comma-separated list of the IDs (e.g., 3,7,12).\n\n{{ $json.forAI }}\n\n",
+        "options": {}
+      },
+      "id": "efe477d9-de40-4d76-b302-bf8859ffd0bc",
+      "name": "Best Article finder",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        736,
+        368
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "Your new Instagram post is here!",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "83f6b00e-01c5-4d75-a300-588a0a667746",
+      "name": "Send Content Confirmation1",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1936,
+        624
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "# Collecting the news",
+        "height": 288,
+        "width": 464
+      },
+      "id": "539847fe-ab5c-4c03-b509-f5c550214945",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inputs expected from Aggregate/RSS: arrays: title[], content[], link[]\nconst all = items[0].json;              // aggregated item\nconst titles = all.title || [];\nconst contents = all.content || [];\nconst links = all.link || [];\n\nconst articles = [];\nconst lines = [];\n\nconst maxLen = Math.max(titles.length, contents.length, links.length);\nfor (let i = 0; i < maxLen; i++) {\n  const obj = {\n    id: i + 1,                          // stable ID (1..N). Use guid if you have one.\n    title: titles[i] ?? \"\",\n    content: contents[i] ?? \"\",\n    link: links[i] ?? \"\"\n  };\n  articles.push(obj);\n  // Short preview for the AI to choose from:\n  const preview = (obj.content || \"\").replace(/\\s+/g, \" \").slice(0, 220);\n  lines.push(`${obj.id}. ${obj.title}\\n${preview}${preview.length === 220 ? \"…\" : \"\"}`);\n}\n\nreturn [\n  {\n    json: {\n      articles,                         // keep the structured mapping\n      forAI: lines.join(\"\\n\\n\")         // human-readable list for the model\n    }\n  }\n];"
+      },
+      "id": "da372939-c50f-4b09-8bf5-bf524985ab87",
+      "name": "group the news into 1 item",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        480,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code node — Run Once for All Items\n\n// 1) Read AI output text (your AI Agent uses `output`)\nlet aiText =\n  (items[0]?.json?.output ??\n   items[0]?.json?.result ??\n   items[0]?.json?.text ??\n   items[0]?.json?.response ??\n   \"\").toString().trim();\n\n// Fallback: read directly from the AI Agent node by name if not passed through\nif (!aiText) {\n  const ai = $items(\"Best Article finder\", 0, 0);   // <-- change to your AI node name if different\n  if (Array.isArray(ai) && ai.length) {\n    aiText = (ai[0].json.output ?? ai[0].json.result ?? ai[0].json.text ?? \"\").toString().trim();\n  }\n}\n\nif (!aiText) {\n  throw new Error(\"AI output is empty. Make sure the AI Agent node's field name is 'output' (or adjust above).\");\n}\n\n// 2) Get articles array from builder node\nlet articles = items[0]?.json?.articles;\nif (!articles) {\n  const built = $items(\"group the news into 1 item\", 0, 0);   // <-- change \"Code1\" to your builder node name\n  if (Array.isArray(built) && built.length) {\n    articles = built[0]?.json?.articles;\n  }\n}\nif (!Array.isArray(articles)) {\n  throw new Error(\"Couldn't find 'articles' array. Ensure the builder node outputs { json: { articles: [...] } }.\");\n}\n\n// 3) Extract numeric IDs (handles commas, spaces, newlines, bullets)\nconst ids = (aiText.match(/\\d+/g) || []).map(n => parseInt(n, 10));\n\n// 4) Map IDs → full article objects\nconst chosen = ids\n  .map(id => articles.find(a => a.id === id))\n  .filter(Boolean);\n\n// 5) Return one item with arrays\nreturn [{\n  json: {\n    raw: aiText,\n    ids,                                  // e.g., [2,18,45]\n    chosen,                                // [{id, title, content, link}, ...]\n    titles: chosen.map(c => c.title),\n    links: chosen.map(c => c.link)\n  }\n}];"
+      },
+      "id": "badf8eb8-330a-4383-bea1-f4d4b2d7fe46",
+      "name": "Find the urls the ai outputted",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1216,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code node — Run Once for All Items\n\n// Collect all links from input items\nconst links = [];\nfor (const item of $input.all()) {\n  if (item.json.link) {\n    links.push(item.json.link);\n  }\n  // if articles are inside \"chosen\" array:\n  if (Array.isArray(item.json.chosen)) {\n    for (const c of item.json.chosen) {\n      if (c.link) links.push(c.link);\n    }\n  }\n}\n\n// Return as one item with all links\nreturn [\n  {\n    json: {\n      links,                          // array of links\n      linksString: links.join(\"\\n\")   // optional: single string\n    }\n  }\n];"
+      },
+      "id": "cab1974d-b9e3-4812-bf61-1819379e90f3",
+      "name": "All url's to 1 string",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1408,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "# Generate content based on the news for Medium, Linkedin & Instagram\n",
+        "height": 464,
+        "width": 848
+      },
+      "id": "9177990a-e7de-421e-afbf-ccfa9917b83c",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "9c988918-8d6e-40bd-afeb-83087cd615a0",
+      "name": "4o-mini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        736,
+        528
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "id": "f1836196-0158-451f-a57e-d002de102e0f",
+      "name": "4.1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1616,
+        896
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "2f426219-8697-4082-be1a-3658dfa7f310",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1024,
+        624
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Generate a detailed AI image prompt that visually represents the CyberSecurity news in a realistic, authentic, and topic-focused way.\nThe image should look like a real-world scene, not a sci-fi fantasy or overly futuristic concept.\nFocus on credible human settings, real technology, and natural lighting.\nAvoid exaggerated digital effects, glowing holograms, or surreal compositions.\n\nThe goal is to create a photo-realistic and modern visual that clearly illustrates the essence of the story — how AI agents are transforming CyberSecurity — showing realistic people, workplaces, or systems in action.\nThe image should feel believable, professional, and relevant to today’s technology landscape, helping viewers instantly grasp the concept.\n\n\n{{ $json.message.content }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2192,
+        992
+      ],
+      "id": "78186cc8-f4f1-46f6-b250-6c800ae33438",
+      "name": "Generate an image"
+    },
+    {
+      "parameters": {
+        "name": "picture",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2944,
+        992
+      ],
+      "id": "f3cd9aa1-319d-477f-829a-39b16d1134f4",
+      "name": "Upload file"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a instagram post based on the following articles.\n\n{{ $json.links }}",
+        "options": {
+          "systemMessage": "You are a content creator, for a big instagram account where we spread news on CyberSecurity\nAlways use the tone of voice:\n- Professional, innovative, and human\n- Short, clear, and active sentences\n- Address the reader directly (\"you,\" \"your company\")\n- Explain technical terms simply with examples or metaphors\n- Write in a positive and forward-thinking tone\n- Conclude often with a question or call to action\n- Use empathetic and results-oriented language\n\nStrict rule:\nDo not use markdown or emojis in any response."
+        }
+      },
+      "id": "423aec0d-0bd4-4c4b-af40-c5923544450c",
+      "name": "News-writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1616,
+        752
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert content creator for a leading CyberSecurity Instagram account.\nBased on the CyberSecurity news provided, generate a short, powerful, and engaging title for an Instagram image.\n\nFollow these rules:\n\nMaximum length: 6 to 10 words.\n\nClarity first: the title must instantly communicate the main idea of the news.\n\nUse a professional, innovative, and human tone.\n\nPrefer active voice and simple, impactful language.\n\nAvoid jargon or overly technical terms.\n\nThe title should spark curiosity or inspire action, like a magazine headline.\n\nDo not use markdown, emojis, or hashtags.\n\nExample:\nNews: “AI Agents Are Transforming Cybersecurity...”\nPossible Title: “AI Agents Are Redefining Cyber Defense”\n\n\n{{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1872,
+        992
+      ],
+      "id": "10c146fb-c11a-4ed7-be9d-a41e1eec143b",
+      "name": "Message a model"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Instagram params').item.json.node }}",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $('Facebook Graph API').item.json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "e79df11a-7431-4c8e-9e23-b432b5b2737e",
+      "name": "Instagram publish media",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "position": [
+        4240,
+        1200
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "225df266-bf29-4415-b04c-2750cef4506a",
+              "name": "imageUrl",
+              "type": "string",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "id": "f35e3093-1bff-4cc6-a6c4-909dca314cc7",
+              "name": "captionText",
+              "type": "string",
+              "value": "={{ $('News-writer').item.json.output }}\n\n#CyberSecurity #InfoSec #CyberAttack #DataBreach #Ransomware #CyberDefense #PrivacyMatters #News #CloudSecurity #CyberThreats"
+            },
+            {
+              "id": "617d669a-97c1-49dd-9493-d0b113d049c1",
+              "name": "node",
+              "value": "YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "59b31f32-9f4e-4363-bba4-46c7dd8fc788",
+      "name": "Instagram params",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3008,
+        1264
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.id }}",
+        "options": {
+          "fields": {
+            "field": [
+              {
+                "name": "=status_code,status"
+              }
+            ]
+          }
+        }
+      },
+      "id": "974dd69e-2776-44ae-ba24-0d539ef1ac87",
+      "name": "Instagram check status of media uploaded before",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "position": [
+        3440,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "0304efee-33b2-499e-bad1-9238c1fc2999",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status_code }}",
+              "rightValue": "FINISHED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4863844-d155-43d7-ac4a-08ddec029c07",
+      "name": "If media status is finished",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3856,
+        1264
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v20.0",
+        "node": "={{ $('Instagram check status of media uploaded before').item.json.id }}",
+        "options": {
+          "fields": {
+            "field": [
+              {
+                "name": "id"
+              },
+              {
+                "name": "status"
+              },
+              {
+                "name": "status_code"
+              }
+            ]
+          }
+        }
+      },
+      "id": "b9221749-06f5-4731-966b-7145393bff20",
+      "name": "Instagram check status of media published before",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "position": [
+        4448,
+        1200
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "from https://n8n.io/workflows/2537-simple-social-instagram-single-image-post-with-facebook-api/",
+        "height": 80,
+        "width": 704,
+        "color": 3
+      },
+      "id": "078d200d-1cd4-4eb3-a2b7-447ccc72a95b",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2976,
+        1664
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.imageUrl }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $json.captionText }}"
+              },
+              {
+                "name": "node",
+                "value": "={{ $json.node }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        3232,
+        1264
+      ],
+      "id": "174d8df0-cec4-4e35-972d-72ab7131f9d0",
+      "name": "Facebook Graph API"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.webContentLink }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-cloudinary.cloudinary",
+      "typeVersion": 1,
+      "position": [
+        3152,
+        992
+      ],
+      "id": "2a2f5dcc-a908-461d-bb51-4dc0fd6f36c1",
+      "name": "Upload an asset from URL"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3648,
+        1264
+      ],
+      "id": "df5b9e21-1f34-422a-98b3-5f49a54f038b",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4112,
+        1344
+      ],
+      "id": "759199f8-10f7-42ff-9c92-faf04b05b67a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "blur",
+        "blur": 50,
+        "sigma": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        992
+      ],
+      "id": "3dcc983c-3716-477b-9d75-03dbd12386f0",
+      "name": "Blur_image"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "=News: \n{{ $('Message a model').item.json.message.content }}",
+        "fontSize": 70,
+        "fontColor": "#F3EBEB",
+        "positionY": 400,
+        "lineLength": 30,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        992
+      ],
+      "id": "4697be60-0fde-4d54-adb8-283d6577d6c1",
+      "name": "Add_textTitle-toimage"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "Read more below",
+        "fontSize": 80,
+        "fontColor": "#ECE4E4",
+        "positionY": 900,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        2768,
+        992
+      ],
+      "id": "00b6ca0e-1c2f-452f-b1e5-ef5724bd8f13",
+      "name": "Add_textReadMore-toimage"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3152,
+        848
+      ],
+      "id": "40de2fa3-2ca5-4f7b-a884-aec579a9d288",
+      "name": "Wait2"
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3360,
+        848
+      ],
+      "id": "40c92592-cd70-4dff-8709-6c2a4d41f4bb",
+      "name": "Delete a file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "4.1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "News-writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Find the urls the ai outputted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Best Article finder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "group the news into 1 item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Best Article finder": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All url's to 1 string": {
+      "main": [
+        [
+          {
+            "node": "News-writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Content Confirmation1": {
+      "main": [
+        []
+      ]
+    },
+    "group the news into 1 item": {
+      "main": [
+        [
+          {
+            "node": "Best Article finder",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Find the urls the ai outputted": {
+      "main": [
+        [
+          {
+            "node": "All url's to 1 string",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Blur_image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Upload an asset from URL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "News-writer": {
+      "main": [
+        [
+          {
+            "node": "Send Content Confirmation1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram params": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram publish media": {
+      "main": [
+        [
+          {
+            "node": "Instagram check status of media published before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If media status is finished": {
+      "main": [
+        [
+          {
+            "node": "Instagram publish media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram check status of media uploaded before": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram check status of media published before": {
+      "main": [
+        []
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Instagram check status of media uploaded before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload an asset from URL": {
+      "main": [
+        [
+          {
+            "node": "Instagram params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If media status is finished",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Instagram check status of media uploaded before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blur_image": {
+      "main": [
+        [
+          {
+            "node": "Add_textTitle-toimage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add_textTitle-toimage": {
+      "main": [
+        [
+          {
+            "node": "Add_textReadMore-toimage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add_textReadMore-toimage": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

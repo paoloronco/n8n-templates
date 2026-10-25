@@ -2,7 +2,7 @@
 
 A curated collection of n8n automation workflows, practical implementation guides and reusable assets. Templates are organized by solution, with variants and releases grouped together.
 
-[![Paolo Ronco — Website](assets/paoloronco-portfolio-badge-v2.svg)](https://paoloronco.it/)
+<a href="https://paoloronco.it/"><img src="https://www.google.com/s2/favicons?domain=paoloronco.it&sz=64" alt="Paolo Ronco favicon" width="38" height="38" align="center"></a> <a href="https://paoloronco.it/"><img src="assets/paoloronco-website-blue-v3.svg" alt="Paolo Ronco — Website" height="58" align="center"></a>
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/paoloronco/n8n-templates) [![n8n Creators](https://img.shields.io/badge/n8n-Creator_Profile-FF6D5A?logo=n8n)](https://n8n.io/creators/paoloronco/) [![Gumroad](https://img.shields.io/badge/Gumroad-Store-FF90E8?logo=gumroad&logoColor=black)](https://paoloronco.gumroad.com/)
 

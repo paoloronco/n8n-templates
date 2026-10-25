@@ -29,11 +29,6 @@ A curated collection of n8n automation workflows, practical implementation guide
 | [Google Cloud Inventory & Change Audit](./free-templates/google-cloud-inventory/) | Resource inventory and change tracking. |
 | [Backup & Sync Execution Validation](./free-templates/backup-sync-monitoring/) | Log-driven validation of scheduled backup/sync jobs. |
 
-### Paid templates
-
-| Template | Description |
-|---|---|
-
 ## Folder conventions
 
 - `free-templates/` and `paid-templates/` remain separate until the distribution model changes.

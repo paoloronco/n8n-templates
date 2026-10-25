@@ -18,7 +18,7 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Setup
 
-- **Purchase the complete package** — Obtain the importable workflow and full deployment documentation from Gumroad or the store.
+- **Get the workflow** — Access the free template through the linked n8n Creators listing. The importable JSON is not currently included in this GitHub folder.
 - **Configure RSS feeds** — Replace or extend the source feeds for your target niche, publication set, or topic.
 - **Configure AI services** — Add the required AI credentials and review prompts for selection, copy, and image generation.
 - **Configure Cloudinary** — Connect the account used to host generated social images.
@@ -30,7 +30,7 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 - n8n instance
 - One or more RSS feeds
-- AI provider/API credentials required by the purchased workflow
+- AI provider/API credentials required by the workflow
 - Cloudinary account
 - Meta/Instagram professional account with Graph API access
 - Required Meta application permissions and credentials
@@ -59,5 +59,5 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Additional Info
 
-- The purchased package includes the importable workflow and complete setup documentation covering RSS sources, APIs, scheduling, testing, and operational guidance.
-- This public repository contains the product overview and promotional assets; the complete paid workflow is delivered with the purchased package.
+- This template is categorized as free. Use the n8n Creators listing to access the workflow; the importable JSON has not yet been added to this repository.
+- API usage, Cloudinary, and other external services may have separate costs.

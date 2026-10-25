@@ -4,7 +4,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 [![Personal Website](https://img.shields.io/badge/PaoloRonco.it-Website-2563EB?logo=googlechrome&logoColor=white&style=for-the-badge)](https://paoloronco.it/) [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/paoloronco/n8n-templates) [![n8n Creators](https://img.shields.io/badge/n8n-Creator_Profile-FF6D5A?logo=n8n)](https://n8n.io/creators/paoloronco/) [![Gumroad](https://img.shields.io/badge/Gumroad-Store-FF90E8?logo=gumroad&logoColor=black)](https://paoloronco.gumroad.com/)
 
-![n8n Templates](assets/n8n-templates.png)
+![n8n Templates](assets/banner.png)
 
 ## Template catalog
 

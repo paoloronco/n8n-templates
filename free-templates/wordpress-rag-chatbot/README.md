@@ -30,7 +30,7 @@ A bilingual WordPress chatbot that indexes posts in Qdrant and answers questions
 6. Download and install the WordPress plugin from the [WordPress guide](https://app.notion.com/p/404f0ba27c32812d84d9d0b4183ef957).
 7. Enter the production webhook URL and matching Header Auth in WordPress settings; add `[wp_ai_chatbot]` to a page.
 
-For complete instructions, see the [public documentation](https://app.notion.com/p/404f0ba27c3281c796fbfc177b050bef).
+For complete instructions, see the [public documentation](https://paoloronco.notion.site/WordPress-AI-Chatbot-404f0ba27c3281c796fbfc177b050bef).
 
 ## Requirements
 
@@ -54,7 +54,7 @@ Adjust OpenAI prompts for language and tone, Qdrant retrieval depth and Cohere r
 
 ## Links
 
-- [Notion documentation](https://app.notion.com/p/404f0ba27c3281c796fbfc177b050bef)
+- [Notion documentation](https://paoloronco.notion.site/WordPress-AI-Chatbot-404f0ba27c3281c796fbfc177b050bef)
 - [n8n Creators listing](https://n8n.io/workflows/13291-build-a-wordpress-rag-chatbot-with-openai-qdrant-or-mongodb/)
 - [Gumroad listing](https://paoloronco.gumroad.com/l/wordpress-aichatbot)
 - [Video walkthrough](https://www.youtube.com/watch?v=vg33xcdU9gE)

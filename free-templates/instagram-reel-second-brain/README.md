@@ -6,6 +6,19 @@ Turn Instagram Reels into concise, searchable knowledge in Notion. Send a link t
 
 Save useful ideas from Instagram Reels without manually transcribing or categorizing them. This workflow combines Telegram, Apify, OpenAI and Notion to extract spoken content and available captions, filter promotional noise, and create structured notes with source links and relevant technical references.
 
+## Output language: Italian and English
+
+Two importable variants are available. They use the same Telegram → Apify → OpenAI → Notion pipeline and support multilingual source Reels.
+
+| Variant | Download | Generated content |
+| --- | --- | --- |
+| Italian (IT) | [Instagram_Reel_to_Notion_Second_Brain.json](./Instagram_Reel_to_Notion_Second_Brain.json) | Italian Notion titles, summaries, knowledge sections and Telegram replies |
+| English (EN) | [Instagram_Reel_to_Notion_Second_Brain_EN.json](./Instagram_Reel_to_Notion_Second_Brain_EN.json) | English Notion titles, summaries, knowledge sections and Telegram replies |
+
+**Changing the output language:** Open `14 — Build AI Prompt` and change the instruction that controls the output language. Then update `17A — Prepare Notion Knowledge Page` for the Notion section headings and fallback messages, and `18 — Format Second Brain Reply` for Telegram confirmations and errors. The `Structured Output Parser` keys and Notion property names can remain unchanged. The `source_language` field records the original audio language, not the language of the generated note.
+
+Do not rename nodes without updating expressions that reference their names. Import only the variant you intend to activate; if both workflows share a Telegram bot, do not activate both simultaneously because the webhook registration can conflict.
+
 ## How it works
 
 1. **Receive:** A Telegram bot receives a public Instagram Reel or compatible video-post URL. `/start` and `/help` are handled without calling paid APIs.
@@ -55,7 +68,7 @@ The property names above match the example Inbox configuration. You can use your
 
 Each Notion entry contains a concise summary and, where supported by the source, key takeaways, mentioned tools, repositories, explicit URLs, practical instructions, potential applications, follow-up actions and material uncertainties. The original Reel link and available author information are retained for reference.
 
-The AI summarizes in **Italian**, preserving relevant product names and technical terminology. Repository names and links are **not independently verified**. The workflow does not invent missing URLs or installation commands.
+The IT variant summarizes in **Italian** and the EN variant summarizes in **English**, preserving relevant product names and technical terminology. Repository names and links are **not independently verified**. The workflow does not invent missing URLs or installation commands.
 
 ## Customization
 
@@ -99,7 +112,8 @@ For detailed troubleshooting, see the [complete Notion documentation](https://pa
 
 ## Download and documentation
 
-- [Importable workflow JSON](./Instagram_Reel_to_Notion_Second_Brain.json)
+- [Italian workflow JSON](./Instagram_Reel_to_Notion_Second_Brain.json)
+- [English workflow JSON](./Instagram_Reel_to_Notion_Second_Brain_EN.json)
 - [Gumroad product page](https://paoloronco.gumroad.com/l/instagram-notion-secondbrain)
 
 ## Documentation and links

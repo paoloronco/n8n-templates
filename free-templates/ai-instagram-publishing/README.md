@@ -4,6 +4,7 @@
 
 ## Links
 
+- **Workflow JSON:** [Download and import](./RSS_AInews-socialPublishing_template.json)
 - **Documentation (Notion):** [Setup guide](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-3f5f0ba27c32806ba425f7d84c72961a?pvs=74)
 - **n8n Creator:** [View template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
@@ -25,7 +26,7 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Setup
 
-- **Get the workflow** — Access the free template through the linked n8n Creators listing. The importable JSON is not currently included in this GitHub folder.
+- **Get the workflow** — Download the workflow JSON from this folder and import it into n8n. Configure your own credentials, email recipient, Google Drive folder ID, and Instagram business account ID.
 - **Configure RSS feeds** — Replace or extend the source feeds for your target niche, publication set, or topic.
 - **Configure AI services** — Add the required AI credentials and review prompts for selection, copy, and image generation.
 - **Configure Cloudinary** — Connect the account used to host generated social images.
@@ -60,5 +61,5 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 
 ## Additional Info
 
-- This template is categorized as free. Use the n8n Creators listing to access the workflow; the importable JSON has not yet been added to this repository.
+- This template is free and the sanitized importable JSON is available in this repository. Configure all required credentials and account-specific parameters before running.
 - API usage, Cloudinary, and other external services may have separate costs.

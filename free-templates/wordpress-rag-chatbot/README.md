@@ -14,7 +14,7 @@ A bilingual WordPress chatbot that indexes posts in Qdrant and answers questions
 | Resource | Purpose |
 |---|---|
 | [Workflow JSON](workflow/WordPress_AI_Chatbot_Template.json) | Importable n8n workflow with indexing and chat branches |
-| [Full setup guide](https://app.notion.com/p/404f0ba27c32810b989ccb0c8af3b372) | Credentials, Qdrant, indexing and webhook |
+| [HTML demo](demo/index.html) | Standalone example using the WordPress REST proxy |\n| [MongoDB embedding utility](mongodb/embed-skills-openai.js) | Optional Node.js tool with [package.json](mongodb/package.json) and [.env.example](mongodb/.env.example) |\n| [Full setup guide](https://app.notion.com/p/404f0ba27c32810b989ccb0c8af3b372) | Credentials, Qdrant, indexing and webhook |
 | [WordPress plugin and HTML demo](https://app.notion.com/p/404f0ba27c32812d84d9d0b4183ef957) | Download the plugin ZIP and HTML example |
 | [API reference](https://app.notion.com/p/404f0ba27c3281678d69d5fab0663469) | Webhook and response formats |
 | [Architecture](https://app.notion.com/p/404f0ba27c32813c86dde81d8fec229e) | Data flow and components |
@@ -43,7 +43,7 @@ For complete instructions, see the [public documentation](https://app.notion.com
 
 ## Customization
 
-Adjust OpenAI prompts for language and tone, Qdrant retrieval depth and Cohere reranking for relevance, and WordPress CSS/JavaScript for the widget. The supplied workflow uses separate Italian and English RAG branches.
+Adjust OpenAI prompts for language and tone, Qdrant retrieval depth and Cohere reranking for relevance, and WordPress CSS/JavaScript for the widget. The supplied workflow uses separate Italian and English RAG branches. The WordPress plugin ZIP is provided on the linked Notion WordPress guide; it is not currently mirrored as source files in this GitHub directory.
 
 ## Additional information
 

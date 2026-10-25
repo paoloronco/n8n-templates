@@ -399,7 +399,7 @@
         2064
       ],
       "id": "d0293610-3381-4084-a4e6-872f7fcd8451",
-      "name": "Qdrant Search (wordpress5)"
+      "name": "Qdrant Search (wordpress-posts)"
     },
     {
       "parameters": {
@@ -722,7 +722,7 @@
         2368
       ],
       "id": "b2427416-0df8-4340-97d1-9f0666db2d2a",
-      "name": "Qdrant Search (wordpress5)1"
+      "name": "Qdrant Search (wordpress-posts)1"
     },
     {
       "parameters": {
@@ -1231,7 +1231,7 @@
     },
     {
       "parameters": {
-        "content": "## WORKFLOW 2: Wordpress AI Chatbot\n\n**⚠️ IMPORTANT: Before using this workflow, run the indexing workflow provided.**\n\n### What this workflow does\n\nHandles incoming chat requests from your website and routes \nthem to the correct intelligence layer:\n* conversation → predefined knowledge (SmallTalk)\n* content questions → semantic search on your posts (RAG)\n* profile/skills queries → structured database lookup\n\n\nThe user always receives a single clean answer, while logging runs in parallel.\n\n### How It Works:\n1. **Request arrives** via Webhook (secured with Header Auth)\n2. **Intent Router** classifies the request → SmallTalk / RAG / Info\n3. **Appropriate AI path** processes the request:\n   - SmallTalk: Quick response from dataset\n   - RAG: Semantic search in Qdrant + AI generation\n   - Info/Skills: MongoDB Atlas search + AI generation\n4. **Response cleaning** removes unnecessary fields (follow_up)\n5. **Send response** back to user via Webhook\n6. **Logging pipeline** runs in parallel:\n   - Hash IP for privacy\n   - Prepare timestamps and metadata\n   - Upload Privacy review required to GCS\n\n### Setup steps\n1. Add your Webhook URL to your website chat widget\n2 Configure Header Auth credentials (must match frontend)\n3. Insert your OpenAI API key\n4. Connect Qdrant (same collection used in Workflow 1)\n5. (Optional) Connect MongoDB Atlas for skills/profile queries\n6. Configure a Cloud Storage bucket for logs (or disable logging)\n7. Run a test message from the site to verify routing works\n8. After setup, the bot is ready — behavior tuning happens only via prompts.",
+        "content": "## WORKFLOW 2: Wordpress AI Chatbot\n\n**⚠️ IMPORTANT: Before using this workflow, run the indexing workflow provided.**\n\n### What this workflow does\n\nHandles incoming chat requests from your website and routes \nthem to the correct intelligence layer:\n* conversation → predefined knowledge (SmallTalk)\n* content questions → semantic search on your posts (RAG)\n* profile/skills queries → structured database lookup\n\n\nThe user always receives a single clean answer, while logging runs in parallel.\n\n### How It Works:\n1. **Request arrives** via Webhook (secured with Header Auth)\n2. **Intent Router** classifies the request → SmallTalk / RAG / Info\n3. **Appropriate AI path** processes the request:\n   - SmallTalk: Quick response from dataset\n   - RAG: Semantic search in Qdrant + AI generation\n   - Info/Skills: MongoDB Atlas search + AI generation\n4. **Response cleaning** removes unnecessary fields (follow_up)\n5. **Send response** back to user via Webhook\n6. **Logging pipeline** runs in parallel:\n   - Review privacy and retention settings before enabling logging\n   - Prepare timestamps and metadata\n   - Optional logging can be configured separately\n\n### Setup steps\n1. Add your Webhook URL to your website chat widget\n2 Configure Header Auth credentials (must match frontend)\n3. Insert your OpenAI API key\n4. Connect Qdrant (same collection used in Workflow 1)\n5. (Optional) Connect MongoDB Atlas for skills/profile queries\n6. Configure a Cloud Storage bucket for logs (or disable logging)\n7. Run a test message from the site to verify routing works\n8. After setup, the bot is ready — behavior tuning happens only via prompts.",
         "height": 2144,
         "width": 4864
       },
@@ -1379,7 +1379,7 @@
       "ai_reranker": [
         [
           {
-            "node": "Qdrant Search (wordpress5)",
+            "node": "Qdrant Search (wordpress-posts)",
             "type": "ai_reranker",
             "index": 0
           }
@@ -1403,17 +1403,6 @@
           {
             "node": "AI Agent",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Qdrant Search (wordpress5)": {
-      "main": [
-        [
-          {
-            "node": "Build context from Qdrant results1",
-            "type": "main",
             "index": 0
           }
         ]
@@ -1448,14 +1437,14 @@
         ],
         [
           {
-            "node": "Qdrant Search (wordpress5)",
+            "node": "Qdrant Search (wordpress-posts)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Qdrant Search (wordpress5)1",
+            "node": "Qdrant Search (wordpress-posts)1",
             "type": "main",
             "index": 0
           }
@@ -1506,7 +1495,7 @@
       "ai_reranker": [
         [
           {
-            "node": "Qdrant Search (wordpress5)1",
+            "node": "Qdrant Search (wordpress-posts)1",
             "type": "ai_reranker",
             "index": 0
           }
@@ -1517,7 +1506,7 @@
       "ai_embedding": [
         [
           {
-            "node": "Qdrant Search (wordpress5)1",
+            "node": "Qdrant Search (wordpress-posts)1",
             "type": "ai_embedding",
             "index": 0
           }
@@ -1541,17 +1530,6 @@
           {
             "node": "AI Agent3",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Qdrant Search (wordpress5)1": {
-      "main": [
-        [
-          {
-            "node": "Build context from Qdrant results",
-            "type": "main",
             "index": 0
           }
         ]
@@ -1726,7 +1704,7 @@
       "ai_embedding": [
         [
           {
-            "node": "Qdrant Search (wordpress5)",
+            "node": "Qdrant Search (wordpress-posts)",
             "type": "ai_embedding",
             "index": 0
           }
@@ -1738,6 +1716,28 @@
         [
           {
             "node": "Code: remove followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Search (wordpress-posts)": {
+      "main": [
+        [
+          {
+            "node": "Build context from Qdrant results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Search (wordpress-posts)1": {
+      "main": [
+        [
+          {
+            "node": "Build context from Qdrant results",
             "type": "main",
             "index": 0
           }

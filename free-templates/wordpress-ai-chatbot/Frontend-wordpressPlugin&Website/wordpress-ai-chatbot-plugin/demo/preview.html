@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WP AI Chatbot – Local Style Preview</title>
+  <link rel="stylesheet" href="../assets/wpaicb.css" />
+  <style>
+    /* Page-only styling to visualize transparency */
+    body{
+      margin:0; padding:24px; 
+      background: radial-gradient(1200px 600px at 20% 10%, #0b1220 0%, #05070c 45%, #02040a 100%);
+      min-height:100vh; color:#e5e7eb; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .info{opacity:.8; margin-bottom:14px;}
+  </style>
+  <script>
+    // Minimal global config the widget expects
+    window.WPAICB = {
+      restUrl: 'http://localhost:9999/wp-json/wpaicb/v1/chat',
+      siteHome: 'http://localhost:9999/'
+    };
+  </script>
+</head>
+<body>
+  <div class="info">Local preview: UI only. Sending will try localhost and fail (by design).</div>
+
+  <div class="wpaicb-wrap" data-wpaicb="1">
+    <div class="wpaicb-chat" style="height: 520px">
+      <!-- Pre-seeded rows to preview styles -->
+      <div class="wpaicb-row wpaicb-bot">
+        <span class="wpaicb-role">Bot:</span>
+        <span class="wpaicb-bubble">Welcome! This is a preview of the new border-only style.</span>
+      </div>
+      <div class="wpaicb-row wpaicb-me">
+        <span class="wpaicb-role">You:</span>
+        <span class="wpaicb-bubble">Looks clean. I can read both roles clearly.</span>
+      </div>
+    </div>
+
+    <div class="wpaicb-bar">
+      <input class="wpaicb-msg" type="text" placeholder="Type… (won't send in preview)" autocomplete="off" />
+      <button class="wpaicb-send" type="button">Send</button>
+    </div>
+    <div class="wpaicb-hint">Tip: This page focuses on visuals; network calls are disabled.</div>
+  </div>
+
+  <script src="../assets/wpaicb.js"></script>
+</body>
+</html>

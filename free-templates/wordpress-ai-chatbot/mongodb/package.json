@@ -1,0 +1,11 @@
+{
+  "name": "wp-ai-chatbot-embeddings",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "embed": "node embed-skills-openai.js"
+  },
+  "dependencies": {
+    "mongodb": "^7.1.0"
+  }
+}

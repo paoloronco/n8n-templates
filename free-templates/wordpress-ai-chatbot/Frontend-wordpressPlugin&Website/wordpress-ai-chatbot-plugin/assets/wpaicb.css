@@ -1,0 +1,67 @@
+.wpaicb-wrap{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  max-width: 780px;
+  margin: 24px auto;
+  padding: 12px;
+  background: transparent; /* remove solid bg; let page show through */
+  color: #fff;
+  border-radius: 8px;
+}
+.wpaicb-title{ margin: 0 0 12px; }
+.wpaicb-chat{
+  border: 1px solid #1f2937;
+  padding: 12px;
+  overflow: auto;
+  border-radius: 12px;
+  background: transparent; /* remove chat area bg */
+}
+.wpaicb-row{ margin: 10px 0; display:flex; gap:10px; align-items:flex-start; }
+.wpaicb-role{ font-weight: 700; min-width: 44px; color:#fff; }
+.wpaicb-bubble{
+  display:inline-block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 100%;
+  white-space: pre-wrap;
+  line-height: 1.35;
+  background: #000; /* black message bubble */
+  border: 1px solid #1f2937; /* keep delimiter border */
+  color: #fff; /* white text for both roles */
+}
+/* Explicitly keep both roles white for clarity */
+.wpaicb-bot .wpaicb-bubble{ color:#ffffff; }
+.wpaicb-me .wpaicb-bubble{ color:#ffffff; }
+
+.wpaicb-bar{ display:flex; gap:8px; margin-top:12px; }
+.wpaicb-msg{
+  flex:1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  background: #000; /* black writing bar */
+  color: #fff; /* white input text */
+}
+.wpaicb-wrap button{
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  cursor: pointer;
+  background: transparent; /* default buttons transparent unless overridden */
+  color: #fff;
+}
+.wpaicb-send{
+  background: #ffffff; /* white send button */
+  color: #000000;      /* dark text on white */
+  border-color: #e5e7eb;
+}
+.wpaicb-wrap button:disabled{ opacity:.6; cursor:not-allowed; }
+
+.wpaicb-hint{ color:#9ca3af; font-size: 13px; margin-top: 8px; }
+
+/* Search results rendering */
+.wpaicb-sr-list{ margin:0; padding-left: 18px; }
+.wpaicb-sr-item{ margin: 8px 0; }
+.wpaicb-sr-item a{ color:#60a5fa; text-decoration:none; }
+.wpaicb-sr-item a:hover{ text-decoration:underline; }
+.wpaicb-sr-summary{ margin-top:3px; font-size:0.95em; opacity:0.92; color:#e5e7eb; }
+.wpaicb-sr-follow{ margin-top:10px; font-style: italic; opacity:0.95; color:#cbd5e1; }

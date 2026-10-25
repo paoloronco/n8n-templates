@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WP AI Chatbot</title>
+  <style>
+    body { font-family: system-ui, Arial; max-width: 780px; margin: 24px auto; padding: 0 12px; background:#fafafa; }
+    #chat { border: 1px solid #ddd; padding: 12px; height: 520px; overflow: auto; border-radius: 12px; background:#fff; }
+    .row { margin: 10px 0; display:flex; gap:10px; align-items:flex-start; }
+    .role { font-weight: 700; min-width: 44px; color:#111; }
+    .bubble { display:inline-block; padding: 10px 12px; border-radius: 12px; max-width: 100%; white-space: pre-wrap; line-height: 1.35; }
+    .me .bubble { background: #f3f4f6; }
+    .bot .bubble { background: #eef2ff; }
+    .bar { display: flex; gap: 8px; margin-top: 12px; }
+    #msg { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ccc; }
+    button { padding: 12px 14px; border-radius: 12px; border: 1px solid #ccc; cursor: pointer; background:#fff; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Rendering risultati */
+    .sr-list { margin: 0; padding-left: 18px; }
+    .sr-item { margin: 8px 0; }
+    .sr-item a { color:#1d4ed8; text-decoration: none; }
+    .sr-item a:hover { text-decoration: underline; }
+    .sr-summary { margin-top: 3px; font-size: 0.95em; opacity: 0.92; }
+    .sr-follow { margin-top: 10px; font-style: italic; opacity: 0.95; }
+
+    .hint { color:#666; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h2>WP AI Chatbot</h2>
+
+  <div id="chat"></div>
+
+  <div class="bar">
+    <input id="msg" placeholder="Scrivi…" autocomplete="off" />
+    <button id="send">Invia</button>
+  </div>
+  <div class="hint">Suggerimento: prova “trova i post che parlano di proxmox”.</div>
+
+  <script>
+    // ✅ Endpoint n8n (il tuo webhook protetto da Header Auth)
+    const ENDPOINT = "/wp-json/wpaicb/v1/chat";
+
+    // 🔐 Header Auth: deve combaciare con Webhook node -> Authentication -> Header Auth
+    // Se in n8n hai messo:
+    //   Header Name: Authorization
+    //   Header Value: Bearer ABC123
+    // allora qui deve essere uguale.
+    const AUTH_HEADER_NAME = "";
+    const AUTH_HEADER_VALUE = "";
+
+    // (opzionale) usato per riconoscere il “trucco” smalltalk->search_results
+    const SITE_HOME = window.location.origin + "/";
+
+    // Session ID client-side per correlare conversazioni/log e rate limit “soft”
+    const sessionId = localStorage.getItem("sessionId") || crypto.randomUUID();
+    localStorage.setItem("sessionId", sessionId);
+
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("msg");
+    const btn = document.getElementById("send");
+
+    // --- Welcome message (shown once per sessionId) ---
+    const WELCOME_MESSAGE = `Hello! Ask about website articles or the author profile.`;
+
+    function addRow(role, cls) {
+      const row = document.createElement("div");
+      row.className = `row ${cls}`;
+
+      const roleEl = document.createElement("span");
+      roleEl.className = "role";
+      roleEl.textContent = role + ":";
+
+      const bubble = document.createElement("span");
+      bubble.className = "bubble";
+
+      row.appendChild(roleEl);
+      row.appendChild(bubble);
+
+      chat.appendChild(row);
+      chat.scrollTop = chat.scrollHeight;
+
+      return { row, bubble };
+    }
+
+    function setText(bubble, text) {
+      bubble.textContent = text ?? "";
+    }
+
+    function normalizeText(s) {
+      return (s ?? "").toString().replace(/\s+/g, " ").trim();
+    }
+
+    function looksLikeJson(text, contentType) {
+      const t = (contentType || "").toLowerCase();
+      if (t.includes("application/json")) return true;
+      const s = (text || "").trim();
+      return (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"));
+    }
+
+    function tryParseJson(text) {
+      if (typeof text !== "string") return null;
+      try { return JSON.parse(text); } catch { return null; }
+    }
+
+    function clearBubble(bubble) {
+      bubble.textContent = "";
+      bubble.innerHTML = "";
+    }
+
+    /**
+     * ✅ Estrae il payload “vero” dalla risposta n8n.
+     * Supporta:
+     *  - { output: {...} }
+     *  - [ { output: {...} } ]
+     *  - { structured: {...} }
+     *  - { type: ... } diretto
+     */
+    function extractPayload(parsed) {
+      let root = parsed;
+
+      // n8n spesso ritorna array di items
+      if (Array.isArray(root)) root = root[0];
+
+      // alcuni flussi wrappano in structured
+      if (root && root.structured && typeof root.structured === "object") root = root.structured;
+
+      // ✅ caso tipico: root.output contiene type/results/...
+      if (root && root.output && typeof root.output === "object") root = root.output;
+
+      return root;
+    }
+
+    // Rende risultati RAG (posts) in lista senza header “Ecco i post che parlano di:”
+    function renderSearchResults(bubble, data) {
+      clearBubble(bubble);
+
+      const results = Array.isArray(data.results) ? data.results : [];
+
+      if (results.length === 0) {
+        const none = document.createElement("div");
+        none.className = "sr-follow";
+        none.textContent = normalizeText(data.follow_up) || "Nessun risultato trovato.";
+        bubble.appendChild(none);
+        return;
+      }
+
+      const ul = document.createElement("ul");
+      ul.className = "sr-list";
+
+      results.forEach(r => {
+        const li = document.createElement("li");
+        li.className = "sr-item";
+
+        const title = normalizeText(r.title) || "Senza titolo";
+        const url = normalizeText(r.url) || "#";
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = title;
+        li.appendChild(a);
+
+        const summary = normalizeText(r.summary);
+        if (summary) {
+          const sum = document.createElement("div");
+          sum.className = "sr-summary";
+          sum.textContent = summary;
+          li.appendChild(sum);
+        }
+
+        ul.appendChild(li);
+      });
+
+      bubble.appendChild(ul);
+
+      const fu = normalizeText(data.follow_up);
+      if (fu) {
+        const follow = document.createElement("div");
+        follow.className = "sr-follow";
+        follow.textContent = fu;
+        bubble.appendChild(follow);
+      }
+    }
+
+    // Rende “info/skills” (type: info) in modo leggibile
+    function renderInfo(bubble, data) {
+      clearBubble(bubble);
+
+      const results = Array.isArray(data.results) ? data.results : [];
+      const follow = normalizeText(data.follow_up);
+
+      if (results.length > 0) {
+        const wrap = document.createElement("div");
+
+        results.forEach((item) => {
+          const block = document.createElement("div");
+          block.style.marginBottom = "10px";
+
+          if (typeof item === "string") {
+            block.textContent = item;
+          } else if (item && typeof item === "object") {
+            const line = [];
+            if (item.title) line.push(item.title);
+            if (item.summary) line.push(item.summary);
+            if (item.skill) line.push(`Skill: ${item.skill}`);
+            if (item.category) line.push(`Category: ${item.category}`);
+            if (item.proficiency) line.push(`Proficiency: ${item.proficiency}`);
+            block.textContent = line.filter(Boolean).join(" — ");
+          } else {
+            block.textContent = normalizeText(item);
+          }
+
+          wrap.appendChild(block);
+        });
+
+        bubble.appendChild(wrap);
+      }
+
+      if (follow) {
+        const fu = document.createElement("div");
+        fu.className = "sr-follow";
+        fu.textContent = follow;
+        bubble.appendChild(fu);
+      }
+
+      if (results.length === 0 && !follow) {
+        setText(bubble, "Ok—mi dai un po’ più contesto su cosa vuoi sapere?");
+      }
+    }
+
+    // Caso speciale: smalltalk “mascherato” da search_results
+    function isSmalltalkWrappedAsSearchResults(obj) {
+      if (!obj || obj.type !== "search_results") return false;
+      const q = (obj.query ?? "").toString();
+      const results = Array.isArray(obj.results) ? obj.results : [];
+      if (results.length !== 1) return false;
+
+      const r0 = results[0] || {};
+      const url = normalizeText(r0.url);
+      const title = normalizeText(r0.title);
+      const summary = normalizeText(r0.summary);
+
+      const queryLooksEmpty = q === "" || q === "\u200B" || normalizeText(q) === "";
+      const looksLikeHomepage =
+        url === normalizeText(SITE_HOME) ||
+        url === "https://example.com" ||
+        url === "https://example.com/";
+
+      return queryLooksEmpty && looksLikeHomepage && !!title && !summary && !normalizeText(obj.follow_up);
+    }
+
+    // Prova a “umanizzare” JSON sconosciuti senza mostrarli raw
+    function renderBestEffortFromUnknownJson(bubble, obj) {
+      const candidates = [
+        obj?.text,
+        obj?.message,
+        obj?.reply,
+        obj?.answer,
+        obj?.output?.text,
+        obj?.output?.follow_up,
+        obj?.output?.query,
+      ].map(normalizeText).filter(Boolean);
+
+      if (candidates.length) {
+        setText(bubble, candidates[0]);
+        return;
+      }
+
+      if (Array.isArray(obj) && obj.every(x => typeof x === "string")) {
+        setText(bubble, obj.join("\n"));
+        return;
+      }
+
+      const keys = (obj && typeof obj === "object") ? Object.keys(obj).slice(0, 10) : [];
+      const digest = keys.length
+        ? `Risposta strutturata non riconosciuta. Campi: ${keys.join(", ")}`
+        : "Risposta strutturata non riconosciuta.";
+      setText(bubble, digest);
+    }
+
+    function renderBotReply(bubble, rawText, contentType, httpStatusOk, statusCode) {
+      if (!httpStatusOk) {
+        if (statusCode === 401 || statusCode === 403) {
+          setText(bubble, `(HTTP ${statusCode}) Non autorizzato. Controlla Header Auth (AUTH_HEADER_NAME/VALUE) e CORS.`);
+          return;
+        }
+        setText(bubble, `(HTTP ${statusCode}) ${rawText || "Errore dal webhook"}`);
+        return;
+      }
+
+      const ct = (contentType || "").toLowerCase();
+      const text = rawText ?? "";
+
+      // 1) Se arriva HTML, estrai testo
+      if (ct.includes("text/html")) {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        setText(bubble, tmp.textContent || tmp.innerText || "");
+        return;
+      }
+
+      // 2) Se arriva JSON (o sembra JSON), parse e route per type
+      if (looksLikeJson(text, ct)) {
+        const parsed = (typeof text === "string") ? tryParseJson(text) : text;
+        if (!parsed) {
+          setText(bubble, text);
+          return;
+        }
+
+        const payload = extractPayload(parsed);
+
+        if (!payload || typeof payload !== "object") {
+          setText(bubble, normalizeText(payload) || "Risposta vuota");
+          return;
+        }
+
+        if (isSmalltalkWrappedAsSearchResults(payload)) {
+          setText(bubble, normalizeText(payload.results[0].title));
+          return;
+        }
+
+        if (payload.type === "search_results") {
+          renderSearchResults(bubble, payload);
+          return;
+        }
+        if (payload.type === "info") {
+          renderInfo(bubble, payload);
+          return;
+        }
+        if (payload.type === "text") {
+          setText(bubble, normalizeText(payload.text));
+          return;
+        }
+
+        renderBestEffortFromUnknownJson(bubble, payload);
+        return;
+      }
+
+      // 3) Plain text
+      setText(bubble, text || `(HTTP ${statusCode}) Risposta vuota`);
+    }
+
+    async function send() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      input.value = "";
+      const me = addRow("Tu", "me");
+      setText(me.bubble, message);
+
+      btn.disabled = true;
+      input.disabled = true;
+
+      const thinking = addRow("Bot", "bot");
+      setText(thinking.bubble, "Sto pensando…");
+
+      const payloadObj = { message, sessionId };
+
+      let res;
+      try {
+        res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Authentication is performed server-side by the WordPress plugin
+            "X-Chat-Session": sessionId,           // ✅ utile per log/rate-limit
+          },
+          body: JSON.stringify(payloadObj),
+        });
+      } catch (e) {
+        setText(thinking.bubble, "Errore di rete (fetch fallita). Controlla endpoint/CORS.");
+        btn.disabled = false;
+        input.disabled = false;
+        input.focus();
+        return;
+      }
+
+      const rawText = await res.text();
+      renderBotReply(thinking.bubble, rawText, res.headers.get("content-type"), res.ok, res.status);
+
+      btn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
+
+    btn.onclick = send;
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+
+    // --- Show welcome on first load (once per sessionId) ---
+    (function initWelcome() {
+      const key = "welcomeShown:" + sessionId;
+      const already = localStorage.getItem(key);
+
+      if (!already) {
+        const w = addRow("Bot", "bot");
+        setText(w.bubble, WELCOME_MESSAGE);
+        localStorage.setItem(key, "1");
+      }
+      input.focus();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1754 @@
+{
+  "name": "WordPress AI Chatbot - Community Template",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "wordpress-posts",
+          "mode": "list",
+          "cachedResultName": "wordpress-posts"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        224
+      ],
+      "id": "0534d7a4-ed00-4d3d-af44-681d911980d0",
+      "name": "Qdrant Vector Store1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        400
+      ],
+      "id": "3b438fa4-92e5-475c-8536-671bf8d89e5f",
+      "name": "Embeddings OpenAI"
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{$json.title}}"
+              },
+              {
+                "name": "url",
+                "value": "={{$json.url}}"
+              },
+              {
+                "name": "postId",
+                "value": "={{$json.postId}}"
+              },
+              {
+                "name": "slug",
+                "value": "={{$json.slug}}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        400
+      ],
+      "id": "50890836-e0e0-4fd0-b07e-8db9ad8d7ee3",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1200,
+        "chunkOverlap": 150,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        608,
+        800
+      ],
+      "id": "74daea1f-fd4b-40b3-bfb3-66f023bce059",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        224
+      ],
+      "id": "94f3bbd3-2e45-40f9-836f-e3551fe1bcfb",
+      "name": "WP Get all post"
+    },
+    {
+      "parameters": {
+        "jsCode": "function stripHtml(s = \"\") {\n  return String(s)\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, \" \")\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, \" \")\n    .replace(/<[^>]*>/g, \" \")\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\nfunction decodeEntities(str = \"\") {\n  return String(str)\n    .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))\n    .replace(/&quot;/g, '\"')\n    .replace(/&apos;/g, \"'\")\n    .replace(/&amp;/g, \"&\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\");\n}\n\n// takes ALL items (Run once for all items)\nconst posts = $input.all().map(i => i.json);\n\nreturn posts.map(p => {\n  const title = decodeEntities(stripHtml(p.title?.rendered ?? p.title ?? \"\"));\n  const excerpt = decodeEntities(stripHtml(p.excerpt?.rendered ?? p.excerpt ?? \"\"));\n  const content = decodeEntities(stripHtml(p.content?.rendered ?? p.content ?? \"\"));\n  const url = String(p.link ?? \"\").trim();\n  \n  // Indexed text: title + excerpt + content (so keywords like \"kali\" match anywhere)\n  // Note: if you want to limit the content length, truncate content to N characters.\n  const text = [\n    title ? `Title: ${title}` : \"\",\n    excerpt ? `Excerpt: ${excerpt}` : \"\",\n    content ? `Content: ${content}` : \"\",\n  ].filter(Boolean).join(\"\\n\\n\");\n  \n  return {\n    json: {\n      // Field that the Default Data Loader will use as content\n      content: text,\n      \n      // FLAT Metadata (for mapping in the Default Data Loader)\n      title,\n      url,\n      postId: String(p.id ?? \"\"),\n      slug: String(p.slug ?? \"\")\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        224
+      ],
+      "id": "138a6a5a-18d8-4ced-a999-4fcf23b0a688",
+      "name": "Prepare Documents for Indexing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        224
+      ],
+      "id": "81d0dea1-56f6-46a7-8537-08e2456f41bd",
+      "name": "Manual Indexing"
+    },
+    {
+      "parameters": {
+        "content": "#### 1️⃣ WP Get all post\n**What it does:** Retrieves all published posts from your WordPress via REST API.\n\n**Configuration:**\n- Operation: `getAll`\n- Return All: `true` (gets all posts, not just the first 10)\n- Credentials: WordPress API (application username/password)\n",
+        "height": 448,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -80
+      ],
+      "id": "db2b7836-5993-4870-afa8-837ba49f72f9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "#### 2️⃣ Prepare Documents for Indexing\n**What it does:** Transforms WordPress posts from raw format to clean documents ready for embedding.\n\n**Operations:**\n1. **Strip HTML:** Removes all HTML tags (`<p>`, `<div>`, `<script>`, etc.)\n2. **Decode Entities:** Converts HTML characters like `&quot;` → `\"`, `&#8217;` → `'`\n3. **Builds indexable text:** Combines title + excerpt + content with labels\n4. **Extracts metadata:** Saves `title`, `url`, `postId`, `slug` for future filtering\n",
+        "height": 448,
+        "width": 416,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "bf8c0fed-f009-419e-9b58-b5043660bb4d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n#### Recursive Character Text Splitter\n\n ✂️ Splits long docs into chunks\n\nCurrent: 1200 chars / 150 overlap\n\nTune based on content:\n- Short posts (<2000): 800/100\n- Medium (2-5K): 1200/150  \n- Long (5K+): 1500/200",
+        "height": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        768
+      ],
+      "id": "9cefe2db-b513-4740-a72a-35e36cd3fe29",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n#### Default data loader\n\n📦 Maps content + metadata\n\nMetadata tracked:\n- title, url, postId, slug\n\n\nUse in chatbot for:\n- Filtering specific posts\n- Citing sources with URLs",
+        "height": 368,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        656,
+        368
+      ],
+      "id": "105d4d03-a5fa-4850-a270-45ffe941c44b",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n#### Embeddings OpenAI\n\n🧠 Converts text → vectors\n\nRecommended: \n_text-embedding-3-small_\n- 5x cheaper than ada-002\n- Same 1536 dimensions\n- Great quality\n",
+        "height": 368,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        368
+      ],
+      "id": "5ddfbad1-77f7-4ad3-a04a-73fed41c8d74",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "💾 Saves to Qdrant collection\n\nStores each post as a searchable semantic document.\nText is converted into a mathematical representation of meaning and saved together with useful context for the chatbot.\n\nThe database does not store just words → it stores concepts.",
+        "height": 1296,
+        "width": 624,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -80
+      ],
+      "id": "dd43376a-24ac-40eb-9780-db747b937197",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## WORKFLOW 1: Indexing Portfolio (WordPress Posts)\n\n### Purpose\nBuilds a semantic knowledge base from your WordPress posts.\nContent is fetched, normalized, embedded, and stored so it can be searched by meaning instead of keywords.\n\n**DO NOT RE-EXECUTE if you don't want to overwrite existing data in the Qdrant collection.**\n\n### How it works\n\n1. The workflow pulls published posts from WordPress through the REST API.\n2. Each post is converted from webpage format → clean readable text.\n3. Text is transformed into vector embeddings (numerical meaning fingerprints).\n4. Embeddings + metadata are stored in Qdrant as searchable documents.\n\n\nResult: questions can match concepts inside posts even if the exact words never appear.\n\n\n### Setup steps\n\n* Create a WordPress Application Password (read-only).\n* Configure the WP API endpoint and credentials in the first node.\n* Set your OpenAI API key for embeddings.\n* Configure a Qdrant collection (host + API key).\n* Run once to populate the knowledge base.\n",
+        "height": 1376,
+        "width": 2432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        -128
+      ],
+      "id": "d73ccc2a-0bd5-4f29-85ec-0a62e00b2215",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## 1. AI Chatbot (Entry Point)\n\nWebhook with Header Auth to receive requests. Customizable template based on your needs.\n\nUsed on example.com to handle chatbot with:\n- SmallTalk (hi, how are you...)\n- RAG (portfolio and projects)\n- Personal Info/Skills",
+        "height": 528,
+        "width": 480,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        1296
+      ],
+      "id": "ff0dfe21-83de-4bbe-b7e6-128ff6e41c71",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2256,
+        1568
+      ],
+      "id": "a11995ad-c357-4e29-9598-413c63794de7",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// ---- helpers ----\nfunction meta(it) {\n  return it.json?.metadata || it.json?.document?.metadata || {};\n}\n\nfunction urlOf(it) {\n  const m = meta(it);\n  return (m.url || m.sourceUrl || it.json?.url || \"\").trim();\n}\n\nfunction titleOf(it) {\n  const m = meta(it);\n  return (m.title || it.json?.title || \"Untitled\").trim();\n}\n\nfunction textOf(it) {\n  return (\n    it.json?.document?.pageContent ||\n    it.json?.pageContent ||\n    it.json?.content ||\n    \"\"\n  ).toString();\n}\n\nfunction scoreOf(it) {\n  const s = it.json?.score ?? it.json?.similarity ?? null;\n  return typeof s === \"number\" ? s : null;\n}\n\nfunction cleanSnippet(s, maxLen = 280) {\n  return s\n    .replace(/\\s+/g, \" \")\n    .replace(/<\\/?[^>]+(>|$)/g, \"\") // if you encounter HTML\n    .trim()\n    .slice(0, maxLen);\n}\n\n// ---- CONFIG (here you balance speed/completeness) ----\nconst MAX_DOCS_FOR_LLM = 60;     // increase recall without exploding tokens\nconst SNIPPET_LEN = 280;         // short snippet = lightweight context\nconst CONTEXT_MAX_DOCS = 35;     // in textual context put fewer (denser)\n\n// ---- Dedup by URL (keep the best by score) ----\nconst byUrl = new Map();\nfor (const it of items) {\n  const url = urlOf(it);\n  if (!url) continue;\n  const score = scoreOf(it) ?? -999;\n  const existing = byUrl.get(url);\n  if (!existing || score > existing.score) {\n    byUrl.set(url, {\n      title: titleOf(it),\n      url,\n      score,\n      snippet: cleanSnippet(textOf(it), SNIPPET_LEN),\n    });\n  }\n}\n\n// ---- sort by score and limit docs ----\nconst docs = [...byUrl.values()]\n  .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))\n  .slice(0, MAX_DOCS_FOR_LLM);\n\n// ---- compact context (only top N) ----\nconst context = docs\n  .slice(0, CONTEXT_MAX_DOCS)\n  .map((d, i) => `${i + 1}) ${d.title}\\nURL: ${d.url}\\nSNIPPET: ${d.snippet}`)\n  .join(\"\\n\\n---\\n\\n\");\n\n// ---- get user query from input node ----\nconst firstIn = $items(\"Code-Request_Parsing\")[0]?.json || {};\nconst userQuery = firstIn.chatInput ?? \"\";\n\n// final output\nreturn ["
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        2064
+      ],
+      "id": "cc92981a-2a83-4d57-9f13-216d8d13b509",
+      "name": "Build context from Qdrant results1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wp-ai-chatbot",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -688,
+        1616
+      ],
+      "id": "757b54f5-2300-41cd-8ce1-8b7f4711b0bc",
+      "name": "Webhook",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Response Parsing: parse output + rewrite URLs + normalize type + strip follow_up ===\n\n// --- URL rewrite helper ---\n// IT branch: urlPrefix = \"\"      → URLs unchanged\n// EN branch: urlPrefix = \"/en/\"  → example.com URLs get /en/ injected\nconst URL_PREFIX = \"\";\n\nfunction rewriteUrl(url) {\n  if (!url || typeof url !== \"string\") return url;\n  const u = url.trim();\n  if (!URL_PREFIX) return u; // IT branch: no rewrite\n  // Already has the prefix → skip\n  if (u.includes(\"://example.com\" + URL_PREFIX)) return u;\n  if (u.startsWith(\"https://example.com/\")) {\n    return u.replace(\"https://example.com/\", \"https://example.com\" + URL_PREFIX);\n  }\n  if (u.startsWith(\"http://example.com/\")) {\n    return u.replace(\"http://example.com/\", \"http://example.com\" + URL_PREFIX);\n  }\n  return u; // other domains: untouched\n}\n\n// --- Robust output parsing ---\nlet obj = $json?.response?.output ?? $json?.output ?? null;\n\n// If it's a string, try to parse it (handles markdown-wrapped JSON too)\nif (typeof obj === \"string\") {\n  let cleaned = obj.trim()\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/\\s*```$/, \"\")\n    .trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) cleaned = jsonMatch[0];\n  try { obj = JSON.parse(cleaned); } catch {}\n}\n\n// --- Normalize type ---\nif (obj && typeof obj === \"object\") {\n  if (obj.type === \"rag_results\") obj.type = \"search_results\";\n  if (!obj.type && obj.results) obj.type = \"search_results\";\n\n  // --- Rewrite URLs in results[] ---\n  if (Array.isArray(obj.results)) {\n    obj.results = obj.results.map(r => ({ ...r, url: rewriteUrl(r.url) }));\n  }\n\n  // --- Remove follow_up ---\n  const { follow_up, ...cleanObj } = obj;\n\n  return [{ json: cleanObj }];\n}\n\n// --- Text/plain fallback ---\nconst raw = $json?.output ?? $json?.response?.output;\nreturn [{\n  json: {\n    type: \"text\",\n    text: typeof raw === \"string\" ? raw : JSON.stringify(raw),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        2064
+      ],
+      "id": "9d7e4372-d93c-425f-a842-49282bd82b08",
+      "name": "Code-Response_Parsing"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.body;\nlet obj = raw;\nif (typeof raw === 'string') { try { obj = JSON.parse(raw); } catch { obj = { message: raw }; } }\nif (!obj || typeof obj !== 'object' || typeof obj.message !== 'string' || !obj.message.trim() || obj.message.length > 2000) {\n  return [{ json: { chatInput: '', sessionId: '', invalidRequest: true } }];\n}\nreturn [{ json: { chatInput: obj.message.trim(), sessionId: String(obj.sessionId || '').slice(0,128), invalidRequest: false } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        1616
+      ],
+      "id": "f994e7f5-9e40-44b8-af19-151f57f8f37b",
+      "name": "Code-Request_Parsing"
+    },
+    {
+      "parameters": {
+        "topN": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        752,
+        2224
+      ],
+      "id": "67c87db9-a110-4062-aa25-35a12f239f04",
+      "name": "Reranker Cohere"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"search_results\",\n  \"query\": \"string\",\n  \"results\": [\n    { \"title\": \"string\", \"url\": \"string\", \"summary\": \"string\" }\n  ],\n  \"follow_up\": \"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1344,
+        2224
+      ],
+      "id": "94fbb53f-0eaa-4f28-8be9-d7c0a3bdf565",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        2224
+      ],
+      "id": "3f884baf-ada7-41d7-9ab3-c2f8557695de",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "wordpress-posts",
+          "mode": "list",
+          "cachedResultName": "wordpress-posts"
+        },
+        "prompt": "={{ $('Webhook').item.json.body.message }}",
+        "topK": 60,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        2064
+      ],
+      "id": "d0293610-3381-4084-a4e6-872f7fcd8451",
+      "name": "Qdrant Search (wordpress5)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Sei l’assistente del sito web example.com.\n\nLINGUA:\n- Rispondi SEMPRE in italiano.\n- Non menzionare mai routing interno, intent, RAG, database o strumenti.\n\nFONTE UNICA:\n- Usa ESCLUSIVAMENTE le informazioni presenti nel CONTESTO qui sotto\n  (titoli, snippet, URL).\n- NON inventare articoli, titoli, URL o dettagli non presenti nel CONTESTO.\n- Se il CONTESTO è vuoto o insufficiente:\n  - restituisci results = []\n  - fai UNA sola domanda di chiarimento breve in italiano.\n\nCONTENUTI:\n- I contenuti nel CONTESTO sono già in italiano.\n- NON tradurre nulla.\n- Mantieni i titoli coerenti con il contenuto originale.\n\nOUTPUT:\n- Restituisci SOLO JSON valido.\n- Nessun markdown, nessun backtick, nessun testo extra.\n- Non aggiungere chiavi extra.\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=USER_QUERY: {{ $items(\"Code-Request_Parsing\")[0].json.chatInput }}\n\nCONTESTO (usa questa come UNICA fonte):\n{{ $json.context }}\n\nTASK:\n- Seleziona i 1–5 articoli PIÙ rilevanti rispetto alla USER_QUERY.\n- Per ogni risultato fornisci:\n  - title: titolo breve e chiaro\n  - url: URL ESATTAMENTE come nel CONTESTO (non modificarlo)\n  - summary: 1–2 frasi riassuntive in italiano\n- Scrivi infine follow_up (1 frase breve in italiano).\n\nRestituisci SOLO JSON con questa struttura ESATTA:\n\n{\n  \"type\": \"search_results\",\n  \"query\": \"<USER_QUERY identica>\",\n  \"results\": [\n    { \"title\": \"...\", \"url\": \"...\", \"summary\": \"...\" }\n  ],\n  \"follow_up\": \"...\"\n}",
+          "returnIntermediateSteps": false,
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1168,
+        2064
+      ],
+      "id": "024db1cf-8299-4250-859e-183cf2c41511",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output[0].content[0].text.intent }} {{ $json.output[0].content[0].text.language }}",
+                    "rightValue": "smalltalk it",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "69f4546e-9774-4f00-bc81-d0c602ed82e0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "smalltalk_it"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4db0dd53-4391-4dde-b53b-08fcd51882bf",
+                    "leftValue": "={{ $json.output[0].content[0].text.intent }} {{ $json.output[0].content[0].text.language }}",
+                    "rightValue": "smalltalk en",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "smalltalk_en"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1a5cd641-81f8-4d5b-bd27-3d0f4e3333de",
+                    "leftValue": "={{ $json.output[0].content[0].text.intent }} {{ $json.output[0].content[0].text.language }}",
+                    "rightValue": "rag it",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RAG_it"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5ae13538-6242-420b-abbc-c0af47148d78",
+                    "leftValue": "={{ $json.output[0].content[0].text.intent }} {{ $json.output[0].content[0].text.language }}",
+                    "rightValue": "rag en",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RAG_en"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fa616c3f-b7c8-44c0-a3fd-6353ed511075",
+                    "leftValue": "={{ $json.output[0].content[0].text.intent }} {{ $json.output[0].content[0].text.language }}",
+                    "rightValue": "info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "info"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        1568
+      ],
+      "id": "89458f41-c5b6-440c-97a2-d3ae3a46330f",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Response generated by the smalltalk model\nconst reply =\n  $json.text ??\n  $json.output?.[0]?.content?.[0]?.text ??\n  \"\";\n// Original user query (optional)\nconst userQuery =\n  $items(\"Code-Request_Parsing\")[0]?.json?.chatInput ??\n  $items(\"Webhook\")[0]?.json?.body?.message ??\n  \"\";\n// Zero-width space: header \"Here are the posts about: \" appears practically empty\nconst invisibleQuery = \"\\u200B\";\n// \"Fake result\" to avoid \"No posts found.\"\n// Use a valid URL (even homepage) if the site requires a clickable link.\nconst fakeUrl = \"https://example.com/\"; // change if you want\nreturn [{\n  json: {\n    type: \"search_results\",\n    query: invisibleQuery,          // or \"\" if your frontend doesn't print anything with empty string\n    results: [\n      {\n        title: String(reply).trim(), // your response becomes the \"card\"\n        url: fakeUrl,\n        summary: \"\"                  // you can put any extras here\n      }\n    ],\n    follow_up: \"\"                   // empty, so it doesn't add other lines below\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        1568
+      ],
+      "id": "ec466b34-8398-4ce5-8c4f-0b6edbfb338a",
+      "name": "Code-Smalltalk_response"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an intent + language router for a website chatbot.\n\nYour job:\n1) Detect the language of the user's message: \"it\" or \"en\".\n2) Classify the intent:\n   - \"smalltalk\": greetings, chit-chat, generic conversation, “what can you do?”\n   - \"info\": questions about the website owner (skills, profile, experience, CV-like questions)\n   - \"rag\": questions about the website/blog content (articles, guides, posts, documentation)\n\nRules:\n- Choose exactly one intent.\n- Return ONLY structured JSON that matches the provided schema.\n- Use \"language\" = \"it\" or \"en\" based on the user’s message language.\n- Copy the user message verbatim into \"query\".\n- Do not add any extra keys.\n"
+            },
+            {
+              "content": "={{$json.chatInput}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "verbosity": "low",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"intent\": { \"type\": \"string\", \"enum\": [\"smalltalk\", \"info\", \"rag\"] },\n    \"language\": { \"type\": \"string\", \"enum\": [\"it\", \"en\"] },\n    \"query\": { \"type\": \"string\" }\n  },\n  \"required\": [\"intent\", \"language\", \"query\"],\n  \"additionalProperties\": false\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        1616
+      ],
+      "id": "b9f71010-05dc-4702-b360-490f89bbe3f4",
+      "name": "OpenAI Intent Router"
+    },
+    {
+      "parameters": {
+        "content": "## 4. RAG - Portfolio\n**Vector Store: Qdrant**\nChosen for simplicity, lightweight, and fast learning curve.\n\n**Flow:**\n1. Qdrant Search (Retrieval=10) → finds relevant documents\n2. Reranker Cohere → reorders by relevance\n3. OpenAI Chat Model → generates response with context\n4. Build context → prepares structured output\n\nSemantic search on portfolio posts and projects.",
+        "height": 896,
+        "width": 1168,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        1776
+      ],
+      "id": "09e069fc-6dde-4b6b-9fa5-0dbc6c87eb0c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// ---- helpers ----\nfunction meta(it) {\n  return it.json?.metadata || it.json?.document?.metadata || {};\n}\n\nfunction urlOf(it) {\n  const m = meta(it);\n  return (m.url || m.sourceUrl || it.json?.url || \"\").trim();\n}\n\nfunction titleOf(it) {\n  const m = meta(it);\n  return (m.title || it.json?.title || \"Untitled\").trim();\n}\n\nfunction textOf(it) {\n  return (\n    it.json?.document?.pageContent ||\n    it.json?.pageContent ||\n    it.json?.content ||\n    \"\"\n  ).toString();\n}\n\nfunction scoreOf(it) {\n  const s = it.json?.score ?? it.json?.similarity ?? null;\n  return typeof s === \"number\" ? s : null;\n}\n\nfunction cleanSnippet(s, maxLen = 280) {\n  return s\n    .replace(/\\s+/g, \" \")\n    .replace(/<\\/?[^>]+(>|$)/g, \"\") // if you encounter HTML\n    .trim()\n    .slice(0, maxLen);\n}\n\n// ---- CONFIG (here you balance speed/completeness) ----\nconst MAX_DOCS_FOR_LLM = 60;     // increase recall without exploding tokens\nconst SNIPPET_LEN = 280;         // short snippet = lightweight context\nconst CONTEXT_MAX_DOCS = 35;     // in textual context put fewer (denser)\n\n// ---- Dedup by URL (keep the best by score) ----\nconst byUrl = new Map();\nfor (const it of items) {\n  const url = urlOf(it);\n  if (!url) continue;\n  const score = scoreOf(it) ?? -999;\n  const existing = byUrl.get(url);\n  if (!existing || score > existing.score) {\n    byUrl.set(url, {\n      title: titleOf(it),\n      url,\n      score,\n      snippet: cleanSnippet(textOf(it), SNIPPET_LEN),\n    });\n  }\n}\n\n// ---- sort by score and limit docs ----\nconst docs = [...byUrl.values()]\n  .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))\n  .slice(0, MAX_DOCS_FOR_LLM);\n\n// ---- compact context (only top N) ----\nconst context = docs\n  .slice(0, CONTEXT_MAX_DOCS)\n  .map((d, i) => `${i + 1}) ${d.title}\\nURL: ${d.url}\\nSNIPPET: ${d.snippet}`)\n  .join(\"\\n\\n---\\n\\n\");\n\n// ---- get user query from input node ----\nconst firstIn = $items(\"Code-Request_Parsing\")[0]?.json || {};\nconst userQuery = firstIn.chatInput ?? \"\";\n\n// final output\nreturn [\n  {\n    json: {\n      chatInput: userQuery,\n      context,\n      documents: docs, // here we already have title/url/snippet/score\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        2368
+      ],
+      "id": "4bc22d89-e931-476b-9f98-8034a0acb87f",
+      "name": "Build context from Qdrant results"
+    },
+    {
+      "parameters": {
+        "topN": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        736,
+        2528
+      ],
+      "id": "a62a1d75-56e6-4d30-b06a-92d1aee4aa8e",
+      "name": "Reranker Cohere3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        2528
+      ],
+      "id": "56576c05-0c8c-45de-ad92-96158499bb3e",
+      "name": "Embeddings OpenAI3"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"search_results\",\n  \"query\": \"string\",\n  \"results\": [\n    { \"title\": \"string\", \"url\": \"string\", \"summary\": \"string\" }\n  ],\n  \"follow_up\": \"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1328,
+        2528
+      ],
+      "id": "47da27fb-25b5-49b3-abf4-9fa52c69556d",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        2528
+      ],
+      "id": "2b7ae763-7c40-4c80-99b0-a2a0e8bf1382",
+      "name": "OpenAI Chat Model3"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "wordpress-posts",
+          "mode": "list",
+          "cachedResultName": "wordpress-posts"
+        },
+        "prompt": "={{ $('Webhook').item.json.body.message }}",
+        "topK": 60,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        2368
+      ],
+      "id": "b2427416-0df8-4340-97d1-9f0666db2d2a",
+      "name": "Qdrant Search (wordpress5)1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are the website assistant for example.com.\n\nLANGUAGE:\n- Reply in the language requested by the user: \"en\".\n  If it is missing, infer it from the user query: Italian -> \"it\", otherwise \"en\".\n\nSOURCE OF TRUTH:\n- Use ONLY the information provided in CONTESTO below (snippets, titles, URLs).\n- Do NOT invent posts, titles, URLs, or details not present in CONTESTO.\n- If CONTESTO is empty or not enough to answer, return an empty results array and ask one short clarification question in the same language.\n\nTRANSLATION:\n- The retrieved content is in Italian. If the requested language is English (\"en\"), translate:\n  - results[].title (optional but recommended)\n  - results[].summary\n  - follow_up\n  Keep URLs exactly as provided (URLs will be adjusted after this step).\n\nOUTPUT:\n- Return ONLY valid JSON matching exactly the required schema.\n- No markdown, no backticks, no extra keys.\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=USER_QUERY: {{ $items(\"Code-Request_Parsing\")[0].json.chatInput }}\n\nCONTESTO (use this as the only source):\n{{ $json.context }}\n\nTASK:\n- Select the most relevant 1–5 posts for USER_QUERY from CONTESTO.\n- For each result, produce:\n  - title: short title (if the title is in Italian translate it)\n  - url: exactly the URL from CONTESTO (do not modify)\n  - summary: 1–2 sentences (translate it if it is in italian)\n- Then write follow_up (1 short sentence) in english\n\nReturn ONLY JSON with this exact structure:\n{\n  \"type\": \"search_results\",\n  \"query\": \"<USER_QUERY exactly>\",\n  \"results\": [ { \"title\": \"...\", \"url\": \"...\", \"summary\": \"...\" } ],\n  \"follow_up\": \"...\"\n}\n",
+          "returnIntermediateSteps": false,
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        2368
+      ],
+      "id": "6d5db6c2-5f51-4be0-8e4b-95a6a371e2fb",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25c7fdea-902b-4c26-a5b3-e09c64183fcc",
+              "name": "bucket",
+              "value": "your-chatbot-logs",
+              "type": "string"
+            },
+            {
+              "id": "fce806f3-3b93-406c-8d09-320d1024f5f9",
+              "name": "todayY",
+              "value": "={{ $now.toUTC().toFormat('yyyy') }}",
+              "type": "string"
+            },
+            {
+              "id": "4e504d08-62e3-4132-9c8a-2db4c47b6e2e",
+              "name": "todayM",
+              "value": "={{ $now.toUTC().toFormat('MM') }}",
+              "type": "string"
+            },
+            {
+              "id": "8380ad7b-4693-4809-a139-046d2646bfde",
+              "name": "todayD",
+              "value": "={{ $now.toUTC().toFormat('dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2656,
+        1568
+      ],
+      "id": "fbbe524e-5f07-4639-9682-c18ecfa76de3",
+      "name": "Set: date"
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "your-chatbot-logs",
+        "objectName": "={{$json.objectName}}",
+        "createData": {
+          "contentType": ""
+        },
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        1568
+      ],
+      "id": "02310ff9-972b-4eae-81e1-f2d69c845186",
+      "name": "GCS: Object_Log",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1) Build the log object with the fields you actually need\nconst log = {\n  ts: $now.toISO(),\n  // identifiers\n  sessionId: $json.sessionId || 'nosess',\n  ip_hash: $json.ip_hash || null,\n  // request\n  request: {\n    text: $json.userQuery || '',\n  },\n  // response (here I put the ENTIRE object you send to the user)\n  response: $json.aiResponse ?? null,\n  // useful extras\n  userAgent: $json.userAgent || null,\n  country: $json.country || null,\n  status: 'ok',\n};\n\n// 2) JSON string\nconst body = JSON.stringify(log);\n\n// 3) Binary (base64) with consistent mimeType\nconst buf = Buffer.from(body, 'utf8');\nconst objectName = $json.objectName || `chatbot-logs/unknown/${Date.now()}.json`;\n\nreturn [{\n  json: {\n    ...$json,\n    objectName,\n  },\n  binary: {\n    data: {\n      data: buf.toString('base64'),\n      mimeType: 'application/json',\n      fileName: objectName.split('/').pop(),\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3056,
+        1568
+      ],
+      "id": "1d8cb44e-06c5-4342-a3de-caee4de84eea",
+      "name": "Code: parsing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8c3e6ca9-ebcc-430d-9882-aafb451bcc8d",
+              "name": "objectName",
+              "value": "=chatbot-logs/{{$json.todayY}}/{{$json.todayM}}/{{$json.todayD}}/{{ $('Crypto: IP Hash').item.json.ip_hash }}_{{$now.toUTC().toFormat('HHmmss_SSS')}}_{{$execution.id}}.json",
+              "type": "string"
+            },
+            {
+              "id": "eeae0fb1-9491-4bc5-aea0-5b9747250db0",
+              "name": "userQuery",
+              "value": "={{ $items(\"Webhook\")[0].json.body?.message || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "325caaa0-724a-4eb9-a1e5-cc7f6182fc41",
+              "name": "sessionId",
+              "value": "={{ $items(\"Webhook\")[0].json.headers?.[\"x-chat-session\"] || $items(\"Webhook\")[0].json.body?.sessionId || \"nosess\" }}",
+              "type": "string"
+            },
+            {
+              "id": "95b95b80-5f54-4958-b7c2-1ec4e67737c5",
+              "name": "userAgent",
+              "value": "={{ $items(\"Webhook\")[0].json.headers?.[\"user-agent\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "b75a2cd3-6e3f-425e-9527-deb4a043e6d8",
+              "name": "country",
+              "value": "={{ $items(\"Webhook\")[0].json.headers?.[\"cf-ipcountry\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f8969b1b-86f8-46f4-9910-63a314843527",
+              "name": "aiResponse",
+              "value": "={{ $items('Respond to Webhook').item.json }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2848,
+        1568
+      ],
+      "id": "bb5570bb-7f2d-48df-80e4-8c4d201baeb2",
+      "name": "set: ObjectName_Date/Folder & data"
+    },
+    {
+      "parameters": {
+        "type": "SHA3-256",
+        "value": "={{ $items(\"Webhook\")[0].json.headers?.[\"cf-connecting-ip\"] || \"\" }}",
+        "dataPropertyName": "ip_hash"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        1568
+      ],
+      "id": "7a5178fa-83e8-41c4-b001-caec9b0d578a",
+      "name": "Crypto: IP Hash"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        3200
+      ],
+      "id": "31763079-6b76-4008-83ce-9010f049b36c",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        3200
+      ],
+      "id": "a9d43cea-9ce9-40af-ba86-8696b7ff2834",
+      "name": "Embeddings OpenAI4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const topN_skills = 10;\nconst topN_profile = 4;\n\n// ===== 1) SKILLS =====\nconst skillDocs = $items(\"MongoDB Atlas Vector SKILLS\")\n  .map(i => i.json?.document)\n  .filter(Boolean)\n  .slice(0, topN_skills);\n\nconst skillsContext = skillDocs\n  .map(d => d.pageContent)\n  .filter(Boolean)\n  .join(\"\\n\\n---\\n\\n\");\n\n// ===== 2) PROFILE (reorder by section priority) =====\nconst profileDocsRaw = $items(\"MongoDB Atlas Vector PROFILE\")\n  .map(i => i.json?.document)\n  .filter(Boolean);\n\nconst preferredOrder = [\n  \"What I do as a Cybersecurity Analyst\",\n  \"Stack and tools - Security\",\n  \"Stack and tools - Cloud & Infrastructure\",\n  \"DevOps & Automation\",\n  \"Systems & Networking\",\n  \"Preferences and focus\",\n  \"Examples of activities / projects\",\n  \"Who I am\",\n  \"Coding & Building\",\n];\n\nconst profileDocs = profileDocsRaw\n  .slice()\n  .sort((a,b) => {\n    const sa = a.metadata?.section ?? \"\";\n    const sb = b.metadata?.section ?? \"\";\n    const ia = preferredOrder.indexOf(sa);\n    const ib = preferredOrder.indexOf(sb);\n    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);\n  })\n  .slice(0, topN_profile);\n\nconst profileContext = profileDocs\n  .map(d => d.pageContent)\n  .filter(Boolean)\n  .join(\"\\n\\n\");\n\n// ===== 3) question =====\nconst chatInput = $items(\"Code-Request_Parsing\")[0].json.chatInput;\n\nconst context =\n`PROFILE CONTEXT:\\n${profileContext}\\n\\n====================\\n\\nSKILLS CONTEXT:\\n${skillsContext}`;\n\nreturn [{ json: { chatInput, context, skillsContext, profileContext } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        3024
+      ],
+      "id": "3d6472d8-7e2d-4fd8-a78d-57a8c5875b40",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "skills-collection",
+          "mode": "list",
+          "cachedResultName": "skills-collection"
+        },
+        "metadata_field": "description_rag",
+        "vectorIndexName": "skills-vector-index",
+        "prompt": "={{ $('Webhook').item.json.body.message }}",
+        "topK": 40,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        3024
+      ],
+      "id": "b59241e1-22c0-4c84-b3be-a5ea92f53f6d",
+      "name": "MongoDB Atlas Vector SKILLS"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        3200
+      ],
+      "id": "23581d36-9a31-41e1-b79b-c23c0b17db49",
+      "name": "Embeddings OpenAI5"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "profile-collection",
+          "mode": "list",
+          "cachedResultName": "profile-collection"
+        },
+        "vectorIndexName": "profile-vector-index",
+        "prompt": "={{ $('Webhook').item.json.body.message }}",
+        "topK": 50,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        3024
+      ],
+      "id": "fd2d04c5-cdef-40d2-865f-ecb43ebfdf1d",
+      "name": "MongoDB Atlas Vector PROFILE"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=USER_QUERY: {{ $items(\"Code-Request_Parsing\")[0].json.chatInput }}\n\nSKILLS\n{{ $json.context }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "Sei un assistente che fornisce informazioni sulle competenze professionali.\n\nCONTESTO DISPONIBILE:\n{{ $items(\"Code in JavaScript3\")[0].json.context }}\n\nDOMANDA UTENTE: {{ $items(\"Code in JavaScript3\")[0].json.chatInput }}\n\nISTRUZIONI:\n1. Analizza la domanda e identifica le 3-7 competenze PIÙ rilevanti dal contesto\n2. Per ogni competenza fornisci:\n   - skill_name: nome chiaro e conciso della competenza\n   - description: descrizione ben formattata (2-4 frasi)\n   - level: livello di competenza (se specificato nel contesto, altrimenti dedurlo come \"Avanzato\", \"Intermedio\" o \"Base\")\n\nFORMATTAZIONE DELLA DESCRIPTION:\n- Usa \\n per andare a capo tra paragrafi\n- Usa • seguito da spazio per elenchi puntati\n- Esempio: \"Protezione degli ambienti cloud.\\n\\n• Implementazione di soluzioni\\n• Gestione della sicurezza\\n• Analisi vulnerabilità\"\n\nOUTPUT RICHIESTO:\nRestituisci SOLO un oggetto JSON valido, senza markdown, senza backtick, senza testo aggiuntivo.\nStruttura ESATTA richiesta:\n\n{\n  \"type\": \"skills_results\",\n  \"query\": \"ripeti qui la domanda originale dell'utente\",\n  \"skills\": [\n    {\n      \"skill_name\": \"Nome Competenza\",\n      \"description\": \"Descrizione formattata con newline e bullet points\",\n      \"level\": \"Livello\"\n    }\n  ],\n  \"follow_up\": \"Una breve domanda per continuare la conversazione\"\n}\n\nIMPORTANTE: \n- NON aggiungere ```json o ``` \n- NON aggiungere testo prima o dopo il JSON\n- Restituisci SOLO il JSON puro"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1456,
+        3024
+      ],
+      "id": "9fed3e95-af84-47ae-b792-d59d80e1b7d3",
+      "name": "AI Agent - SKILLS"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === ROBUST PARSING OF AI AGENT OUTPUT ===\n// Transform skills_results into search_results for WordPress compatibility\n\n// Get the raw output\nlet rawOutput = $json?.output ?? $json?.response?.output ?? \"\";\n\n// If it's already an object, use it directly\nif (typeof rawOutput === \"object\" && rawOutput !== null) {\n  // If it has skills, transform them into results\n  if (rawOutput.skills || rawOutput.type === \"skills_results\") {\n    return [{\n      json: {\n        type: \"search_results\",  // ← Type compatible with WP\n        query: rawOutput.query ?? \"\",\n        results: (rawOutput.skills ?? []).map(skill => ({  // ← KEY: skills → results\n          title: skill.skill_name ?? skill.name ?? \"Skill\",\n          url: \"https://example.com/skills/\",  // Placeholder URL (WP requires it)\n          summary: formatSkillDescription(skill)  // Format description with level\n        })),\n        follow_up: rawOutput.follow_up ?? \"Would you like to explore any specific skill in more detail?\"\n      }\n    }];\n  }\n}\n\n// If it's a string, parse it\nif (typeof rawOutput === \"string\") {\n  // Clean the string from markdown and spaces\n  let cleaned = rawOutput.trim();\n  \n  // Remove any markdown backticks\n  cleaned = cleaned.replace(/^```json\\s*/i, '');\n  cleaned = cleaned.replace(/^```\\s*/i, '');\n  cleaned = cleaned.replace(/\\s*```$/, '');\n  cleaned = cleaned.trim();\n  \n  // Try to find the JSON if there's text around it\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    cleaned = jsonMatch[0];\n  }\n  \n  // Parse the JSON\n  try {\n    const parsed = JSON.parse(cleaned);\n    \n    // Transform skills into results\n    return [{\n      json: {\n        type: \"search_results\",\n        query: parsed.query ?? \"\",\n        results: (parsed.skills ?? []).map(skill => ({\n          title: skill.skill_name ?? skill.name ?? \"Skill\",\n          url: \"#\",\n          summary: formatSkillDescription(skill)\n        })),\n        follow_up: parsed.follow_up ?? \"Would you like to explore any specific skill in more detail?\"\n      }\n    }];\n    \n  } catch (parseError) {\n    console.error(\"JSON parsing error:\", parseError);\n    console.error(\"Raw output:\", rawOutput);\n    console.error(\"Cleaned output:\", cleaned);\n    \n    // Fallback: create an error response\n    return [{\n      json: {\n        type: \"search_results\",\n        query: $items(\"Code-Request_Parsing\")[0]?.json?.chatInput ?? \"\",\n        results: [],\n        follow_up: \"An error occurred in the response format. Could you rephrase the question?\"\n      }\n    }];\n  }\n}\n\n// Final fallback\nreturn [{\n  json: {\n    type: \"search_results\",\n    query: \"\",\n    results: [],\n    follow_up: \"I didn't find any relevant skills. Would you like to search for something else?\"\n  }\n}];\n\n// === HELPER FUNCTION ===\nfunction formatSkillDescription(skill) {\n  const level = skill.level && skill.level !== \"N/A\" ? skill.level : \"\";\n  const description = skill.description ?? \"\";\n  \n  // If there's a level, add it at the beginning\n  if (level) {\n    return `**Level:** ${level}\\n\\n${description}`;\n  }\n  \n  return description;\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        3024
+      ],
+      "id": "705d00c2-5bde-4c00-942d-958f8517d966",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === REMOVE FOLLOW_UP FROM ALL RESPONSES ===\n// This node cleans the final output by removing the follow_up field\nconst data = $json;\n\n// If the object has the follow_up field, remove it\nif (data && typeof data === 'object') {\n  // Create a copy of the object without follow_up\n  const { follow_up, ...cleanedData } = data;\n  \n  return [{ json: cleanedData }];\n}\n\n// If for some reason it's not an object, pass through\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        2064
+      ],
+      "id": "bd3b3a11-ca11-41eb-a06f-c3d7fb17b700",
+      "name": "Code: remove followup"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are a conversational assistant for a professional website chatbot.\n\nYour role is to handle SMALLTALK and LIGHT CONVERSATION only.\n\nLANGUAGE:\n- Always respond in the user's language: {{ $json.language }}.\n- Do not mention the language explicitly.\n\nWHAT YOU CAN DO:\n- Greet the user naturally.\n- Engage in casual conversation.\n- Answer generic questions like:\n  - “What can you do?”\n  - “How does this chatbot work?”\n  - “Who are you?”\n- Briefly explain what kind of help the chatbot can provide.\n- Encourage the user to ask something more specific if appropriate.\n\nWHAT YOU MUST NOT DO:\n- Do NOT provide detailed information about the website owner.\n- Do NOT list skills, projects, experience, or technical details.\n- Do NOT reference blog posts, articles, or indexed content.\n- Do NOT invent facts.\n- Do NOT mention internal systems, routing, intents, context, or databases.\n\nSTYLE RULES:\n- Be friendly, professional, and human.\n- Keep responses short but useful (2–5 sentences).\n- Avoid generic filler like “I am just an AI”.\n- Adapt your answer to the user’s tone (casual → casual, formal → neutral).\n- If the user message is vague, respond politely and guide them.\n\nFINAL RULE:\n- If the question clearly requires specific information about the website owner or site content, gently suggest asking a more specific question."
+            },
+            {
+              "content": "=input: {{ $('Webhook').item.json.body.message }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        576,
+        1568
+      ],
+      "id": "b720508c-723b-4017-90bb-e72b86d3f691",
+      "name": "SmallTalk Response"
+    },
+    {
+      "parameters": {
+        "content": "## 7. Respond to Webhook\nReturns the final JSON response to the client with proper `Content-Type: application/json` header.",
+        "height": 336,
+        "width": 150,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        1376
+      ],
+      "id": "2db21e1b-e83b-49d9-9785-4ae73c64e9fe",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## 6. Code: remove followup\n**Purpose:** Cleans the final output by removing the `follow_up` field from all AI responses.\n\n**Why?** The AI Agent generates a `follow_up` suggestion in the JSON output, but this field is not needed in the final response sent to the user. This node strips it out to keep the response clean and focused.\n\nSimple destructuring: `const { follow_up, ...cleanedData } = data;`\n",
+        "height": 448,
+        "width": 368,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1776
+      ],
+      "id": "bb3b4bdf-9e5d-4ab5-9536-d5ce66b6de89",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        2224
+      ],
+      "id": "20d0ea5a-7e29-4a64-859f-74c055eb85eb",
+      "name": "Embeddings OpenAI1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. SmallTalk\nHandles casual conversations and quick responses.\nUses SmallTalk Reranker to select the most appropriate response from dataset.\n",
+        "height": 304,
+        "width": 640,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        1456
+      ],
+      "id": "a8c3a843-8edf-427e-8d73-86dd14e972c3",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Intent Router\nAutomatically classifies user request into:\n- **Language**: SmallTalk\n- **Relevant**: RAG (document search)\n- **Not Relevant**: Information/Skills\n\nUses OpenAI Chat Model for intelligent routing.",
+        "height": 528,
+        "width": 560,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        1296
+      ],
+      "id": "2d4268e0-bfd0-4e8e-83a7-be8bcfed19be",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## 5. Informations - Skills\n**Vector Store: MongoDB Atlas**\nChosen for comprehensive functions and advanced flexibility.\n\n**Data extracted from example.com via:**\n- Scraping with Playwright\n- AI processing + manual work\n- Embedding directly in site code\n\n**Parallel flow:**\n- MongoDB Vector SKILLS (technical skills)\n- MongoDB Vector PROFILE (personal info)\n\n**⚠️ Optional setup:** If you want to avoid MongoDB Atlas setup, you can remove this section and use only Qdrant or other solutions for everything.\n",
+        "height": 688,
+        "width": 1440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        2688
+      ],
+      "id": "7d16fddf-23ec-4006-a166-9c7624b3865e",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "IT",
+        "height": 272,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        2064
+      ],
+      "id": "5ddec878-34ad-4dd2-88b5-cab92b30085b",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "EN",
+        "height": 304,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        2352
+      ],
+      "id": "82b57ff7-9271-4479-b034-3be6322cd11b",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "IT\nEN",
+        "height": 352,
+        "width": 1408,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        3008
+      ],
+      "id": "34a7aa80-0de4-46e1-9f88-81f1bad8a262",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n## 8. Logging System\n\n### 8.1 Crypto: IP Hash\n**GDPR/Privacy Compliance**\n\n**What it does:**\n- Takes the user's IP address from CloudFlare header `cf-connecting-ip`\n- Hashes it using **SHA3-256** cryptographic algorithm\n- Stores only the hash, NEVER the original IP\n\n\n**Why?**\n- **Privacy review required**: IP addresses are personal data under GDPR/CCPA\n- **Privacy review required**: Hashing makes data non-reversible (you can't get the original IP back)\n- **Analytics**: You can still track unique users and detect patterns without storing sensitive data\n- **Legal Safety**: Reduces liability and data breach risks\n\n\n**Example:**\n- Original IP: `10.11.12.13`\n- SHA3-256 Hash: `551ddf8b5dff17e9c4ad007928473c61f3b47c71bcec1a659100f30d49669c5c` (64 characters)\n---\n\n### 8.2 Set: date\nPrepares the log file path structure with timestamp data:\n- `todayY` → Year (2025)\n- `todayM` → Month (02)\n- `todayD` → Day (10)\n\n**Folder structure on GCS:**\n```\nchatbot-logs/\n  └── 2025/\n      └── 02/\n          └── 10/\n              └── {ip_hash}_{timestamp}_{execution_id}.json\n```\n---\n\n### 8.3 set: ObjectName_Date/Folder & data\nAggregates all data for logging:\n- `objectName`: Full GCS path with IP hash and timestamp\n- `userQuery`: User's original message\n- `sessionId`: Conversation session identifier\n- `userAgent`: Browser/client information\n- `country`: User's country from CloudFlare (`cf-ipcountry`)\n- `aiResponse`: Complete AI response object\n---\n\n### 8.4 Code: parsing\nConverts it to Base64 binary format for GCS upload.\nBuilds the final log JSON object with all metadata:\n\n```json\n{\n  \"ts\": \"2025-02-10T14:30:00Z\",\n  \"sessionId\": \"abc123\",\n  \"ip_hash\": \"a3b5c7d9...\",\n  \"request\": {\n    \"text\": \"What are your skills?\"\n  },\n  \"response\": { /* full AI response */ },\n  \"userAgent\": \"Mozilla/5.0...\",\n  \"country\": \"US\",\n  \"status\": \"ok\"\n}\n```\n---\n\n### 8.5 GCS: Object_Log\n**Final Step**: Uploads the log file to Google Cloud Storage bucket `your-chatbot-logs`\n\n**Benefits of GCS:**\n- **Scalable**: Handles millions of logs\n- **Cost-effective**: Cheap storage for cold data\n- **Analytics**: Can use BigQuery for analysis\n- **Compliance**: Automatic encryption at rest\n- **Retention**: Set lifecycle policies to auto-delete old logs",
+        "height": 1808,
+        "width": 1008,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        1568
+      ],
+      "id": "4cabf381-b81c-4b0f-8de5-ffb19aed2fac",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "## WORKFLOW 2: Wordpress AI Chatbot\n\n**⚠️ IMPORTANT: Before using this workflow, run the indexing workflow provided.**\n\n### What this workflow does\n\nHandles incoming chat requests from your website and routes \nthem to the correct intelligence layer:\n* conversation → predefined knowledge (SmallTalk)\n* content questions → semantic search on your posts (RAG)\n* profile/skills queries → structured database lookup\n\n\nThe user always receives a single clean answer, while logging runs in parallel.\n\n### How It Works:\n1. **Request arrives** via Webhook (secured with Header Auth)\n2. **Intent Router** classifies the request → SmallTalk / RAG / Info\n3. **Appropriate AI path** processes the request:\n   - SmallTalk: Quick response from dataset\n   - RAG: Semantic search in Qdrant + AI generation\n   - Info/Skills: MongoDB Atlas search + AI generation\n4. **Response cleaning** removes unnecessary fields (follow_up)\n5. **Send response** back to user via Webhook\n6. **Logging pipeline** runs in parallel:\n   - Hash IP for privacy\n   - Prepare timestamps and metadata\n   - Upload Privacy review required to GCS\n\n### Setup steps\n1. Add your Webhook URL to your website chat widget\n2 Configure Header Auth credentials (must match frontend)\n3. Insert your OpenAI API key\n4. Connect Qdrant (same collection used in Workflow 1)\n5. (Optional) Connect MongoDB Atlas for skills/profile queries\n6. Configure a Cloud Storage bucket for logs (or disable logging)\n7. Run a test message from the site to verify routing works\n8. After setup, the bot is ready — behavior tuning happens only via prompts.",
+        "height": 2144,
+        "width": 4864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        1280
+      ],
+      "id": "3f9826e6-ca11-40bf-bdfe-366242577a9b",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Response Parsing: parse output + rewrite URLs + normalize type + strip follow_up ===\n\n// --- URL rewrite helper ---\n// IT branch: urlPrefix = \"\"      → URLs unchanged\n// EN branch: urlPrefix = \"/en/\"  → example.com URLs get /en/ injected\nconst URL_PREFIX = \"/en/\";\n\nfunction rewriteUrl(url) {\n  if (!url || typeof url !== \"string\") return url;\n  const u = url.trim();\n  if (!URL_PREFIX) return u; // IT branch: no rewrite\n  // Already has the prefix → skip\n  if (u.includes(\"://example.com\" + URL_PREFIX)) return u;\n  if (u.startsWith(\"https://example.com/\")) {\n    return u.replace(\"https://example.com/\", \"https://example.com\" + URL_PREFIX);\n  }\n  if (u.startsWith(\"http://example.com/\")) {\n    return u.replace(\"http://example.com/\", \"http://example.com\" + URL_PREFIX);\n  }\n  return u; // other domains: untouched\n}\n\n// --- Robust output parsing ---\nlet obj = $json?.response?.output ?? $json?.output ?? null;\n\n// If it's a string, try to parse it (handles markdown-wrapped JSON too)\nif (typeof obj === \"string\") {\n  let cleaned = obj.trim()\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/\\s*```$/, \"\")\n    .trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) cleaned = jsonMatch[0];\n  try { obj = JSON.parse(cleaned); } catch {}\n}\n\n// --- Normalize type ---\nif (obj && typeof obj === \"object\") {\n  if (obj.type === \"rag_results\") obj.type = \"search_results\";\n  if (!obj.type && obj.results) obj.type = \"search_results\";\n\n  // --- Rewrite URLs in results[] ---\n  if (Array.isArray(obj.results)) {\n    obj.results = obj.results.map(r => ({ ...r, url: rewriteUrl(r.url) }));\n  }\n\n  // --- Remove follow_up ---\n  const { follow_up, ...cleanObj } = obj;\n\n  return [{ json: cleanObj }];\n}\n\n// --- Text/plain fallback ---\nconst raw = $json?.output ?? $json?.response?.output;\nreturn [{\n  json: {\n    type: \"text\",\n    text: typeof raw === \"string\" ? raw : JSON.stringify(raw),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        2368
+      ],
+      "id": "24888152-b4d0-4e9b-accf-3a689529c056",
+      "name": "Code-Response_Parsing_en"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WP Get all post": {
+      "main": [
+        [
+          {
+            "node": "Prepare Documents for Indexing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Documents for Indexing": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Indexing": {
+      "main": [
+        [
+          {
+            "node": "WP Get all post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Build context from Qdrant results1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code-Request_Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code-Response_Parsing": {
+      "main": [
+        [
+          {
+            "node": "Code: remove followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code-Request_Parsing": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Intent Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Qdrant Search (wordpress5)",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Search (wordpress5)": {
+      "main": [
+        [
+          {
+            "node": "Build context from Qdrant results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code-Response_Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "SmallTalk Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SmallTalk Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Qdrant Search (wordpress5)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Qdrant Search (wordpress5)1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MongoDB Atlas Vector SKILLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code-Smalltalk_response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Intent Router": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build context from Qdrant results": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere3": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Qdrant Search (wordpress5)1",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Search (wordpress5)1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Search (wordpress5)1": {
+      "main": [
+        [
+          {
+            "node": "Build context from Qdrant results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Code-Response_Parsing_en",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: date": {
+      "main": [
+        [
+          {
+            "node": "set: ObjectName_Date/Folder & data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: parsing": {
+      "main": [
+        [
+          {
+            "node": "GCS: Object_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set: ObjectName_Date/Folder & data": {
+      "main": [
+        [
+          {
+            "node": "Code: parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto: IP Hash": {
+      "main": [
+        [
+          {
+            "node": "Set: date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - SKILLS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI4": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector SKILLS",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - SKILLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Atlas Vector SKILLS": {
+      "main": [
+        [
+          {
+            "node": "MongoDB Atlas Vector PROFILE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI5": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector PROFILE",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Atlas Vector PROFILE": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - SKILLS": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code: remove followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: remove followup": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SmallTalk Response": {
+      "main": [
+        [
+          {
+            "node": "Code-Smalltalk_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Search (wordpress5)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code-Response_Parsing_en": {
+      "main": [
+        [
+          {
+            "node": "Code: remove followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "tags": []
+}

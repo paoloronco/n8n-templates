@@ -1256,6 +1256,22 @@
       ],
       "id": "24888152-b4d0-4e9b-accf-3a689529c056",
       "name": "Code-Response_Parsing_en"
+    },
+    {
+      "parameters": {
+        "content": "## Documentation & Implementation Support\n\n**Documentation:** [Setup, WordPress plugin, API reference and customization](https://paoloronco.notion.site/WordPress-AI-Chatbot-404f0ba27c3281c796fbfc177b050bef)\n\nThis template is free to use and customize. Follow the documentation to connect your own WordPress site, API credentials and vector databases.\n\n**Need help with deployment or customization?**  \nFor installation, integrations or tailored implementations, contact **info@paoloronco.it** or visit [paoloronco.it](https://paoloronco.it).\n\n*Third-party API and hosting costs are not included.*",
+        "height": 336,
+        "width": 816,
+        "color": 6
+      },
+      "id": "7dcba3a7-77c0-4ca2-b3f1-2a46dcb92571",
+      "name": "Documentation & Support",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        -528
+      ]
     }
   ],
   "pinData": {},

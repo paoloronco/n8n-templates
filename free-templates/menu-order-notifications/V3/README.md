@@ -54,7 +54,7 @@ Process online menu orders with n8n, log daily orders, send ntfy push notificati
 - **Documentation:** [Setup guide](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 
 - **n8n Creator:** [View template](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
-- **Gumroad:** Not Published
+- **Gumroad:** [View V3 on Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 
 ## Additional Info
 

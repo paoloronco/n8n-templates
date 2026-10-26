@@ -10,7 +10,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 ## Template catalog
 
-**Free** workflows include importable JSON and setup resources. **Paid** templates retain their existing delivery model; their workflow JSON files are not publicly distributed here.
+**Free templates** include workflow JSON files and setup instructions. **Paid templates** are available through the links in the catalog.
 
 ### Free templates
 

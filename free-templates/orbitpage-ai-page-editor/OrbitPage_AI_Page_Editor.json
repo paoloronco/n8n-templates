@@ -85,7 +85,7 @@
       "typeVersion": 1,
       "position": [
         704,
-        1600
+        1744
       ],
       "credentials": {
         "orbitPageApi": {
@@ -107,7 +107,7 @@
       "typeVersion": 1,
       "position": [
         544,
-        1600
+        1744
       ],
       "credentials": {
         "orbitPageApi": {
@@ -129,7 +129,7 @@
       "typeVersion": 1,
       "position": [
         384,
-        1600
+        1744
       ],
       "credentials": {
         "orbitPageApi": {
@@ -151,7 +151,7 @@
       "typeVersion": 1,
       "position": [
         208,
-        1600
+        1744
       ],
       "credentials": {
         "orbitPageApi": {
@@ -175,7 +175,7 @@
       "typeVersion": 1,
       "position": [
         32,
-        1600
+        1744
       ],
       "credentials": {
         "orbitPageApi": {
@@ -384,105 +384,120 @@
       "type": "@n8n/n8n-nodes-langchain.chat",
       "typeVersion": 1.3,
       "position": [
-        2640,
+        2848,
         1216
       ],
       "webhookId": "1c4e09d8-339e-4d34-81b4-5827bec4908d"
     },
     {
       "parameters": {
-        "content": "# OrbitPage AI Page Editor\n\n## Quick overview\nInspect your OrbitPage through chat, request AI edits, and review a validated proposal before approving publication. The workflow connects OpenAI with OrbitPage and keeps the final publishing decision in your hands.\n\n## How it works\n- Ask a question or describe a page edit.\n- The agent reads the relevant workspace data.\n- OrbitPage prepares a private edit preview.\n- Review the proposal in Chat.\n- Approve publication or reject the changes.\n\n## Requirements\n- n8n 2.x with the imported node versions.\n- Community package: `n8n-nodes-orbitpage@0.3.2` or newer.\n- OrbitPage workspace and AI allowance.\n- OpenAI API access.\n\n[Setup guide](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/orbitpage-ai-page-editor)",
-        "width": 600,
-        "height": 800,
-        "color": 3
+        "content": "# OrbitPage AI Page Editor\n\nChat with an AI agent to inspect your OrbitPage, request edits, and review a validated proposal before approving publication.\n\n## Setup\n1. Install `n8n-nodes-orbitpage@0.3.2` or newer on an n8n 2.x instance that supports community nodes.\n2. Create an OrbitPage API token with `workspace:read`, `publication:read`, `publication:write`, `ai:read`, and `ai:write`.\n3. Select your OrbitPage credential on all seven OrbitPage nodes.\n4. Connect your OpenAI credential in **OpenAI Chat Model**.\n5. Keep Chat private while testing; configure authentication before sharing its URL.\n\n## How it works\n1. Receive a question or edit request through Chat.\n2. Read the relevant workspace and page data.\n3. Generate a validated preview for an edit request.\n4. Show the proposed changes with approval buttons.\n5. Apply and publish only after approval, then read publication status.\n\n## Customization\n- Change the chat model, response language, or agent tone.\n- Adjust the conversation memory window.\n- Customize approval labels and response messages.\n\n## Testing & notes\n- Start with a question about your page.\n- Test **Reject** before approving an intended edit.\n- **Approve and publish** requests a live page update.\n- OpenAI usage and OrbitPage AI previews have separate costs or allowances.\n- Review execution-data retention for page content and proposals.\n\n[Full setup guide](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/orbitpage-ai-page-editor)\n\nCreated by **Paolo Ronco**.\nWorkflow: **info@paoloronco.it**\nOrbitPage: **contact@orbitpage.com**",
+        "width": 720,
+        "height": 1180
       },
-      "id": "0d8d675a-2785-4bac-9841-c788a337c959",
-      "name": "Guide - Overview",
+      "id": "d0326abc-2026-4026-8026-000000000000",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 01 · Chat and AI agent\n\nReceives the request and selects the relevant tools. OpenAI interprets the message; conversation memory supplies recent context.\n\n**Configure:** select your OpenAI credential below and protect Chat before sharing.",
+        "width": 752,
+        "height": 688,
+        "color": 7
+      },
+      "id": "d0326abc-2026-4026-8026-000000000001",
+      "name": "NOTE 01 - Chat and Agent",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         -800,
-        80
+        816
       ]
     },
     {
       "parameters": {
-        "content": "## 1. Connect your accounts\n\n- Install the OrbitPage community package before running the workflow.\n- Create an OrbitPage API token for the workspace you want to edit.\n- Add these scopes: `workspace:read`, `publication:read`, `publication:write`, `ai:read`, and `ai:write`.\n- Select your OrbitPage credential on all seven OrbitPage nodes.\n- Select your OpenAI credential on **OpenAI Chat Model**.\n\n## First test\n- Keep Chat private during setup.\n- Ask: “What is the publication status of my page?”\n- Request a small edit and test **Reject**.\n- Repeat with an intended change and test **Approve and publish**.\n- Check the result in your OrbitPage dashboard.\n\n**Before sharing Chat:** configure authentication. Chat users can request changes and approve publication in the connected workspace.",
-        "width": 600,
-        "height": 800,
-        "color": 5
-      },
-      "id": "75aa4374-ecdc-49b9-a17e-6f375f2afcef",
-      "name": "Guide - Setup",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -160,
-        80
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## 2. Start with a clear request\n\n- **When Chat Message Received** starts an execution for each message.\n- **OrbitPage AI Page Editor** interprets the request and selects the relevant tools.\n- **OpenAI Chat Model** uses `gpt-5-mini` by default.\n- **Conversation Memory** retains recent context with a window length of `20`.\n- File uploads are disabled.\n\n## Example requests\n- “Summarize the content of my page.”\n- “Make my introduction shorter and keep all links unchanged.”\n- “Rewrite the main description in English.”\n\n## Expected behavior\n- Questions can be answered without creating an edit.\n- Ambiguous requests may need clarification.\n- Page content is treated as data, not as instructions.\n- Responses are delivered through the Chat nodes.",
-        "width": 600,
-        "height": 800,
+        "content": "## 02 · Read page data and preview edits\n\nFour tools read the workspace, draft, publication status, and AI allowance. The preview tool prepares validated changes without modifying the page.\n\n**Configure:** select your OrbitPage credential on each tool. Preview generation uses AI allowance.",
+        "width": 864,
+        "height": 448,
         "color": 7
       },
-      "id": "a9c5b3ce-d53a-4716-b670-40cd0b204423",
-      "name": "Guide - Chat",
+      "id": "d0326abc-2026-4026-8026-000000000002",
+      "name": "NOTE 02 - OrbitPage Tools",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        480,
-        80
+        -32,
+        1488
       ]
     },
     {
       "parameters": {
-        "content": "## 3. Read the page and prepare a preview\n\nThe agent has four read tools:\n- **Get Workspace Overview**\n- **Get Full Page Draft**\n- **Get Draft and Publication Status**\n- **Get AI Usage and Allowance**\n\n**Preview AI Page Changes** asks OrbitPage to validate a proposed edit.\n\n- A preview does not modify or publish the page.\n- Generating a preview uses OrbitPage AI allowance.\n- The agent is instructed to submit one preview per message with an edit instruction of at most 600 characters.\n- If generation fails, review the error and try again later.\n\n**Prepare Chat Response** formats the proposal summary, changes, revision, and expiry when supplied. The preview token is passed internally to the approval branch.",
-        "width": 600,
-        "height": 800,
+        "content": "## 03 · Format and route the response\n\nFormats the proposal for Chat. A preview opens the approval step; ordinary answers go directly to the final Chat response.",
+        "width": 528,
+        "height": 784,
         "color": 7
       },
-      "id": "e416abbb-1d50-433c-a8c5-96151b3ddd8a",
-      "name": "Guide - Tools",
+      "id": "d0326abc-2026-4026-8026-000000000003",
+      "name": "NOTE 03 - Prepare Response",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1120,
-        80
+        848,
+        816
       ]
     },
     {
       "parameters": {
-        "content": "## 4. Review before publishing\n\n- **Review Preview in Chat** displays the proposal with two buttons.\n- **Approve and publish** applies the reviewed proposal and requests publication.\n- **Reject** ends the edit without changing the page.\n- The approval step waits up to **9 minutes**.\n\n## After approval\n- **Apply Approved Preview** submits the server-issued preview token.\n- **Verify Published State** reads the resulting publication state.\n- **Format Publication Result** prepares the status message.\n- **Send Chat Response** returns the result.\n\n**Check the reported status:** this step reads the OrbitPage API; it does not test the live website in a browser.\n\nExpired or stale previews may be rejected. Read the current page and generate a new proposal before approving again.",
-        "width": 600,
-        "height": 800,
-        "color": 4
+        "content": "## 04 · Review the proposal\n\nDisplays **Approve and publish** and **Reject** buttons. Waits up to **9 minutes** for a decision.\n\nOnly an approved response enters the publication branch.",
+        "width": 400,
+        "height": 880,
+        "color": 7
       },
-      "id": "a7a7a7a7-1010-4040-8080-000000000004",
-      "name": "Guide - Approval",
+      "id": "d0326abc-2026-4026-8026-000000000004",
+      "name": "NOTE 04 - Human Approval",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1760,
-        80
+        1408,
+        720
       ]
     },
     {
       "parameters": {
-        "content": "## 5. Customize and maintain\n\n- **Model:** choose a compatible tool-calling model in **OpenAI Chat Model**.\n- **Language and tone:** adjust the agent instructions.\n- **Memory:** change the context window if needed.\n- **Approval:** customize button labels and wait time, respecting preview expiry.\n- **Messages:** edit the response-formatting nodes.\n\n## Additional info\n- OpenAI usage and OrbitPage AI previews have separate costs or allowances.\n- Rejected previews have already used AI allowance.\n- Review execution-data retention: page content and proposals may appear in logs.\n- Account, billing, domain, Shop, newsletter, team, deletion, backup, and restore actions are outside this workflow.\n\n## Support\nCreated by **Paolo Ronco**, creator of OrbitPage.\n- Workflow: **info@paoloronco.it**\n- OrbitPage: **contact@orbitpage.com**",
-        "width": 600,
-        "height": 800,
-        "color": 6
+        "content": "## 05 · Apply changes and read status\n\nSubmits the approved preview token and requests publication, then reads the resulting status. Rejection returns a cancellation message.\n\nExpired or stale previews may be rejected. Verification reads API state; it does not test the live website.",
+        "width": 864,
+        "height": 880,
+        "color": 7
       },
-      "id": "a7a7a7a7-1010-4040-8080-000000000005",
-      "name": "Guide - Customization",
+      "id": "d0326abc-2026-4026-8026-000000000005",
+      "name": "NOTE 05 - Publish and Verify",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2400,
-        80
+        1840,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 06 · Return the result\n\nSends the answer, cancellation, or publication result back to the same Chat session.",
+        "width": 352,
+        "height": 784,
+        "color": 7
+      },
+      "id": "d0326abc-2026-4026-8026-000000000006",
+      "name": "NOTE 06 - Chat Response",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        816
       ]
     }
   ],

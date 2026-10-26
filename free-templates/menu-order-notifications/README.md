@@ -4,9 +4,9 @@ Order notification automation for online menus. Select one functional variant:
 
 | Variant | Capabilities | Setup |
 |---|---|---|
-| [Basic](./basic/) | Order webhook, ntfy push and order logging | [Guide](./basic/README.md) |
-| [Home Assistant TTS](./home-assistant-tts/) | Basic capabilities plus spoken announcements | [Guide](./home-assistant-tts/README.md) |
-| [Home Assistant TTS + BAC](./home-assistant-tts-bac/) | TTS plus per-person order history and simplified BAC estimate | [Guide](./home-assistant-tts-bac/README.md) |
+| [V1 — Basic](./V1/) | Order webhook, ntfy push and order logging | [Guide](./V1/README.md) |
+| [V2 — Home Assistant TTS](./V2/) | Basic capabilities plus spoken announcements | [Guide](./V2/README.md) |
+| [V3 — Home Assistant TTS + BAC](./V3/) | TTS plus per-person order history and simplified BAC estimate | [Guide](./V3/README.md) |
 
 ## Shared resources
 

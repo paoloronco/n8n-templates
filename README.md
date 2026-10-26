@@ -40,7 +40,7 @@ A dash indicates that no public listing was found in the repository or Notion ca
 - Solution directories use descriptive, lowercase kebab-case names without numeric prefixes.
 - Functional alternatives use descriptive names (e.g. `basic/`, `home-assistant-tts/`); successive releases use `v1/`, `v2/`.
 - Each solution has a README with variant selection, import instructions and relevant resources. Existing assets, examples and supporting documentation are retained.
-- For menu order notifications, shared website mockups and common setup documentation live once in the solution folder.
+- Menu order notifications use `V1/` (Basic), `V2/` (Home Assistant TTS), and `V3/` (Home Assistant TTS + BAC). Shared website mockups and common setup documentation live once in the solution folder.
 
 ## Importing a workflow
 

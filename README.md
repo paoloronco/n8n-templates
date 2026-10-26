@@ -34,14 +34,6 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 A dash indicates that no public listing was found in the repository or Notion catalog. Linked listings may describe an earlier release.
 
-## Folder conventions
-
-- `free-templates/` and `paid-templates/` remain separate until the distribution model changes.
-- Solution directories use descriptive, lowercase kebab-case names without numeric prefixes.
-- Functional alternatives use descriptive names (e.g. `basic/`, `home-assistant-tts/`); successive releases use `v1/`, `v2/`.
-- Each solution has a README with variant selection, import instructions and relevant resources. Existing assets, examples and supporting documentation are retained.
-- Menu order notifications use `V1/` (Basic), `V2/` (Home Assistant TTS), and `V3/` (Home Assistant TTS + BAC). Shared website mockups and common setup documentation live once in the solution folder.
-
 ## Importing a workflow
 
 1. Open the relevant template folder and read its README.

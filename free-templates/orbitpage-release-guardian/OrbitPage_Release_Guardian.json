@@ -1,0 +1,1119 @@
+{
+  "name": "OrbitPage - Release Guardian",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4f83e7f0-79d9-4d2a-b317-2dd0fc0133be",
+      "name": "When Manually Started",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "14309fd6-1311-42ff-bd1f-a54f3366a106",
+      "name": "When OrbitPage Saved Revision Changes",
+      "type": "n8n-nodes-orbitpage.orbitPageTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        976
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "guardian-email",
+              "name": "approval_email",
+              "type": "string",
+              "value": "REPLACE_WITH_APPROVAL_EMAIL"
+            },
+            {
+              "id": "guardian-enabled",
+              "name": "ENABLE_PUBLISH",
+              "type": "string",
+              "value": "NO"
+            },
+            {
+              "id": "guardian-success-email",
+              "name": "SEND_SUCCESS_EMAIL",
+              "type": "string",
+              "value": "YES"
+            },
+            {
+              "id": "guardian-timeout",
+              "name": "approval_timeout_hours",
+              "type": "number",
+              "value": 24
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e96ccd2f-4d66-45a5-b184-d5ae7a534778",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        896
+      ],
+      "notesInFlow": true,
+      "notes": "Replace the email address. SEND_SUCCESS_EMAIL=YES reports verified dashboard releases. ENABLE_PUBLISH only controls approval of private drafts created through API or ChatGPT; leave it NO if you only edit in the OrbitPage dashboard."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "18030cf2-8534-4ac1-a76b-89012ad8b4f3",
+      "name": "Get Workspace Overview",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        144,
+        896
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getDraft",
+        "options": {}
+      },
+      "id": "e61f9e6a-c9d0-4631-8ec7-4c774673e979",
+      "name": "Get Full Page Draft",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        400,
+        896
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "publication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "7bcdf026-3b53-48f8-addf-154ae8cda971",
+      "name": "Get Publication Status",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        656,
+        896
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Configuration').first().json;\nconst workspace = $('Get Workspace Overview').first().json;\nconst draftResponse = $('Get Full Page Draft').first().json;\nconst publicationResponse = $('Get Publication Status').first().json;\nconst draft = draftResponse.data || {};\nconst publication = publicationResponse.body?.data || publicationResponse.data || {};\nconst headers = publicationResponse.headers || {};\nconst draftRevision = Number(publication.draftRevision ?? draftResponse.revision ?? workspace.revision);\nconst publishedRevision = Number(publication.publishedRevision ?? 0);\nconst publicUrl = String(publication.publicUrl || workspace.publicUrl || '').trim();\nconst approvedEtag = String(headers.etag || headers.ETag || headers['x-orbitpage-revision'] || (Number.isSafeInteger(draftRevision) ? draftRevision : '')).trim();\nconst publishEnabled = String(config.ENABLE_PUBLISH || '').trim().toUpperCase() === 'YES';\nconst sendSuccessEmail = String(config.SEND_SUCCESS_EMAIL || '').trim().toUpperCase() === 'YES';\nconst workspaceKey = String(workspace.tenant?.tenantId || workspace.workspace?.tenantId || workspace.page?.pageId || workspace.pageId || 'orbitpage-workspace');\n\nconst safeText = (value, max = 160) => String(value ?? '').replace(/\\s+/g, ' ').trim().slice(0, max);\nconst projectLink = (item = {}) => ({ id: safeText(item.id, 128), type: safeText(item.type, 40), title: safeText(item.title), url: safeText(item.url, 500), isActive: item.isActive !== false, status: safeText(item.status, 40), position: Number(item.position ?? 0) });\nconst projectPage = (item = {}) => ({ id: safeText(item.id, 128), slug: safeText(item.slug, 128), title: safeText(item.title), active: item.isActive !== false, blocks: Array.isArray(item.blocks) ? item.blocks.map(projectLink) : [] });\nconst snapshot = {\n  profile: { name: safeText(draft.profile?.name || draft.profile?.displayName || draft.profile?.title), bio: safeText(draft.profile?.bio, 500), browserTitle: safeText(draft.profile?.browserTitle || draft.profile?.seoTitle), seoDescription: safeText(draft.profile?.seoDescription, 500) },\n  links: Array.isArray(draft.links) ? draft.links.map(projectLink) : [],\n  subpages: Array.isArray(draft.subpages) ? draft.subpages.map(projectPage) : [],\n  theme: { preset: safeText(draft.theme?.preset || draft.theme?.name), font: safeText(draft.theme?.fontFamily || draft.theme?.font), background: safeText(draft.theme?.backgroundColor || draft.theme?.background) },\n  menu: { enabled: Boolean(draft.menu?.enabled), homepage: safeText(draft.menu?.routing?.homepage), sectionCount: Array.isArray(draft.menu?.sections) ? draft.menu.sections.length : 0 },\n  privacy: { enabled: Boolean(draft.consentConfig?.enabled), mode: safeText(draft.consentConfig?.mode) },\n  textFiles: Array.isArray(draft.textFiles) ? draft.textFiles.map((item) => safeText(item.path || item.key, 128)).filter(Boolean) : []\n};\n\nconst state = $getWorkflowStaticData('global');\nconst sameWorkspace = state.releaseGuardian?.workspaceKey === workspaceKey;\nconst previous = sameWorkspace ? state.releaseGuardian.snapshot : null;\nconst previousVerifiedRevision = sameWorkspace ? Number(state.releaseGuardian.revision ?? 0) : 0;\nconst changedSections = [];\nfor (const key of Object.keys(snapshot)) if (!previous || JSON.stringify(previous[key]) !== JSON.stringify(snapshot[key])) changedSections.push(key);\nconst byId = (items) => new Map((items || []).filter((item) => item.id).map((item) => [item.id, item]));\nconst oldLinks = byId(previous?.links);\nconst newLinks = byId(snapshot.links);\nconst addedLinks = [...newLinks.keys()].filter((id) => !oldLinks.has(id));\nconst removedLinks = [...oldLinks.keys()].filter((id) => !newLinks.has(id));\nconst changedLinks = [...newLinks.keys()].filter((id) => oldLinks.has(id) && JSON.stringify(oldLinks.get(id)) !== JSON.stringify(newLinks.get(id)));\n\nconst blockers = [];\nconst warnings = [];\nif (!Number.isSafeInteger(draftRevision) || draftRevision < 0) blockers.push('OrbitPage did not return a valid draft revision.');\nif (!Number.isSafeInteger(publishedRevision) || publishedRevision < 0) blockers.push('OrbitPage did not return a valid published revision.');\nif (!approvedEtag) blockers.push('The publication response did not contain an ETag or revision.');\nif (!/^https:\\/\\//i.test(publicUrl)) blockers.push('The public URL is missing or is not HTTPS.');\n\nconst findings = [];\nconst walk = (value, path = 'draft', depth = 0) => {\n  if (depth > 8 || findings.length >= 25 || value == null) return;\n  if (typeof value === 'string') {\n    if (/REPLACE_WITH|\\bTODO\\b|\\bTBD\\b/i.test(value)) findings.push(`${path}: placeholder text`);\n    if (/(?:url|href)$/i.test(path) && /^(?:javascript:|file:|data:text\\/html)/i.test(value.trim())) findings.push(`${path}: unsafe URL protocol`);\n    return;\n  }\n  if (Array.isArray(value)) return value.forEach((entry, index) => walk(entry, `${path}[${index}]`, depth + 1));\n  if (typeof value === 'object') for (const [key, entry] of Object.entries(value)) walk(entry, `${path}.${key}`, depth + 1);\n};\nwalk(draft);\nif (findings.length) blockers.push(...findings);\nif (!snapshot.links.length && !snapshot.subpages.length) warnings.push('The draft contains no main blocks or subpages.');\nif (!previous) warnings.push('No prior Guardian snapshot exists yet; this first review is a baseline rather than a field-by-field comparison.');\nif (publication.publicationError) warnings.push(`OrbitPage reports a previous publication error: ${safeText(publication.publicationError, 240)}`);\n\nconst needsPublication = draftRevision !== publishedRevision;\nconst publishedReleaseChanged = !needsPublication && publishedRevision > 0 && publishedRevision !== previousVerifiedRevision;\nconst verifyPublishedRelease = publishedReleaseChanged && /^https:\\/\\//i.test(publicUrl);\nconst rollbackRevision = needsPublication ? publishedRevision : previousVerifiedRevision;\nconst readyForApproval = publishEnabled && needsPublication && blockers.length === 0;\nconst notifyBlocked = publishEnabled && needsPublication && blockers.length > 0;\nconst escapeHtml = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;');\nconst diffLines = previous\n  ? [\n      `Changed sections: ${changedSections.join(', ') || 'none'}`,\n      `Blocks added: ${addedLinks.join(', ') || 'none'}`,\n      `Blocks changed: ${changedLinks.join(', ') || 'none'}`,\n      `Blocks removed: ${removedLinks.join(', ') || 'none'}`\n    ]\n  : [`Baseline: ${snapshot.links.length} blocks and ${snapshot.subpages.length} subpages`];\nconst summary = [\n  `Draft revision: ${draftRevision}`,\n  `Published revision: ${publishedRevision}`,\n  `Public URL: ${publicUrl}`,\n  ...diffLines,\n  ...(warnings.length ? [`Warnings: ${warnings.join(' | ')}`] : []),\n  ...(blockers.length ? [`Findings: ${blockers.join(' | ')}`] : [])\n].join('\\n');\nconst list = (items, empty) => `<ul>${(items.length ? items : [empty]).map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;\nconst approvalHtml = `<div style=\"font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#202124\"><h2>OrbitPage Release Guardian</h2><p>A private draft is ready for review.</p><table style=\"border-collapse:collapse;width:100%\"><tr><td style=\"padding:6px;font-weight:bold\">Draft revision</td><td style=\"padding:6px\">${draftRevision}</td></tr><tr><td style=\"padding:6px;font-weight:bold\">Published revision</td><td style=\"padding:6px\">${publishedRevision}</td></tr><tr><td style=\"padding:6px;font-weight:bold\">Public URL</td><td style=\"padding:6px\">${escapeHtml(publicUrl)}</td></tr></table><h3>Changes</h3>${list(diffLines, 'No differences detected.')}<h3>Warnings</h3>${list(warnings, 'None')}<p><strong>Approval publishes exactly revision ${draftRevision}.</strong> If the draft changes before the click is processed, OrbitPage rejects the stale ETag.</p><p><a href=\"APPROVAL_URL\" style=\"display:inline-block;padding:12px 18px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px\">Approve and publish</a></p><p style=\"font-size:12px;color:#666\">Do not forward this approval link. Ignore it to reject or let it expire.</p></div>`;\n\nreturn [{ json: { workspaceKey, draftRevision, previousPublishedRevision: publishedRevision, previousVerifiedRevision, rollbackRevision, publicUrl, approvedEtag, publishEnabled, sendSuccessEmail, needsPublication, publishedReleaseChanged, verifyPublishedRelease, readyForApproval, notifyBlocked, blockers, warnings, changedSections, addedLinks, changedLinks, removedLinks, summary, approvalHtml, currentSnapshot: snapshot } }];"
+      },
+      "id": "a99226ff-8c1b-464c-80e8-4e9a470535c0",
+      "name": "Analyze Draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        896
+      ],
+      "notesInFlow": true,
+      "notes": "Creates a bounded public-field snapshot, compares it with the last successful Guardian release, and blocks obvious placeholders or unsafe URL protocols."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-ready",
+              "leftValue": "={{ $json.readyForApproval ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d6fd75c4-eb1d-47ad-a866-1f8ca06bd140",
+      "name": "If Ready for Approval",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-verify-published",
+              "leftValue": "={{ $json.verifyPublishedRelease ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "156bdefb-e016-4be1-a075-ddccb99abdf0",
+      "name": "If Published Release Needs Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        1136
+      ],
+      "notesInFlow": true,
+      "notes": "Dashboard saves are usually published before the one-minute poll. New already-published revisions go directly to the live check instead of being skipped."
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Configuration').first().json.approval_email }}",
+        "subject": "=OrbitPage approval required — revision {{ $json.draftRevision }}",
+        "message": "={{ $json.approvalHtml.replace('APPROVAL_URL', $execution.resumeUrl) }}",
+        "options": {}
+      },
+      "id": "ce586437-32a0-44ee-ac82-b275e0d47778",
+      "name": "Send Publication Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1424,
+        656
+      ],
+      "webhookId": "df1fd58e-fd2d-451a-820a-503fb8a8e754"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "limitWaitTime": true,
+        "resumeAmount": "={{ $('Configuration').first().json.approval_timeout_hours }}",
+        "options": {}
+      },
+      "id": "0a76de9c-5e9a-4995-884e-0d1ebc0ca3c4",
+      "name": "Wait for Publication Approval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        656
+      ],
+      "webhookId": "f8c44225-2cd3-4e2c-a587-e8cf5bb04725"
+    },
+    {
+      "parameters": {
+        "resource": "publication",
+        "operation": "publishPage",
+        "reviewedStateTag": "={{ $('Analyze Draft').first().json.approvedEtag }}",
+        "options": {}
+      },
+      "id": "e4a4e34b-c5ab-4b75-9388-e46c645da59f",
+      "name": "Publish Approved Draft",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        656
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Analyze Draft').first().json.publicUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "body"
+            }
+          }
+        }
+      },
+      "id": "42bab68a-b2e6-476b-b3aa-37edbf5dc98b",
+      "name": "Check Published Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2192,
+        656
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst status = Number(response.statusCode ?? response.status ?? 0);\nconst body = String(response.body ?? response.data ?? '');\nconst analysis = $('Analyze Draft').first().json;\nconst hasSuccessStatus = status ? status >= 200 && status < 400 : body.length > 0;\nconst liveCheckPassed = hasSuccessStatus && body.length > 80 && !/under construction/i.test(body);\nreturn [{ json: { liveCheckPassed, statusCode: status || null, bodyBytes: body.length, checkedAt: new Date().toISOString(), publicUrl: analysis.publicUrl, rollbackRevision: analysis.rollbackRevision, canRollback: !liveCheckPassed && Number(analysis.rollbackRevision) > 0 } }];"
+      },
+      "id": "b93f8eec-33ae-4dba-b9da-3df9f2f589e8",
+      "name": "Verify Published Page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-live",
+              "leftValue": "={{ $json.liveCheckPassed ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba570f86-9d6c-4331-9c0d-72841cd7533b",
+      "name": "If Public Check Passed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const analysis = $('Analyze Draft').first().json;\nconst check = $('Verify Published Page').first().json;\nconst state = $getWorkflowStaticData('global');\nstate.releaseGuardian = { workspaceKey: analysis.workspaceKey, revision: analysis.draftRevision, snapshot: analysis.currentSnapshot, updatedAt: new Date().toISOString() };\nreturn [{ json: { status: 'published_and_verified', draftRevision: analysis.draftRevision, previousPublishedRevision: analysis.previousPublishedRevision, publicUrl: analysis.publicUrl, checkedAt: check.checkedAt, statusCode: check.statusCode, changedSections: analysis.changedSections, warnings: analysis.warnings } }];"
+      },
+      "id": "0a55d041-e283-4855-888b-9279f12ca504",
+      "name": "Remember Verified Release",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        640
+      ],
+      "notesInFlow": true,
+      "notes": "Stores only the bounded public-field projection used by the next diff. n8n persists workflow static data only for successful production executions."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-send-success",
+              "leftValue": "={{ $('Analyze Draft').first().json.sendSuccessEmail ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6aff442-ce9c-4536-beb1-914369240fe8",
+      "name": "If Success Email Is Enabled",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3216,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Configuration').first().json.approval_email }}",
+        "subject": "=OrbitPage release {{ $json.draftRevision }} verified",
+        "message": "=<h2>OrbitPage release verified</h2><p>Revision <strong>{{ $json.draftRevision }}</strong> is public and passed the live HTTP check.</p><p><a href=\"{{ $json.publicUrl }}\">Open the public page</a></p><pre style=\"white-space:pre-wrap\">{{ $('Analyze Draft').first().json.summary }}</pre>",
+        "options": {}
+      },
+      "id": "b8842983-b261-428e-b46e-6beb03ec9873",
+      "name": "Send Verified Release Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3472,
+        624
+      ],
+      "webhookId": "5e29b348-5443-4a5f-a8b3-93d5e81b5126"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-can-rollback",
+              "leftValue": "={{ $json.canRollback ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dbdce57b-8595-45dc-a149-17ccf41ac124",
+      "name": "If Rollback Is Available",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "backup",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "718fdb74-9169-41c5-a49c-8f2907dfb995",
+      "name": "Get Versions for Rollback",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        3216,
+        992
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst body = response.body || response;\nconst headers = response.headers || {};\nconst targetRevision = Number($('Analyze Draft').first().json.rollbackRevision);\nconst versions = Array.isArray(body.versions) ? body.versions : [];\nif (!versions.some((version) => Number(version.revision) === targetRevision)) throw new Error(`Previous verified revision ${targetRevision} is not available for rollback.`);\nconst rollbackEtag = String(headers.etag || headers.ETag || headers['x-orbitpage-revision'] || body.currentRevision || '').trim();\nif (!rollbackEtag) throw new Error('OrbitPage did not return the current revision required for a safe rollback.');\nconst publicUrl = $('Analyze Draft').first().json.publicUrl;\nconst html = `<div style=\"font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#202124\"><h2>OrbitPage live check failed</h2><p>The published page did not pass the HTTP smoke test after three attempts.</p><ul><li>URL: ${publicUrl}</li><li>Failed release: ${$('Analyze Draft').first().json.draftRevision}</li><li>Last verified rollback target: ${targetRevision}</li></ul><p>Confirming restores and immediately republishes the last revision verified by this workflow. If the workspace changes before approval, the stored ETag makes the restore fail safely.</p><p><a href=\"ROLLBACK_URL\" style=\"display:inline-block;padding:12px 18px;background:#b42318;color:#fff;text-decoration:none;border-radius:8px\">Approve rollback</a></p><p style=\"font-size:12px;color:#666\">Ignore this link to keep the current version and investigate manually.</p></div>`;\nreturn [{ json: { targetRevision, rollbackEtag, html, publicUrl } }];"
+      },
+      "id": "150593dc-22ee-4631-8e57-fa5fbcdb604c",
+      "name": "Prepare Rollback Approval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3472,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Configuration').first().json.approval_email }}",
+        "subject": "=OrbitPage live check failed — approve rollback to revision {{ $json.targetRevision }}",
+        "message": "={{ $json.html.replace('ROLLBACK_URL', $execution.resumeUrl) }}",
+        "options": {}
+      },
+      "id": "742b575b-ba09-4953-ac48-8dbaa247795a",
+      "name": "Send Rollback Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3728,
+        992
+      ],
+      "webhookId": "9f187e83-16ef-4fc3-81ab-9b4814e15c1f"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "limitWaitTime": true,
+        "resumeAmount": "={{ $('Configuration').first().json.approval_timeout_hours }}",
+        "options": {}
+      },
+      "id": "e7138cfb-5c13-463d-ae88-06119f61cd0a",
+      "name": "Wait for Rollback Approval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3984,
+        992
+      ],
+      "webhookId": "f8f74917-e156-4b6d-8ed1-c8977d047454"
+    },
+    {
+      "parameters": {
+        "resource": "backup",
+        "operation": "restoreVersion",
+        "revision": "={{ $('Prepare Rollback Approval').first().json.targetRevision }}",
+        "revisionMode": "manual",
+        "ifMatchRevision": "={{ $('Prepare Rollback Approval').first().json.rollbackEtag }}",
+        "options": {}
+      },
+      "id": "b0a3af3a-a75f-4605-9b29-c728e0dd15d4",
+      "name": "Restore Approved Version",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        4240,
+        992
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "name": "OrbitPage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Analyze Draft').first().json.publicUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "body"
+            }
+          }
+        }
+      },
+      "id": "844ceab0-ba20-4b0d-af3a-fa1e96a41e20",
+      "name": "Check Restored Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4496,
+        992
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst status = Number(response.statusCode ?? response.status ?? 0);\nconst body = String(response.body ?? response.data ?? '');\nconst restoredPagePassed = (status ? status >= 200 && status < 400 : body.length > 0) && body.length > 80 && !/under construction/i.test(body);\nif (!restoredPagePassed) throw new Error(`Rollback completed but the restored public page still failed verification (HTTP ${status || 'unknown'}).`);\nreturn [{ json: { status: 'rolled_back_and_verified', restoredRevision: $('Prepare Rollback Approval').first().json.targetRevision, replacedRevision: $('Analyze Draft').first().json.draftRevision, publicUrl: $('Analyze Draft').first().json.publicUrl, statusCode: status || null, checkedAt: new Date().toISOString() } }];"
+      },
+      "id": "48938238-a8c4-4f3a-a27f-7901bef4ea97",
+      "name": "Report Verified Rollback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4752,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Configuration').first().json.approval_email }}",
+        "subject": "=OrbitPage live check failed — no previous revision available",
+        "message": "=<h2>OrbitPage live check failed</h2><p>The page at <a href=\"{{ $('Analyze Draft').first().json.publicUrl }}\">{{ $('Analyze Draft').first().json.publicUrl }}</a> did not pass the HTTP smoke test, and there is no earlier published revision available for rollback.</p><p>Review the n8n execution and OrbitPage publication status manually.</p>",
+        "options": {}
+      },
+      "id": "b1b74118-c0b6-4f0e-9e3f-7158e6c072b5",
+      "name": "Send Failure Without Rollback",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3216,
+        1152
+      ],
+      "webhookId": "fc0f768b-0c18-4b1f-ac90-e78969953f85"
+    },
+    {
+      "parameters": {
+        "jsCode": "throw new Error('The published OrbitPage failed its live check and no previous revision is available for rollback.');"
+      },
+      "id": "f042b31d-0727-4956-b344-6e9c3d799ffd",
+      "name": "Fail Without Rollback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3472,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const analysis = $('Analyze Draft').first().json;\nlet status = 'private_draft_dry_run';\nif (!analysis.needsPublication && !analysis.publishedReleaseChanged) status = 'duplicate_published_revision';\nelse if (!analysis.needsPublication) status = 'published_check_blocked';\nelse if (analysis.blockers.length) status = 'private_draft_blocked';\nreturn [{ json: { status, publishEnabled: analysis.publishEnabled, draftRevision: analysis.draftRevision, publishedRevision: analysis.previousPublishedRevision, publicUrl: analysis.publicUrl, summary: analysis.summary, blockers: analysis.blockers, warnings: analysis.warnings, notifyBlocked: analysis.notifyBlocked, nextStep: status === 'private_draft_dry_run' ? 'Set ENABLE_PUBLISH to YES only if this private API draft should enter email approval.' : status === 'private_draft_blocked' ? 'Fix the findings in OrbitPage and wait for the next saved revision.' : status === 'published_check_blocked' ? 'Fix the public URL or invalid revision data before live verification can run.' : 'This published revision was already verified; no action is required.' } }];"
+      },
+      "id": "99a2a07f-87de-4c17-80a0-30fe3575d64e",
+      "name": "Report Skipped Release",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "guardian-notify-blocked",
+              "leftValue": "={{ $json.notifyBlocked ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9d964a3a-c4d5-48ca-a680-5c513ba10f63",
+      "name": "If Blocked Alert Is Needed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Configuration').first().json.approval_email }}",
+        "subject": "=OrbitPage Release Guardian blocked revision {{ $json.draftRevision }}",
+        "message": "=<h2>OrbitPage release blocked</h2><p>The Guardian did not publish revision {{ $json.draftRevision }}.</p><pre style=\"white-space:pre-wrap\">{{ $json.summary }}</pre><p>Fix the reported values in OrbitPage. A new draft revision will trigger another review.</p>",
+        "options": {}
+      },
+      "id": "880bf617-d7a7-4ed4-8c0a-7e417c58944b",
+      "name": "Send Blocked Release Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2144,
+        1136
+      ],
+      "webhookId": "e24e91bf-0788-492a-b196-c2dd150cbc0d"
+    },
+    {
+      "parameters": {
+        "content": "# OrbitPage Release Guardian\n\nMonitor every saved OrbitPage revision, verify the public page after publication, and provide a safe, human-approved rollback when a release fails its live check.\n\n> **No unattended rollback occurs.** Every restoration requires explicit approval.\n\n## Quick setup\n\n1. Install `n8n-nodes-orbitpage@0.3.2` or newer.\n2. Select the same **OrbitPage API** credential on every OrbitPage node.\n3. Select a **Gmail OAuth2** credential on every Gmail node.\n4. Grant these OrbitPage token scopes:\n   - `workspace:read`\n   - `publication:read`\n   - `publication:write`\n   - `backup:read`\n   - `backup:write`\n5. Open **Configuration** and replace the notification email address.\n6. Keep `SEND_SUCCESS_EMAIL=YES` during the first test.\n7. Keep `ENABLE_PUBLISH=NO` for normal OrbitPage dashboard editing.\n8. Run **When Manually Started** once, verify the result, and then activate the workflow.\n\n## How it works\n\n1. The trigger checks OrbitPage for newly saved revisions once per minute.\n2. The workflow reads the workspace, complete draft, publication status, and current ETag.\n3. It compares the current public-facing content with the last successfully verified release.\n4. Dashboard changes that are already published proceed directly to the public-page check.\n5. A successful check stores the revision as the new verified baseline and can send a confirmation email.\n6. If the check fails, the workflow looks for the last previously verified revision.\n7. When that version is still available, an email requests explicit rollback approval.\n8. After approval, OrbitPage restores and republishes the historical version using the current ETag.\n9. The restored public page is checked again before the workflow reports success.\n\n---\n\n**Created by Paolo Ronco, also the creator of OrbitPage.**\n\nOrbitPage support: [contact@orbitpage.com](mailto:contact@orbitpage.com)  \nWorkflow support: [contact@orbitpage.com](mailto:contact@orbitpage.com) or [info@paoloronco.it](mailto:info@paoloronco.it)",
+        "height": 828,
+        "width": 700
+      },
+      "id": "7fe05a27-f78f-4fac-bef6-80014e8ed1bc",
+      "name": "Guide - Release Guardian",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1 · Trigger, configuration, and safe reads\n\n- **Manual trigger:** validates the current release during setup.\n- **OrbitPage trigger:** polls the saved workspace revision every minute. It is not a webhook or event log.\n- **Configuration:** sets the notification address, success-email preference, and optional private-draft approval mode.\n- **Read nodes:** fetch workspace, full draft, and publication status with its ETag.\n\nThis module is read-only. Dashboard saves normally publish automatically before the next poll.",
+        "height": 520,
+        "width": 1240,
+        "color": 7
+      },
+      "id": "891b5394-4adf-44c6-8b73-24e791fd1a74",
+      "name": "Guide - 1 Inputs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2 · Analyze and route\n\nCreates a bounded snapshot of public-facing fields, compares it with the last verified release, and checks revisions, public URL, placeholders, and unsafe URL protocols.\n\nRouting distinguishes:\n- a deliberately private API/ChatGPT draft;\n- a new revision already published by the dashboard;\n- a duplicate revision that needs no work.",
+        "height": 520,
+        "width": 500,
+        "color": 7
+      },
+      "id": "3eedc904-09df-4ed1-8551-02b309bd0d62",
+      "name": "Guide - 2 Analysis",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3 · Private draft approval — optional\n\nUsed only when an eligible API or ChatGPT write intentionally leaves `draftRevision` ahead of `publishedRevision` and `ENABLE_PUBLISH=YES`.\n\nThe email link resumes the workflow and publishes the exact reviewed ETag. Any edit made while approval is pending causes OrbitPage to reject the stale state instead of publishing newer, unreviewed work. Normal dashboard saves do not use this branch.",
+        "height": 352,
+        "width": 780,
+        "color": 7
+      },
+      "id": "446c89c3-5a4c-4038-b971-315c8eb12717",
+      "name": "Guide - 3 Private Draft",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4 · Published-release routing\n\nA new already-published dashboard revision proceeds to the public-page check. A revision already verified by this workflow ends as a safe duplicate.\n\nPrivate drafts remain unchanged when approval mode is disabled or validation reports findings. A blocked-draft email is sent only when `ENABLE_PUBLISH=YES`; no public state is changed in this module.",
+        "height": 560,
+        "width": 1004,
+        "color": 7
+      },
+      "id": "c4a1e102-81db-43c9-bca9-55966dfd8c85",
+      "name": "Guide - 4 Routing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5 · Verify the public release\n\nRequests the exact public URL and checks HTTP status, response size, and obvious maintenance content. Transport failures can retry up to three times; returned HTTP error responses are evaluated immediately.\n\nA successful production execution stores only the bounded snapshot and verified revision in workflow static data. `SEND_SUCCESS_EMAIL=YES` sends the release summary. A failed check moves to assisted rollback.",
+        "height": 352,
+        "width": 1500,
+        "color": 7
+      },
+      "id": "02f5544e-8078-4466-b64b-ceb27d93773e",
+      "name": "Guide - 5 Verification",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6 · Human-approved rollback\n\nIf the live check fails, the workflow uses the last revision it previously verified—not the failing release. It confirms that version still exists, captures the current workspace ETag, and emails a rollback approval link.\n\nOnly an explicit click restores and republishes the historical version. A concurrent edit invalidates the ETag and fails safely. The restored page is checked again. On the first baseline, no earlier verified revision exists, so the workflow alerts and stops without restoring anything.",
+        "height": 520,
+        "width": 2080,
+        "color": 7
+      },
+      "id": "6d43a2fe-3c6c-41a7-b692-ad6c0941c6c7",
+      "name": "Guide - 6 Rollback",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        864
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Manually Started": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When OrbitPage Saved Revision Changes": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get Workspace Overview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Workspace Overview": {
+      "main": [
+        [
+          {
+            "node": "Get Full Page Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Full Page Draft": {
+      "main": [
+        [
+          {
+            "node": "Get Publication Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Publication Status": {
+      "main": [
+        [
+          {
+            "node": "Analyze Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Draft": {
+      "main": [
+        [
+          {
+            "node": "If Ready for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Ready for Approval": {
+      "main": [
+        [
+          {
+            "node": "Send Publication Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Published Release Needs Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Published Release Needs Check": {
+      "main": [
+        [
+          {
+            "node": "Check Published Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Skipped Release",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Publication Approval": {
+      "main": [
+        [
+          {
+            "node": "Wait for Publication Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Publication Approval": {
+      "main": [
+        [
+          {
+            "node": "Publish Approved Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish Approved Draft": {
+      "main": [
+        [
+          {
+            "node": "Check Published Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Published Page": {
+      "main": [
+        [
+          {
+            "node": "Verify Published Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Published Page": {
+      "main": [
+        [
+          {
+            "node": "If Public Check Passed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Public Check Passed": {
+      "main": [
+        [
+          {
+            "node": "Remember Verified Release",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Rollback Is Available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember Verified Release": {
+      "main": [
+        [
+          {
+            "node": "If Success Email Is Enabled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Success Email Is Enabled": {
+      "main": [
+        [
+          {
+            "node": "Send Verified Release Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Rollback Is Available": {
+      "main": [
+        [
+          {
+            "node": "Get Versions for Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Failure Without Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Versions for Rollback": {
+      "main": [
+        [
+          {
+            "node": "Prepare Rollback Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Rollback Approval": {
+      "main": [
+        [
+          {
+            "node": "Send Rollback Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Rollback Approval": {
+      "main": [
+        [
+          {
+            "node": "Wait for Rollback Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Rollback Approval": {
+      "main": [
+        [
+          {
+            "node": "Restore Approved Version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Approved Version": {
+      "main": [
+        [
+          {
+            "node": "Check Restored Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Restored Page": {
+      "main": [
+        [
+          {
+            "node": "Report Verified Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Failure Without Rollback": {
+      "main": [
+        [
+          {
+            "node": "Fail Without Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report Skipped Release": {
+      "main": [
+        [
+          {
+            "node": "If Blocked Alert Is Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Blocked Alert Is Needed": {
+      "main": [
+        [
+          {
+            "node": "Send Blocked Release Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "nodeGroups": [],
+  "tags": []
+}

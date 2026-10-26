@@ -15,8 +15,7 @@
       "position": [
         -720,
         1072
-      ],
-      "webhookId": "28275b57-403f-47c5-ab17-f5426e4f6d9e"
+      ]
     },
     {
       "parameters": {
@@ -52,13 +51,7 @@
       "position": [
         -560,
         1312
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "u0RTEr9Pum9EMs9x",
-          "name": "OpenAi account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -86,13 +79,7 @@
       "position": [
         704,
         1744
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -108,13 +95,7 @@
       "position": [
         544,
         1744
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -130,13 +111,7 @@
       "position": [
         384,
         1744
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -152,13 +127,7 @@
       "position": [
         208,
         1744
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -176,13 +145,7 @@
       "position": [
         32,
         1744
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -259,8 +222,7 @@
       "position": [
         1440,
         992
-      ],
-      "webhookId": "9b94e9af-7106-4714-8a08-a05b07ac1265"
+      ]
     },
     {
       "parameters": {
@@ -310,12 +272,6 @@
         1920,
         976
       ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "onError": "continueRegularOutput"
     },
     {
@@ -330,13 +286,7 @@
       "position": [
         2160,
         976
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -386,12 +336,11 @@
       "position": [
         2848,
         1216
-      ],
-      "webhookId": "1c4e09d8-339e-4d34-81b4-5827bec4908d"
+      ]
     },
     {
       "parameters": {
-        "content": "# OrbitPage AI Page Editor\n\nChat with an AI agent to inspect your OrbitPage, request edits, and review a validated proposal before approving publication.\n\n## Setup\n1. Install `n8n-nodes-orbitpage@0.3.2` or newer on an n8n 2.x instance that supports community nodes.\n2. Create an OrbitPage API token with `workspace:read`, `publication:read`, `publication:write`, `ai:read`, and `ai:write`.\n3. Select your OrbitPage credential on all seven OrbitPage nodes.\n4. Connect your OpenAI credential in **OpenAI Chat Model**.\n5. Keep Chat private while testing; configure authentication before sharing its URL.\n\n## How it works\n1. Receive a question or edit request through Chat.\n2. Read the relevant workspace and page data.\n3. Generate a validated preview for an edit request.\n4. Show the proposed changes with approval buttons.\n5. Apply and publish only after approval, then read publication status.\n\n## Customization\n- Change the chat model, response language, or agent tone.\n- Adjust the conversation memory window.\n- Customize approval labels and response messages.\n\n## Testing & notes\n- Start with a question about your page.\n- Test **Reject** before approving an intended edit.\n- **Approve and publish** requests a live page update.\n- OpenAI usage and OrbitPage AI previews have separate costs or allowances.\n- Review execution-data retention for page content and proposals.\n\n[Full setup guide](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/orbitpage-ai-page-editor)\n\nCreated by **Paolo Ronco**.\nWorkflow: **info@paoloronco.it**\nOrbitPage: **contact@orbitpage.com**",
+        "content": "# OrbitPage AI Page Editor\n\nChat with an AI agent to inspect your OrbitPage, request edits, and review a validated proposal before approving publication.\n\n## Setup\n1. Install `n8n-nodes-orbitpage@0.3.2` or newer on an n8n 2.x instance that supports community nodes.\n2. Create an OrbitPage API token with `workspace:read`, `publication:read`, `publication:write`, `ai:read`, and `ai:write`.\n3. Select your OrbitPage credential on all seven OrbitPage nodes.\n4. Connect your OpenAI credential in **OpenAI Chat Model**.\n5. Keep Chat private while testing; configure authentication before sharing its URL.\n\n## How it works\n1. Receive a question or edit request through Chat.\n2. Read the relevant workspace and page data.\n3. Generate a validated preview for an edit request.\n4. Show the proposed changes with approval buttons.\n5. Apply and publish only after approval, then read publication status.\n\n## Customization\n- Change the chat model, response language, or agent tone.\n- Adjust the conversation memory window.\n- Customize approval labels and response messages.\n\n## Testing & notes\n- Start with a question about your page.\n- Test **Reject** before approving an intended edit.\n- **Approve and publish** requests a live page update.\n- OpenAI usage and OrbitPage AI previews have separate costs or allowances.\n- Review execution-data retention for page content and proposals.\n\n[Full setup guide](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/orbitpage-ai-page-editor)",
         "width": 720,
         "height": 1180
       },
@@ -501,7 +450,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "When Chat Message Received": {
       "main": [
@@ -705,16 +653,11 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "270dea60-f9c4-4225-a1ae-b59df368d60d",
-  "meta": {
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
   "nodeGroups": [],
-  "id": "jsJzjpWpm6ufRE54",
   "tags": []
 }

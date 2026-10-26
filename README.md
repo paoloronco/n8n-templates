@@ -32,8 +32,6 @@ A curated collection of n8n automation workflows, practical implementation guide
 | Backup & Sync Execution Validation | Log-driven validation of scheduled backup/sync jobs. | [Folder](./free-templates/backup-sync-monitoring/) | [View](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation) | [View](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/) | [Guide](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a?pvs=74) |
 | AI News → Instagram Publishing | Generate social posts from RSS news and publish them to Instagram using AI and Cloudinary. | [Folder](./free-templates/ai-instagram-publishing/) | [View](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing) | [View](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/) | [Guide](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-3f5f0ba27c32806ba425f7d84c72961a?pvs=74) |
 
-A dash indicates that no public listing was found in the repository or Notion catalog. Linked listings may describe an earlier release.
-
 ## Importing a workflow
 
 1. Open the relevant template folder and read its README.

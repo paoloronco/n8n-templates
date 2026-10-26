@@ -4,6 +4,11 @@
 
 Chat with an AI page editor to inspect your OrbitPage workspace, understand your current page, and prepare validated edits. Review each proposal directly in n8n Chat, then approve publication or reject it. The workflow applies approved changes and retrieves the resulting publication status.
 
+## Download
+
+- [Download on Gumroad](https://paoloronco.gumroad.com/l/orbitpage-ai-pageeditor)
+- [Workflow JSON](./OrbitPage_AI_Page_Editor.json)
+
 ## How it works
 
 1. **Receive:** An n8n Chat message starts the AI agent, using OpenAI and conversation memory for context.

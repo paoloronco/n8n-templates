@@ -16,6 +16,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description |
 |---|---|
+| [OrbitPage Release Guardian](./free-templates/orbitpage-release-guardian/) | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. |
 | [Website AI Chatbot](./free-templates/website-ai-chatbot/) | Authenticated website RAG chatbot with OpenAI, Qdrant, Cohere reranking and structured JSON responses. |
 | [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate multilingual WordPress audio with Google Cloud TTS and Translate. [Free download](https://paoloronco.gumroad.com/l/wordpress-voiceovers) · [n8n Creators](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing). |
 | [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |

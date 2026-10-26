@@ -8,6 +8,11 @@ Order notification automation for online menus. Select one functional variant:
 | [V2 — Home Assistant TTS](./V2/) | Basic capabilities plus spoken announcements | [Guide](./V2/README.md) |
 | [V3 — Home Assistant TTS + BAC](./V3/) | TTS plus per-person order history and simplified BAC estimate | [Guide](./V3/README.md) |
 
+## Published version
+
+- **Gumroad:** [V3 — Home Assistant TTS + BAC](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications). Only V3 is published on Gumroad.
+- **n8n Creators:** [V3 — View template](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/).
+
 ## Shared resources
 
 - [Online menu mockup](./website-mockup/)

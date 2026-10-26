@@ -14,21 +14,21 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 ### Free templates
 
-| Template | Description |
-|---|---|
-| [OrbitPage Release Guardian](./free-templates/orbitpage-release-guardian/) | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. |
-| [Website AI Chatbot](./free-templates/website-ai-chatbot/) | Authenticated website RAG chatbot with OpenAI, Qdrant, Cohere reranking and structured JSON responses. |
-| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate multilingual WordPress audio with Google Cloud TTS and Translate. [Free download](https://paoloronco.gumroad.com/l/wordpress-voiceovers) · [n8n Creators](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing). |
-| [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. |
-| [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). |
-| [Digital Certificate Creation & Validation](./free-templates/digital-certificates/) | HTML/CSS PDF or PDF Generator API variants. |
-| [Tech & AI News Digest](./free-templates/tech-ai-news-digest/) | RSS collection, AI ranking, summaries and email delivery. |
-| [Instagram Reel to Notion Second Brain](./free-templates/instagram-reel-second-brain/) | Save public Instagram Reels as structured Notion knowledge using Telegram, Apify and OpenAI. Italian and English output variants available. [Gumroad](https://paoloronco.gumroad.com/l/instagram-notion-secondbrain) · [Setup guide](https://paoloronco.notion.site/Documentation-Instagram-Reel-to-Notion-Second-Brain-404f0ba27c3281e1b7e0cd5159fb6bc7?pvs=73). |
-| [Menu Order Notifications](./free-templates/menu-order-notifications/) | Basic ntfy, Home Assistant TTS and BAC tracking variants. |
-| [Splunk Security Alert Notifications](./free-templates/splunk-alert-notifications/) | Basic notifications and enriched/deduplicated alert processing. |
-| [Newsletter & Release Announcements](./free-templates/newsletter-automation/) | Subscriber management, welcomes and GitHub release emails. |
-| [Google Cloud Inventory & Change Audit](./free-templates/google-cloud-inventory/) | Resource inventory and change tracking. |
-| [Backup & Sync Execution Validation](./free-templates/backup-sync-monitoring/) | Log-driven validation of scheduled backup/sync jobs. |
+| Template | Description | Download | n8n Creators | Setup guide |
+|---|---|---|---|---|
+| [OrbitPage Release Guardian](./free-templates/orbitpage-release-guardian/) | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. | — | — | — |
+| [Website AI Chatbot](./free-templates/website-ai-chatbot/) | Authenticated website RAG chatbot with OpenAI, Qdrant, Cohere reranking and structured JSON responses. | — | — | — |
+| [WordPress Voiceovers — Google Cloud TTS](./free-templates/wordpress-ai-voiceovers/) | Generate multilingual WordPress audio with Google Cloud TTS and Translate. | [Free download](https://paoloronco.gumroad.com/l/wordpress-voiceovers) | [Legacy listing](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) | — |
+| [Amazon Luna Prime Games](./free-templates/amazon-luna-prime-games/) | Synchronize included-with-Prime games with Google Sheets. | — | — | — |
+| [Invoice Archiving & Data Extraction](./free-templates/invoice-archiving/) | Gmail invoice extraction and archiving (v1 / v2). | — | — | — |
+| [Digital Certificate Creation & Validation](./free-templates/digital-certificates/) | HTML/CSS PDF or PDF Generator API variants. | — | — | — |
+| [Tech & AI News Digest](./free-templates/tech-ai-news-digest/) | RSS collection, AI ranking, summaries and email delivery. | — | — | — |
+| [Instagram Reel to Notion Second Brain](./free-templates/instagram-reel-second-brain/) | Save public Instagram Reels as structured Notion knowledge using Telegram, Apify and OpenAI. Italian and English output variants available. | [Gumroad](https://paoloronco.gumroad.com/l/instagram-notion-secondbrain) | — | [Guide](https://paoloronco.notion.site/Documentation-Instagram-Reel-to-Notion-Second-Brain-404f0ba27c3281e1b7e0cd5159fb6bc7?pvs=73) |
+| [Menu Order Notifications](./free-templates/menu-order-notifications/) | Basic ntfy, Home Assistant TTS and BAC tracking variants. | — | — | — |
+| [Splunk Security Alert Notifications](./free-templates/splunk-alert-notifications/) | Basic notifications and enriched/deduplicated alert processing. | — | — | — |
+| [Newsletter & Release Announcements](./free-templates/newsletter-automation/) | Subscriber management, welcomes and GitHub release emails. | — | — | — |
+| [Google Cloud Inventory & Change Audit](./free-templates/google-cloud-inventory/) | Resource inventory and change tracking. | — | — | — |
+| [Backup & Sync Execution Validation](./free-templates/backup-sync-monitoring/) | Log-driven validation of scheduled backup/sync jobs. | — | — | — |
 
 ## Folder conventions
 

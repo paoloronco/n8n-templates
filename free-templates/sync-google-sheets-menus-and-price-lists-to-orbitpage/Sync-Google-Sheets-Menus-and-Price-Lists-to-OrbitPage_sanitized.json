@@ -1,0 +1,1563 @@
+{
+  "name": "Sync Google Sheets Menus and Price Lists to OrbitPage",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "90426f7b-4402-4283-a4c6-d31496fb9251",
+      "name": "Manual check",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "1d5dde56-6d21-4757-941a-185ee13debf4",
+      "name": "Check every 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "724abade-5bdd-a85b-e54a-5cddf64a7a1a",
+              "name": "MODE",
+              "value": "SAMPLE",
+              "type": "string"
+            },
+            {
+              "id": "a1803eb2-967e-9e21-4f90-6d929d440e3e",
+              "name": "SPREADSHEET_ID",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "71d8c467-309c-6b70-b771-5f440c041d78",
+              "name": "SHEET_NAME",
+              "value": "Items",
+              "type": "string"
+            },
+            {
+              "id": "95d71dbf-e25e-d91e-f987-d6aa0af036f3",
+              "name": "SYNC_KEY",
+              "value": "services",
+              "type": "string"
+            },
+            {
+              "id": "70115ee5-51bc-25b0-9810-8d2f3647719b",
+              "name": "SECTION_NAME",
+              "value": "Services",
+              "type": "string"
+            },
+            {
+              "id": "74804201-b785-217d-318c-3efc87c7be54",
+              "name": "EXPECTED_CURRENCY",
+              "value": "EUR",
+              "type": "string"
+            },
+            {
+              "id": "1e2f33ac-7379-acec-14a7-ef5bc1403c22",
+              "name": "REGISTRY_TABLE_NAME",
+              "value": "OrbitPage Sheets Sync",
+              "type": "string"
+            },
+            {
+              "id": "2fab32d5-a5f6-6b1d-0f5b-88f57361a33c",
+              "name": "FROM_EMAIL",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "bb7cdd04-fd1c-a205-706b-6a26fc365dfa",
+              "name": "APPROVAL_EMAIL",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d4d2babc-2326-78f6-8aca-a26e4588af2e",
+              "name": "ALLOW_DELETIONS",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "6229fd5c-a0be-a0f4-d68a-2379140751dc",
+              "name": "PUBLISH_AFTER_APPROVAL",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "37d51211-76c7-f2bc-e8cc-02b18c583115",
+              "name": "APPROVAL_TIMEOUT_HOURS",
+              "value": 48,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9b7e7f94-eba7-40b9-a21e-1fc4226cadc8",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function text(value,max,label,required=false) {\n  if (value!=null && typeof value!=='string' && typeof value!=='number') throw Error(label+' must be text');\n  const out=String(value??'').trim();\n  if (out.length>max || (required&&!out)) throw Error('Invalid '+label);\n  return out;\n}\n\nfunction flag(value,label,empty=false) {\n  if (value===''||value==null) return empty;\n  if (value===true||String(value).trim().toUpperCase()==='TRUE') return true;\n  if (value===false||String(value).trim().toUpperCase()==='FALSE') return false;\n  throw Error(label+' must be TRUE or FALSE');\n}\n\nfunction validateConfiguration(raw) {\n  const mode=String(raw.MODE||'SAMPLE');\n  if (!['SAMPLE','PREVIEW','EMAIL_APPROVAL'].includes(mode)) throw Error('MODE must be SAMPLE, PREVIEW or EMAIL_APPROVAL');\n  const syncKey=String(raw.SYNC_KEY||'services');\n  if (!/^[a-z0-9][a-z0-9_-]{0,23}$/.test(syncKey)) throw Error('Invalid SYNC_KEY');\n  const config={mode,syncKey,spreadsheetId:text(raw.SPREADSHEET_ID,100,'spreadsheet ID'),sheetName:text(raw.SHEET_NAME||'Items',80,'sheet name',true),sectionName:text(raw.SECTION_NAME||'Services',80,'section name',true),currency:String(raw.EXPECTED_CURRENCY||'EUR'),tableName:text(raw.REGISTRY_TABLE_NAME||'OrbitPage Sheets Sync',100,'registry table',true),fromEmail:text(raw.FROM_EMAIL,254,'sender'),approvalEmail:text(raw.APPROVAL_EMAIL,254,'reviewer'),allowDeletions:flag(raw.ALLOW_DELETIONS,'ALLOW_DELETIONS'),publish:flag(raw.PUBLISH_AFTER_APPROVAL,'PUBLISH_AFTER_APPROVAL'),approvalHours:Number(raw.APPROVAL_TIMEOUT_HOURS??48)};\n  if (!/^[A-Z]{3}$/.test(config.currency)) throw Error('EXPECTED_CURRENCY must be three uppercase letters');\n  if (!Number.isInteger(config.approvalHours)||config.approvalHours<1||config.approvalHours>168) throw Error('Approval timeout must be 1–168 hours');\n  if (mode!=='SAMPLE'&&!/^[a-zA-Z0-9_-]{20,100}$/.test(config.spreadsheetId)) throw Error('Set a Google spreadsheet ID before reading a real sheet');\n  if (mode==='EMAIL_APPROVAL') for (const email of [config.fromEmail,config.approvalEmail]) if (!/^[^\\s@,;<>]+@[^\\s@,;<>]+\\.[^\\s@,;<>]+$/.test(email)) throw Error('Set one SMTP sender and one approval recipient');\n  return config;\n}\n\nreturn [{json:validateConfiguration($json)}];"
+      },
+      "id": "94c117f8-67ea-487c-966d-470b49dfd451",
+      "name": "Validate configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "52639d4a-6876-dd2c-ee14-75ebce162377",
+              "leftValue": "={{ $json.mode === 'SAMPLE' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "56157c49-3781-4507-8629-55f0d492f303",
+      "name": "Sample mode",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1984,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function approvalDecision(response,startedAt,timeoutHours,now) {\n  if (Date.parse(now)>Date.parse(startedAt)+timeoutHours*3600000) return 'expired';\n  const data=response?.data??response;\n  if (!data||data.approved!==true) return data?.approved===false?'declined':'expired';\n  return 'approved';\n}\n\nfunction clone(value) { return JSON.parse(JSON.stringify(value)); }\n\nfunction contextFor(config,publication) {\n  if (!publication.publicUrl) throw Error('The workspace needs a public URL before linking a registry');\n  return stable([publication.publicUrl,config.spreadsheetId,config.sheetName,config.syncKey]);\n}\n\nfunction decodeRegistry(rows) {\n  const records=rows.filter(r=>r&&r.key);\n  if (records.length>1) throw Error('Duplicate registry records: reconcile before continuing');\n  if (!records.length) return null;\n  const r=records[0];let snapshot;\n  try {snapshot=JSON.parse(r.snapshot||'{\"items\":{},\"section\":null}');} catch {throw Error('Invalid registry snapshot');}\n  if (!snapshot||!snapshot.items||typeof snapshot.items!=='object'||Array.isArray(snapshot.items)) throw Error('Invalid registry ownership data');\n  return {...r,snapshot};\n}\n\nfunction flag(value,label,empty=false) {\n  if (value===''||value==null) return empty;\n  if (value===true||String(value).trim().toUpperCase()==='TRUE') return true;\n  if (value===false||String(value).trim().toUpperCase()==='FALSE') return false;\n  throw Error(label+' must be TRUE or FALSE');\n}\n\nfunction itemProjection(item) {\n  return {id:item.id,sectionId:item.sectionId,name:item.name,description:item.description||'',priceMinor:item.priceMinor,available:item.available,position:item.position};\n}\n\nfunction makePlan(input) {\n  const {config,rows,publication}=input;\n  if (!input.menu||!Array.isArray(input.menu.items)||!Array.isArray(input.menu.sections)) throw Error('OrbitPage returned no native menu');\n  const revision=Number(input.revision);\n  if (!Number.isSafeInteger(revision)||revision<0||publication.draftRevision!==revision) throw Error('The settings and publication revisions differ');\n  if (publication.draftRevision!==publication.publishedRevision) throw Error('Publish or reconcile unrelated private changes before synchronizing');\n  if (input.menu.currency!==config.currency) throw Error('The configured currency differs from the menu; no automatic currency conversion');\n  const context=contextFor(config,publication),registry=input.registry;\n  if (registry&&registry.context!==context) throw Error('The registry belongs to another sheet, namespace or workspace');\n  if (registry&&registry.state!=='idle') throw Error('A pending or uncertain execution is held for reconciliation');\n  const parsed=readRows(rows,config),menu=clone(input.menu),snapshot=clone(registry?.snapshot||{section:null,items:{}});\n  const sectionId='gs-'+config.syncKey+'-section';\n  const existingSection=menu.sections.find(s=>s.id===sectionId);\n  const upserts=parsed.rows.filter(r=>r.action==='UPSERT');\n  const changes=[],warnings=[];\n  if (upserts.length) {\n    if (existingSection) {\n      if (!snapshot.section) throw Error('Section ID collision: the registry does not own this section');\n      if (stable({id:existingSection.id,name:existingSection.name})!==stable(snapshot.section)) throw Error('The managed section was edited in OrbitPage');\n      if (existingSection.name!==config.sectionName) {changes.push({action:'section',id:sectionId,before:{name:existingSection.name},after:{name:config.sectionName}});existingSection.name=config.sectionName;}\n    } else {\n      if (snapshot.section) throw Error('The managed section was removed in OrbitPage');\n      if (menu.sections.length>=30) throw Error('Native menu section limit reached');\n      menu.sections.push({id:sectionId,name:config.sectionName,description:'',visible:true,position:menu.sections.length});\n      changes.push({action:'section',id:sectionId,before:null,after:{name:config.sectionName}});\n    }\n    snapshot.section={id:sectionId,name:config.sectionName};\n  }\n  for (const row of parsed.rows) {\n    const id='gs-'+config.syncKey+'-'+row.id;\n    const at=menu.items.findIndex(item=>item.id===id),current=at<0?null:menu.items[at],previous=snapshot.items[id];\n    if (current&&!previous) throw Error('Item ID collision: '+row.id+' is not owned by this registry');\n    if (current&&stable(itemProjection(current))!==stable(previous)) throw Error('Managed fields were edited in OrbitPage: '+row.id);\n    if (row.action==='DELETE') {\n      if (current) {menu.items.splice(at,1);changes.push({action:'delete',id,before:itemProjection(current),after:null});}\n      delete snapshot.items[id];continue;\n    }\n    if (!current&&previous) throw Error('A managed item was removed in OrbitPage: '+row.id);\n    const desired={id,sectionId,name:row.name,description:row.description,priceMinor:row.priceMinor,available:row.available,position:row.position};\n    if (!current) {\n      menu.items.push({...desired,variants:[],allergens:[],dietaryTags:[],featured:false});\n      changes.push({action:'add',id,before:null,after:desired});\n    } else if (stable(itemProjection(current))!==stable(desired)) {\n      menu.items[at]={...current,...desired};\n      changes.push({action:'update',id,before:itemProjection(current),after:desired});\n    }\n    snapshot.items[id]=desired;\n  }\n  if (menu.items.length>250) throw Error('Native menu item limit reached');\n  const missing=Object.keys(snapshot.items).filter(id=>!parsed.allIds.includes(id.slice(('gs-'+config.syncKey+'-').length)));\n  if (missing.length) warnings.push(missing.length+' previously managed item(s) missing from the sheet were preserved; deletion requires an approved DELETE row.');\n  if (!menu.enabled) warnings.push('Enable and configure the native menu in OrbitPage before applying this plan.');\n  if (config.mode==='EMAIL_APPROVAL'&&changes.length&&!menu.enabled) throw Error('Enable and publish the native menu before using email-approved sync');\n  return {config,context,revision:String(revision),originalPublishedRevision:publication.publishedRevision,baseMenu:clone(input.menu),menu,rows:clone(rows),sourceSignature:stable(rows),previousSnapshot:clone(registry?.snapshot||{section:null,items:{}}),nextSnapshot:snapshot,changes,warnings,hasChanges:changes.length>0,stateChanged:stable(snapshot)!==stable(registry?.snapshot||{section:null,items:{}}),stats:{added:changes.filter(c=>c.action==='add').length,updated:changes.filter(c=>c.action==='update').length,deleted:changes.filter(c=>c.action==='delete').length,skipped:parsed.skipped,missingPreserved:missing.length}};\n}\n\nfunction priceMinor(value) {\n  if (typeof value==='number') {\n    if (!Number.isFinite(value)||value<0||value>100000||Math.abs(value*100-Math.round(value*100))>0.000001) throw Error('Price must be non-negative with at most two decimals');\n    return Math.round(value*100);\n  }\n  const s=String(value??'').trim();\n  if (!/^(0|[1-9]\\d{0,5})([.,]\\d{1,2})?$/.test(s)) throw Error('Invalid price; use an unformatted number or decimal text without thousands separators');\n  const [whole,decimal='']=s.replace(',','.').split('.');\n  const minor=Number(whole)*100+Number(decimal.padEnd(2,'0'));\n  if (minor>10000000) throw Error('Price exceeds menu limit');\n  return minor;\n}\n\nfunction readRows(input,config) {\n  const rows=input.filter(r=>r&&Object.keys(r).some(k=>k!=='row_number'&&r[k]!==''&&r[k]!=null));\n  if (rows.length>250) throw Error('More than 250 populated rows; split the source before synchronizing');\n  const ids=new Set(),approved=[];let skipped=0;\n  for (let index=0;index<rows.length;index++) {\n    const row=rows[index],id=String(row.id??'').trim();\n    if (id) {if (ids.has(id)) throw Error('Duplicate source id: '+id);ids.add(id);}\n    if (!flag(row.approved,'approved on row '+(index+2))) {skipped++;continue;}\n    if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id)) throw Error('Approved rows need a stable lowercase id');\n    const action=String(row.action||'UPSERT').trim().toUpperCase();\n    if (!['UPSERT','DELETE'].includes(action)) throw Error('Unknown action for '+id);\n    if (action==='DELETE') {\n      if (!config.allowDeletions) throw Error('DELETE requires ALLOW_DELETIONS=true and a reviewed approval');\n      approved.push({id,action});continue;\n    }\n    const position=row.position===''||row.position==null?index:Number(row.position);\n    if (!Number.isInteger(position)||position<0||position>249) throw Error('Position must be an integer from 0 to 249');\n    approved.push({id,action,name:text(row.name,120,'name for '+id,true),description:text(row.description,500,'description'),priceMinor:priceMinor(row.price),available:flag(row.available,'available for '+id,true),position});\n  }\n  return {rows:approved,skipped,allIds:[...ids]};\n}\n\nfunction recheckPlan(plan,current,executionId) {\n  if (current.registry?.state!=='pending'||String(current.registry.execution_id)!==String(executionId)||current.registry.context!==plan.context) throw Error('This execution no longer owns the pending review');\n  if (stable(current.registry.snapshot)!==stable(plan.previousSnapshot)) throw Error('The ownership snapshot changed during review');\n  if (contextFor(plan.config,current.publication)!==plan.context) throw Error('Workspace identity changed');\n  if (String(current.revision)!==plan.revision||current.publication.draftRevision!==Number(plan.revision)||current.publication.publishedRevision!==plan.originalPublishedRevision) throw Error('The workspace revision changed after review');\n  if (stable(current.menu)!==stable(plan.baseMenu)) throw Error('The menu changed after review');\n  if (stable(current.rows)!==plan.sourceSignature) throw Error('The sheet changed after review; generate a new diff');\n  return plan;\n}\n\nfunction registryRecord(plan,state,executionId,now,snapshot) {\n  return {key:plan.config.syncKey,state,context:plan.context,execution_id:String(executionId||''),snapshot:JSON.stringify(snapshot),updated_at:now};\n}\n\nfunction reviewEmail(plan) {\n  const escape=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n  const show=value=>value==null?'—':escape(value.name||value.id||'Section')+(value.description?'<br>'+escape(value.description):'')+(Number.isInteger(value.priceMinor)?'<br><strong>'+(value.priceMinor/100).toFixed(2)+' '+escape(plan.config.currency)+'</strong>':'')+(typeof value.available==='boolean'?'<br>'+(value.available?'Available':'Unavailable'):'')+(Number.isInteger(value.position)?'<br>Order: '+value.position:'');\n  return '<h2>Review Google Sheets → OrbitPage</h2><p>Destination: '+escape(plan.config.publish?'PUBLIC PAGE':'PRIVATE DRAFT')+'. Approved rows only. Currency: '+escape(plan.config.currency)+'.</p><p>'+escape(JSON.stringify(plan.stats))+'</p><table border=\"1\" cellpadding=\"8\"><tr><th>Action / ID</th><th>Before</th><th>After</th></tr>'+plan.changes.map(c=>'<tr><td>'+escape(c.action+' '+c.id)+'</td><td>'+show(c.before)+'</td><td>'+show(c.after)+'</td></tr>').join('')+'</table><p>'+plan.warnings.map(escape).join('<br>')+'</p><p>Changes to the page or source sheet invalidate this review. Declining or timing out does not change the page.</p>';\n}\n\nfunction runSampleSuite(config) {\n  const results=[];const check=(condition,message)=>{if(!condition)throw Error('Sample assertion: '+message);};\n  const input=sampleInput(config),plan=makePlan(input),now='2026-01-01T00:00:00.000Z';\n  check(plan.stats.added===1&&plan.stats.updated===1&&plan.stats.skipped===1&&plan.stats.missingPreserved===1,'diff counts');\n  check(stable(plan.menu.items.find(i=>i.id==='house-item'))===stable(input.menu.items[0]),'unmanaged item preserved');\n  check(!plan.menu.items.some(i=>i.id.endsWith('-draft')),'unapproved row excluded');\n  results.push({case:'diff and preservation',status:'passed',stats:plan.stats,changes:plan.changes});\n  const pending={...input.registry,state:'pending',execution_id:'sample'};\n  recheckPlan(plan,{...input,registry:pending},'sample');\n  const publication={...input.publication,draftRevision:42,publishedRevision:config.publish?42:41};\n  const saved=verifyWrite(plan,{revision:42},{revision:42,data:{menu:plan.menu}},publication);\n  results.push({case:'approved write and verification (simulated)',status:'passed',...saved});\n  for(const [response,expected] of [[{data:{approved:false}},'declined'],[{},'expired']]) {\n    check(approvalDecision(response,now,48,now)===expected,'approval decision');\n    check(stable(input.menu)===stable(plan.baseMenu),'decline does not write');results.push({case:expected+' without page mutation',status:'passed'});\n  }\n  const repeat=makePlan({...input,menu:plan.menu,revision:42,publication:{...publication,publishedRevision:42},registry:{...input.registry,snapshot:plan.nextSnapshot}});\n  check(!repeat.hasChanges,'second run is a no-op');results.push({case:'repeat without duplicate items',status:'passed'});\n  const deletion=clone(input);deletion.config.allowDeletions=true;deletion.rows.push({id:'legacy',approved:true,action:'DELETE'});\n  const removed=makePlan(deletion);check(removed.stats.deleted===1&&!removed.menu.items.some(i=>i.id.endsWith('-legacy')),'explicit approved delete');results.push({case:'explicit approved deletion',status:'passed'});\n  for(const [name,mutate] of [['page revision conflict',v=>{v.revision++;v.publication.draftRevision++;}],['source sheet changed',v=>{v.rows[0].price=56;}]]) {\n    const changed=clone({...input,registry:pending});mutate(changed);let stopped=false;try{recheckPlan(plan,changed,'sample');}catch{stopped=true;}check(stopped,name);results.push({case:name+' blocked',status:'passed'});\n  }\n  const invalid=clone(input);invalid.rows[0].price='1.234,56';let stopped=false;try{makePlan(invalid);}catch{stopped=true;}check(stopped,'invalid approved price');results.push({case:'invalid price blocked before write',status:'passed'});\n  return results.map(result=>({...result,sampleOnly:true,externalCalls:0}));\n}\n\nfunction sampleInput(config) {\n  const sectionId='gs-'+config.syncKey+'-section';\n  const item=(id,name,priceMinor,sectionId='house',position=0)=>({id,sectionId,name,description:'',priceMinor,available:true,position,variants:[],allergens:[],dietaryTags:[],featured:false});\n  const current=item('gs-'+config.syncKey+'-consultation','Consultation',5000,sectionId);\n  const legacy=item('gs-'+config.syncKey+'-legacy','Legacy service',1500,sectionId,1);\n  const menu={version:1,enabled:true,venueType:'other',setupCompleted:true,name:'Sample service list',description:'Fictional data for isolated validation',footerText:'Sample data',currency:'EUR',locale:'en-GB',sections:[{id:'house',name:'Unmanaged section',visible:true,position:0},{id:sectionId,name:config.sectionName,description:'',visible:true,position:1}],items:[item('house-item','Keep this unmanaged item',1200),current,legacy],theme:{preset:'editorial',background:'#f4f1eb',surface:'#fffdf8',text:'#17201d',muted:'#66706b',accent:'#1f5b47',border:'#d7d4cc',radius:8,imageLayout:'compact'},routing:{homepage:'link',linkEnabled:true}};\n  const publication={draftRevision:41,publishedRevision:41,publicationStatus:'published',publicUrl:'https://example.test/sample-menu'};\n  const rows=[{id:'consultation',approved:true,action:'UPSERT',name:'Consultation',description:'Updated service',price:55,available:true,position:0},{id:'assessment',approved:true,action:'UPSERT',name:'Assessment',description:'New approved service',price:'25,50',available:true,position:1},{id:'draft',approved:false,action:'UPSERT',name:'Not approved',price:'invalid'}];\n  const snapshot={section:{id:sectionId,name:config.sectionName},items:Object.fromEntries([current,legacy].map(i=>[i.id,itemProjection(i)]))};\n  return {config,rows,menu,publication,revision:41,registry:{key:config.syncKey,state:'idle',context:contextFor(config,publication),execution_id:'',snapshot}};\n}\n\nfunction stable(value) {\n  if (Array.isArray(value)) return '['+value.map(stable).join(',')+']';\n  if (value && typeof value==='object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stable(value[k])).join(',')+'}';\n  return JSON.stringify(value);\n}\n\nfunction text(value,max,label,required=false) {\n  if (value!=null && typeof value!=='string' && typeof value!=='number') throw Error(label+' must be text');\n  const out=String(value??'').trim();\n  if (out.length>max || (required&&!out)) throw Error('Invalid '+label);\n  return out;\n}\n\nfunction validateConfiguration(raw) {\n  const mode=String(raw.MODE||'SAMPLE');\n  if (!['SAMPLE','PREVIEW','EMAIL_APPROVAL'].includes(mode)) throw Error('MODE must be SAMPLE, PREVIEW or EMAIL_APPROVAL');\n  const syncKey=String(raw.SYNC_KEY||'services');\n  if (!/^[a-z0-9][a-z0-9_-]{0,23}$/.test(syncKey)) throw Error('Invalid SYNC_KEY');\n  const config={mode,syncKey,spreadsheetId:text(raw.SPREADSHEET_ID,100,'spreadsheet ID'),sheetName:text(raw.SHEET_NAME||'Items',80,'sheet name',true),sectionName:text(raw.SECTION_NAME||'Services',80,'section name',true),currency:String(raw.EXPECTED_CURRENCY||'EUR'),tableName:text(raw.REGISTRY_TABLE_NAME||'OrbitPage Sheets Sync',100,'registry table',true),fromEmail:text(raw.FROM_EMAIL,254,'sender'),approvalEmail:text(raw.APPROVAL_EMAIL,254,'reviewer'),allowDeletions:flag(raw.ALLOW_DELETIONS,'ALLOW_DELETIONS'),publish:flag(raw.PUBLISH_AFTER_APPROVAL,'PUBLISH_AFTER_APPROVAL'),approvalHours:Number(raw.APPROVAL_TIMEOUT_HOURS??48)};\n  if (!/^[A-Z]{3}$/.test(config.currency)) throw Error('EXPECTED_CURRENCY must be three uppercase letters');\n  if (!Number.isInteger(config.approvalHours)||config.approvalHours<1||config.approvalHours>168) throw Error('Approval timeout must be 1–168 hours');\n  if (mode!=='SAMPLE'&&!/^[a-zA-Z0-9_-]{20,100}$/.test(config.spreadsheetId)) throw Error('Set a Google spreadsheet ID before reading a real sheet');\n  if (mode==='EMAIL_APPROVAL') for (const email of [config.fromEmail,config.approvalEmail]) if (!/^[^\\s@,;<>]+@[^\\s@,;<>]+\\.[^\\s@,;<>]+$/.test(email)) throw Error('Set one SMTP sender and one approval recipient');\n  return config;\n}\n\nfunction verifyWrite(plan,response,settings,publication) {\n  const revision=Number(response.revision);\n  if (!Number.isSafeInteger(revision)||revision<=Number(plan.revision)||settings.revision!==revision||publication.draftRevision!==revision) throw Error('The resulting draft revision was not confirmed');\n  const actual=clone(settings.data.menu),expected=clone(plan.menu);delete actual.updatedAt;delete expected.updatedAt;\n  if (stable(actual)!==stable(expected)) throw Error('The saved menu differs from the reviewed menu');\n  if (plan.config.publish) {\n    if (publication.publishedRevision!==revision||publication.publicationStatus!=='published') throw Error('Publication was not confirmed');\n  } else if (publication.publishedRevision!==plan.originalPublishedRevision) throw Error('The public revision changed while saving a private draft');\n  return {revision,message:plan.config.publish?'Reviewed native menu published and verified.':'Reviewed native menu saved as a private draft and verified; publish it separately before another sync.'};\n}\n\nreturn runSampleSuite($('Validate configuration').first().json).map(json=>({json}));"
+      },
+      "id": "99f4315e-095d-45fe-9db5-a05175679ade",
+      "name": "Run isolated sample suite",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2304,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "={{ $('Validate configuration').first().json.tableName }}",
+        "columns": {
+          "column": [
+            {
+              "name": "key"
+            },
+            {
+              "name": "state"
+            },
+            {
+              "name": "context"
+            },
+            {
+              "name": "execution_id"
+            },
+            {
+              "name": "snapshot"
+            },
+            {
+              "name": "updated_at"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "8bbdc20c-4736-4c53-a9da-66be2b63bd85",
+      "name": "Create or reuse registry",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Validate configuration').first().json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Validate configuration').first().json.sheetName }}"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A1:H252"
+            }
+          },
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "id": "d888ce73-f296-44cf-876a-abf4081e5c51",
+      "name": "Read source rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2688,
+        592
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "resource": "settings",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "fc0fa997-6b8f-4151-8488-025152f1859e",
+      "name": "Read current menu",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        592
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "publication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "51a029d1-b3d9-4a8b-b5cd-49f030ab4998",
+      "name": "Read current publication",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        592
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create or reuse registry').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('Validate configuration').first().json.syncKey }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "66cb8ffc-047e-4271-bd14-a0a2d9a96327",
+      "name": "Read ownership registry",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        592
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "function stable(value) {\n  if (Array.isArray(value)) return '['+value.map(stable).join(',')+']';\n  if (value && typeof value==='object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stable(value[k])).join(',')+'}';\n  return JSON.stringify(value);\n}\n\nfunction clone(value) { return JSON.parse(JSON.stringify(value)); }\n\nfunction text(value,max,label,required=false) {\n  if (value!=null && typeof value!=='string' && typeof value!=='number') throw Error(label+' must be text');\n  const out=String(value??'').trim();\n  if (out.length>max || (required&&!out)) throw Error('Invalid '+label);\n  return out;\n}\n\nfunction flag(value,label,empty=false) {\n  if (value===''||value==null) return empty;\n  if (value===true||String(value).trim().toUpperCase()==='TRUE') return true;\n  if (value===false||String(value).trim().toUpperCase()==='FALSE') return false;\n  throw Error(label+' must be TRUE or FALSE');\n}\n\nfunction priceMinor(value) {\n  if (typeof value==='number') {\n    if (!Number.isFinite(value)||value<0||value>100000||Math.abs(value*100-Math.round(value*100))>0.000001) throw Error('Price must be non-negative with at most two decimals');\n    return Math.round(value*100);\n  }\n  const s=String(value??'').trim();\n  if (!/^(0|[1-9]\\d{0,5})([.,]\\d{1,2})?$/.test(s)) throw Error('Invalid price; use an unformatted number or decimal text without thousands separators');\n  const [whole,decimal='']=s.replace(',','.').split('.');\n  const minor=Number(whole)*100+Number(decimal.padEnd(2,'0'));\n  if (minor>10000000) throw Error('Price exceeds menu limit');\n  return minor;\n}\n\nfunction readRows(input,config) {\n  const rows=input.filter(r=>r&&Object.keys(r).some(k=>k!=='row_number'&&r[k]!==''&&r[k]!=null));\n  if (rows.length>250) throw Error('More than 250 populated rows; split the source before synchronizing');\n  const ids=new Set(),approved=[];let skipped=0;\n  for (let index=0;index<rows.length;index++) {\n    const row=rows[index],id=String(row.id??'').trim();\n    if (id) {if (ids.has(id)) throw Error('Duplicate source id: '+id);ids.add(id);}\n    if (!flag(row.approved,'approved on row '+(index+2))) {skipped++;continue;}\n    if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id)) throw Error('Approved rows need a stable lowercase id');\n    const action=String(row.action||'UPSERT').trim().toUpperCase();\n    if (!['UPSERT','DELETE'].includes(action)) throw Error('Unknown action for '+id);\n    if (action==='DELETE') {\n      if (!config.allowDeletions) throw Error('DELETE requires ALLOW_DELETIONS=true and a reviewed approval');\n      approved.push({id,action});continue;\n    }\n    const position=row.position===''||row.position==null?index:Number(row.position);\n    if (!Number.isInteger(position)||position<0||position>249) throw Error('Position must be an integer from 0 to 249');\n    approved.push({id,action,name:text(row.name,120,'name for '+id,true),description:text(row.description,500,'description'),priceMinor:priceMinor(row.price),available:flag(row.available,'available for '+id,true),position});\n  }\n  return {rows:approved,skipped,allIds:[...ids]};\n}\n\nfunction itemProjection(item) {\n  return {id:item.id,sectionId:item.sectionId,name:item.name,description:item.description||'',priceMinor:item.priceMinor,available:item.available,position:item.position};\n}\n\nfunction contextFor(config,publication) {\n  if (!publication.publicUrl) throw Error('The workspace needs a public URL before linking a registry');\n  return stable([publication.publicUrl,config.spreadsheetId,config.sheetName,config.syncKey]);\n}\n\nfunction decodeRegistry(rows) {\n  const records=rows.filter(r=>r&&r.key);\n  if (records.length>1) throw Error('Duplicate registry records: reconcile before continuing');\n  if (!records.length) return null;\n  const r=records[0];let snapshot;\n  try {snapshot=JSON.parse(r.snapshot||'{\"items\":{},\"section\":null}');} catch {throw Error('Invalid registry snapshot');}\n  if (!snapshot||!snapshot.items||typeof snapshot.items!=='object'||Array.isArray(snapshot.items)) throw Error('Invalid registry ownership data');\n  return {...r,snapshot};\n}\n\nfunction makePlan(input) {\n  const {config,rows,publication}=input;\n  if (!input.menu||!Array.isArray(input.menu.items)||!Array.isArray(input.menu.sections)) throw Error('OrbitPage returned no native menu');\n  const revision=Number(input.revision);\n  if (!Number.isSafeInteger(revision)||revision<0||publication.draftRevision!==revision) throw Error('The settings and publication revisions differ');\n  if (publication.draftRevision!==publication.publishedRevision) throw Error('Publish or reconcile unrelated private changes before synchronizing');\n  if (input.menu.currency!==config.currency) throw Error('The configured currency differs from the menu; no automatic currency conversion');\n  const context=contextFor(config,publication),registry=input.registry;\n  if (registry&&registry.context!==context) throw Error('The registry belongs to another sheet, namespace or workspace');\n  if (registry&&registry.state!=='idle') throw Error('A pending or uncertain execution is held for reconciliation');\n  const parsed=readRows(rows,config),menu=clone(input.menu),snapshot=clone(registry?.snapshot||{section:null,items:{}});\n  const sectionId='gs-'+config.syncKey+'-section';\n  const existingSection=menu.sections.find(s=>s.id===sectionId);\n  const upserts=parsed.rows.filter(r=>r.action==='UPSERT');\n  const changes=[],warnings=[];\n  if (upserts.length) {\n    if (existingSection) {\n      if (!snapshot.section) throw Error('Section ID collision: the registry does not own this section');\n      if (stable({id:existingSection.id,name:existingSection.name})!==stable(snapshot.section)) throw Error('The managed section was edited in OrbitPage');\n      if (existingSection.name!==config.sectionName) {changes.push({action:'section',id:sectionId,before:{name:existingSection.name},after:{name:config.sectionName}});existingSection.name=config.sectionName;}\n    } else {\n      if (snapshot.section) throw Error('The managed section was removed in OrbitPage');\n      if (menu.sections.length>=30) throw Error('Native menu section limit reached');\n      menu.sections.push({id:sectionId,name:config.sectionName,description:'',visible:true,position:menu.sections.length});\n      changes.push({action:'section',id:sectionId,before:null,after:{name:config.sectionName}});\n    }\n    snapshot.section={id:sectionId,name:config.sectionName};\n  }\n  for (const row of parsed.rows) {\n    const id='gs-'+config.syncKey+'-'+row.id;\n    const at=menu.items.findIndex(item=>item.id===id),current=at<0?null:menu.items[at],previous=snapshot.items[id];\n    if (current&&!previous) throw Error('Item ID collision: '+row.id+' is not owned by this registry');\n    if (current&&stable(itemProjection(current))!==stable(previous)) throw Error('Managed fields were edited in OrbitPage: '+row.id);\n    if (row.action==='DELETE') {\n      if (current) {menu.items.splice(at,1);changes.push({action:'delete',id,before:itemProjection(current),after:null});}\n      delete snapshot.items[id];continue;\n    }\n    if (!current&&previous) throw Error('A managed item was removed in OrbitPage: '+row.id);\n    const desired={id,sectionId,name:row.name,description:row.description,priceMinor:row.priceMinor,available:row.available,position:row.position};\n    if (!current) {\n      menu.items.push({...desired,variants:[],allergens:[],dietaryTags:[],featured:false});\n      changes.push({action:'add',id,before:null,after:desired});\n    } else if (stable(itemProjection(current))!==stable(desired)) {\n      menu.items[at]={...current,...desired};\n      changes.push({action:'update',id,before:itemProjection(current),after:desired});\n    }\n    snapshot.items[id]=desired;\n  }\n  if (menu.items.length>250) throw Error('Native menu item limit reached');\n  const missing=Object.keys(snapshot.items).filter(id=>!parsed.allIds.includes(id.slice(('gs-'+config.syncKey+'-').length)));\n  if (missing.length) warnings.push(missing.length+' previously managed item(s) missing from the sheet were preserved; deletion requires an approved DELETE row.');\n  if (!menu.enabled) warnings.push('Enable and configure the native menu in OrbitPage before applying this plan.');\n  if (config.mode==='EMAIL_APPROVAL'&&changes.length&&!menu.enabled) throw Error('Enable and publish the native menu before using email-approved sync');\n  return {config,context,revision:String(revision),originalPublishedRevision:publication.publishedRevision,baseMenu:clone(input.menu),menu,rows:clone(rows),sourceSignature:stable(rows),previousSnapshot:clone(registry?.snapshot||{section:null,items:{}}),nextSnapshot:snapshot,changes,warnings,hasChanges:changes.length>0,stateChanged:stable(snapshot)!==stable(registry?.snapshot||{section:null,items:{}}),stats:{added:changes.filter(c=>c.action==='add').length,updated:changes.filter(c=>c.action==='update').length,deleted:changes.filter(c=>c.action==='delete').length,skipped:parsed.skipped,missingPreserved:missing.length}};\n}\n\nconst settings=$('Read current menu').first().json.body;\nconst publication=$('Read current publication').first().json.body.data;\nconst plan=makePlan({config:$('Validate configuration').first().json,rows:$('Read source rows').all().map(i=>i.json),menu:settings.data.menu,revision:settings.revision,publication,registry:decodeRegistry($input.all().map(i=>i.json))});\nreturn [{json:plan}];"
+      },
+      "id": "fc560ddf-cbf6-4a98-aca5-415a17e4d428",
+      "name": "Plan changes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3888,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2cbf2712-e5da-7292-93bd-e2dae6b45036",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2db2b56a-6415-413a-9c70-734e913027f5",
+      "name": "Has menu changes",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4224,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea798c15-4425-694d-2452-4a9857b2dd41",
+              "leftValue": "={{ $('Plan changes').first().json.config.mode === 'PREVIEW' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c8348359-cbad-486f-9258-6ab2ea3675c1",
+      "name": "Preview only",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4544,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function registryRecord(plan,state,executionId,now,snapshot) {\n  return {key:plan.config.syncKey,state,context:plan.context,execution_id:String(executionId||''),snapshot:JSON.stringify(snapshot),updated_at:now};\n}\n\nfunction reviewEmail(plan) {\n  const escape=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n  const show=value=>value==null?'—':escape(value.name||value.id||'Section')+(value.description?'<br>'+escape(value.description):'')+(Number.isInteger(value.priceMinor)?'<br><strong>'+(value.priceMinor/100).toFixed(2)+' '+escape(plan.config.currency)+'</strong>':'')+(typeof value.available==='boolean'?'<br>'+(value.available?'Available':'Unavailable'):'')+(Number.isInteger(value.position)?'<br>Order: '+value.position:'');\n  return '<h2>Review Google Sheets → OrbitPage</h2><p>Destination: '+escape(plan.config.publish?'PUBLIC PAGE':'PRIVATE DRAFT')+'. Approved rows only. Currency: '+escape(plan.config.currency)+'.</p><p>'+escape(JSON.stringify(plan.stats))+'</p><table border=\"1\" cellpadding=\"8\"><tr><th>Action / ID</th><th>Before</th><th>After</th></tr>'+plan.changes.map(c=>'<tr><td>'+escape(c.action+' '+c.id)+'</td><td>'+show(c.before)+'</td><td>'+show(c.after)+'</td></tr>').join('')+'</table><p>'+plan.warnings.map(escape).join('<br>')+'</p><p>Changes to the page or source sheet invalidate this review. Declining or timing out does not change the page.</p>';\n}\n\nconst plan=$('Plan changes').first().json;const startedAt=new Date().toISOString();\nreturn [{json:{...plan,startedAt,emailHtml:reviewEmail(plan),record:registryRecord(plan,'pending',$execution.id,startedAt,plan.previousSnapshot)}}];"
+      },
+      "id": "b1ee185a-a45f-4f4d-904d-b996dfe7b113",
+      "name": "Prepare pending review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4864,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create or reuse registry').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('Prepare pending review').first().json.record.key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Prepare pending review').first().json.record.key }}",
+            "state": "={{ $('Prepare pending review').first().json.record.state }}",
+            "context": "={{ $('Prepare pending review').first().json.record.context }}",
+            "execution_id": "={{ $('Prepare pending review').first().json.record.execution_id }}",
+            "snapshot": "={{ $('Prepare pending review').first().json.record.snapshot }}",
+            "updated_at": "={{ $('Prepare pending review').first().json.record.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c4412d4b-6271-43fc-93b4-62192c0f1fd8",
+      "name": "Claim pending review",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        5184,
+        592
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "={{ $('Prepare pending review').first().json.config.fromEmail }}",
+        "toEmail": "={{ $('Prepare pending review').first().json.config.approvalEmail }}",
+        "subject": "={{ 'OrbitPage · Review ' + $('Prepare pending review').first().json.config.sectionName }}",
+        "message": "={{ $('Prepare pending review').first().json.emailHtml }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve sync"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": "={{ $('Prepare pending review').first().json.config.approvalHours }}"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "6fac1c92-9a90-4ebf-863c-ed661fc2d6be",
+      "name": "Email diff and wait for approval",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5536,
+        592
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "function approvalDecision(response,startedAt,timeoutHours,now) {\n  if (Date.parse(now)>Date.parse(startedAt)+timeoutHours*3600000) return 'expired';\n  const data=response?.data??response;\n  if (!data||data.approved!==true) return data?.approved===false?'declined':'expired';\n  return 'approved';\n}\n\nconst work=$('Prepare pending review').first().json;\nreturn [{json:{decision:approvalDecision($json,work.startedAt,work.config.approvalHours,new Date().toISOString())}}];"
+      },
+      "id": "2952447a-463d-4844-a1a8-37874a664f8f",
+      "name": "Interpret decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5856,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9150adce-1674-374c-814a-e53b32fdd90d",
+              "leftValue": "={{ $json.decision === 'approved' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c00ff65b-c00d-49b0-b459-dcf83a0ea010",
+      "name": "Sync approved",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6176,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function registryRecord(plan,state,executionId,now,snapshot) {\n  return {key:plan.config.syncKey,state,context:plan.context,execution_id:String(executionId||''),snapshot:JSON.stringify(snapshot),updated_at:now};\n}\n\nconst plan=$('Plan changes').first().json;\nreturn [{json:{record:registryRecord(plan,'idle','',new Date().toISOString(),plan.previousSnapshot)}}];"
+      },
+      "id": "6532a2fc-65af-42d6-b818-dd6efd639c44",
+      "name": "Prepare review release",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6576,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create or reuse registry').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('Prepare review release').first().json.record.key }}"
+            },
+            {
+              "keyName": "state",
+              "keyValue": "pending"
+            },
+            {
+              "keyName": "execution_id",
+              "keyValue": "={{ String($execution.id) }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Prepare review release').first().json.record.key }}",
+            "state": "={{ $('Prepare review release').first().json.record.state }}",
+            "context": "={{ $('Prepare review release').first().json.record.context }}",
+            "execution_id": "={{ $('Prepare review release').first().json.record.execution_id }}",
+            "snapshot": "={{ $('Prepare review release').first().json.record.snapshot }}",
+            "updated_at": "={{ $('Prepare review release').first().json.record.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "610193a8-58d6-461a-bde0-24c7a1159dad",
+      "name": "Release declined or expired claim",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        6896,
+        1024
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nif(!$json.key)throw new Error('The pending record changed; reconcile it manually.');return [{json:{status:$('Interpret decision').first().json.decision,message:'No page mutation was sent.'}}];"
+      },
+      "id": "d59168ac-5486-4eac-a3ab-8f57ab081d76",
+      "name": "Confirm review released",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7216,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Validate configuration').first().json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Validate configuration').first().json.sheetName }}"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A1:H252"
+            }
+          },
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "id": "be77e4d4-a437-46ab-97e8-02091cffda6f",
+      "name": "Re-read source rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        6544,
+        576
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "resource": "settings",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "5177e6d5-a911-4555-8710-4f1368553c75",
+      "name": "Re-read reviewed menu",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        6864,
+        576
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "publication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "92e0c001-0b6a-4101-a7e3-070d4c38b71a",
+      "name": "Re-read reviewed publication",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        7184,
+        576
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create or reuse registry').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('Validate configuration').first().json.syncKey }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "563f4840-1cce-42ea-aeba-689989c228ce",
+      "name": "Read pending claim",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        7504,
+        576
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "function stable(value) {\n  if (Array.isArray(value)) return '['+value.map(stable).join(',')+']';\n  if (value && typeof value==='object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stable(value[k])).join(',')+'}';\n  return JSON.stringify(value);\n}\n\nfunction contextFor(config,publication) {\n  if (!publication.publicUrl) throw Error('The workspace needs a public URL before linking a registry');\n  return stable([publication.publicUrl,config.spreadsheetId,config.sheetName,config.syncKey]);\n}\n\nfunction decodeRegistry(rows) {\n  const records=rows.filter(r=>r&&r.key);\n  if (records.length>1) throw Error('Duplicate registry records: reconcile before continuing');\n  if (!records.length) return null;\n  const r=records[0];let snapshot;\n  try {snapshot=JSON.parse(r.snapshot||'{\"items\":{},\"section\":null}');} catch {throw Error('Invalid registry snapshot');}\n  if (!snapshot||!snapshot.items||typeof snapshot.items!=='object'||Array.isArray(snapshot.items)) throw Error('Invalid registry ownership data');\n  return {...r,snapshot};\n}\n\nfunction recheckPlan(plan,current,executionId) {\n  if (current.registry?.state!=='pending'||String(current.registry.execution_id)!==String(executionId)||current.registry.context!==plan.context) throw Error('This execution no longer owns the pending review');\n  if (stable(current.registry.snapshot)!==stable(plan.previousSnapshot)) throw Error('The ownership snapshot changed during review');\n  if (contextFor(plan.config,current.publication)!==plan.context) throw Error('Workspace identity changed');\n  if (String(current.revision)!==plan.revision||current.publication.draftRevision!==Number(plan.revision)||current.publication.publishedRevision!==plan.originalPublishedRevision) throw Error('The workspace revision changed after review');\n  if (stable(current.menu)!==stable(plan.baseMenu)) throw Error('The menu changed after review');\n  if (stable(current.rows)!==plan.sourceSignature) throw Error('The sheet changed after review; generate a new diff');\n  return plan;\n}\n\nconst settings=$('Re-read reviewed menu').first().json.body;\nconst plan=recheckPlan($('Plan changes').first().json,{menu:settings.data.menu,revision:settings.revision,publication:$('Re-read reviewed publication').first().json.body.data,rows:$('Re-read source rows').all().map(i=>i.json),registry:decodeRegistry($input.all().map(i=>i.json))},$execution.id);\nreturn [{json:plan}];"
+      },
+      "id": "405596ae-3bc5-4031-80e1-985b4ef11ebc",
+      "name": "Check exact reviewed state",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7824,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "settings",
+        "operation": "updateMenuSettings",
+        "jsonBody": "={{ JSON.stringify($json.menu) }}",
+        "revisionMode": "manual",
+        "ifMatchRevision": "={{ $json.revision }}",
+        "publish": "={{ $json.config.publish }}",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "be0eec38-fb51-4ddb-a19d-af6320d35ea3",
+      "name": "Apply reviewed native menu",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        8144,
+        576
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "settings",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "6d128530-5db2-4bae-a949-7d6e2ec81965",
+      "name": "Read saved menu",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        8496,
+        576
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "publication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "id": "020852a3-2ca4-44b7-8824-697c8e530589",
+      "name": "Read resulting publication",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "position": [
+        8816,
+        576
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "function clone(value) { return JSON.parse(JSON.stringify(value)); }\n\nfunction stable(value) {\n  if (Array.isArray(value)) return '['+value.map(stable).join(',')+']';\n  if (value && typeof value==='object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stable(value[k])).join(',')+'}';\n  return JSON.stringify(value);\n}\n\nfunction verifyWrite(plan,response,settings,publication) {\n  const revision=Number(response.revision);\n  if (!Number.isSafeInteger(revision)||revision<=Number(plan.revision)||settings.revision!==revision||publication.draftRevision!==revision) throw Error('The resulting draft revision was not confirmed');\n  const actual=clone(settings.data.menu),expected=clone(plan.menu);delete actual.updatedAt;delete expected.updatedAt;\n  if (stable(actual)!==stable(expected)) throw Error('The saved menu differs from the reviewed menu');\n  if (plan.config.publish) {\n    if (publication.publishedRevision!==revision||publication.publicationStatus!=='published') throw Error('Publication was not confirmed');\n  } else if (publication.publishedRevision!==plan.originalPublishedRevision) throw Error('The public revision changed while saving a private draft');\n  return {revision,message:plan.config.publish?'Reviewed native menu published and verified.':'Reviewed native menu saved as a private draft and verified; publish it separately before another sync.'};\n}\n\nfunction registryRecord(plan,state,executionId,now,snapshot) {\n  return {key:plan.config.syncKey,state,context:plan.context,execution_id:String(executionId||''),snapshot:JSON.stringify(snapshot),updated_at:now};\n}\n\nconst plan=$('Plan changes').first().json;\nconst result=verifyWrite(plan,$('Apply reviewed native menu').first().json.body,$('Read saved menu').first().json.body,$json.body.data);\nreturn [{json:{...result,record:registryRecord(plan,'idle','',new Date().toISOString(),plan.nextSnapshot)}}];"
+      },
+      "id": "31a5c3cd-5812-45cd-a9b7-eccef06c8487",
+      "name": "Verify exact saved result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9136,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create or reuse registry').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('Verify exact saved result').first().json.record.key }}"
+            },
+            {
+              "keyName": "state",
+              "keyValue": "pending"
+            },
+            {
+              "keyName": "execution_id",
+              "keyValue": "={{ String($execution.id) }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Verify exact saved result').first().json.record.key }}",
+            "state": "={{ $('Verify exact saved result').first().json.record.state }}",
+            "context": "={{ $('Verify exact saved result').first().json.record.context }}",
+            "execution_id": "={{ $('Verify exact saved result').first().json.record.execution_id }}",
+            "snapshot": "={{ $('Verify exact saved result').first().json.record.snapshot }}",
+            "updated_at": "={{ $('Verify exact saved result').first().json.record.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "22495986-7798-4073-b3f1-93fd43901317",
+      "name": "Remember verified ownership",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        9456,
+        576
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nif(!$json.key)throw new Error('The page write succeeded but registry ownership changed; reconcile the execution without resending.');\nreturn [{json:{status:'verified',...$('Verify exact saved result').first().json,record:undefined}}];"
+      },
+      "id": "1de52e77-9b99-40e8-ae4e-c0b9c69c6b67",
+      "name": "Verified result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9776,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nconst plan=$('Plan changes').first().json;\nreturn [{json:{status:plan.hasChanges?'preview':'no-op',stats:plan.stats,changes:plan.changes,warnings:plan.warnings,requiresManualRegistryCleanup:!plan.hasChanges&&plan.stateChanged,message:'No menu write or approval email was sent.'}}];"
+      },
+      "id": "54afd7ae-58ef-42e7-af46-1e5b212c166d",
+      "name": "Preview or no-op result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4816,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Sync Google Sheets Menus and Price Lists to OrbitPage\n\n## Quick overview\n\nKeep one native OrbitPage menu section in sync with approved Google Sheets rows. Preview additions, edits and explicit deletions, then review the exact diff by email before saving a private draft or publishing. This prototype is unpublished and starts in SAMPLE mode, without external calls.\n\n## How it works\n\n1. Manual and thirty-minute checks share one configuration; the schedule remains disabled while the workflow is unpublished.\n2. SAMPLE runs isolated fictional scenarios. PREVIEW reads a real source and computes differences without changing the menu or emailing a reviewer.\n3. Real runs read unformatted sheet values, the current native menu, publication revision and a dedicated n8n Data Table ownership registry.\n4. Approved rows update one managed section. Existing page blocks, other menu sections, unmanaged items and item fields outside the sheet mapping are preserved.\n5. Missing and unapproved rows keep their previous items. Deletion requires an approved DELETE row and ALLOW_DELETIONS enabled.\n6. EMAIL_APPROVAL records a pending claim and emails a before/after diff. Decline or expiry releases that claim without changing the page.\n7. Approval re-reads the sheet, menu, publication and claim. A changed source, revision, ownership record or manually edited managed field blocks the write.\n8. The reviewed menu is written with an exact revision precondition. Read-back checks confirm content and private/public revision before recording success; uncertain outcomes stay held for reconciliation.\n\n## Setup\n\n1. Import OrbitPage_Sheets_Sync.json into n8n 2.x and run Manual check with MODE set to SAMPLE; no credentials are required for the sample branch.\n2. Install n8n-nodes-orbitpage 0.3.2 or newer. For real reads, select Google Sheets and OrbitPage credentials; select the same OrbitPage credential on all OrbitPage nodes.\n3. Import sample-items.csv into a sheet named Items. Keep the eight headers and stable lowercase IDs; use TRUE/FALSE for approved and available, and numeric prices without currency symbols.\n4. In Configuration, set SPREADSHEET_ID, SHEET_NAME, SYNC_KEY, SECTION_NAME, EXPECTED_CURRENCY and a dedicated REGISTRY_TABLE_NAME. Run PREVIEW and inspect the result. With a Service Account, share the source sheet with that account first.\n5. Before real writes, enable, configure and publish the native menu in OrbitPage. The expected currency must match it; the workflow does not change global menu settings or add a navigation block.\n6. To review real changes, choose EMAIL_APPROVAL, connect SMTP and set one authorized FROM_EMAIL and APPROVAL_EMAIL. The default approval timeout is forty-eight hours.\n7. PUBLISH_AFTER_APPROVAL defaults to false: approval saves a private draft. Publish or reconcile that draft separately before another sync. Set it true only when automatic publication of explicitly reviewed changes is intended.\n8. Keep this draft unpublished during design and validation. Publishing the workflow and submitting any public template are separate owner decisions.\n\n## Requirements\n\n- n8n 2.x with Data Tables, Google Sheets, Send Email 2.1 and OrbitPage community nodes available.\n- An OrbitPage plan with native menus; token scopes workspace:read, settings:read, settings:write and publication:read, plus publication:write when publication is enabled.\n- Real email review requires SMTP and a reachable n8n HTTPS address for signed approval links; access gateways must allow the reviewer to authenticate.\n- One source sheet, one dedicated registry, one managed menu section, at most 250 populated source rows and the native menu limits of 250 items and thirty sections.\n\n## Customization\n\n- SAMPLE is isolated; PREVIEW creates or reuses only the n8n registry table and reads providers, without menu writes or approval emails.\n- Enable ALLOW_DELETIONS only for intentional reviewed removals. Never reset the registry to resolve a single error or rename stable IDs to reorder items.\n- Preserve the registry after successful runs. Pending or uncertain records require manual reconciliation; do not run overlapping manual checks against a scheduled instance.\n- Change schedule frequency and APPROVAL_TIMEOUT_HOURS as needed. Keep exact revision checks, source rechecks and read-back verification enabled.\n- See `DESIGN.md` for the schema, ownership rules, limits and validation boundaries. No AI or paid model API is required; ordinary hosting, Sheets, SMTP and OrbitPage quotas still apply.\n",
+        "height": 1472,
+        "width": 832
+      },
+      "id": "1e3d54ad-6176-48af-822a-d583b7e3f037",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure and validate\n\nSAMPLE runs nine isolated checks without credentials or external calls. PREVIEW reads a real sheet and menu without writing the page. EMAIL_APPROVAL reviews changes before applying them. Keep this workflow unpublished until the owner chooses to activate it.",
+        "height": 864,
+        "width": 1664,
+        "color": 7
+      },
+      "id": "8ef17e24-f6cc-4d05-b3ad-beb8d66ca54d",
+      "name": "Start and isolated validation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Read the sheet and menu\n\nRead unformatted prices and a bounded range. Load the native menu, publication revision and dedicated ownership registry. The workflow manages one section; missing or unapproved rows preserve existing items.",
+        "height": 464,
+        "width": 1408,
+        "color": 7
+      },
+      "id": "f66cc0b3-4a5e-41e9-88fb-b882d28959ed",
+      "name": "Read source and ownership",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Show the exact differences\n\nValidate stable IDs, prices and explicit deletion requests. Compare managed fields with the last successful snapshot. PREVIEW stops here; an actual change in EMAIL_APPROVAL mode claims the pending review and emails the before/after diff.",
+        "height": 464,
+        "width": 1344,
+        "color": 7
+      },
+      "id": "cdc4b0aa-6209-4d2d-a575-b5e20a333fb9",
+      "name": "Diff and review routing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4096,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Wait for a decision\n\nSigned native n8n buttons approve or decline the reviewed snapshot. Default timeout: forty-eight hours. No menu is changed before approval. Failed or ambiguous deliveries keep the claim for manual reconciliation; SMTP retries are disabled.",
+        "height": 464,
+        "width": 960,
+        "color": 7
+      },
+      "id": "6617a453-f85a-4d65-9b25-45c4eebf8161",
+      "name": "Email approval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5472,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Re-read before applying\n\nAfter approval, re-read the sheet, menu, publication and claim. A different revision, edited source or lost claim stops the write. The exact reviewed menu is applied with a manual revision precondition; draft saving is the default.",
+        "height": 464,
+        "width": 1920,
+        "color": 7
+      },
+      "id": "5561331e-3d9c-44b3-bdae-0cd930bfc9df",
+      "name": "Recheck before writing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6464,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Verify before recording success\n\nRead the saved menu and publication again. Confirm the exact reviewed content, revision and intended private/public destination before updating ownership. A failed verification holds the claim; never blindly retry a write.",
+        "height": 464,
+        "width": 1632,
+        "color": 7
+      },
+      "id": "c6ba7714-bae9-484d-8fdf-4ace25f83f78",
+      "name": "Read-back verification",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8416,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Release without page changes\n\nDecline and timeout update only the claim owned by this execution. The page has not been staged or changed. A conflicting claim is preserved for reconciliation.",
+        "height": 288,
+        "width": 1024,
+        "color": 7
+      },
+      "id": "af302351-8b06-4f8c-9451-82d836b746ec",
+      "name": "Decline or expiry",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6464,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Inspect preview and no-op results\n\nThe result lists additions, updates, deletions and warnings. A no-op sends no email or menu write. Rows removed from Sheets are kept until an approved DELETE is supplied. Registry-only cleanup is flagged for manual reconciliation.",
+        "height": 400,
+        "width": 608,
+        "color": 7
+      },
+      "id": "04bda66a-26f9-4902-b9ea-4955ef5098f8",
+      "name": "Preview output",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4544,
+        912
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual check": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check every 30 minutes": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Validate configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate configuration": {
+      "main": [
+        [
+          {
+            "node": "Sample mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sample mode": {
+      "main": [
+        [
+          {
+            "node": "Run isolated sample suite",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create or reuse registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or reuse registry": {
+      "main": [
+        [
+          {
+            "node": "Read source rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read source rows": {
+      "main": [
+        [
+          {
+            "node": "Read current menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read current menu": {
+      "main": [
+        [
+          {
+            "node": "Read current publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read current publication": {
+      "main": [
+        [
+          {
+            "node": "Read ownership registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read ownership registry": {
+      "main": [
+        [
+          {
+            "node": "Plan changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan changes": {
+      "main": [
+        [
+          {
+            "node": "Has menu changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has menu changes": {
+      "main": [
+        [
+          {
+            "node": "Preview only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preview or no-op result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview only": {
+      "main": [
+        [
+          {
+            "node": "Preview or no-op result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare pending review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare pending review": {
+      "main": [
+        [
+          {
+            "node": "Claim pending review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim pending review": {
+      "main": [
+        [
+          {
+            "node": "Email diff and wait for approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email diff and wait for approval": {
+      "main": [
+        [
+          {
+            "node": "Interpret decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpret decision": {
+      "main": [
+        [
+          {
+            "node": "Sync approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync approved": {
+      "main": [
+        [
+          {
+            "node": "Re-read source rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review release",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare review release": {
+      "main": [
+        [
+          {
+            "node": "Release declined or expired claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release declined or expired claim": {
+      "main": [
+        [
+          {
+            "node": "Confirm review released",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-read source rows": {
+      "main": [
+        [
+          {
+            "node": "Re-read reviewed menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-read reviewed menu": {
+      "main": [
+        [
+          {
+            "node": "Re-read reviewed publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-read reviewed publication": {
+      "main": [
+        [
+          {
+            "node": "Read pending claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read pending claim": {
+      "main": [
+        [
+          {
+            "node": "Check exact reviewed state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check exact reviewed state": {
+      "main": [
+        [
+          {
+            "node": "Apply reviewed native menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply reviewed native menu": {
+      "main": [
+        [
+          {
+            "node": "Read saved menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read saved menu": {
+      "main": [
+        [
+          {
+            "node": "Read resulting publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read resulting publication": {
+      "main": [
+        [
+          {
+            "node": "Verify exact saved result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify exact saved result": {
+      "main": [
+        [
+          {
+            "node": "Remember verified ownership",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember verified ownership": {
+      "main": [
+        [
+          {
+            "node": "Verified result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": []
+}

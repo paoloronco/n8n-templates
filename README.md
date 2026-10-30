@@ -16,6 +16,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description | GitHub | Gumroad | n8n Creators | Setup guide |
 |---|---|---|---|---|---|
+| Sync Google Sheets Menus and Price Lists to OrbitPage | Sync approved sheet rows to a native menu section with previews, email review and preserved unrelated content. | [Folder](./free-templates/sync-google-sheets-menus-and-price-lists-to-orbitpage/) | — | — | [Guide](./free-templates/sync-google-sheets-menus-and-price-lists-to-orbitpage/README.md) |
 | Add New YouTube Videos to OrbitPage | Add new YouTube videos as native players, automatically or after email approval. No YouTube API key. | [Folder](./free-templates/add-new-youtube-videos-to-orbitpage/) | — | — | [Guide](./free-templates/add-new-youtube-videos-to-orbitpage/README.md) |
 | OrbitPage AI Page Editor | Edit OrbitPage pages through AI chat, review validated previews and approve publication. | [Folder](./free-templates/orbitpage-ai-page-editor/) | [View](https://paoloronco.gumroad.com/l/orbitpage-ai-pageeditor) | — | [Guide](./free-templates/orbitpage-ai-page-editor/README.md) |
 | OrbitPage Release Guardian | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. | [Folder](./free-templates/orbitpage-release-guardian/) | — | — | [Guide](./free-templates/orbitpage-release-guardian/README.md) |

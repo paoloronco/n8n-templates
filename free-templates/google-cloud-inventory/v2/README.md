@@ -10,7 +10,9 @@ Inventory resources and visible IAM policies across an explicit list of Google C
 
 - [Workflow JSON](./google-cloud-inventory-workflow.json) — sanitized, inactive 49-node template, including six documentation notes.
 - [Full setup and technical documentation](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73).
-- [Gumroad package](https://paoloronco.gumroad.com/l/googlecloud-inventorychange) — JSON, this README and the optional XLSX reference workbook.
+- [Step-by-step setup guide](https://paoloronco.notion.site/Setup-Configuration-408f0ba27c3281159afbf589df96e399) — Google Cloud, Sheets, n8n credentials, SMTP and validation.
+- [Gumroad download](https://paoloronco.gumroad.com/l/googlecloud-inventorychange) — workflow JSON, setup guidance and links to the documentation and dashboard.
+- [Gumroad delivery text](./gumroad-delivery.md) — the customer-facing delivery copy published with the downloadable workflow.
 - [Copy the native Google Sheets dashboard](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy) — public model with synthetic examples. Your editable copy is the intended integration; use its spreadsheet ID.
 
 ## What the user configures and what the workflow creates
@@ -35,6 +37,14 @@ Use an n8n release supporting the supplied node versions: Data Table, HTTP Reque
 - On **`billingProject`**, which the two Cloud Asset nodes send as `x-goog-user-project`: `serviceusage.services.use`, for example `roles/serviceusage.serviceUsageConsumer`, with Cloud Asset API enabled there.
 - On the **central BigQuery project**: `bigquery.jobs.create` and `bigquery.datasets.create`, plus the dataset/table read, create and update permissions used by setup and SQL persistence. A typical predefined-role setup is BigQuery Job User plus BigQuery Data Editor at project level. Dataset-level Data Editor alone cannot create a missing dataset. Setup attempts dataset creation and accepts an existing-dataset response; existing datasets still need matching location and schema.
 - On **your spreadsheet copy**: a file-level Editor share for the Sheets identity, plus Google credentials with the relevant API scopes. Cloud IAM alone does not share a Drive file. The guide covers `cloud-platform`/BigQuery and `spreadsheets` scopes and separate Google credentials if desired.
+
+For one Google service-account credential handling all ten HTTP nodes, enable HTTP Request use and enter these OAuth scopes as one comma-separated value:
+
+```txt
+https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets
+```
+
+With separate credentials, use `cloud-platform` for Cloud Asset/BigQuery and `spreadsheets` for the Sheets nodes.
 
 See Google's [Cloud Asset permissions](https://docs.cloud.google.com/asset-inventory/docs/roles-permissions) and [BigQuery dataset creation permissions](https://docs.cloud.google.com/bigquery/docs/datasets). Use the detailed guide to match your organization's policies.
 

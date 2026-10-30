@@ -1,103 +1,12 @@
-import { createHash } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import * as core from './smart-bio.mjs';
 
-export const columns=['key','channel_id','video_id','state','title','execution_id','updated_at','payload'];
-const id=name=>createHash('sha256').update(`orbitpage-smartbio-v1:${name}`).digest('hex').slice(0,32).replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
-const script=(functions,body)=>functions.map(name=>core[name].toString()).join('\n\n')+'\n\n'+body;
-export function buildWorkflow({config={},orbitCredential,smtpCredential,testPath,presentation=true}={}) {
-  const nodes=[],connections={};
-  const node=(name,type,typeVersion,parameters,x,y,extra={})=>{nodes.push({id:id(name),name,type,typeVersion,parameters,position:[x,y],...extra});return name;};
-  const connect=(a,b,out=0)=>{connections[a]??={main:[]};connections[a].main[out]??=[];connections[a].main[out].push({node:b,type:'main',index:0});};
-  const code=(name,functions,body,x,y)=>node(name,'n8n-nodes-base.code',2,{jsCode:script(functions,body)},x,y);
-  const condition=(name,value,x,y)=>node(name,'n8n-nodes-base.if',2.2,{conditions:{options:{caseSensitive:true,leftValue:'',typeValidation:'strict',version:2},conditions:[{id:id(name+' condition'),leftValue:value,rightValue:'',operator:{type:'boolean',operation:'true',singleValue:true}}],combinator:'and'},options:{}},x,y);
-  const orbit=(name,resource,operation,parameters,x,y)=>node(name,'n8n-nodes-orbitpage.orbitPage',1,{resource,operation,...parameters,options:{includeResponseHeaders:true}},x,y,orbitCredential ? {credentials:orbitCredential} : {});
-  const locator={__rl:true,value:"={{ $('Validate Configuration').first().json.tableId }}",mode:'id'};
-  const upsert=(name,source,state,x,y)=>node(name,'n8n-nodes-base.dataTable',1,{resource:'row',operation:'upsert',dataTableId:locator,matchType:'allConditions',filters:{conditions:[{keyName:'key',condition:'eq',keyValue:`={{ $('${source}').first().json.key }}`}]},columns:{mappingMode:'defineBelow',value:Object.fromEntries(columns.map(column=>[column,`={{ $('${source}').first().json.registry.${column} }}`])),matchingColumns:[],schema:columns.map(name=>({id:name,displayName:name,type:'string',required:false,defaultMatch:false,display:true,canBeUsedToMatch:true})),attemptToConvertTypes:false,convertFieldsToString:false},options:{}},x,y);
-  const manual=node('Manual check or replay','n8n-nodes-base.manualTrigger',1,{},0,280);
-  const schedule=node('Check YouTube every 15 minutes','n8n-nodes-base.scheduleTrigger',1.2,{rule:{interval:[{field:'minutes',minutesInterval:15}]}},0,460);
-  const defaults={YOUTUBE_CHANNEL_ID:'REPLACE_WITH_UC_CHANNEL_ID',MODE:'EMAIL_APPROVAL',REGISTRY_TABLE_NAME:'OrbitPage Smart Bio',FROM_EMAIL:'REPLACE_WITH_SENDER_EMAIL',APPROVAL_EMAIL:'REPLACE_WITH_APPROVAL_EMAIL',SHOW_TITLE:false,SHOW_DESCRIPTION:false,APPROVAL_TIMEOUT_HOURS:48,MANUAL_VIDEO_ID:'',...config};
-  node('Configuration','n8n-nodes-base.set',3.4,{assignments:{assignments:Object.entries(defaults).map(([name,value])=>({id:id('config:'+name),name,value,type:typeof value}))},options:{}},240,360,{notes:'MODE: EMAIL_APPROVAL or AUTOMATIC. MANUAL_VIDEO_ID is used only by the manual trigger. Existing channel videos are ignored on the first normal poll.',notesInFlow:true});
-  connect(manual,'Configuration');connect(schedule,'Configuration');
-  if(testPath){node('Temporary verification trigger','n8n-nodes-base.webhook',2,{httpMethod:'POST',path:testPath,responseMode:'onReceived',options:{}},0,640);connect('Temporary verification trigger','Configuration');}
-  node('Create or reuse registry','n8n-nodes-base.dataTable',1,{resource:'table',operation:'create',tableName:"={{ $('Configuration').first().json.REGISTRY_TABLE_NAME }}",columns:{column:columns.map(name=>({name,type:'string'}))},options:{createIfNotExists:true}},500,360);
-  connect('Configuration','Create or reuse registry');
-  code('Validate Configuration',['validateConfiguration'],"return [{json:validateConfiguration({...$('Configuration').first().json,REGISTRY_TABLE_ID:$json.id})}];",760,360);connect('Create or reuse registry','Validate Configuration');
-  node('Read OrbitPage API contract','n8n-nodes-base.httpRequest',4.2,{url:'https://orbitpage.com/api/openapi.json',options:{timeout:20000}},900,700);connect('Validate Configuration','Read OrbitPage API contract');
-  code('Require private draft support',['requireDraftCapability'],"return [{json:requireDraftCapability($json,$('Validate Configuration').first().json)}];",1160,700);connect('Read OrbitPage API contract','Require private draft support');
-  node('Read public YouTube feed','n8n-nodes-base.httpRequest',4.2,{url:"={{ 'https://www.youtube.com/feeds/videos.xml?channel_id=' + $json.channelId }}",options:{timeout:20000,response:{response:{responseFormat:'text',outputPropertyName:'feedXml'}}}},1020,360,{retryOnFail:true,maxTries:3,waitBetweenTries:2000});connect('Require private draft support','Read public YouTube feed');
-  node('Parse channel feed','n8n-nodes-base.xml',1,{mode:'xmlToJson',dataPropertyName:'feedXml',options:{explicitArray:false,ignoreAttrs:false}},1280,360);connect('Read public YouTube feed','Parse channel feed');
-  node('Read channel registry','n8n-nodes-base.dataTable',1,{resource:'row',operation:'get',dataTableId:locator,matchType:'allConditions',filters:{conditions:[{keyName:'channel_id',condition:'eq',keyValue:"={{ $('Validate Configuration').first().json.channelId }}"}]},returnAll:true},1540,360,{alwaysOutputData:true});connect('Parse channel feed','Read channel registry');
-  code('Select next video',['feedVideos','selectWork','registryRow'],`const config=$('Validate Configuration').first().json;
-const parsed=$('Parse channel feed').first().json;
-const videos=feedVideos(parsed.feedXml || parsed,config.channelId);
-const now=new Date().toISOString();
-const work=selectWork(config,videos,$input.all().map(i=>i.json),${testPath?'true':"$execution.mode === 'manual'"},now);
-if(work.action!=='noop')work.registry=registryRow(work,work.action==='baseline'?'baseline':'processing',$execution.id,now);
-return [{json:work}];`,1800,360);connect('Read channel registry','Select next video');
-  condition('Has new work',"={{ $json.action !== 'noop' }}",2060,360);connect('Select next video','Has new work');
-  upsert('Claim video or remember baseline','Select next video','processing',2320,280);connect('Has new work','Claim video or remember baseline');
-  condition('Is a video',"={{ $('Select next video').first().json.action === 'video' }}",2580,280);connect('Claim video or remember baseline','Is a video');
-  orbit('Read current blocks','links','listLinks',{},2840,200);connect('Is a video','Read current blocks');
-  orbit('Check publication before staging','publication','getPublication',{},3100,200);connect('Read current blocks','Check publication before staging');
-  code('Prepare YouTube card',['proposedCard','sameCard','prepareCard'],`const blocks=$('Read current blocks').first().json;
-const publication=$json.body.data;
-if(publication.draftRevision!==publication.publishedRevision || publication.draftRevision!==blocks.body.revision)throw new Error('Unpublished or concurrent edits exist. Review them before adding the video.');
-  return [{json:{...prepareCard($('Select next video').first().json,blocks),originalPublishedRevision:publication.publishedRevision}}];`,3360,200);connect('Check publication before staging','Prepare YouTube card');
-  condition('Card needs saving',"={{ $json.needsWrite }}",3620,200);connect('Prepare YouTube card','Card needs saving');
-  orbit('Save video card','advanced','customRequest',{customMethod:'PUT',customPath:'/links',customQuery:"={{ JSON.stringify({publish:$('Prepare YouTube card').first().json.config.mode === 'EMAIL_APPROVAL' ? '0' : '1'}) }}",customIfMatch:"={{ $('Prepare YouTube card').first().json.revision }}",customBody:"={{ JSON.stringify({links:$('Prepare YouTube card').first().json.links}) }}"},3880,100);connect('Card needs saving','Save video card');
-  code('Card saved',['registryRow','approvalMessage'],`const work=$('Prepare YouTube card').first().json;
-if($('Save video card').isExecuted)work.revision=String($('Save video card').first().json.body.revision);
-work.needsApproval=work.config.mode==='EMAIL_APPROVAL'&&!work.alreadyPublished;
-work.registry=registryRow(work,work.needsApproval?'pending':'publishing',$execution.id,new Date().toISOString());
-work.emailHtml=approvalMessage(work);
-return [{json:work}];`,4140,200);connect('Save video card','Card saved');connect('Card needs saving','Card saved',1);
-  upsert('Remember saved card','Card saved','pending',4400,200);connect('Card saved','Remember saved card');
-  condition('Email approval required',"={{ $('Card saved').first().json.needsApproval }}",4660,200);connect('Remember saved card','Email approval required');
-  node('Email approval — Approva or Rifiuta','n8n-nodes-base.emailSend',2.1,{resource:'email',operation:'sendAndWait',fromEmail:"={{ $('Card saved').first().json.config.fromEmail }}",toEmail:"={{ $('Card saved').first().json.config.approvalEmail }}",subject:"={{ 'OrbitPage · Approva il video: ' + $('Card saved').first().json.video.title }}",message:"={{ $('Card saved').first().json.emailHtml }}",responseType:'approval',approvalOptions:{values:{approvalType:'double',approveLabel:'Approva e pubblica',disapproveLabel:'Rifiuta',buttonApprovalStyle:'primary',buttonDisapprovalStyle:'secondary'}},options:{appendAttribution:false,limitWaitTime:{values:{limitType:'afterTimeInterval',resumeAmount:"={{ $('Card saved').first().json.config.approvalHours }}",resumeUnit:'hours'}}}},4920,-80,{...(smtpCredential ? {credentials:smtpCredential} : {}),retryOnFail:false,notes:'The native n8n signed approval links resume only this waiting execution. Keep the recipient mailbox and n8n approval endpoints protected.',notesInFlow:true});connect('Email approval required','Email approval — Approva or Rifiuta');
-  code('Read approval decision',['approvalDecision','registryRow'],`const work=$('Card saved').first().json;const decision=approvalDecision($json,work,new Date().toISOString());return [{json:{...work,decision,registry:registryRow(work,decision,$execution.id,new Date().toISOString())}}];`,5180,-80);connect('Email approval — Approva or Rifiuta','Read approval decision');
-  condition('Video was approved',"={{ $json.decision === 'approved' }}",5440,-80);connect('Read approval decision','Video was approved');
-  orbit('Read declined draft','links','listLinks',{},5700,100);connect('Video was approved','Read declined draft',1);
-  orbit('Check declined publication','publication','getPublication',{},5960,100);connect('Read declined draft','Check declined publication');
-  code('Prepare declined draft cleanup',['sameCard','reviewCard'],`const work=$('Card saved').first().json;
-const blocks=$('Read declined draft').first().json;
-const publication=$json.body.data;
-if(publication.draftRevision!==Number(work.revision)||publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft changed. Declined video retained for manual review.');
-const checked=reviewCard(work,blocks);return [{json:{...checked,links:blocks.body.data.filter(b=>b.id!==work.card.id).map((b,position)=>({...b,position}))}}];`,6220,100);connect('Check declined publication','Prepare declined draft cleanup');
-  orbit('Discard declined video draft','links','replaceLinks',{revisionMode:'manual',ifMatchRevision:'={{ $json.revision }}',jsonBody:'={{ JSON.stringify({links:$json.links}) }}'},6480,100);connect('Prepare declined draft cleanup','Discard declined video draft');
-  upsert('Remember declined or expired','Read approval decision','declined',6740,100);connect('Discard declined video draft','Remember declined or expired');
-  orbit('Read blocks after approval','links','listLinks',{},5700,-160);connect('Video was approved','Read blocks after approval');
-  orbit('Check publication after approval','publication','getPublication',{},5960,-160);connect('Read blocks after approval','Check publication after approval');
-  code('Review exact hidden card',['sameCard','reviewCard'],`const blocks=$('Read blocks after approval').first().json;
-const publication=$json.body.data;
-  const work=$('Card saved').first().json;
-  if(publication.draftRevision!==Number(work.revision) || publication.draftRevision!==blocks.body.revision || publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft or publication changed. Approval did not publish unreviewed changes.');
-return [{json:reviewCard($('Card saved').first().json,blocks)}];`,6220,-160);connect('Check publication after approval','Review exact hidden card');
-  orbit('Publish approved video card','links','updateLink',{linkId:"={{ $json.card.id }}",revisionMode:'manual',ifMatchRevision:"={{ $json.revision }}",jsonBody:JSON.stringify({isActive:true,status:'live'})},6480,-160);connect('Review exact hidden card','Publish approved video card');
-  code('Prepare publication check',[],`const work=$('Card saved').first().json;
-if($('Publish approved video card').isExecuted)work.revision=String($('Publish approved video card').first().json.body.revision);
-return [{json:work}];`,6740,360);connect('Publish approved video card','Prepare publication check');connect('Email approval required','Prepare publication check',1);
-  orbit('Read resulting publication','publication','getPublication',{},7000,360);connect('Prepare publication check','Read resulting publication');
-  code('Validate public destination',['publicDestination'],`return [{json:{url:publicDestination($json.body.data.publicUrl)}}];`,7260,360);connect('Read resulting publication','Validate public destination');
-  node('Check public page','n8n-nodes-base.httpRequest',4.2,{url:'={{ $json.url }}',options:{timeout:20000,response:{response:{responseFormat:'text',fullResponse:true,neverError:true}}}},7520,360,{retryOnFail:true,maxTries:3,waitBetweenTries:2000});connect('Validate public destination','Check public page');
-  code('Verify published card',['verifyPublication','registryRow'],`const work=verifyPublication($('Prepare publication check').first().json,$('Read resulting publication').first().json.body,$json);work.registry=registryRow(work,'published',$execution.id,new Date().toISOString());return [{json:work}];`,7780,360);connect('Check public page','Verify published card');
-  upsert('Remember verified publication','Verify published card','published',8040,360);connect('Verify published card','Remember verified publication');
-  code('Result',[],`const selected=$('Select next video').first().json;let message=selected.message||'Declined or expired video discarded; the previous public content was preserved.';
-if($('Verify published card').isExecuted)message=$('Verify published card').first().json.message;
-return [{json:{message,videoId:selected.video?.id||null,mode:selected.config?.mode||null}}];`,8300,600);connect('Remember verified publication','Result');connect('Remember declined or expired','Result');connect('Is a video','Result',1);connect('Has new work','Result',1);
-  const workflow={name:'OrbitPage Smart Bio — YouTube',nodes,connections,settings:{executionOrder:'v1',timezone:'Europe/Rome',saveDataSuccessExecution:'none',saveDataErrorExecution:'all',saveManualExecutions:true,saveExecutionProgress:false}};
-  if (!presentation) return workflow;
-  const layout=JSON.parse(readFileSync(new URL('./presentation.json',import.meta.url),'utf8'));
-  for (const entry of nodes) {
-    const position=layout.positions[entry.name];
-    if (!position && entry.name !== 'Temporary verification trigger') throw new Error('Missing presentation position: '+entry.name);
-    if (position) entry.position=[...position];
-  }
-  const notes=structuredClone(layout.notes);
-  notes[0].parameters.content=readFileSync(new URL('./README.md',import.meta.url),'utf8').replace(/\r\n/g,'\n').trim();
-  return {...workflow,active:false,pinData:{},nodes:[...notes,...nodes]};
+// The owner's n8n export is authoritative. Never regenerate or tidy its canvas.
+export function buildWorkflow() {
+  return JSON.parse(readFileSync(new URL('./OrbitPage_Smart_Bio_YouTube.json',import.meta.url),'utf8'));
 }
 
-if(process.argv[1]===fileURLToPath(import.meta.url))await writeFile(new URL('./OrbitPage_Smart_Bio_YouTube.json',import.meta.url),JSON.stringify(buildWorkflow(),null,2)+'\n');
+if (process.argv[1]===fileURLToPath(import.meta.url)) {
+  const workflow=buildWorkflow();
+  console.log(`Loaded ${workflow.nodes.length} nodes from the authoritative export; no files or canvas positions changed.`);
+}

@@ -1,42 +1,82 @@
 {
-  "version": 4,
-  "mode": "regenerated",
-  "positionsPreserved": false,
+  "version": 5,
+  "mode": "owner-approved",
+  "algorithm": "preserve-owner-canvas",
   "verified": true,
-  "algorithm": "template-publishing-assistant-v4-with-compact-reading-rows",
+  "positionsPreserved": true,
+  "nodeOrderPreserved": true,
+  "noteParametersPreserved": true,
   "executableNodes": 41,
-  "generatedNotes": 11,
-  "removedNotes": 0,
-  "preservedNotes": 0,
-  "recoveredNodes": [],
-  "normalization": {
-    "duplicateReferences": 0,
-    "unknownReferences": 0,
-    "emptySectionsRemoved": 0,
-    "textFieldsRecovered": 0,
-    "sharedNodes": [],
-    "graphFallback": false
-  },
+  "preservedNotes": 11,
+  "generatedNotes": 0,
+  "connectionsPreserved": true,
+  "workflowInactive": true,
+  "overviewMatchesReadme": true,
+  "sectionWords": [
+    {
+      "title": "Configure and start checks",
+      "words": 32
+    },
+    {
+      "title": "Find the next video",
+      "words": 34
+    },
+    {
+      "title": "Claim work or finish",
+      "words": 31
+    },
+    {
+      "title": "Stage the video card",
+      "words": 36
+    },
+    {
+      "title": "Route the saved proposal",
+      "words": 30
+    },
+    {
+      "title": "Wait for email review",
+      "words": 31
+    },
+    {
+      "title": "Publish the approved card",
+      "words": 32
+    },
+    {
+      "title": "Discard an unchanged proposal",
+      "words": 35
+    },
+    {
+      "title": "Check the public page",
+      "words": 30
+    },
+    {
+      "title": "Record and return results",
+      "words": 31
+    }
+  ],
   "sections": [
     {
       "title": "Configure and start checks",
+      "id": "684e4f3e-c6e6-40af-b7b9-70cd070b8ea2",
+      "x": 880,
+      "y": 0,
+      "width": 1312,
+      "height": 768,
       "nodes": [
         "Manual check or replay",
         "Check YouTube every 15 minutes",
         "Configuration",
         "Create or reuse registry",
         "Validate Configuration"
-      ],
-      "x": 0,
-      "y": 0,
-      "width": 1312,
-      "height": 768,
-      "headerHeight": 160,
-      "flowAnchor": 416,
-      "rank": 0
+      ]
     },
     {
       "title": "Find the next video",
+      "id": "89167153-a747-4209-9a3d-b7aeb7f6289f",
+      "x": 2224,
+      "y": 224,
+      "width": 1952,
+      "height": 416,
       "nodes": [
         "Read OrbitPage API contract",
         "Require private draft support",
@@ -44,477 +84,118 @@
         "Parse channel feed",
         "Read channel registry",
         "Select next video"
-      ],
-      "x": 1888,
-      "y": 0,
-      "width": 1952,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 240,
-      "rank": 1
+      ]
     },
     {
       "title": "Claim work or finish",
+      "id": "2086e85d-6f9b-410e-889d-2cb2d7c2303f",
+      "x": 4208,
+      "y": 224,
+      "width": 992,
+      "height": 416,
       "nodes": [
         "Has new work",
         "Claim video or remember baseline",
         "Is a video"
-      ],
-      "x": 4032,
-      "y": 0,
-      "width": 992,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 240,
-      "rank": 2
+      ]
     },
     {
       "title": "Stage the video card",
+      "id": "05ef8970-5fae-49f4-862a-5481803cdc63",
+      "x": 5248,
+      "y": 0,
+      "width": 1728,
+      "height": 416,
       "nodes": [
         "Read current blocks",
         "Check publication before staging",
         "Prepare YouTube card",
         "Card needs saving",
         "Save video card"
-      ],
-      "x": 0,
-      "y": 960,
-      "width": 1632,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 1200,
-      "rank": 3
+      ]
     },
     {
       "title": "Route the saved proposal",
+      "id": "a44a3508-e361-40ca-aa84-0f1fe824eb60",
+      "x": 7024,
+      "y": 0,
+      "width": 960,
+      "height": 272,
       "nodes": [
         "Card saved",
         "Remember saved card",
         "Email approval required"
-      ],
-      "x": 1888,
-      "y": 960,
-      "width": 960,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 1200,
-      "rank": 4
+      ]
     },
     {
       "title": "Wait for email review",
+      "id": "ba341a3d-1f9a-4b37-bf0f-63e521c12ef1",
+      "x": 8000,
+      "y": -128,
+      "width": 1024,
+      "height": 400,
       "nodes": [
         "Email approval — Approva or Rifiuta",
         "Read approval decision",
         "Video was approved"
-      ],
-      "x": 4032,
-      "y": 960,
-      "width": 1024,
-      "height": 496,
-      "headerHeight": 160,
-      "flowAnchor": 1200,
-      "rank": 5
+      ]
     },
     {
       "title": "Publish the approved card",
+      "id": "03c14fe4-16d0-4bae-9546-70539e804a7b",
+      "x": 9040,
+      "y": -128,
+      "width": 1312,
+      "height": 400,
       "nodes": [
         "Read blocks after approval",
         "Check publication after approval",
         "Review exact hidden card",
         "Publish approved video card"
-      ],
-      "x": 0,
-      "y": 1648,
-      "width": 1312,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 1888,
-      "rank": 6
+      ]
     },
     {
       "title": "Discard an unchanged proposal",
+      "id": "cf6cd6a9-3905-474e-b262-12288d114828",
+      "x": 10336,
+      "y": 800,
+      "width": 1696,
+      "height": 432,
       "nodes": [
         "Read declined draft",
         "Check declined publication",
         "Prepare declined draft cleanup",
         "Discard declined video draft",
         "Remember declined or expired"
-      ],
-      "x": 0,
-      "y": 2272,
-      "width": 1696,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 2512,
-      "rank": 6
+      ]
     },
     {
       "title": "Check the public page",
+      "id": "82939bf3-7456-41b5-a41a-331131d648e4",
+      "x": 10368,
+      "y": 0,
+      "width": 1280,
+      "height": 272,
       "nodes": [
         "Prepare publication check",
         "Read resulting publication",
         "Validate public destination",
         "Check public page"
-      ],
-      "x": 1888,
-      "y": 1648,
-      "width": 1280,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 1888,
-      "rank": 7
+      ]
     },
     {
       "title": "Record and return results",
+      "id": "7a1d9f5f-eef3-4864-8eb2-9ed685c98fd8",
+      "x": 11664,
+      "y": 272,
+      "width": 992,
+      "height": 336,
       "nodes": [
         "Verify published card",
         "Remember verified publication",
         "Result"
-      ],
-      "x": 4032,
-      "y": 1648,
-      "width": 992,
-      "height": 432,
-      "headerHeight": 160,
-      "flowAnchor": 1888,
-      "rank": 8
+      ]
     }
   ],
-  "nodeBounds": {
-    "Manual check or replay": {
-      "x": 80,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 0
-    },
-    "Check YouTube every 15 minutes": {
-      "x": 64,
-      "y": 528,
-      "width": 224,
-      "height": 176,
-      "section": 0
-    },
-    "Configuration": {
-      "x": 416,
-      "y": 368,
-      "width": 192,
-      "height": 240,
-      "section": 0
-    },
-    "Create or reuse registry": {
-      "x": 736,
-      "y": 368,
-      "width": 192,
-      "height": 176,
-      "section": 0
-    },
-    "Validate Configuration": {
-      "x": 1056,
-      "y": 368,
-      "width": 192,
-      "height": 176,
-      "section": 0
-    },
-    "Read OrbitPage API contract": {
-      "x": 1952,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 1
-    },
-    "Require private draft support": {
-      "x": 2272,
-      "y": 192,
-      "width": 224,
-      "height": 176,
-      "section": 1
-    },
-    "Read public YouTube feed": {
-      "x": 2624,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 1
-    },
-    "Parse channel feed": {
-      "x": 2944,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 1
-    },
-    "Read channel registry": {
-      "x": 3264,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 1
-    },
-    "Select next video": {
-      "x": 3584,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 1
-    },
-    "Has new work": {
-      "x": 4096,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 2
-    },
-    "Claim video or remember baseline": {
-      "x": 4416,
-      "y": 192,
-      "width": 224,
-      "height": 176,
-      "section": 2
-    },
-    "Is a video": {
-      "x": 4768,
-      "y": 192,
-      "width": 192,
-      "height": 176,
-      "section": 2
-    },
-    "Read current blocks": {
-      "x": 64,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 3
-    },
-    "Check publication before staging": {
-      "x": 384,
-      "y": 1152,
-      "width": 224,
-      "height": 176,
-      "section": 3
-    },
-    "Prepare YouTube card": {
-      "x": 736,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 3
-    },
-    "Card needs saving": {
-      "x": 1056,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 3
-    },
-    "Save video card": {
-      "x": 1376,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 3
-    },
-    "Card saved": {
-      "x": 1952,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 4
-    },
-    "Remember saved card": {
-      "x": 2272,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 4
-    },
-    "Email approval required": {
-      "x": 2592,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 4
-    },
-    "Email approval — Approva or Rifiuta": {
-      "x": 4096,
-      "y": 1152,
-      "width": 256,
-      "height": 240,
-      "section": 5
-    },
-    "Read approval decision": {
-      "x": 4480,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 5
-    },
-    "Video was approved": {
-      "x": 4800,
-      "y": 1152,
-      "width": 192,
-      "height": 176,
-      "section": 5
-    },
-    "Read blocks after approval": {
-      "x": 64,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 6
-    },
-    "Check publication after approval": {
-      "x": 384,
-      "y": 1840,
-      "width": 224,
-      "height": 176,
-      "section": 6
-    },
-    "Review exact hidden card": {
-      "x": 736,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 6
-    },
-    "Publish approved video card": {
-      "x": 1056,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 6
-    },
-    "Read declined draft": {
-      "x": 64,
-      "y": 2464,
-      "width": 192,
-      "height": 176,
-      "section": 7
-    },
-    "Check declined publication": {
-      "x": 384,
-      "y": 2464,
-      "width": 192,
-      "height": 176,
-      "section": 7
-    },
-    "Prepare declined draft cleanup": {
-      "x": 704,
-      "y": 2464,
-      "width": 224,
-      "height": 176,
-      "section": 7
-    },
-    "Discard declined video draft": {
-      "x": 1056,
-      "y": 2464,
-      "width": 224,
-      "height": 176,
-      "section": 7
-    },
-    "Remember declined or expired": {
-      "x": 1408,
-      "y": 2464,
-      "width": 224,
-      "height": 176,
-      "section": 7
-    },
-    "Prepare publication check": {
-      "x": 1952,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 8
-    },
-    "Read resulting publication": {
-      "x": 2272,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 8
-    },
-    "Validate public destination": {
-      "x": 2592,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 8
-    },
-    "Check public page": {
-      "x": 2912,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 8
-    },
-    "Verify published card": {
-      "x": 4096,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 9
-    },
-    "Remember verified publication": {
-      "x": 4416,
-      "y": 1840,
-      "width": 224,
-      "height": 176,
-      "section": 9
-    },
-    "Result": {
-      "x": 4768,
-      "y": 1840,
-      "width": 192,
-      "height": 176,
-      "section": 9
-    }
-  },
-  "connectionsPreserved": true,
-  "workflowInactive": true,
-  "assistantSourceSha256": "3f47fff0b6782ae6c57b64ce09c11c427e0e3479bb53eabb7f405081af6fb9ab",
-  "graphSha256": "0b5cbf266465460777c51f62b29c3fd7a105c80706055e3848e0334ed3cdfd13",
-  "proseLanguage": "en",
-  "overviewMatchesReadme": true,
-  "sectionWords": [
-    {
-      "title": "Configure and start checks",
-      "words": 26
-    },
-    {
-      "title": "Find the next video",
-      "words": 28
-    },
-    {
-      "title": "Claim work or finish",
-      "words": 25
-    },
-    {
-      "title": "Stage the video card",
-      "words": 30
-    },
-    {
-      "title": "Route the saved proposal",
-      "words": 24
-    },
-    {
-      "title": "Wait for email review",
-      "words": 25
-    },
-    {
-      "title": "Publish the approved card",
-      "words": 26
-    },
-    {
-      "title": "Discard an unchanged proposal",
-      "words": 29
-    },
-    {
-      "title": "Check the public page",
-      "words": 24
-    },
-    {
-      "title": "Record and return results",
-      "words": 25
-    }
-  ]
+  "exportSha256": "ba6b2953c91988e7698edc66b9dea516bf8331cfd2177801da7ac6c523cd7b43"
 }

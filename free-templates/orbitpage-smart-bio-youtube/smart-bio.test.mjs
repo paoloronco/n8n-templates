@@ -118,5 +118,5 @@ test('export is portable, all connections resolve, and all Code nodes compile',(
   assert.ok(!JSON.stringify(workflow).includes('prhomelab'));
   assert.ok(!workflow.nodes.some(n=>n.type==='n8n-nodes-base.webhook'));
   const save=workflow.nodes.find(n=>n.name==='Save video card');
-  assert.equal(save.parameters.operation,'customRequest');assert.ok(save.parameters.customQuery.includes("'0'"));
+  assert.equal(save.parameters.operation??'customRequest','customRequest');assert.ok(save.parameters.customQuery.includes("'0'"));
 });

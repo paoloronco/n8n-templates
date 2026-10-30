@@ -157,21 +157,25 @@ to 24 per day (720 over 30 days); change the Schedule Trigger if needed.
 
 The registry contains public video metadata and processing state. Execution data
 can include the complete editable page, private drafts, email addresses and
-signed approval state. Successful scheduled executions are not saved by default;
-failed and manual executions remain available for diagnosis. Apply your n8n
-retention and access policy and protect the SMTP and OrbitPage credentials.
+signed approval state. Execution retention follows the imported workflow and
+instance settings. Review whether successful, failed and manual executions should
+be stored, apply your n8n retention and access policy, and protect the SMTP and
+OrbitPage credentials.
 
 ## Source and validation
 
-The checked-in JSON is generated from [workflow.mjs](./workflow.mjs), with the presentation pass in [publishing.mjs](./publishing.mjs); pure logic
-is in [smart-bio.mjs](./smart-bio.mjs). To regenerate and test with Node.js:
+The checked-in JSON is the definitive owner-approved n8n export.
+[workflow.mjs](./workflow.mjs) reads it without regenerating the canvas;
+[publishing.mjs](./publishing.mjs) verifies it and refreshes documentation snapshots.
+Behavior helpers used by the tests are in [smart-bio.mjs](./smart-bio.mjs).
+To verify the package with Node.js:
 
 ```sh
 node publishing.mjs
 node --test smart-bio.test.mjs
 ```
 
-The publishing pass reuses the Template Publishing Assistant layout engine locally, then packs its sections into compact reading rows. One orange note contains the canonical README; ten neutral section frames cover every executable node once. The [layout report](./layout-report.json) verifies graph preservation, note bounds, text clearance and no node/frame collisions. It does not run the Assistant's paid API, Notion or SMTP branches. `node workflow.mjs` regenerates the JSON with the saved presentation; `node publishing.mjs` also refreshes documentation on the canvas and the presentation report.
+The owner's manually arranged nodes and sticky notes are authoritative. The earlier automatic layout has been superseded; no publishing script moves nodes, regenerates notes or overwrites the approved workflow. The [layout report](./layout-report.json) records the existing section membership, note word counts and export fingerprint. `node publishing.mjs` refreshes only the report, presentation snapshot and extracted note text. See [publishing maintenance](./PUBLISHING.md) before editing the template.
 
 Live deployment evidence and private instance details are not part of the public
 template. Verify the imported workflow with your own workspace before enabling it.

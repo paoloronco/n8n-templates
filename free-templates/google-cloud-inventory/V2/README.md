@@ -97,4 +97,4 @@ The first completed scan establishes a baseline. The sorted scope list is part o
 
 - **v2.1.0:** explicit multiproject resource/IAM fan-out; central BigQuery/Sheets delivery; scope-aware baseline profile; complete-pagination checks across all scopes; explicit Cloud Asset quota project; digest disable switch; Sheets write ranges grow beyond the model's initial row count. Setup docs distinguish manual provisioning from automatic dataset/table/registry creation.
 - **v2.0.1:** single-scope v2 release. Existing history is retained, with a fresh baseline under the v2.1.0 profile.
-- [Legacy v1](../README.md#legacy-v1-documentation): original project-discovery workflow, preserved separately.
+- [V1](../V1/README.md): original project-discovery workflow, preserved separately.

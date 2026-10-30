@@ -8,6 +8,7 @@ YouTube, or AI provider is required.
 ## Download and requirements
 
 - [Importable workflow JSON](./OrbitPage_Smart_Bio_YouTube.json)
+- [Catalog listing copy and demonstration outline](./CATALOG.md)
 - n8n 2.x with Data Tables, Send Email 2.1, and community nodes available.
 - `n8n-nodes-orbitpage` 0.3.2 or newer and a hosted OrbitPage workspace.
 - An OrbitPage API that advertises `publish=0` on `PUT /links` for approval mode.
@@ -50,6 +51,8 @@ If the page uses an external consent platform with automatic iframe blocking,
 declare the YouTube privacy-enhanced video widget there and enable its Experience purpose (3 for iubenda) or the equivalent required
 consent purpose. Otherwise that platform may suppress the iframe even after
 OrbitPage permits it. This workflow does not disable provider consent checks.
+For a custom CMP installation, configure OrbitPage's reopen selector as well;
+for an iubenda widget it is `.iubenda-cs-preferences-link`.
 
 ## Setup
 
@@ -119,7 +122,9 @@ test video's registry row. Never clear the entire table to fix one video.
   Revision checks prevent stale page writes; no external email system can promise
   exactly-once delivery after an uncertain transport outcome.
 - Existing blocks are preserved; cards are prepended with a deterministic
-  `smartbio-VIDEO_ID` ID. No automatic deletion of older published videos occurs.
+  `smartbio-VIDEO_ID` ID in the content collection. A saved custom canvas still
+  determines their visual placement. No automatic deletion of older published
+  videos occurs.
 - Unrelated unpublished changes block staging. Any revision change during email
   review blocks publication/cleanup. This avoids publishing private work that the
   reviewer did not see. Review and resolve the draft manually after a conflict.
@@ -138,6 +143,9 @@ test video's registry row. Never clear the entire table to fix one video.
 No paid YouTube or AI API is used. Your n8n hosting/execution and SMTP provider
 may have their normal costs or quotas. The workflow does not upload video files
 to OrbitPage storage.
+At the default interval there are 96 scheduled checks per day (2,880 over 30 days),
+plus manual replays and any other executions. A 60-minute schedule reduces this
+to 24 per day (720 over 30 days); change the Schedule Trigger if needed.
 
 The registry contains public video metadata and processing state. Execution data
 can include the complete editable page, private drafts, email addresses and

@@ -1,5 +1,9 @@
 # Google Cloud Inventory & Change Audit — v2
 
+**Template revision:** v2.0.1 · 2026-10-30. The main workflow note includes the setup guide and public support contact.
+
+**Support & customization:** [info@paoloronco.it](mailto:info@paoloronco.it) · [paoloronco.it](https://paoloronco.it).
+
 Inventory Google Cloud resources, assess visible IAM policies and governance rules, and compare completed BigQuery snapshots. Review the latest results in Google Sheets with five tabs, three filterable tables, review checkboxes, conditional formatting and four charts.
 
 ## Get started

@@ -2,14 +2,201 @@
   "name": "OrbitPage Smart Bio — YouTube",
   "nodes": [
     {
+      "id": "tpa-sticky-1",
+      "name": "[TPA] README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        0
+      ],
+      "parameters": {
+        "content": "# OrbitPage Smart Bio — YouTube\n\n## Quick overview\n\nAdd new public YouTube videos to your OrbitPage as native video cards with a cover and Play button. Choose automatic publication or a private draft with email approval. Public feed polling needs no YouTube API key or AI service.\n\n## How it works\n\n1. Manual and scheduled checks share one configuration and a persistent n8n Data Table registry.\n2. The workflow checks OrbitPage draft support, reads the channel feed and selects one unseen video, oldest first. The first normal run only records a baseline.\n3. A registry claim prevents a pending video from generating another card or approval request.\n4. Current blocks and publication revisions are checked before adding a native YouTube card; unrelated private changes stop processing.\n5. `AUTOMATIC` publishes immediately; `EMAIL_APPROVAL` saves a private draft and emails signed approve/decline buttons.\n6. Approval publishes only the unchanged reviewed card. Decline or timeout removes only the unchanged proposal; concurrent edits stop cleanup for review.\n7. Publication metadata and public HTML are checked before recording success. No-work, baseline and declined paths finish without another email.\n\n## Setup\n\n1. Import [the workflow JSON](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/free-templates/orbitpage-smart-bio-youtube/OrbitPage_Smart_Bio_YouTube.json) and install `n8n-nodes-orbitpage` 0.3.2 or newer.\n2. Select the same OrbitPage credential on all OrbitPage nodes, including `Save video card`; keep tokens in n8n credentials.\n3. In `Configuration`, set `YOUTUBE_CHANNEL_ID` to the channel's `UC…` ID, choose `MODE` and set a dedicated `REGISTRY_TABLE_NAME`.\n4. For `EMAIL_APPROVAL`, select SMTP on `Email approval — Approva or Rifiuta` and set `FROM_EMAIL` and `APPROVAL_EMAIL` to authorized addresses.\n5. Run `Manual check or replay` with `MANUAL_VIDEO_ID` empty to establish the baseline; confirm its result and registry.\n6. To test without a new upload, replay a recent feed video using `MANUAL_VIDEO_ID`; check approve, decline and duplicate behavior with separate videos, then clear the field.\n7. Confirm the page's YouTube consent configuration, inspect the public player, then publish the workflow to enable its schedule. Follow the [technical guide](https://github.com/paoloronco/n8n-templates/blob/main/free-templates/orbitpage-smart-bio-youtube/GUIDE.md) for the full test procedure.\n\n## Requirements\n\n- n8n 2.x with Data Tables, Send Email 2.1 and community nodes enabled; a hosted OrbitPage workspace.\n- OrbitPage token scopes: `workspace:read`, `links:read`, `links:write`, `publication:read`, `publication:write`.\n- Approval mode requires API support for `publish=0`; native cover presentation requires renderer 4.21.162 or newer.\n- Email approval requires SMTP and a reachable n8n HTTPS address for the reviewer.\n- Videos must be public, present in the recent channel feed and allow embedding; the page's consent provider must permit the YouTube widget.\n\n## Customization\n\n- Set `SHOW_TITLE` and `SHOW_DESCRIPTION` to display optional text; both default to false.\n- Set `APPROVAL_TIMEOUT_HOURS` from 1 to 168; the default is 48.\n- Change the Schedule Trigger's 15-minute interval to suit your upload frequency and n8n execution quota.\n- Finish pending reviews before changing the channel, registry, workspace or mode. Keep revision checks and the private-draft capability check enabled.",
+        "width": 832,
+        "height": 1664,
+        "color": 1
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-2",
+      "name": "[TPA] Configure and start checks",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "content": "## 1. Configure and start checks\n\nSet the channel and publication mode once. Manual and scheduled checks use the same configuration, create or reuse a dedicated registry, and validate the required inputs.",
+        "width": 1312,
+        "height": 768,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-3",
+      "name": "[TPA] Find the next video",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        0
+      ],
+      "parameters": {
+        "content": "## 2. Find the next video\n\nCheck private-draft support, then read the public feed and registry. The first normal run records existing videos without importing them; later checks select one unseen video, oldest first.",
+        "width": 1952,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-4",
+      "name": "[TPA] Claim work or finish",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4032,
+        0
+      ],
+      "parameters": {
+        "content": "## 3. Claim work or finish\n\nSkip checks with no work. Save the baseline or claim a selected video before changing the page. A pending or uncertain claim blocks another proposal.",
+        "width": 992,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-5",
+      "name": "[TPA] Stage the video card",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        960
+      ],
+      "parameters": {
+        "content": "## 4. Stage the video card\n\nRead existing blocks and publication state, then prepare a native YouTube card. Preserve existing content and reject unrelated private drafts. Automatic mode publishes now; approval mode saves a private proposal.",
+        "width": 1632,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-6",
+      "name": "[TPA] Route the saved proposal",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        960
+      ],
+      "parameters": {
+        "content": "## 5. Route the saved proposal\n\nRecord the saved revision and processing state. Send private proposals to email review; automatic or already-published cards continue directly to the public verification phase.",
+        "width": 960,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-7",
+      "name": "[TPA] Wait for email review",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4032,
+        960
+      ],
+      "parameters": {
+        "content": "## 6. Wait for email review\n\nEmail the signed approve and decline buttons to the configured reviewer. Interpret the response or timeout and route the exact proposal to publication or cleanup.",
+        "width": 1024,
+        "height": 496,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-8",
+      "name": "[TPA] Publish the approved card",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1648
+      ],
+      "parameters": {
+        "content": "## 7. Publish the approved card\n\nRe-read blocks and publication state. Compare the exact reviewed revision and card before activating and publishing it. Any intervening edit stops the operation for manual review.",
+        "width": 1312,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-9",
+      "name": "[TPA] Discard an unchanged proposal",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        2272
+      ],
+      "parameters": {
+        "content": "## 8. Discard an unchanged proposal\n\nFor rejection or timeout, remove only the unchanged proposed card and restore the prior public content. Preserve concurrent edits by stopping cleanup when the reviewed revision no longer matches.",
+        "width": 1696,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-10",
+      "name": "[TPA] Check the public page",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        1648
+      ],
+      "parameters": {
+        "content": "## 9. Check the public page\n\nRead resulting publication metadata and validate its HTTPS destination before fetching the public page. Both automatic publication and approved proposals share this verification path.",
+        "width": 1280,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "id": "tpa-sticky-11",
+      "name": "[TPA] Record and return results",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4032,
+        1648
+      ],
+      "parameters": {
+        "content": "## 10. Record and return results\n\nConfirm the expected revision, card and video in public HTML before marking publication complete. The shared result also reports no-work, baseline, rejected and expired outcomes.",
+        "width": 992,
+        "height": 432,
+        "color": 7
+      },
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
       "id": "fc2c24e3-03fe-bc09-493f-acad480334b0",
       "name": "Manual check or replay",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "parameters": {},
       "position": [
-        0,
-        280
+        128,
+        192
       ]
     },
     {
@@ -28,8 +215,8 @@
         }
       },
       "position": [
-        0,
-        460
+        128,
+        528
       ]
     },
     {
@@ -99,8 +286,8 @@
         "options": {}
       },
       "position": [
-        240,
-        360
+        464,
+        368
       ],
       "notes": "MODE: EMAIL_APPROVAL or AUTOMATIC. MANUAL_VIDEO_ID is used only by the manual trigger. Existing channel videos are ignored on the first normal poll.",
       "notesInFlow": true
@@ -155,8 +342,8 @@
         }
       },
       "position": [
-        500,
-        360
+        784,
+        368
       ]
     },
     {
@@ -168,8 +355,8 @@
         "jsCode": "function validateConfiguration(raw) {\n  const config = {\n    channelId: String(raw.YOUTUBE_CHANNEL_ID || '').trim(),\n    mode: String(raw.MODE || 'EMAIL_APPROVAL').trim(),\n    tableId: String(raw.REGISTRY_TABLE_ID || '').trim(),\n    fromEmail: String(raw.FROM_EMAIL || '').trim(),\n    approvalEmail: String(raw.APPROVAL_EMAIL || '').trim(),\n    showTitle: raw.SHOW_TITLE === true,\n    showDescription: raw.SHOW_DESCRIPTION === true,\n    approvalHours: Number(raw.APPROVAL_TIMEOUT_HOURS ?? 48),\n    manualVideoId: String(raw.MANUAL_VIDEO_ID || '').trim(),\n  };\n  if (!/^UC[\\w-]{22}$/.test(config.channelId)) throw new Error('Enter the UC… channel ID, not a handle or video URL.');\n  if (!['AUTOMATIC', 'EMAIL_APPROVAL'].includes(config.mode)) throw new Error('MODE must be AUTOMATIC or EMAIL_APPROVAL.');\n  if (!/^[\\w-]{5,100}$/.test(config.tableId)) throw new Error('The registry could not be created or reused. Check REGISTRY_TABLE_NAME and Data Table access.');\n  if (config.mode === 'EMAIL_APPROVAL' && [config.fromEmail, config.approvalEmail].some(v => !/^[^\\s<>@]+@[^\\s<>@]+\\.[^\\s<>@]+$/.test(v))) throw new Error('Configure one FROM_EMAIL and one APPROVAL_EMAIL.');\n  if (!Number.isInteger(config.approvalHours) || config.approvalHours < 1 || config.approvalHours > 168) throw new Error('Approval timeout must be 1–168 hours.');\n  if (config.manualVideoId && !/^[\\w-]{11}$/.test(config.manualVideoId)) throw new Error('MANUAL_VIDEO_ID must be an 11-character public YouTube video ID.');\n  return config;\n}\n\nreturn [{json:validateConfiguration({...$('Configuration').first().json,REGISTRY_TABLE_ID:$json.id})}];"
       },
       "position": [
-        760,
-        360
+        1104,
+        368
       ]
     },
     {
@@ -184,8 +371,8 @@
         }
       },
       "position": [
-        900,
-        700
+        2000,
+        192
       ]
     },
     {
@@ -197,8 +384,8 @@
         "jsCode": "function requireDraftCapability(spec, config) {\n  if (config.mode === 'AUTOMATIC') return config;\n  const parameters=spec.paths?.['/links']?.put?.parameters || [];\n  const supportsDraft=parameters.some(p=>{\n    const resolved=p.$ref?.startsWith('#/components/parameters/') ? spec.components?.parameters?.[p.$ref.split('/').pop()] : p;\n    return resolved?.name==='publish' && resolved.in==='query' && resolved.schema?.enum?.some(v=>String(v)==='0');\n  });\n  if (!supportsDraft) throw new Error('This OrbitPage API does not advertise private link drafts (publish=0). Update OrbitPage before using EMAIL_APPROVAL. No card was saved.');\n  return config;\n}\n\nreturn [{json:requireDraftCapability($json,$('Validate Configuration').first().json)}];"
       },
       "position": [
-        1160,
-        700
+        2336,
+        192
       ]
     },
     {
@@ -219,8 +406,8 @@
         }
       },
       "position": [
-        1020,
-        360
+        2672,
+        192
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -240,8 +427,8 @@
         }
       },
       "position": [
-        1280,
-        360
+        2992,
+        192
       ]
     },
     {
@@ -270,8 +457,8 @@
         "returnAll": true
       },
       "position": [
-        1540,
-        360
+        3312,
+        192
       ],
       "alwaysOutputData": true
     },
@@ -284,8 +471,8 @@
         "jsCode": "function feedVideos(document, channelId) {\n  const text = value => String(Array.isArray(value) ? value[0]?._ ?? value[0] ?? '' : value?._ ?? value ?? '');\n  const ownsChannel = value => text(value) === channelId || `UC${text(value)}` === channelId;\n  const feed = document.feed;\n  if (!feed || !ownsChannel(feed['yt:channelId'])) throw new Error('The response is not the configured YouTube channel feed.');\n  const entries = feed.entry ? (Array.isArray(feed.entry) ? feed.entry : [feed.entry]) : [];\n  const videos = entries.map(entry => {\n    const id = text(entry['yt:videoId']);\n    const publishedAt = text(entry.published);\n    if (!/^[\\w-]{11}$/.test(id) || !ownsChannel(entry['yt:channelId']) || !Number.isFinite(Date.parse(publishedAt))) throw new Error('Invalid YouTube feed entry.');\n    const media = entry['media:group'] || {};\n    return { id, title: text(entry.title).slice(0, 200), description: text(media['media:description']).slice(0, 2000), publishedAt, url: `https://www.youtube.com/watch?v=${id}` };\n  });\n  return [...new Map(videos.map(v => [v.id, v])).values()].sort((a,b) => Date.parse(a.publishedAt)-Date.parse(b.publishedAt) || a.id.localeCompare(b.id));\n}\n\nfunction selectWork(config, videos, rows, manual, now) {\n  const baselineKey = `${config.channelId}:baseline`;\n  const baseline = rows.find(r => r.key === baselineKey);\n  const known = new Set(rows.map(r => r.video_id).filter(Boolean));\n  const initial = baseline ? JSON.parse(baseline.payload || '{}').ids || [] : [];\n  initial.forEach(id => known.add(id));\n  if (manual && config.manualVideoId) {\n    if (rows.some(r => ['processing','pending','publishing'].includes(r.state))) throw new Error('Another video is pending or needs reconciliation. Finish it before replaying a video.');\n    const video = videos.find(v => v.id === config.manualVideoId);\n    if (!video) throw new Error('Manual video is not in the current public channel feed. Choose a recent public video.');\n    // An explicit manual replay may select an initial-baseline video, never a claimed video.\n    if (rows.some(r => r.video_id === video.id)) return { action:'noop', message:'Video already registered; no second email or card.' };\n    return { action:'video', config, video, key:`${config.channelId}:${video.id}`, startedAt:now, expiresAt:new Date(Date.parse(now)+config.approvalHours*3600000).toISOString() };\n  }\n  if (!baseline) return { action:'baseline', config, key:baselineKey, startedAt:now, baselineIds:videos.map(v=>v.id), message:'Baseline saved. Existing videos were not imported.' };\n  if (rows.some(r => ['processing','pending','publishing'].includes(r.state))) return { action:'noop', message:'Another video is pending or needs reconciliation. No second draft was created.' };\n  const video = videos.find(v => !known.has(v.id));\n  if (!video) return { action:'noop', message:'No new public video.' };\n  return { action:'video', config, video, key:`${config.channelId}:${video.id}`, startedAt:now, expiresAt:new Date(Date.parse(now)+config.approvalHours*3600000).toISOString() };\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst config=$('Validate Configuration').first().json;\nconst parsed=$('Parse channel feed').first().json;\nconst videos=feedVideos(parsed.feedXml || parsed,config.channelId);\nconst now=new Date().toISOString();\nconst work=selectWork(config,videos,$input.all().map(i=>i.json),$execution.mode === 'manual',now);\nif(work.action!=='noop')work.registry=registryRow(work,work.action==='baseline'?'baseline':'processing',$execution.id,now);\nreturn [{json:work}];"
       },
       "position": [
-        1800,
-        360
+        3632,
+        192
       ]
     },
     {
@@ -318,8 +505,8 @@
         "options": {}
       },
       "position": [
-        2060,
-        360
+        4144,
+        192
       ]
     },
     {
@@ -438,8 +625,8 @@
         "options": {}
       },
       "position": [
-        2320,
-        280
+        4480,
+        192
       ]
     },
     {
@@ -472,8 +659,8 @@
         "options": {}
       },
       "position": [
-        2580,
-        280
+        4816,
+        192
       ]
     },
     {
@@ -489,15 +676,9 @@
         }
       },
       "position": [
-        2840,
-        200
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        112,
+        1152
+      ]
     },
     {
       "id": "4d19728e-f64c-f8b5-3373-3aed35df796e",
@@ -512,15 +693,9 @@
         }
       },
       "position": [
-        3100,
-        200
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        448,
+        1152
+      ]
     },
     {
       "id": "4417ea84-ae70-b6b4-9182-a262c9990232",
@@ -531,8 +706,8 @@
         "jsCode": "function proposedCard(work) {\n  return { id:`smartbio-${work.video.id}`, type:'embed', title:work.config.showTitle ? work.video.title : '', description:work.config.showDescription ? work.video.description : '',\n    url:'', content:JSON.stringify({provider:'youtube',snippet:work.video.url,consentCategory:'preferences',height:360}),\n    isActive:work.config.mode === 'AUTOMATIC', status:work.config.mode === 'AUTOMATIC' ? 'live' : 'draft',\n    availability:'available', position:0, campaignName:'orbitpage-smart-bio' };\n}\n\nfunction sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction prepareCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision)) throw new Error('Invalid OrbitPage block response.');\n  const card=proposedCard(work);\n  const matches=body.data.filter(b=>b.id===card.id);\n  if (matches.length > 1 || (matches[0] && !sameCard(matches[0],card))) throw new Error('The existing Smart Bio card was edited. Review it manually; nothing was overwritten.');\n  const existing=matches[0];\n  if (existing && !(existing.isActive === true && existing.status==='live') && !(existing.isActive === false && existing.status==='draft')) throw new Error('The existing card visibility was changed. Review it manually.');\n  const links=existing ? body.data : [card,...body.data];\n  return {...work, card, links:links.map((b,position)=>({...b,position})), revision:String(body.revision), needsWrite:!existing, alreadyPublished:!!existing && existing.isActive===true && existing.status==='live'};\n}\n\nconst blocks=$('Read current blocks').first().json;\nconst publication=$json.body.data;\nif(publication.draftRevision!==publication.publishedRevision || publication.draftRevision!==blocks.body.revision)throw new Error('Unpublished or concurrent edits exist. Review them before adding the video.');\n  return [{json:{...prepareCard($('Select next video').first().json,blocks),originalPublishedRevision:publication.publishedRevision}}];"
       },
       "position": [
-        3360,
-        200
+        784,
+        1152
       ]
     },
     {
@@ -565,8 +740,8 @@
         "options": {}
       },
       "position": [
-        3620,
-        200
+        1104,
+        1152
       ]
     },
     {
@@ -587,15 +762,9 @@
         }
       },
       "position": [
-        3880,
-        100
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        1424,
+        1152
+      ]
     },
     {
       "id": "79f395cd-ad81-cda5-306f-8c2efed8e88b",
@@ -606,8 +775,8 @@
         "jsCode": "function registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nfunction approvalMessage(work) {\n  const escape = value => String(value).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n  return `<h2>Nuovo video pronto per OrbitPage</h2><p><strong>${escape(work.video.title)}</strong></p><p><a href=\"${escape(work.video.url)}\">Guarda il video su YouTube</a></p><p>La card YouTube è salvata come bozza nascosta. Approva per renderla pubblica oppure rifiuta per scartare la bozza.</p><p>Titolo esterno: ${work.config.showTitle?'visibile':'nascosto'} · Descrizione esterna: ${work.config.showDescription?'visibile':'nascosta'}.</p><p>Scadenza: ${escape(work.expiresAt)}. L'approvazione riguarda solo questa card; eventuali modifiche alla card richiedono una nuova revisione.</p>`;\n}\n\nconst work=$('Prepare YouTube card').first().json;\nif($('Save video card').isExecuted)work.revision=String($('Save video card').first().json.body.revision);\nwork.needsApproval=work.config.mode==='EMAIL_APPROVAL'&&!work.alreadyPublished;\nwork.registry=registryRow(work,work.needsApproval?'pending':'publishing',$execution.id,new Date().toISOString());\nwork.emailHtml=approvalMessage(work);\nreturn [{json:work}];"
       },
       "position": [
-        4140,
-        200
+        2000,
+        1152
       ]
     },
     {
@@ -726,8 +895,8 @@
         "options": {}
       },
       "position": [
-        4400,
-        200
+        2320,
+        1152
       ]
     },
     {
@@ -760,8 +929,8 @@
         "options": {}
       },
       "position": [
-        4660,
-        200
+        2640,
+        1152
       ]
     },
     {
@@ -798,15 +967,9 @@
         }
       },
       "position": [
-        4920,
-        -80
+        4176,
+        1152
       ],
-      "credentials": {
-        "smtp": {
-          "id": "REPLACE_WITH_SMTP_CREDENTIAL",
-          "name": "SMTP account"
-        }
-      },
       "retryOnFail": false,
       "notes": "The native n8n signed approval links resume only this waiting execution. Keep the recipient mailbox and n8n approval endpoints protected.",
       "notesInFlow": true
@@ -820,8 +983,8 @@
         "jsCode": "function approvalDecision(response, work, now) {\n  const data=response.data;\n  if (Date.parse(now)>Date.parse(work.expiresAt) || !data?.respondedAt) return 'expired';\n  return data.approved===true ? 'approved' : 'declined';\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst work=$('Card saved').first().json;const decision=approvalDecision($json,work,new Date().toISOString());return [{json:{...work,decision,registry:registryRow(work,decision,$execution.id,new Date().toISOString())}}];"
       },
       "position": [
-        5180,
-        -80
+        4528,
+        1152
       ]
     },
     {
@@ -854,8 +1017,8 @@
         "options": {}
       },
       "position": [
-        5440,
-        -80
+        4848,
+        1152
       ]
     },
     {
@@ -871,15 +1034,9 @@
         }
       },
       "position": [
-        5700,
-        100
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        112,
+        2464
+      ]
     },
     {
       "id": "c2b32ad7-56ea-2f9c-3f0a-395acecf1d53",
@@ -894,15 +1051,9 @@
         }
       },
       "position": [
-        5960,
-        100
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        432,
+        2464
+      ]
     },
     {
       "id": "64063d1e-2bb5-f443-2992-d28ef40c00e6",
@@ -913,8 +1064,8 @@
         "jsCode": "function sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction reviewCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision) || String(body.revision)!==work.revision) throw new Error('The reviewed draft revision changed. Approval was not applied.');\n  const actual=body.data.find(b=>b.id===work.card.id);\n  if (!sameCard(actual,work.card) || actual.isActive!==false || actual.status!=='draft') throw new Error('The proposed card changed or is no longer a hidden draft. Approval was not applied.');\n  return {...work,revision:String(body.revision)};\n}\n\nconst work=$('Card saved').first().json;\nconst blocks=$('Read declined draft').first().json;\nconst publication=$json.body.data;\nif(publication.draftRevision!==Number(work.revision)||publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft changed. Declined video retained for manual review.');\nconst checked=reviewCard(work,blocks);return [{json:{...checked,links:blocks.body.data.filter(b=>b.id!==work.card.id).map((b,position)=>({...b,position}))}}];"
       },
       "position": [
-        6220,
-        100
+        768,
+        2464
       ]
     },
     {
@@ -933,15 +1084,9 @@
         }
       },
       "position": [
-        6480,
-        100
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        1120,
+        2464
+      ]
     },
     {
       "id": "89410512-f221-7668-4e48-6fd5152cf0e8",
@@ -1059,8 +1204,8 @@
         "options": {}
       },
       "position": [
-        6740,
-        100
+        1472,
+        2464
       ]
     },
     {
@@ -1076,15 +1221,9 @@
         }
       },
       "position": [
-        5700,
-        -160
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        112,
+        1840
+      ]
     },
     {
       "id": "753c5c54-ac75-7f05-826f-e4728e6207f3",
@@ -1099,15 +1238,9 @@
         }
       },
       "position": [
-        5960,
-        -160
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        448,
+        1840
+      ]
     },
     {
       "id": "d16000e9-30fc-68a4-efdb-f58f7310e419",
@@ -1118,8 +1251,8 @@
         "jsCode": "function sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction reviewCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision) || String(body.revision)!==work.revision) throw new Error('The reviewed draft revision changed. Approval was not applied.');\n  const actual=body.data.find(b=>b.id===work.card.id);\n  if (!sameCard(actual,work.card) || actual.isActive!==false || actual.status!=='draft') throw new Error('The proposed card changed or is no longer a hidden draft. Approval was not applied.');\n  return {...work,revision:String(body.revision)};\n}\n\nconst blocks=$('Read blocks after approval').first().json;\nconst publication=$json.body.data;\n  const work=$('Card saved').first().json;\n  if(publication.draftRevision!==Number(work.revision) || publication.draftRevision!==blocks.body.revision || publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft or publication changed. Approval did not publish unreviewed changes.');\nreturn [{json:reviewCard($('Card saved').first().json,blocks)}];"
       },
       "position": [
-        6220,
-        -160
+        784,
+        1840
       ]
     },
     {
@@ -1139,15 +1272,9 @@
         }
       },
       "position": [
-        6480,
-        -160
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        1104,
+        1840
+      ]
     },
     {
       "id": "c2ba0973-e511-92fb-8506-6012f3ab6474",
@@ -1158,8 +1285,8 @@
         "jsCode": "\n\nconst work=$('Card saved').first().json;\nif($('Publish approved video card').isExecuted)work.revision=String($('Publish approved video card').first().json.body.revision);\nreturn [{json:work}];"
       },
       "position": [
-        6740,
-        360
+        2000,
+        1840
       ]
     },
     {
@@ -1175,15 +1302,9 @@
         }
       },
       "position": [
-        7000,
-        360
-      ],
-      "credentials": {
-        "orbitPageApi": {
-          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
-          "name": "OrbitPage API account"
-        }
-      }
+        2320,
+        1840
+      ]
     },
     {
       "id": "6af1fbdb-337e-79e0-a731-a5a9e44c95f8",
@@ -1194,8 +1315,8 @@
         "jsCode": "function publicDestination(value) {\n  if (typeof value!=='string' || !/^https:\\/\\/[a-z0-9.-]+(?::443)?(?:\\/[a-z0-9/_-]*)?$/i.test(value)) throw new Error('Invalid public HTTPS destination.');\n  return value;\n}\n\nreturn [{json:{url:publicDestination($json.body.data.publicUrl)}}];"
       },
       "position": [
-        7260,
-        360
+        2640,
+        1840
       ]
     },
     {
@@ -1217,8 +1338,8 @@
         }
       },
       "position": [
-        7520,
-        360
+        2960,
+        1840
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1233,8 +1354,8 @@
         "jsCode": "function verifyPublication(work, publication, response) {\n  const p=publication.data;\n  if (!p || !Number.isSafeInteger(Number(work.revision)) || p.publicationStatus!=='published' || p.publishedRevision < Number(work.revision)) throw new Error('OrbitPage has not confirmed the requested publication.');\n  const html=response.body ?? response.data;\n  if (response.statusCode!==200 || typeof html!=='string' || !html.includes(work.card.id) || !html.includes(work.video.id)) throw new Error('The public HTML did not contain the expected published YouTube card.');\n  return {...work,publication:{revision:p.publishedRevision,url:p.publicUrl},message:'YouTube card published and found in the public page.'};\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst work=verifyPublication($('Prepare publication check').first().json,$('Read resulting publication').first().json.body,$json);work.registry=registryRow(work,'published',$execution.id,new Date().toISOString());return [{json:work}];"
       },
       "position": [
-        7780,
-        360
+        4144,
+        1840
       ]
     },
     {
@@ -1353,8 +1474,8 @@
         "options": {}
       },
       "position": [
-        8040,
-        360
+        4480,
+        1840
       ]
     },
     {
@@ -1366,72 +1487,8 @@
         "jsCode": "\n\nconst selected=$('Select next video').first().json;let message=selected.message||'Declined or expired video discarded; the previous public content was preserved.';\nif($('Verify published card').isExecuted)message=$('Verify published card').first().json.message;\nreturn [{json:{message,videoId:selected.video?.id||null,mode:selected.config?.mode||null}}];"
       },
       "position": [
-        8300,
-        600
-      ]
-    },
-    {
-      "id": "932b2db9-e6fc-eb8b-acda-56aa92559366",
-      "name": "Start here",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "parameters": {
-        "content": "# OrbitPage Smart Bio · YouTube\n\nNew public video → native YouTube player. No YouTube key and no AI charges.\n\n1. Install n8n-nodes-orbitpage ≥0.3.2.\n2. Select one OrbitPage credential on every OrbitPage node. Scopes: workspace:read, links:read, links:write, publication:read, publication:write.\n3. Set the UC channel ID in Configuration.\n4. Choose AUTOMATIC or EMAIL_APPROVAL. For approval, select SMTP and set sender/recipient.\n5. The registry is created automatically. Use a dedicated table name for each workflow/workspace.\n6. First normal run records a baseline without importing old videos. To test an existing video, set MANUAL_VIDEO_ID and run the manual trigger.\n7. Clear MANUAL_VIDEO_ID after testing, then publish the schedule.\n\nTitles/descriptions are optional. The native player remains gated by the page consent settings. Never run overlapping manual replays against the scheduled workflow.",
-        "width": 1040,
-        "height": 540,
-        "color": 5
-      },
-      "position": [
-        -80,
-        -420
-      ]
-    },
-    {
-      "id": "fb97e851-f2e5-5287-a1e4-3f632bb572a8",
-      "name": "Detection and deduplication",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "parameters": {
-        "content": "## 1 · Feed and persistent registry\n\nPublic Atom feed; channel and video IDs are validated. One new video per poll, oldest first. The first poll records current IDs. Processing/pending/declined/expired/published rows prevent repeat cards and repeat requests.\n\nA processing row after an error is intentionally held for review. Inspect the execution and current card before clearing only that row. Do not reset the whole table.",
-        "width": 1370,
-        "height": 260,
-        "color": 4
-      },
-      "position": [
-        1000,
-        -40
-      ]
-    },
-    {
-      "id": "c6ae9b49-87cd-9462-48a1-b70258da7735",
-      "name": "Reviewable draft and automatic mode",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "parameters": {
-        "content": "## 2 · Save only the requested card\n\nPreserve all existing blocks. EMAIL_APPROVAL uses the public API publish=0 option to save a private draft. AUTOMATIC saves a live card immediately. Both modes check revisions and refuse to release unrelated private drafts.\n\nApproval is bound to the exact staged revision. A stable smartbio-VIDEO_ID makes retries identifiable. Requires an OrbitPage API version exposing publish=0 on PUT /links.",
-        "width": 1610,
-        "height": 260,
-        "color": 6
-      },
-      "position": [
-        2800,
-        -430
-      ]
-    },
-    {
-      "id": "95808579-6bdd-f8f4-af48-ae4bf5c3727b",
-      "name": "Approval and verification",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "parameters": {
-        "content": "## 3 · Email decision → exact card → live check\n\nApprova e pubblica / Rifiuta. Default timeout: 48 hours. Rejection or timeout discards only the unchanged proposed card, republishing the prior content; no repeat request. Concurrent changes stop automatic cleanup for manual review.\n\nBefore publishing, re-read the card and compare the exact draft revision and content. Stale writes stop; no blind publication retry. Finally check publication metadata and the expected card in public HTML. This is an HTTP smoke check; video playback can still be restricted by YouTube.",
-        "width": 1550,
-        "height": 300,
-        "color": 3
-      },
-      "position": [
-        5120,
-        -560
+        4816,
+        1840
       ]
     }
   ],
@@ -1919,5 +1976,7 @@
     "saveDataErrorExecution": "all",
     "saveManualExecutions": true,
     "saveExecutionProgress": false
-  }
+  },
+  "active": false,
+  "pinData": {}
 }

@@ -2,7 +2,7 @@
 
 This is ready-to-use listing copy, not confirmation of submission or catalog
 approval. Import [the workflow JSON](./OrbitPage_Smart_Bio_YouTube.json) and see
-[the setup guide](./README.md) for the complete requirements and test procedure.
+[the technical guide](./GUIDE.md) for the complete requirements and test procedure.
 
 ## Title
 

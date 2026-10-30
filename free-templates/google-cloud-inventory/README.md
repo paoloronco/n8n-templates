@@ -1,4 +1,4 @@
-# Google Cloud Inventory & Change Audit
+# Audit Google Cloud inventory and IAM changes with BigQuery and Sheets
 
 Reusable Google Cloud inventory and change-audit workflows for n8n. **Start with v2** for IAM findings, a Google Sheets review dashboard, HTML/CSV reports and conditional email digests.
 

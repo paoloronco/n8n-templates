@@ -1,4 +1,4 @@
-# Google Cloud Inventory & Change Audit — v2
+# Audit Google Cloud inventory and IAM changes with BigQuery and Sheets
 
 **Template revision:** v2.0.1 · 2026-10-30. The main workflow note includes the setup guide and public support contact.
 

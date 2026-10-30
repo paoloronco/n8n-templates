@@ -1,0 +1,2373 @@
+{
+  "name": "Audit Google Cloud inventory and IAM changes with BigQuery and Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "32c2e6d6-53fb-4c57-956e-fa6a78dd5e03",
+      "name": "Manual start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        14432,
+        4128
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "8e9f1e36-1518-4ed8-af99-5e3bbc5b2610",
+      "name": "Daily schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        14432,
+        3936
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"scope\": \"projects/your-gcp-project-id\",\n  \"billingProject\": \"your-gcp-project-id\",\n  \"dataset\": \"cloud_inventory\",\n  \"location\": \"EU\",\n  \"pageSize\": 500,\n  \"maxPages\": 1000,\n  \"maxAssets\": 20000,\n  \"maxPayloadMiB\": 30,\n  \"batchBytes\": 3000000,\n  \"requiredLabels\": [\n    \"owner\",\n    \"environment\"\n  ],\n  \"allowedLocations\": [],\n  \"ignoreMetadataFields\": [\n    \"updateTime\"\n  ],\n  \"sheetId\": \"YOUR_SPREADSHEET_ID\",\n  \"emailTo\": \"recipient@example.com\",\n  \"emailFrom\": \"n8n@example.com\",\n  \"notifyEveryRun\": false,\n  \"maxBytesBilled\": \"10000000000\",\n  \"reportChangeLimit\": 5000,\n  \"labelAssetTypes\": [\n    \"artifactregistry.googleapis.com/Repository\",\n    \"bigquery.googleapis.com/Dataset\",\n    \"bigquery.googleapis.com/Table\",\n    \"cloudresourcemanager.googleapis.com/Project\",\n    \"compute.googleapis.com/Instance\",\n    \"compute.googleapis.com/Disk\",\n    \"storage.googleapis.com/Bucket\",\n    \"sqladmin.googleapis.com/Instance\",\n    \"run.googleapis.com/Service\",\n    \"pubsub.googleapis.com/Topic\"\n  ]\n}",
+        "options": {}
+      },
+      "id": "90e4de9b-94f5-4d8f-987e-06db441c4ed7",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        14672,
+        4016
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$input.first().json;\nif(!/^(projects\\/[A-Za-z0-9_-]+|folders\\/\\d+|organizations\\/\\d+)$/.test(c.scope))throw Error('Invalid Google Cloud scope');\nif(!/^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(c.billingProject))throw Error('Invalid billingProject');\nif(!/^[A-Za-z_][A-Za-z0-9_]{0,1023}$/.test(c.dataset))throw Error('Invalid dataset');\nif(!/^[A-Za-z0-9-]+$/.test(c.location))throw Error('Invalid BigQuery location');\nfor(const k of ['pageSize','maxPages','maxAssets','maxPayloadMiB','batchBytes','reportChangeLimit'])if(!Number.isSafeInteger(c[k])||c[k]<1)throw Error('Invalid '+k);\nif(c.pageSize>500||c.maxAssets>100000||c.batchBytes>4000000||c.reportChangeLimit>10000)throw Error('Configured limits exceed supported bounds');\nif(!/^\\d+$/.test(c.maxBytesBilled)||!/^[A-Za-z0-9_-]+$/.test(c.sheetId))throw Error('Invalid integration configuration');\nfor(const k of ['requiredLabels','labelAssetTypes','allowedLocations','ignoreMetadataFields'])if(!Array.isArray(c[k])||c[k].some(v=>typeof v!=='string'))throw Error('Invalid '+k);\nfor(const k of ['emailTo','emailFrom'])if(!/^[^\\s<>@]+@[^\\s<>@]+\\.[^\\s<>@]+$/.test(c[k]))throw Error('Invalid '+k);\nconst runId=String(Date.now())+'_'+String($execution.id).replace(/[^A-Za-z0-9_]/g,'_');\nconst startedAt=new Date().toISOString();\nconst sheetUrl='https://docs.google.com/spreadsheets/d/'+c.sheetId+'/edit';\nconst executionUrl='https://n8n.example.com/workflow/'+$workflow.id+'/executions/'+$execution.id;\nconst registry={run_id:runId,scope:c.scope,status:'RUNNING',started_at:startedAt,finished_at:'',assets:0,added:0,modified:0,removed:0,high:0,medium:0,iam_status:'PENDING',delivery_status:'PENDING',summary:'Scan started',sheet_url:sheetUrl,execution_url:executionUrl};\nreturn [{json:{...c,runId,startedAt,sheetUrl,executionUrl,profile:'canonical_v2_'+JSON.stringify([...c.ignoreMetadataFields].sort()),registry}}];\n"
+      },
+      "id": "10127939-9f4c-4f56-8977-1779dba6c720",
+      "name": "Initialize run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14912,
+        4016
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "gcp_inventory_template_runs",
+        "columns": {
+          "column": [
+            {
+              "name": "run_id"
+            },
+            {
+              "name": "scope"
+            },
+            {
+              "name": "status"
+            },
+            {
+              "name": "started_at"
+            },
+            {
+              "name": "finished_at"
+            },
+            {
+              "name": "assets",
+              "type": "number"
+            },
+            {
+              "name": "added",
+              "type": "number"
+            },
+            {
+              "name": "modified",
+              "type": "number"
+            },
+            {
+              "name": "removed",
+              "type": "number"
+            },
+            {
+              "name": "high",
+              "type": "number"
+            },
+            {
+              "name": "medium",
+              "type": "number"
+            },
+            {
+              "name": "iam_status"
+            },
+            {
+              "name": "delivery_status"
+            },
+            {
+              "name": "summary"
+            },
+            {
+              "name": "sheet_url"
+            },
+            {
+              "name": "execution_url"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "03e6b6ed-923b-472c-a778-bba20f8bf403",
+      "name": "Ensure run registry",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        15152,
+        4016
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure run registry').first().json.id }}"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "keyValue": "={{ $('Initialize run').first().json.registry.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Initialize run').first().json.registry.run_id }}",
+            "scope": "={{ $('Initialize run').first().json.registry.scope }}",
+            "status": "={{ $('Initialize run').first().json.registry.status }}",
+            "started_at": "={{ $('Initialize run').first().json.registry.started_at }}",
+            "finished_at": "={{ $('Initialize run').first().json.registry.finished_at }}",
+            "assets": "={{ $('Initialize run').first().json.registry.assets }}",
+            "added": "={{ $('Initialize run').first().json.registry.added }}",
+            "modified": "={{ $('Initialize run').first().json.registry.modified }}",
+            "removed": "={{ $('Initialize run').first().json.registry.removed }}",
+            "high": "={{ $('Initialize run').first().json.registry.high }}",
+            "medium": "={{ $('Initialize run').first().json.registry.medium }}",
+            "iam_status": "={{ $('Initialize run').first().json.registry.iam_status }}",
+            "delivery_status": "={{ $('Initialize run').first().json.registry.delivery_status }}",
+            "summary": "={{ $('Initialize run').first().json.registry.summary }}",
+            "sheet_url": "={{ $('Initialize run').first().json.registry.sheet_url }}",
+            "execution_url": "={{ $('Initialize run').first().json.registry.execution_url }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "finished_at",
+              "displayName": "finished_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assets",
+              "displayName": "assets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "added",
+              "displayName": "added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "modified",
+              "displayName": "modified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "removed",
+              "displayName": "removed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "high",
+              "displayName": "high",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "medium",
+              "displayName": "medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "iam_status",
+              "displayName": "iam_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sheet_url",
+              "displayName": "sheet_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "79f56d9f-9522-40f1-af15-9312bf6e73cc",
+      "name": "Register running",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        15392,
+        4016
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{ $('Initialize run').first().json.billingProject }}/datasets",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({datasetReference:{projectId:$('Initialize run').first().json.billingProject,datasetId:$('Initialize run').first().json.dataset},location:$('Initialize run').first().json.location}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "e6f536a8-a43d-4d79-aeae-046cbbf96e72",
+      "name": "Create dataset",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15632,
+        4016
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw=$input.first().json,r=raw.body||raw,c=$('Initialize run').first().json;\nif(r.error&&Number(r.error.code)!==409)throw Error('BigQuery dataset setup failed: '+(r.error.message||r.error.code));\nconst t=n=>'`'+c.billingProject+'.'+c.dataset+'.'+n+'`';\nconst query=`CREATE TABLE IF NOT EXISTS ${t('inventory_resources_v2')} (run_id STRING, observed_at TIMESTAMP, scope STRING, asset_name STRING, asset_type STRING, project STRING, location STRING, display_name STRING, metadata_json STRING) PARTITION BY DATE(observed_at) CLUSTER BY scope,asset_type;\nCREATE TABLE IF NOT EXISTS ${t('inventory_runs_v2')} (run_id STRING, scope STRING, profile STRING, started_at TIMESTAMP, finished_at TIMESTAMP, status STRING, asset_count INT64, previous_run STRING, iam_status STRING);\nCREATE TABLE IF NOT EXISTS ${t('inventory_changes_v2')} (run_id STRING, scope STRING, asset_name STRING, asset_type STRING, project STRING, change_type STRING, before_json STRING, after_json STRING, detected_at TIMESTAMP) PARTITION BY DATE(detected_at) CLUSTER BY scope,change_type;\nCREATE TABLE IF NOT EXISTS ${t('inventory_findings_v2')} (run_id STRING, scope STRING, observed_at TIMESTAMP, finding_id STRING, severity STRING, rule_id STRING, asset_name STRING, title STRING, evidence STRING, recommendation STRING) PARTITION BY DATE(observed_at) CLUSTER BY scope,severity;\nINSERT INTO ${t('inventory_runs_v2')} (run_id,scope,profile,started_at,status) SELECT @run,@scope,@profile,TIMESTAMP(@started),'RUNNING' FROM UNNEST([1]) WHERE NOT EXISTS (SELECT 1 FROM ${t('inventory_runs_v2')} WHERE run_id=@run);`;\nconst queryParameters=Object.entries({run:c.runId,scope:c.scope,profile:c.profile,started:c.startedAt}).map(([name,value])=>({name,parameterType:{type:'STRING'},parameterValue:{value}}));\nreturn [{json:{job:{jobReference:{projectId:c.billingProject,location:c.location,jobId:'inv_'+c.runId+'_setup'},configuration:{query:{query,useLegacySql:false,parameterMode:'NAMED',queryParameters,maximumBytesBilled:c.maxBytesBilled}}}}}];\n"
+      },
+      "id": "897d0b4e-57f2-4c8a-a284-ec93d2596ac2",
+      "name": "Prepare setup job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15872,
+        4000
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{ $('Initialize run').first().json.billingProject }}/jobs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.job) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "8040ba96-124a-4914-aafb-4e05085121e9",
+      "name": "Submit BigQuery job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16192,
+        4672
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json;\nif(r.error)throw Error('BigQuery job submission failed: '+(r.error.message||r.error.code));\nif(!r.jobReference?.jobId)throw Error('Missing BigQuery job reference');\nreturn [{json:r}];\n"
+      },
+      "id": "026a1846-34c1-4796-9c20-714ac407120c",
+      "name": "Validate submitted job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16432,
+        4656
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "id": "88057553-60e4-40b6-82a2-92480cf42f23",
+      "name": "Wait for BigQuery",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        16672,
+        4656
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{$json.jobReference.projectId}}/jobs/{{$json.jobReference.jobId}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "location",
+              "value": "={{$json.jobReference.location}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "29f2f865-23be-4bb3-bf35-d80e1469b8b6",
+      "name": "Get BigQuery job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16912,
+        4656
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json;\nif(r.error||r.status?.errorResult)throw Error('BigQuery job failed: '+(r.status?.errorResult?.message||r.error?.message||'Unknown error'));\nif(!r.jobReference?.jobId||!r.status?.state)throw Error('Invalid BigQuery job response');\nif(r.status.state!=='DONE'&&Date.now()-Number(r.statistics?.creationTime||0)>600000)throw Error('BigQuery job exceeded 10 minute polling limit');\nreturn [{json:r}];\n"
+      },
+      "id": "8f9fb369-8cb6-474d-9b86-851116a57298",
+      "name": "Validate job status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17152,
+        4640
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ae25fe6c-468f-46e5-a658-5db4066ced5c",
+              "leftValue": "={{ $json.status.state === \"DONE\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9afbfa7d-3f8d-4aff-9acf-a36c39206970",
+      "name": "Job finished?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        17392,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e9cfeea2-71e9-45d2-940b-9c1a069c36de",
+              "leftValue": "={{ $json.jobReference.jobId.endsWith(\"_setup\") }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "26cc55b1-5680-4ebd-83b7-354e01a05ac4",
+      "name": "Setup finished?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        17632,
+        4624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bce3f33d-403d-46e9-9c75-540469f19245",
+              "leftValue": "={{ $json.jobReference.jobId.includes(\"_batch_\") }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fc6d0206-fd02-4d81-bb58-ab241cbf83e6",
+      "name": "Batch finished?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        17872,
+        4816
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://cloudasset.googleapis.com/v1/{{ $('Initialize run').first().json.scope }}:searchAllResources",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pageSize",
+              "value": "={{ $('Initialize run').first().json.pageSize }}"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "pageToken",
+                    "value": "={{ $response.body.nextPageToken || \"\" }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.nextPageToken }}",
+              "limitPagesFetched": true,
+              "maxRequests": "={{ $('Initialize run').first().json.maxPages }}"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "ab96d37b-2d25-42e3-8990-63026cad80f0",
+      "name": "Search Cloud Assets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16224,
+        4048
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,pages=$input.all().map(i=>i.json);\nif(!pages.length||pages.at(-1).nextPageToken)throw Error('Resource pagination incomplete');\nfunction canonical(v){if(Array.isArray(v))return v.map(canonical).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().filter(k=>!c.ignoreMetadataFields.includes(k)).map(k=>[k,canonical(v[k])]));return v;}\nconst assets=[],seen=new Set();let bytes=0;\nfor(const p of pages){if(p.error||!Array.isArray(p.results??[]))throw Error('Invalid Cloud Asset response');for(const a of p.results||[]){if(!a.name||!a.assetType)throw Error('Asset is missing its identity');if(seen.has(a.name))throw Error('Duplicate asset across API pages: '+a.name);seen.add(a.name);const metadata_json=JSON.stringify(canonical(a));bytes+=Buffer.byteLength(metadata_json);if(bytes>c.maxPayloadMiB*1024*1024||assets.length>=c.maxAssets)throw Error('Inventory exceeds configured payload/asset limit');assets.push({run_id:c.runId,observed_at:c.startedAt,scope:c.scope,asset_name:a.name,asset_type:a.assetType,project:a.project||'',location:a.location||'',display_name:a.displayName||'',metadata_json});}}\nassets.sort((a,b)=>a.asset_name.localeCompare(b.asset_name));\nreturn [{json:{assets,assetCount:assets.length,pageCount:pages.length,payloadBytes:bytes}}];\n"
+      },
+      "id": "c0be1926-40be-48e7-a281-b9ea991e2259",
+      "name": "Normalize inventory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16464,
+        4032
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://cloudasset.googleapis.com/v1/{{ $('Initialize run').first().json.scope }}:searchAllIamPolicies",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pageSize",
+              "value": "500"
+            },
+            {
+              "name": "query",
+              "value": "policy:allUsers OR policy:allAuthenticatedUsers OR policy:roles/owner OR policy:roles/editor"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "pageToken",
+                    "value": "={{ $response.body.nextPageToken || \"\" }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.nextPageToken }}",
+              "limitPagesFetched": true,
+              "maxRequests": "={{ $('Initialize run').first().json.maxPages }}"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "abe77e93-5dab-46f9-94b7-44c796dc0621",
+      "name": "Search IAM policies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16704,
+        4016
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,inventory=$('Normalize inventory').first().json,pages=$input.all().map(i=>i.json.body||i.json);\nconst findings=[];const add=(rule,severity,name,title,evidence,recommendation)=>findings.push({run_id:c.runId,scope:c.scope,observed_at:c.startedAt,finding_id:rule+'|'+name+'|'+evidence,severity,rule_id:rule,asset_name:name,title,evidence,recommendation});\nfor(const a of inventory.assets){const m=JSON.parse(a.metadata_json);const missing=c.labelAssetTypes.includes(a.asset_type)?c.requiredLabels.filter(k=>!String(m.labels?.[k]??'').trim()):[];if(missing.length)add('LABELS_REQUIRED','LOW',a.asset_name,'Missing governance labels',missing.join(', '),'Review and apply the required labels.');if(c.allowedLocations.length&&a.location&&a.location!=='global'&&!c.allowedLocations.includes(a.location))add('LOCATION_POLICY','MEDIUM',a.asset_name,'Location outside policy',a.location,'Review the location policy; include individual zones explicitly if needed.');}\nlet iamStatus='COMPLETE',iamMessage='Searchable IAM policies within the selected scope';\nif(!pages.length||pages.some(p=>p.error)||pages.at(-1)?.nextPageToken){iamStatus='UNAVAILABLE';iamMessage=pages.find(p=>p.error)?.error?.message||'Incomplete IAM pagination';add('IAM_COVERAGE','MEDIUM',c.scope,'Incomplete IAM assessment',iamMessage,'Check Cloud Asset API, cloudasset.assets.searchAllIamPolicies and the maxPages limit.');}\nelse for(const p of pages)for(const a of p.results||[])for(const b of a.policy?.bindings||[]){const members=b.members||[],publicMembers=members.filter(m=>['allUsers','allAuthenticatedUsers'].includes(m));const conditional=b.condition?' Condition: '+JSON.stringify(b.condition):'';if(publicMembers.length)add('IAM_PUBLIC',b.condition?'MEDIUM':'HIGH',a.resource,'Public IAM binding',b.role+' → '+publicMembers.join(', ')+conditional,'Confirm whether public access is intentional and restrict the binding if unnecessary.');if(['roles/owner','roles/editor'].includes(b.role))add('IAM_BASIC_ROLE','MEDIUM',a.resource,'Broad IAM role',b.role+'; principal: '+members.length+conditional,'Consider predefined roles with least privilege.');}\nconst unique=[...new Map(findings.map(f=>[f.finding_id,f])).values()];\nconst rank={HIGH:0,MEDIUM:1,LOW:2};unique.sort((a,b)=>rank[a.severity]-rank[b.severity]||a.finding_id.localeCompare(b.finding_id));\nreturn [{json:{...inventory,findings:unique,iamStatus,iamMessage}}];\n"
+      },
+      "id": "75001bc7-a464-4e7e-b209-b357f30bd8a7",
+      "name": "Assess inventory and IAM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16944,
+        4000
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,d=$input.first().json,batches=[];\nfor(const [table,rows]of [['inventory_resources_v2',d.assets],['inventory_findings_v2',d.findings]]){let current=[],bytes=0;for(const r of rows){const n=Buffer.byteLength(JSON.stringify(r))+100;if(n>c.batchBytes)throw Error('Single row exceeds batchBytes');if(current.length&&(bytes+n>c.batchBytes||current.length>=250)){batches.push({table,rows:current});current=[];bytes=0;}current.push(r);bytes+=n;}if(current.length)batches.push({table,rows:current});}\nif(!batches.length)batches.push({table:'inventory_resources_v2',rows:[]});\nreturn batches.map((b,index)=>({json:{...b,batchIndex:index}}));\n"
+      },
+      "id": "8455f64a-eb0e-495a-9ecc-fd07138906d4",
+      "name": "Build persistence batches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17184,
+        4000
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "19167910-e72b-4f5a-922d-4481b7a421d2",
+      "name": "Batch loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        17424,
+        3984
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,b=$input.first().json;\nif(!['inventory_resources_v2','inventory_findings_v2'].includes(b.table)||!Array.isArray(b.rows))throw Error('Invalid persistence batch');\nconst cols=b.rows.length?Object.keys(b.rows[0]):[];\nconst fields=cols.map(k=>['observed_at'].includes(k)?`TIMESTAMP(JSON_VALUE(r,'$.${k}'))`:`JSON_VALUE(r,'$.${k}')`).join(',');\nconst query=b.rows.length?`INSERT INTO \\`${c.billingProject}.${c.dataset}.${b.table}\\` (${cols.join(',')}) SELECT ${fields} FROM UNNEST(JSON_QUERY_ARRAY(@payload)) r;`:'SELECT 1;';\nreturn [{json:{job:{jobReference:{projectId:c.billingProject,location:c.location,jobId:'inv_'+c.runId+'_batch_'+b.batchIndex},configuration:{query:{query,useLegacySql:false,maximumBytesBilled:c.maxBytesBilled,parameterMode:'NAMED',queryParameters:[{name:'payload',parameterType:{type:'STRING'},parameterValue:{value:JSON.stringify(b.rows)}}]}}}}}];\n"
+      },
+      "id": "0295c28f-8639-4077-86ee-e98b9591389c",
+      "name": "Prepare batch job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17856,
+        4176
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,t=n=>'`'+c.billingProject+'.'+c.dataset+'.'+n+'`';\nconst query=`DECLARE previous STRING;\nSET previous=(SELECT run_id FROM ${t('inventory_runs_v2')} WHERE scope=@scope AND profile=@profile AND status='COMPLETE' AND run_id!=@run AND finished_at<=TIMESTAMP(@started) ORDER BY finished_at DESC,run_id DESC LIMIT 1);\nBEGIN TRANSACTION;\nASSERT (SELECT COUNT(*) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Snapshot row count does not match discovered assets';\nASSERT (SELECT COUNT(DISTINCT asset_name) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Duplicate asset names in snapshot';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_findings_v2')} WHERE run_id=@run)=@findings AS 'Finding count mismatch';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_runs_v2')} WHERE run_id=@run AND status='RUNNING')=1 AS 'Run already finalized or missing';\nINSERT INTO ${t('inventory_changes_v2')} (run_id,scope,asset_name,asset_type,project,change_type,before_json,after_json,detected_at)\nWITH cur AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=@run), prev AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=previous)\nSELECT @run,@scope,COALESCE(c.asset_name,p.asset_name),COALESCE(c.asset_type,p.asset_type),COALESCE(c.project,p.project),CASE WHEN p.asset_name IS NULL THEN 'ADDED' WHEN c.asset_name IS NULL THEN 'REMOVED' ELSE 'MODIFIED' END,p.metadata_json,c.metadata_json,CURRENT_TIMESTAMP()\nFROM cur c FULL OUTER JOIN prev p USING(asset_name) WHERE previous IS NOT NULL AND (c.asset_name IS NULL OR p.asset_name IS NULL OR c.metadata_json!=p.metadata_json);\nUPDATE ${t('inventory_runs_v2')} SET status='COMPLETE',finished_at=CURRENT_TIMESTAMP(),asset_count=@expected,previous_run=previous,iam_status=@iam WHERE run_id=@run;\nCOMMIT TRANSACTION;\nSELECT TO_JSON_STRING(STRUCT(previous AS previous_run,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.finding_id=f.finding_id)) AS new_actionable,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.finding_id=p.finding_id)) AS resolved_actionable,\n(SELECT COUNTIF(change_type='ADDED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS added,(SELECT COUNTIF(change_type='MODIFIED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS modified,(SELECT COUNTIF(change_type='REMOVED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS removed,ARRAY(SELECT AS STRUCT asset_name,asset_type,project,change_type FROM ${t('inventory_changes_v2')} WHERE run_id=@run ORDER BY change_type,asset_name LIMIT ${c.reportChangeLimit}) AS changes)) AS report;`;\nconst params={run:['STRING',c.runId],scope:['STRING',c.scope],profile:['STRING',c.profile],started:['STRING',c.startedAt],expected:['INT64',String(d.assetCount)],findings:['INT64',String(d.findings.length)],iam:['STRING',d.iamStatus]};\nreturn [{json:{job:{jobReference:{projectId:c.billingProject,location:c.location,jobId:'inv_'+c.runId+'_audit'},configuration:{query:{query,useLegacySql:false,maximumBytesBilled:c.maxBytesBilled,parameterMode:'NAMED',queryParameters:Object.entries(params).map(([name,[type,value]])=>({name,parameterType:{type},parameterValue:{value}}))}}}}}];\n"
+      },
+      "id": "0da1de62-b444-44a7-9a78-2ed99da7cd6f",
+      "name": "Prepare audit job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17872,
+        3968
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://bigquery.googleapis.com/bigquery/v2/projects/{{$json.jobReference.projectId}}/queries/{{$json.jobReference.jobId}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "location",
+              "value": "={{$json.jobReference.location}}"
+            },
+            {
+              "name": "maxResults",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "08fe9393-f369-4dda-a8bc-d0729ef9f9fe",
+      "name": "Read audit results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18112,
+        4832
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,r=$input.first().json;\nif(r.jobComplete!==true||r.pageToken||r.error||r.errors?.length||r.rows?.length!==1)throw Error('Audit result is missing, incomplete or paginated');\nconst audit=JSON.parse(r.rows[0].f[0].v);\nfor(const k of ['added','modified','removed'])if(!Number.isSafeInteger(audit[k])||audit[k]<0)throw Error('Invalid audit totals');\nconst changes=audit.changes||[],totalChanges=audit.added+audit.modified+audit.removed;\nconst high=d.findings.filter(f=>f.severity==='HIGH').length,medium=d.findings.filter(f=>f.severity==='MEDIUM').length;\nconst finishedAt=new Date().toISOString(),baseline=!audit.previous_run;\nconst newActionable=audit.new_actionable||0,resolvedActionable=audit.resolved_actionable||0;\nconst summary=baseline?'Initial v2 baseline created':`${audit.added} added, ${audit.modified} modified, ${audit.removed} removed`;\nconst registry={...c.registry,status:'COMPLETE',finished_at:finishedAt,assets:d.assetCount,added:audit.added,modified:audit.modified,removed:audit.removed,high,medium,iam_status:d.iamStatus,delivery_status:'PENDING',summary,sheet_url:c.sheetUrl};\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));\nconst invHeaders=['Resource','Type','Project','Location','Name','Labels','Status'];\nconst invRows=d.assets.map(a=>{const m=JSON.parse(a.metadata_json);return [a.asset_name,a.asset_type,a.project,a.location,a.display_name,JSON.stringify(m.labels||{}),m.state||''];});\nconst changeHeaders=['Change','Resource','Type','Project'];\nconst changeRows=changes.map(a=>[a.change_type,a.asset_name,a.asset_type,a.project]);\nconst findingHeaders=['Severity','Rule','Resource','Title','Evidence','Recommended action'];\nconst findingRows=d.findings.map(f=>[f.severity,f.rule_id,f.asset_name,f.title,f.evidence,f.recommendation]);\nconst summaryRows=[['Scan',c.runId],['Scope',c.scope],['Inventory status','COMPLETE'],['Started (UTC)',c.startedAt],['Finished (UTC)',finishedAt],['Resources',d.assetCount],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium],['Assessment IAM',d.iamStatus],['IAM coverage',d.iamMessage],['Comparison',summary],['Previous baseline',audit.previous_run||'None'],['Changes displayed',changes.length],['Total changes',totalChanges],['Google Sheet',c.sheetUrl],['n8n execution',c.executionUrl],['Coverage','Cloud Asset Inventory: searchable metadata and visible IAM policies. Permissions limit coverage.'],['Finding LOW',d.findings.filter(f=>f.severity==='LOW').length],['View limit',changes.length<totalChanges?'Changes truncated: full details in BigQuery inventory_changes_v2':'No truncation'],['Required labels',c.requiredLabels.join(', ')||'Not configured'],['Allowed locations',c.allowedLocations.join(', ')||'Unrestricted'],['Change details','before_json and after_json in BigQuery inventory_changes_v2'],['Delivery','PENDING - check Scans and the n8n registry']];\nsummaryRows.push(['New HIGH/MEDIUM findings',newActionable],['Resolved HIGH/MEDIUM findings',resolvedActionable],['Resources checked for labels',d.assets.filter(a=>c.labelAssetTypes.includes(a.asset_type)).length]);\nconst table=(title,headers,rows)=>`<section><h2>${title} <small>${rows.length}</small></h2><div class=\"scroll\"><table><thead><tr>${headers.map(h=>'<th>'+esc(h)+'</th>').join('')}</tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></div></section>`;\nconst emailHtml=`<h2>Google Cloud Inventory</h2><p><strong>${esc(c.scope)}</strong></p><p>${d.assetCount} resources. ${esc(summary)}.</p><p>Finding: ${high} HIGH, ${medium} MEDIUM. Assessment IAM: ${esc(d.iamStatus)}.</p><p><a href=\"${esc(c.sheetUrl)}\">Open inventory and findings</a> · <a href=\"${esc(c.executionUrl)}\">Open execution and download reports</a></p><p>Run ${esc(c.runId)}. Findings require review; no automatic remediation.</p>`;\nconst html=`<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Google Cloud Inventory</title><style>body{font:15px system-ui;margin:0;background:#f3f6fa;color:#14283f}header{background:#14283f;color:white;padding:32px}main{padding:24px;max-width:1500px;margin:auto}h1{margin:0 0 8px}h2{font-size:21px}small{color:#64748b}a{color:#1672c4}header a{color:#9ddcff}.cards{display:flex;gap:16px;flex-wrap:wrap}.card,section{background:white;border:1px solid #d7e0eb;border-radius:10px;padding:20px;margin-bottom:20px}.card{min-width:140px}.card strong{display:block;font-size:30px}.scroll{overflow:auto;max-height:650px}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#e8f0f8;text-align:left;position:sticky;top:0}td,th{padding:10px;border-bottom:1px solid #e1e7ef;vertical-align:top}td{max-width:540px;overflow-wrap:anywhere}input{padding:12px;width:min(600px,90%);margin:0 0 20px;border:1px solid #64748b;border-radius:6px}.warning{padding:15px;background:#fff0cb;border-radius:6px}</style><header><h1>Google Cloud Inventory</h1><p>${esc(c.scope)} · ${esc(finishedAt)}</p><a href=\"${esc(c.sheetUrl)}\">Google Sheet</a> · <a href=\"${esc(c.executionUrl)}\">n8n execution</a></header><main><div class=\"cards\">${[['Resources',d.assetCount],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium]].map(([k,v])=>'<div class=\"card\">'+esc(k)+'<strong>'+v+'</strong></div>').join('')}</div><p>${esc(summary)}. IAM: ${esc(d.iamStatus)}.</p>${d.iamStatus!=='COMPLETE'?'<p class=\"warning\">IAM assessment unavailable: '+esc(d.iamMessage)+'</p>':''}${changes.length<totalChanges?'<p class=\"warning\">Views limited to '+changes.length+' of '+totalChanges+' changes. Full details in BigQuery.</p>':''}<label for=\"filter\">Filter resources, changes and findings</label><br><input id=\"filter\" type=\"search\" placeholder=\"Name, type, project, severity…\">${table('Findings',findingHeaders,findingRows)}${table('Changes',changeHeaders,changeRows)}${table('Inventory',invHeaders,invRows)}${table('Scan details',['Field','Value'],summaryRows)}<p>Searchable metadata and policies from Cloud Asset Inventory, limited by effective permissions. No vulnerability, traffic or cost scan. Required labels may not apply to every resource type.</p></main><script>document.getElementById('filter').addEventListener('input',function(){const q=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.hidden=!r.textContent.toLowerCase().includes(q));});</script></html>`;\nconst csvCell=v=>{let s=String(v??'');if(/^[=+@\\-\\t\\r]/.test(s))s=\"'\"+s;return '\"'+s.replace(/\"/g,'\"\"')+'\"';};\nconst csv=(headers,rows)=>'\\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\\r\\n');\nconst files={report:[html,'text/html','report.html'],inventory:[csv(invHeaders,invRows),'text/csv','inventory.csv'],changes:[csv(changeHeaders,changeRows),'text/csv','changes.csv'],findings:[csv(findingHeaders,findingRows),'text/csv','findings.csv']};\nconst binary=Object.fromEntries(Object.entries(files).map(([key,[text,mimeType,fileName]])=>[key,{data:Buffer.from(text).toString('base64'),mimeType,fileName}]));\nreturn [{json:{registry,summaryRows,invHeaders,invRows,changeHeaders,changeRows,findingHeaders,findingRows,baseline,totalChanges,newActionable,resolvedActionable,changesTruncated:changes.length<totalChanges,emailHtml:emailHtml+`<p>New HIGH/MEDIUM findings: ${newActionable}. Resolved: ${resolvedActionable}.</p>`,emailSubject:`[GCP ${high?'HIGH':d.iamStatus!=='COMPLETE'?'WARNING':'Inventory'}] ${c.scope} · ${summary}`,shouldNotify:c.notifyEveryRun||baseline||totalChanges>0||high>0||newActionable>0||resolvedActionable>0||d.iamStatus!=='COMPLETE'},binary}];\n"
+      },
+      "id": "dce33d40-eb92-43e0-ac81-b75432c6e43c",
+      "name": "Build report and exports",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        18400,
+        4768
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure run registry').first().json.id }}"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "keyValue": "={{ $('Build report and exports').first().json.registry.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Build report and exports').first().json.registry.run_id }}",
+            "scope": "={{ $('Build report and exports').first().json.registry.scope }}",
+            "status": "={{ $('Build report and exports').first().json.registry.status }}",
+            "started_at": "={{ $('Build report and exports').first().json.registry.started_at }}",
+            "finished_at": "={{ $('Build report and exports').first().json.registry.finished_at }}",
+            "assets": "={{ $('Build report and exports').first().json.registry.assets }}",
+            "added": "={{ $('Build report and exports').first().json.registry.added }}",
+            "modified": "={{ $('Build report and exports').first().json.registry.modified }}",
+            "removed": "={{ $('Build report and exports').first().json.registry.removed }}",
+            "high": "={{ $('Build report and exports').first().json.registry.high }}",
+            "medium": "={{ $('Build report and exports').first().json.registry.medium }}",
+            "iam_status": "={{ $('Build report and exports').first().json.registry.iam_status }}",
+            "delivery_status": "={{ $('Build report and exports').first().json.registry.delivery_status }}",
+            "summary": "={{ $('Build report and exports').first().json.registry.summary }}",
+            "sheet_url": "={{ $('Build report and exports').first().json.registry.sheet_url }}",
+            "execution_url": "={{ $('Build report and exports').first().json.registry.execution_url }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "finished_at",
+              "displayName": "finished_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assets",
+              "displayName": "assets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "added",
+              "displayName": "added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "modified",
+              "displayName": "modified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "removed",
+              "displayName": "removed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "high",
+              "displayName": "high",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "medium",
+              "displayName": "medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "iam_status",
+              "displayName": "iam_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sheet_url",
+              "displayName": "sheet_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "edba0a09-c3af-4631-ab0f-cc2da6bf4714",
+      "name": "Register completed inventory",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        18640,
+        4752
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Initialize run').first().json.sheetId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "spreadsheetId,properties(locale),sheets(properties,tables,charts(chartId),conditionalFormats)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "f0f873b5-aded-41ae-99ef-15ca314f5d4b",
+      "name": "Read Sheets structure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18880,
+        4752
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json,d=$('Build report and exports').first().json;\nconst meta=$('Read Sheets structure').first().json,read=$input.first().json;\nif(meta.spreadsheetId!==c.sheetId||read.spreadsheetId!==c.sheetId)throw Error('Unexpected Google Sheets response');\nconst assessment=$('Assess inventory and IAM').first().json;\nconst requests=[],known=new Map(meta.sheets.map(s=>[s.properties.title,s]));\nif(!meta.properties?.locale)throw Error('Spreadsheet locale missing');\nconst localizedFormula=text=>text;\nrequests.push({updateSpreadsheetProperties:{properties:{locale:'en_GB'},fields:'locale'}});\nconst formulaBound=Math.max(1000,...meta.sheets.map(s=>s.properties.gridProperties?.rowCount||0),assessment.assets.length+2,assessment.findings.length+2);\nconst rgb=hex=>({red:parseInt(hex.slice(0,2),16)/255,green:parseInt(hex.slice(2,4),16)/255,blue:parseInt(hex.slice(4,6),16)/255});\nconst color={navy:rgb('18334F'),blue:rgb('2F6DB2'),pale:rgb('F3F6FA'),line:rgb('DFE6EF'),white:rgb('FFFFFF'),ink:rgb('21364D'),muted:rgb('65758B'),green:rgb('E6F3EB'),red:rgb('FBE5E5'),amber:rgb('FFF0CC')};\nconst grid=(id,r0,r1,c0,c1)=>({sheetId:id,startRowIndex:r0,endRowIndex:r1,startColumnIndex:c0,endColumnIndex:c1});\nconst cell=v=>({userEnteredValue:typeof v==='boolean'?{boolValue:v}:typeof v==='number'?{numberValue:v}:v&&typeof v==='object'&&v.formula?{formulaValue:v.formula}:{stringValue:String(v??'')}});\nconst rows=data=>data.map(row=>({values:row.map(cell)}));\nconst write=(id,r,col,data)=>requests.push({updateCells:{start:{sheetId:id,rowIndex:r,columnIndex:col},rows:rows(data),fields:'userEnteredValue'}});\nconst fmt=(range,format)=>requests.push({repeatCell:{range,cell:{userEnteredFormat:format},fields:'userEnteredFormat'}});\nconst dims=(id,type,start,end,pixelSize)=>requests.push({updateDimensionProperties:{range:{sheetId:id,dimension:type,startIndex:start,endIndex:end},properties:{pixelSize},fields:'pixelSize'}});\nconst formula=formula=>({formula:localizedFormula(formula.replaceAll('100001',String(formulaBound)).replaceAll('10001',String(formulaBound)))});\nfunction ensure(name){if(!known.has(name))throw Error('Required sheet missing: '+name);return known.get(name).properties.sheetId;}\nconst order=['Dashboard','Inventory','Findings','Changes','Scans'];\nfor(const name of order)ensure(name);\nconst ids=Object.fromEntries(order.map(name=>[name,known.get(name).properties.sheetId]));\nfor(const [index,name]of order.entries()){const s=known.get(name),id=ids[name];requests.push({updateSheetProperties:{properties:{sheetId:id,index,gridProperties:{hideGridlines:true,frozenRowCount:name==='Dashboard'?0:1,frozenColumnCount:['Inventory','Findings'].includes(name)?2:0,rowCount:Math.max(s.properties.gridProperties?.rowCount||1000,assessment.assets.length+2,assessment.findings.length+2),columnCount:Math.max(30,s.properties.gridProperties?.columnCount||0)},tabColorStyle:{rgbColor:name==='Dashboard'?color.navy:color.blue}},fields:'index,gridProperties,tabColorStyle'}});requests.push({clearBasicFilter:{sheetId:id}});for(let i=(s.conditionalFormats?.length||0)-1;i>=0;i--)requests.push({deleteConditionalFormatRule:{sheetId:id,index:i}});}\nconst valuesFor=name=>read.valueRanges?.find(v=>v.range.startsWith(\"'\"+name+\"'!\")||v.range.startsWith(name+'!'))?.values||[];\nfor(const name of ['Inventory','Findings','Scans'])if(!read.valueRanges?.some(v=>v.range.startsWith(\"'\"+name+\"'!\")||v.range.startsWith(name+'!')))throw Error('Missing review range: '+name+'; update stopped to preserve manual data');\nfunction reviewMap(name,key){const data=valuesFor(name),headers=data[0]||[],ki=headers.indexOf(key),ci=0,ni=8;const map=new Map();if(ki>=0)for(const row of data.slice(1)){if(row[ki])map.set(String(row[ki]),{checked:row[ci]===true||String(row[ci]).toUpperCase()==='TRUE',note:ni>=0?String(row[ni]??''):''});}return map;}\nconst reviews={inventory:reviewMap('Inventory','Asset ID'),finding:reviewMap('Findings','Finding ID')};\nconst projectNames=new Map();for(const a of assessment.assets)if(a.asset_type==='cloudresourcemanager.googleapis.com/Project')projectNames.set(a.project,a.asset_name.split('/projects/')[1]||a.display_name);\nconst serviceMap={bigquery:'BigQuery',artifactregistry:'Artifact Registry',cloudresourcemanager:'Resource Manager',iam:'IAM',storage:'Cloud Storage',compute:'Compute Engine',run:'Cloud Run',pubsub:'Pub/Sub',sqladmin:'Cloud SQL',cloudbilling:'Cloud Billing',dataplex:'Dataplex',serviceusage:'Service Usage'};\nconst service=type=>serviceMap[type.split('.')[0]]||type.split('.')[0];\nconst typeLabel=type=>type.split('/').at(-1);\nconst shortName=name=>{const part=name.split('/').filter(Boolean).at(-1)||name;return part.length>70?part.slice(0,56)+'…'+part.slice(-10):part;};\nconst project=a=>projectNames.get(a.project)||(/^projects\\//.test(c.scope)?c.scope.slice(9):a.project.replace(/^projects\\//,''));\nconst assetByName=new Map(assessment.assets.map(a=>[a.asset_name,a]));\nconst invHeaders=['Verified','Name','Service','Type','Project','Location','Status','Labels','Notes','Resource','Asset ID'];\nconst invRows=assessment.assets.map(a=>{const m=JSON.parse(a.metadata_json),state=reviews.inventory.get(a.asset_name)||{};const name=a.display_name&&!a.display_name.includes('/')?a.display_name:shortName(a.asset_name);return [!!state.checked,name,service(a.asset_type),typeLabel(a.asset_type),project(a),a.location,m.state||'',Object.entries(m.labels||{}).map(([k,v])=>k+'='+v).join('; '),state.note||'',a.asset_name.replace(/^\\/\\/[^/]+\\//,''),a.asset_name];}).sort((a,b)=>a[2].localeCompare(b[2])||a[3].localeCompare(b[3])||a[1].localeCompare(b[1]));\nconst findHeaders=['Reviewed','Severity','Control','Resource','Service','Project','Evidence','Recommended action','Notes','Finding ID','Asset ID'];\nconst controlNames={IAM_BASIC_ROLE:'Broad IAM roles',IAM_PUBLIC:'Public access',LABELS_REQUIRED:'Required labels',LOCATION_POLICY:'Location',IAM_COVERAGE:'IAM coverage'};\nconst findRows=assessment.findings.map(f=>{const a=assetByName.get(f.asset_name),state=reviews.finding.get(f.finding_id)||{};return [!!state.checked,f.severity,controlNames[f.rule_id]||f.rule_id,shortName(f.asset_name),a?service(a.asset_type):'IAM',a?project(a):c.scope.replace(/^projects\\//,''),f.evidence,f.recommendation,state.note||'',f.finding_id,f.asset_name];});\nconst changeHeaders=['Change','Resource','Type','Project','Asset ID'];\nconst changeRows=d.changeRows.map(r=>[r[0],shortName(r[1]),typeLabel(r[2]),project({project:r[3]}),r[1]]);\nconst specs=[['Inventory',invHeaders,invRows,[105,245,160,155,170,145,105,240,220,380,400],'GCP_Inventory'],['Findings',findHeaders,findRows,[105,100,170,230,155,160,290,350,220,400,400],'GCP_Findings'],['Changes',changeHeaders,changeRows,[130,270,190,180,500],'GCP_Changes']];\nfunction nativeTable(name,headers,data,tableName){const id=ids[name],end=Math.max(data.length+1,2),existing=known.get(name).tables?.find(t=>t.range?.sheetId===id&&(t.range.startRowIndex||0)===0);const table={name:tableName,range:grid(id,0,end,0,headers.length),rowsProperties:{headerColorStyle:{rgbColor:color.navy},firstBandColorStyle:{rgbColor:color.white},secondBandColorStyle:{rgbColor:color.pale}},columnProperties:headers.map((columnName,columnIndex)=>({columnIndex,columnName,columnType:columnIndex===0&&['Inventory','Findings'].includes(name)?'BOOLEAN':'TEXT'}))};if(existing)requests.push({updateTable:{table:{...table,tableId:existing.tableId},fields:'name,range,rowsProperties,columnProperties'}});else requests.push({addTable:{table}});}\nfor(const [name,headers,data,widths,tableName]of specs){const id=ids[name],n=Math.max(data.length+1,2),oldRows=known.get(name).properties.gridProperties.rowCount;requests.push({updateCells:{range:grid(id,0,oldRows,0,headers.length),rows:rows([headers,...data]),fields:'userEnteredValue'}});fmt(grid(id,0,n,0,headers.length),{textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:color.ink},verticalAlignment:'MIDDLE',wrapStrategy:'CLIP'});fmt(grid(id,0,1,0,headers.length),{backgroundColor:color.navy,textFormat:{bold:true,fontFamily:'Arial',fontSize:10,foregroundColor:color.white},verticalAlignment:'MIDDLE',wrapStrategy:'WRAP'});dims(id,'ROWS',0,1,40);dims(id,'ROWS',1,n,34);for(const [i,width]of widths.entries())dims(id,'COLUMNS',i,i+1,width);nativeTable(name,headers,data,tableName);const hiddenStart=name==='Inventory'?10:name==='Findings'?9:4;requests.push({updateDimensionProperties:{range:{sheetId:id,dimension:'COLUMNS',startIndex:hiddenStart,endIndex:headers.length},properties:{hiddenByUser:true},fields:'hiddenByUser'}});if(name!=='Changes'){fmt(grid(id,1,n,0,1),{horizontalAlignment:'CENTER',verticalAlignment:'MIDDLE',textFormat:{fontFamily:'Arial',fontSize:10}});fmt(grid(id,1,n,8,9),{backgroundColor:rgb('FFF9E8'),wrapStrategy:'CLIP',verticalAlignment:'MIDDLE',textFormat:{fontFamily:'Arial',fontSize:10}});}}\nfunction cf(name,formulaText,bg,fg,bold=false,cols){requests.push({addConditionalFormatRule:{index:0,rule:{ranges:[grid(ids[name],1,Math.max(2,(name==='Inventory'?invRows:name==='Findings'?findRows:changeRows).length+1),0,cols||specs.find(s=>s[0]===name)[1].length)],booleanRule:{condition:{type:'CUSTOM_FORMULA',values:[{userEnteredValue:localizedFormula(formulaText)}]},format:{backgroundColor:bg,textFormat:{foregroundColor:fg||color.ink,bold}}}}}});}\ncf('Inventory','=AND($A2=TRUE,$K2<>\"\")',color.green,color.ink);\ncf('Findings','=$B2=\"LOW\"',rgb('E9F0FA'),color.ink);cf('Findings','=$B2=\"MEDIUM\"',color.amber,color.ink);cf('Findings','=$B2=\"HIGH\"',color.red,rgb('A11D26'),true);cf('Findings','=AND($A2=TRUE,$J2<>\"\")',color.green,color.muted);\ncf('Changes','=$A2=\"ADDED\"',color.green);cf('Changes','=$A2=\"MODIFIED\"',color.amber);cf('Changes','=$A2=\"REMOVED\"',color.red);\nconst historyHeaders=['run_id','scope','started_at','finished_at','assets','added','modified','removed','high','medium','iam_status','delivery_status','execution_url'];\nconst historyValues=valuesFor('Scans'),historyRows=historyValues.slice(1).filter(r=>r[0]);\nif(historyValues[0]?.[0]!=='run_id')throw Error('Scans headers changed; cannot safely append history');\nconst historyCount=historyRows.length+1,hid=ids.Scans;\nfmt(grid(hid,0,historyCount+1,0,13),{textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:color.ink},wrapStrategy:'CLIP',verticalAlignment:'MIDDLE'});fmt(grid(hid,0,1,0,13),{backgroundColor:color.navy,textFormat:{fontFamily:'Arial',fontSize:10,bold:true,foregroundColor:color.white},wrapStrategy:'WRAP'});dims(hid,'ROWS',0,historyCount+1,32);[220,190,195,195,90,90,90,90,90,90,140,220,320].forEach((size,i)=>dims(hid,'COLUMNS',i,i+1,size));requests.push({setBasicFilter:{filter:{range:grid(hid,0,historyCount+1,0,13)}}});\nconst allServices=[...new Set(invRows.map(r=>r[2]))].sort((a,b)=>invRows.filter(r=>r[2]===b).length-invRows.filter(r=>r[2]===a).length);\nconst serviceNames=allServices.length>8?[...allServices.slice(0,7),'Other services']:allServices;\nconst now=d.registry;const timeline=[...historyRows.filter(r=>r[0]!==c.runId).map(r=>({time:r[2],assets:Number(r[4]),added:Number(r[5]),modified:Number(r[6]),removed:Number(r[7])})),{time:c.startedAt,assets:now.assets,added:now.added,modified:now.modified,removed:now.removed}].slice(-30);\nconst dash=ids.Dashboard;\nfor(const chart of known.get('Dashboard').charts||[])if([83001,83002,83003,83004].includes(chart.chartId))requests.push({deleteEmbeddedObject:{objectId:chart.chartId}});\nrequests.push({unmergeCells:{range:grid(dash,0,60,0,18)}});\nrequests.push({updateCells:{range:grid(dash,0,70,0,30),rows:[],fields:'userEnteredValue,userEnteredFormat,dataValidation'}});\nfmt(grid(dash,0,49,0,30),{backgroundColor:color.white,textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:color.ink},verticalAlignment:'MIDDLE',wrapStrategy:'CLIP'});dims(dash,'COLUMNS',0,1,26);dims(dash,'COLUMNS',1,17,78);dims(dash,'ROWS',0,49,22);dims(dash,'ROWS',1,2,32);\nwrite(dash,1,1,[['Google Cloud · Inventory & Change Audit']]);fmt(grid(dash,1,2,1,17),{textFormat:{fontFamily:'Arial',fontSize:16,bold:true,foregroundColor:color.navy}});\nwrite(dash,2,1,[[c.scope+'  |  '+new Date(c.startedAt).toLocaleString('en-GB',{timeZone:'Europe/Rome'})+' Europe/Rome']]);fmt(grid(dash,2,3,1,17),{textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:color.muted}});\nconst cards=[{col:1,label:'RESOURCES',value:'=COUNTA(Inventory!K2:K100001)',note:'Complete inventory'},{col:5,label:'FINDINGS TO REVIEW',value:'=COUNTIFS(Findings!J2:J100001,\"<>\",Findings!A2:A100001,FALSE)',note:'Reviewed checkbox in Findings'},{col:9,label:'CHANGES',value:'=COUNTA(Changes!E2:E10001)',note:d.changesTruncated?'Limited view: full details in BigQuery':'Compared with the previous scan'},{col:13,label:'VERIFIED RESOURCES',value:'=COUNTIFS(Inventory!K2:K100001,\"<>\",Inventory!A2:A100001,TRUE)',note:'Verified checkbox in Inventory'}];\nfor(const card of cards){for(const r of [4,5,7])requests.push({mergeCells:{range:grid(dash,r,r+1,card.col,card.col+3),mergeType:'MERGE_ALL'}});fmt(grid(dash,4,8,card.col,card.col+3),{backgroundColor:color.pale,textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:color.ink},verticalAlignment:'MIDDLE'});write(dash,4,card.col,[[card.label]]);write(dash,5,card.col,[[formula(card.value)]]);fmt(grid(dash,5,6,card.col,card.col+3),{backgroundColor:color.pale,textFormat:{fontFamily:'Arial',fontSize:22,bold:true,foregroundColor:color.navy},numberFormat:{type:'NUMBER',pattern:'#,##0'}});dims(dash,'ROWS',5,6,34);write(dash,7,card.col,[[card.note]]);fmt(grid(dash,7,8,card.col,card.col+3),{backgroundColor:color.pale,textFormat:{fontFamily:'Arial',fontSize:9,foregroundColor:color.muted},wrapStrategy:'WRAP'});dims(dash,'ROWS',7,8,34);}\nrequests.push({mergeCells:{range:grid(dash,9,10,1,17),mergeType:'MERGE_ALL'}});write(dash,9,1,[[assessment.iamStatus==='COMPLETE'?'IAM assessed · '+now.high+' HIGH · '+now.medium+' MEDIUM · '+assessment.findings.filter(f=>f.severity==='LOW').length+' LOW. Checkboxes and notes stay linked to each resource.':'IAM assessment unavailable: '+assessment.iamMessage]]);fmt(grid(dash,9,10,1,17),{textFormat:{fontFamily:'Arial',fontSize:10,foregroundColor:assessment.iamStatus==='COMPLETE'?color.muted:rgb('A11D26')},wrapStrategy:'WRAP'});dims(dash,'ROWS',9,10,32);\nwrite(dash,0,19,[['Service','Resources'],...serviceNames.map((s,i)=>[s,formula(s==='Other services'?'=COUNTA(Inventory!$K$2:$K$100001)-SUM(U2:U8)':'=COUNTIFS(Inventory!$C$2:$C$100001,T'+(i+2)+')')])]);\nwrite(dash,0,22,[['Severity','To review'],...['HIGH','MEDIUM','LOW'].map((s,i)=>[s,formula('=COUNTIFS(Findings!$B$2:$B$100001,W'+(i+2)+',Findings!$A$2:$A$100001,FALSE)')])]);\nwrite(dash,0,25,[['Scan UTC','Resources','Added','Modified','Removed'],...timeline.map(r=>[(Date.parse(r.time)/86400000)+25569,r.assets,r.added,r.modified,r.removed])]);fmt(grid(dash,1,timeline.length+1,25,26),{numberFormat:{type:'DATE_TIME',pattern:'dd/MM HH:mm'}});requests.push({updateDimensionProperties:{range:{sheetId:dash,dimension:'COLUMNS',startIndex:19,endIndex:30},properties:{hiddenByUser:true},fields:'hiddenByUser'}});\nconst source=(col,n=timeline.length+1)=>({sourceRange:{sources:[grid(dash,0,n,col+15,col+16)]}});\nconst chartBase=(id,title,col,row)=>({chartId:id,spec:{title,fontName:'Arial',titleTextFormat:{fontSize:12,bold:true,foregroundColor:color.navy},backgroundColor:color.white,hiddenDimensionStrategy:'SHOW_ALL'},position:{overlayPosition:{anchorCell:{sheetId:dash,rowIndex:row,columnIndex:col},widthPixels:600,heightPixels:285}}});\nconst ch1=chartBase(83001,'Resources by service',1,11);ch1.spec.basicChart={chartType:'BAR',legendPosition:'NO_LEGEND',headerCount:1,domains:[{domain:source(4,serviceNames.length+1)}],series:[{series:source(5,serviceNames.length+1),targetAxis:'BOTTOM_AXIS',color:color.blue}],axis:[{position:'BOTTOM_AXIS',title:'Resources'}]};\nconst ch2=chartBase(83002,'Unreviewed findings by severity',9,11);ch2.spec.pieChart={legendPosition:'RIGHT_LEGEND',domain:source(7,4),series:source(8,4),pieHole:0.58};\nconst ch3=chartBase(83003,'Resource count over time',1,25);ch3.spec.basicChart={chartType:'LINE',legendPosition:'NO_LEGEND',headerCount:1,domains:[{domain:source(10)}],series:[{series:source(11),targetAxis:'LEFT_AXIS',color:color.blue}],axis:[{position:'BOTTOM_AXIS',title:'Scan (UTC)'},{position:'LEFT_AXIS',title:'Resources'}]};\nconst ch4=chartBase(83004,'Changes by scan',9,25);ch4.spec.basicChart={chartType:'COLUMN',stackedType:'STACKED',legendPosition:'BOTTOM_LEGEND',headerCount:1,domains:[{domain:source(10)}],series:[{series:source(12),targetAxis:'LEFT_AXIS',color:rgb('459E72')},{series:source(13),targetAxis:'LEFT_AXIS',color:rgb('D4A13B')},{series:source(14),targetAxis:'LEFT_AXIS',color:rgb('CA5963')}],axis:[{position:'BOTTOM_AXIS',title:'Scan (UTC)'},{position:'LEFT_AXIS',title:'Changed resources'}]};\nch4.spec.basicChart.axis[1].viewWindowOptions={viewWindowMin:0,viewWindowMode:'EXPLICIT',viewWindowMax:Math.max(1,...timeline.map(r=>r.added+r.modified+r.removed))*1.2};\nfor(const chart of [ch1,ch2,ch3,ch4])requests.push({addChart:{chart}});\nfor(const col of [1,5,9,13])requests.push({mergeCells:{range:grid(dash,39,40,col,col+3),mergeType:'MERGE_ALL'}});\nfor(const row of [41,42])requests.push({mergeCells:{range:grid(dash,row,row+1,1,17),mergeType:'MERGE_ALL'}});\nwrite(dash,39,1,[[formula('=HYPERLINK(\"#gid='+ids.Inventory+'\",\"Open inventory\")')]]);write(dash,39,5,[[formula('=HYPERLINK(\"#gid='+ids.Findings+'\",\"Review findings\")')]]);write(dash,39,9,[[formula('=HYPERLINK(\"#gid='+ids.Changes+'\",\"Open changes\")')]]);write(dash,39,13,[[formula('=HYPERLINK(\"#gid='+ids.Scans+'\",\"Scan history\")')]]);\nwrite(dash,41,1,[['Delivery: updating']]);write(dash,42,1,[['Coverage: resources and policies visible to the service account. Rules and technical details are in the workflow.']]);\nconst payloadBytes=Buffer.byteLength(JSON.stringify(requests));if(payloadBytes>8000000)throw Error('Sheets update exceeds 8 MB');\nreturn [{json:{registry:d.registry,requests,requestCount:requests.length,sheetIds:ids,reviewCounts:{inventory:invRows.filter(r=>r[0]).length,finding:findRows.filter(r=>r[0]).length},dashboardCharts:4}}];\n"
+      },
+      "id": "c3cfce9b-2552-4960-9b54-10d7cbed7c33",
+      "name": "Build Sheets update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        19312,
+        4720
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Initialize run').first().json.sheetId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({requests:$json.requests,includeSpreadsheetInResponse:false}) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "22a4f3ae-1673-43cf-a058-a71c884cd0a0",
+      "name": "Update Google Sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        19536,
+        4704
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$input.first().json,expected=$('Build Sheets update').first().json.requestCount;\nif(r.spreadsheetId!==$('Initialize run').first().json.sheetId||r.replies?.length!==expected)throw Error('Sheets batch update response incomplete');\nreturn [{json:{sheets:'OK'}}];\n"
+      },
+      "id": "58ffea1a-aa74-4ccd-810a-734621aea092",
+      "name": "Verify Sheets update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        19776,
+        4688
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bf5574df-c90c-4e35-842c-26470a649c42",
+              "leftValue": "={{ $(\"Build report and exports\").first().json.shouldNotify }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6a2423e3-cc10-4c1f-a6a4-02445959e8fd",
+      "name": "Send digest?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        20016,
+        4672
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $('Initialize run').first().json.emailFrom }}",
+        "toEmail": "={{ $('Initialize run').first().json.emailTo }}",
+        "subject": "={{ $('Build report and exports').first().json.emailSubject }}",
+        "html": "={{ $('Build report and exports').first().json.emailHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "08a20e41-b86b-43f1-8669-8f981dfb69e3",
+      "name": "Email digest",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        20256,
+        4656
+      ],
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "smtp": {
+          "id": null,
+          "name": "Configure your SMTP credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d=$('Build report and exports').first().json;\nconst registry={...d.registry,delivery_status:d.shouldNotify?'SHEETS_OK_EMAIL_SENT':'SHEETS_OK_EMAIL_SKIPPED'};\nconst ids=$('Build Sheets update').first().json.sheetIds;\nconst keys=['run_id','scope','started_at','finished_at','assets','added','modified','removed','high','medium','iam_status','delivery_status','execution_url'];\nconst values=keys.map(k=>({userEnteredValue:typeof registry[k]==='number'?{numberValue:registry[k]}:{stringValue:String(registry[k]??'')}}));\nconst sheetDeliveryBody={requests:[{updateCells:{start:{sheetId:ids.Dashboard,rowIndex:41,columnIndex:1},rows:[{values:[{userEnteredValue:{stringValue:'Delivery: '+(d.shouldNotify?'sheet updated. Digest sent.':'sheet updated. No digest needed.')}}]}],fields:'userEnteredValue'}},{appendCells:{sheetId:ids.Scans,rows:[{values}],fields:'userEnteredValue'}}]};\nreturn [{json:{registry,sheetDeliveryBody}}];"
+      },
+      "id": "7fa0b94e-ac0d-4db5-9e0b-6e2bd4566376",
+      "name": "Delivery complete",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20496,
+        4640
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Initialize run').first().json.sheetId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.sheetDeliveryBody) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "8cbf2328-fba5-4dc2-9ecc-86053809903e",
+      "name": "Finalize Sheets delivery",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20720,
+        4624
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure run registry').first().json.id }}"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "keyValue": "={{ $('Delivery complete').first().json.registry.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Delivery complete').first().json.registry.run_id }}",
+            "scope": "={{ $('Delivery complete').first().json.registry.scope }}",
+            "status": "={{ $('Delivery complete').first().json.registry.status }}",
+            "started_at": "={{ $('Delivery complete').first().json.registry.started_at }}",
+            "finished_at": "={{ $('Delivery complete').first().json.registry.finished_at }}",
+            "assets": "={{ $('Delivery complete').first().json.registry.assets }}",
+            "added": "={{ $('Delivery complete').first().json.registry.added }}",
+            "modified": "={{ $('Delivery complete').first().json.registry.modified }}",
+            "removed": "={{ $('Delivery complete').first().json.registry.removed }}",
+            "high": "={{ $('Delivery complete').first().json.registry.high }}",
+            "medium": "={{ $('Delivery complete').first().json.registry.medium }}",
+            "iam_status": "={{ $('Delivery complete').first().json.registry.iam_status }}",
+            "delivery_status": "={{ $('Delivery complete').first().json.registry.delivery_status }}",
+            "summary": "={{ $('Delivery complete').first().json.registry.summary }}",
+            "sheet_url": "={{ $('Delivery complete').first().json.registry.sheet_url }}",
+            "execution_url": "={{ $('Delivery complete').first().json.registry.execution_url }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "finished_at",
+              "displayName": "finished_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assets",
+              "displayName": "assets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "added",
+              "displayName": "added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "modified",
+              "displayName": "modified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "removed",
+              "displayName": "removed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "high",
+              "displayName": "high",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "medium",
+              "displayName": "medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "iam_status",
+              "displayName": "iam_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sheet_url",
+              "displayName": "sheet_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6dab4220-1d45-4c43-8782-d2a972e458b1",
+      "name": "Register delivery",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        20928,
+        4608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const report=$('Build report and exports').first();\nreturn [{json:{...$('Delivery complete').first().json,download:'Apri Binary per scaricare report.html e CSV; Google Sheet aggiornato'},binary:report.binary}];\n"
+      },
+      "id": "9a1f27a6-d733-4f1c-b358-ddee0e1847d7",
+      "name": "Report files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        21168,
+        4608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const c=$('Initialize run').first().json;\nconst r=$input.first().json;\nlet registry={...(r.registry||(r.run_id===c.runId?r:c.registry))};\ntry{const generated=$('Build report and exports').first().json.registry;if(generated?.run_id===c.runId)registry={...generated};}catch{}\nlet complete=registry.status==='COMPLETE';\ntry{const audit=$('Read audit results').first().json;if(audit.jobComplete===true){complete=true;registry.status='COMPLETE';}}catch{}\nconst message=String(r.error?.message||r.error||r.message||'Execution failed').slice(0,1500);\nregistry={...registry,status:complete?'COMPLETE':'FAILED',finished_at:new Date().toISOString(),delivery_status:complete?'FAILED':'NOT_ATTEMPTED',summary:(complete?'Delivery failed: ':'Scan failed: ')+message};\nreturn [{json:{registry}}];"
+      },
+      "id": "e773cf32-2f98-46ee-bca6-e1ac8c98e566",
+      "name": "Record failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        21424,
+        5280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure run registry').first().json.id }}"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "keyValue": "={{ $('Record failure').first().json.registry.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Record failure').first().json.registry.run_id }}",
+            "scope": "={{ $('Record failure').first().json.registry.scope }}",
+            "status": "={{ $('Record failure').first().json.registry.status }}",
+            "started_at": "={{ $('Record failure').first().json.registry.started_at }}",
+            "finished_at": "={{ $('Record failure').first().json.registry.finished_at }}",
+            "assets": "={{ $('Record failure').first().json.registry.assets }}",
+            "added": "={{ $('Record failure').first().json.registry.added }}",
+            "modified": "={{ $('Record failure').first().json.registry.modified }}",
+            "removed": "={{ $('Record failure').first().json.registry.removed }}",
+            "high": "={{ $('Record failure').first().json.registry.high }}",
+            "medium": "={{ $('Record failure').first().json.registry.medium }}",
+            "iam_status": "={{ $('Record failure').first().json.registry.iam_status }}",
+            "delivery_status": "={{ $('Record failure').first().json.registry.delivery_status }}",
+            "summary": "={{ $('Record failure').first().json.registry.summary }}",
+            "sheet_url": "={{ $('Record failure').first().json.registry.sheet_url }}",
+            "execution_url": "={{ $('Record failure').first().json.registry.execution_url }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "finished_at",
+              "displayName": "finished_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assets",
+              "displayName": "assets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "added",
+              "displayName": "added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "modified",
+              "displayName": "modified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "removed",
+              "displayName": "removed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "high",
+              "displayName": "high",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "medium",
+              "displayName": "medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "iam_status",
+              "displayName": "iam_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sheet_url",
+              "displayName": "sheet_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ffc5dbd5-34ed-4d01-b0da-580fec4281f7",
+      "name": "Register failure",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        21664,
+        5280
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $('Record failure').first().json.registry.summary }}"
+      },
+      "id": "8de7247c-a80b-4e85-90ce-bd0826176587",
+      "name": "Stop failed run",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        22144,
+        5280
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Audit Google Cloud inventory and IAM changes with BigQuery and Sheets\n\n**Template revision:** v2.0.1 · 2026-10-30\n\n**Full setup guide:** [Read the complete documentation](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73)\n\n**Support & customization:** [info@paoloronco.it](mailto:info@paoloronco.it) · [paoloronco.it](https://paoloronco.it).\n\n### How it works\nFor cloud operations teams: run manually or daily at 03:15 in the workflow timezone. Discover resources and visible IAM policies through Cloud Asset Inventory, assess governance rules, and compare completed BigQuery snapshots. The first scan establishes a baseline. Google Sheets provides five review tabs, four charts, filters and checkboxes; HTML/CSV exports and conditional email digests complete delivery. The n8n data table tracks scan and delivery status. Coverage depends on API visibility; this is not a complete security or compliance audit.\n\n### Setup\n1. [Open Google Sheets dashboard/model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy). Create your own copy and share it as Editor with your Sheets service account.\n2. Enable Cloud Asset Inventory, BigQuery and Sheets APIs. Connect Google API credentials to all HTTP nodes: inventory/IAM read access, BigQuery jobs and dataset/table write access, plus Sheets edit access.\n3. In Configuration, set scope, billingProject, dataset, location, sheetId, emailTo and emailFrom; review limits and governance rules. Connect SMTP to Email digest. Review the execution URL in Initialize run.\n4. Select your Error Workflow in Settings. Check timezone, run manually, verify Sheets/BigQuery/reports and a second scan, then publish to enable scheduling. BigQuery storage and queries may incur charges.\n\n### Customization\nAdjust requiredLabels, labelAssetTypes, allowedLocations, retention, reportChangeLimit and notifyEveryRun. Keep sheet headers and hidden identifiers intact.",
+        "height": 680,
+        "width": 650,
+        "color": 1
+      },
+      "id": "4c6a63e6-0429-499f-971e-450dfcd28605",
+      "name": "00 Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13712,
+        3744
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 01 · Configure and track runs\n\nValidate scope, destinations and resource limits before discovery. The data table records RUNNING, COMPLETE or FAILED independently from delivery status. Configure credentials and destinations before the first run.",
+        "height": 620,
+        "width": 1696,
+        "color": 7
+      },
+      "id": "ca012ee2-0834-409e-acac-8aa6ca2ccd88",
+      "name": "01 Configuration",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        14400,
+        3744
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 02 · Discover and assess\n\nPaginated resource and IAM searches feed canonical inventory and governance checks. Review public access, broad roles, labels and locations. Unavailable IAM coverage is reported explicitly; zero findings does not establish security.",
+        "height": 600,
+        "width": 1904,
+        "color": 7
+      },
+      "id": "305cce66-2709-4a91-bd71-a70571a70b41",
+      "name": "02 Discovery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16144,
+        3760
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 03 · Persist and compare snapshots\n\nBatched BigQuery jobs wait for completion and validate errors. Only complete snapshots become baselines. The first scan establishes a baseline; later scans identify added, modified and removed assets. Set retention and billed-byte limits for your environment.",
+        "height": 650,
+        "width": 2124,
+        "color": 7
+      },
+      "id": "d3c962ec-ec12-43d0-b775-5eff22556834",
+      "name": "03 Persistence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16128,
+        4400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 04 · Review and deliver results\n\nUpdate the dashboard, inventory, findings, changes and scan history. Preserve review checkboxes and notes by stable identifiers. Conditional email digests summarize actionable changes. Keep headers and hidden IDs intact; download HTML and CSV from Report files.",
+        "height": 478,
+        "width": 3084,
+        "color": 7
+      },
+      "id": "247a1b90-ede8-4668-ae10-82415d645b2b",
+      "name": "04 Delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        18288,
+        4576
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 05 · Record failures\n\nPersist failure details and stop the execution so n8n can invoke the Error Workflow selected in Settings. Automatic runs use the native error handler; inspect manual failures in Executions. No duplicate error email is sent here.",
+        "height": 500,
+        "width": 980,
+        "color": 7
+      },
+      "id": "ca1d18a3-62c0-4f5d-92f5-2cd1f3904b29",
+      "name": "05 Failure",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        21376,
+        5072
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Initialize run').first().json.sheetId }}/values:batchGet?ranges=Inventory!A%3AK&ranges=Findings!A%3AK&ranges=Scans!A%3AM",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueRenderOption",
+              "value": "UNFORMATTED_VALUE"
+            }
+          ]
+        },
+        "options": {
+          "queryParameterArrays": "repeat",
+          "timeout": 120000
+        }
+      },
+      "id": "63ee5d55-603d-4c09-ae62-a8bc43b2d2c0",
+      "name": "Read review state",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        19088,
+        4736
+      ],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual start": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily schedule": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Initialize run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize run": {
+      "main": [
+        [
+          {
+            "node": "Ensure run registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure run registry": {
+      "main": [
+        [
+          {
+            "node": "Register running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register running": {
+      "main": [
+        [
+          {
+            "node": "Create dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create dataset": {
+      "main": [
+        [
+          {
+            "node": "Prepare setup job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare setup job": {
+      "main": [
+        [
+          {
+            "node": "Submit BigQuery job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit BigQuery job": {
+      "main": [
+        [
+          {
+            "node": "Validate submitted job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate submitted job": {
+      "main": [
+        [
+          {
+            "node": "Wait for BigQuery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for BigQuery": {
+      "main": [
+        [
+          {
+            "node": "Get BigQuery job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get BigQuery job": {
+      "main": [
+        [
+          {
+            "node": "Validate job status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate job status": {
+      "main": [
+        [
+          {
+            "node": "Job finished?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job finished?": {
+      "main": [
+        [
+          {
+            "node": "Setup finished?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for BigQuery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup finished?": {
+      "main": [
+        [
+          {
+            "node": "Search Cloud Assets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Batch finished?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch finished?": {
+      "main": [
+        [
+          {
+            "node": "Batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read audit results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Cloud Assets": {
+      "main": [
+        [
+          {
+            "node": "Normalize inventory",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize inventory": {
+      "main": [
+        [
+          {
+            "node": "Search IAM policies",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search IAM policies": {
+      "main": [
+        [
+          {
+            "node": "Assess inventory and IAM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess inventory and IAM": {
+      "main": [
+        [
+          {
+            "node": "Build persistence batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build persistence batches": {
+      "main": [
+        [
+          {
+            "node": "Batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch loop": {
+      "main": [
+        [
+          {
+            "node": "Prepare audit job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare batch job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare batch job": {
+      "main": [
+        [
+          {
+            "node": "Submit BigQuery job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare audit job": {
+      "main": [
+        [
+          {
+            "node": "Submit BigQuery job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read audit results": {
+      "main": [
+        [
+          {
+            "node": "Build report and exports",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build report and exports": {
+      "main": [
+        [
+          {
+            "node": "Register completed inventory",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register completed inventory": {
+      "main": [
+        [
+          {
+            "node": "Read Sheets structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheets structure": {
+      "main": [
+        [
+          {
+            "node": "Read review state",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Sheets update": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Verify Sheets update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Sheets update": {
+      "main": [
+        [
+          {
+            "node": "Send digest?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send digest?": {
+      "main": [
+        [
+          {
+            "node": "Email digest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delivery complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email digest": {
+      "main": [
+        [
+          {
+            "node": "Delivery complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register delivery": {
+      "main": [
+        [
+          {
+            "node": "Report files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record failure": {
+      "main": [
+        [
+          {
+            "node": "Register failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register failure": {
+      "main": [
+        [
+          {
+            "node": "Stop failed run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery complete": {
+      "main": [
+        [
+          {
+            "node": "Finalize Sheets delivery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize Sheets delivery": {
+      "main": [
+        [
+          {
+            "node": "Register delivery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read review state": {
+      "main": [
+        [
+          {
+            "node": "Build Sheets update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "timezone": "Europe/Rome"
+  }
+}

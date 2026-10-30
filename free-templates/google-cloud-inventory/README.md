@@ -1,4 +1,28 @@
-# Google Cloud Inventory & Change Audit
+# Audit Google Cloud inventory and IAM changes with BigQuery and Sheets
+
+Reusable Google Cloud inventory and change-audit workflows for n8n. **Start with v2** for IAM findings, a Google Sheets review dashboard, HTML/CSV reports and conditional email digests.
+
+## Releases
+
+| Version | Workflow | Documentation | Distribution |
+| --- | --- | --- | --- |
+| **v2 — current** | [Importable JSON](./v2/google-cloud-inventory-workflow.json) | [Quick setup](./v2/README.md) · [Complete guide](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73) | [Gumroad](https://paoloronco.gumroad.com/l/googlecloud-inventorychange) |
+| v1 — legacy | [Original JSON](./Google%20Cloud%20Inventory%20%26%20Change%20Audit.json) | [Legacy reference below](#legacy-v1-documentation) | Retained for existing installations. |
+
+## Current release
+
+The 47-node v2 template collects resources within a configured project, folder or organization scope, assesses selected IAM/governance controls, persists completed snapshots in BigQuery and updates a five-tab Google Sheets dashboard. The first successful scan establishes a baseline.
+
+[Copy the Google Sheets model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy) and follow the [v2 README](./v2/README.md). Create your own editable spreadsheet and configure your own Google API/SMTP credentials before running.
+
+The original v1 JSON stays at its existing path so existing download links continue to work. The versions have different configuration, table schemas and scope behavior; v2 is not an automatic migration of v1 history.
+
+## Legacy v1 documentation
+
+<details>
+<summary>Expand the original v1 setup and reference</summary>
+
+The reference below applies to the original JSON in this directory. Use the v2 links above for the current release.
 
 **Full documentation:** [Google Cloud Inventory & Change Audit — Notion](https://www.notion.so/402f0ba27c32801ba303f2549dbe9fa2)
 
@@ -75,3 +99,5 @@ No custom IAM roles or manual lists of target projects are required. Project dis
 - [n8n Google Service Account credentials](https://docs.n8n.io/integrations/builtin/credentials/google/service-account/)
 - [Google Cloud Asset Inventory](https://cloud.google.com/asset-inventory/docs/search-resources)
 - [BigQuery access control](https://cloud.google.com/bigquery/docs/access-control)
+
+</details>

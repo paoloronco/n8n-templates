@@ -1,0 +1,1923 @@
+{
+  "name": "OrbitPage Smart Bio — YouTube",
+  "nodes": [
+    {
+      "id": "fc2c24e3-03fe-bc09-493f-acad480334b0",
+      "name": "Manual check or replay",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "parameters": {},
+      "position": [
+        0,
+        280
+      ]
+    },
+    {
+      "id": "541f8a59-6b8e-4702-89fe-4d0f9937fea2",
+      "name": "Check YouTube every 15 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        460
+      ]
+    },
+    {
+      "id": "9a88aac8-af84-69e6-ddef-8cc6ed88b30b",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8cc58c6c-e249-423e-9f06-8ce7d43e5ae7",
+              "name": "YOUTUBE_CHANNEL_ID",
+              "value": "REPLACE_WITH_UC_CHANNEL_ID",
+              "type": "string"
+            },
+            {
+              "id": "3edeedb7-7d39-e1d6-1780-8a0867d3fb01",
+              "name": "MODE",
+              "value": "EMAIL_APPROVAL",
+              "type": "string"
+            },
+            {
+              "id": "b17d5a81-9428-1511-7550-1321325ebf35",
+              "name": "REGISTRY_TABLE_NAME",
+              "value": "OrbitPage Smart Bio",
+              "type": "string"
+            },
+            {
+              "id": "b5697077-cf63-7515-90c8-bc1e4c1e21cf",
+              "name": "FROM_EMAIL",
+              "value": "REPLACE_WITH_SENDER_EMAIL",
+              "type": "string"
+            },
+            {
+              "id": "c8ac37d8-1bb4-efde-6fdc-235e5a590323",
+              "name": "APPROVAL_EMAIL",
+              "value": "REPLACE_WITH_APPROVAL_EMAIL",
+              "type": "string"
+            },
+            {
+              "id": "8397c673-0734-a0aa-2652-2f936c5a9287",
+              "name": "SHOW_TITLE",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "476010c8-0405-5994-007d-655ec941bf02",
+              "name": "SHOW_DESCRIPTION",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "8c3b205a-c917-481d-8a3d-855d8ca71c01",
+              "name": "APPROVAL_TIMEOUT_HOURS",
+              "value": 48,
+              "type": "number"
+            },
+            {
+              "id": "190143c4-52ad-d0e7-c433-f76103dde32d",
+              "name": "MANUAL_VIDEO_ID",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        240,
+        360
+      ],
+      "notes": "MODE: EMAIL_APPROVAL or AUTOMATIC. MANUAL_VIDEO_ID is used only by the manual trigger. Existing channel videos are ignored on the first normal poll.",
+      "notesInFlow": true
+    },
+    {
+      "id": "0de916a6-baef-8bc1-b93f-c10d0a18660f",
+      "name": "Create or reuse registry",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "={{ $('Configuration').first().json.REGISTRY_TABLE_NAME }}",
+        "columns": {
+          "column": [
+            {
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "name": "channel_id",
+              "type": "string"
+            },
+            {
+              "name": "video_id",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "execution_id",
+              "type": "string"
+            },
+            {
+              "name": "updated_at",
+              "type": "string"
+            },
+            {
+              "name": "payload",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "position": [
+        500,
+        360
+      ]
+    },
+    {
+      "id": "1571f6ce-08aa-b86d-44da-56dba4410fdf",
+      "name": "Validate Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function validateConfiguration(raw) {\n  const config = {\n    channelId: String(raw.YOUTUBE_CHANNEL_ID || '').trim(),\n    mode: String(raw.MODE || 'EMAIL_APPROVAL').trim(),\n    tableId: String(raw.REGISTRY_TABLE_ID || '').trim(),\n    fromEmail: String(raw.FROM_EMAIL || '').trim(),\n    approvalEmail: String(raw.APPROVAL_EMAIL || '').trim(),\n    showTitle: raw.SHOW_TITLE === true,\n    showDescription: raw.SHOW_DESCRIPTION === true,\n    approvalHours: Number(raw.APPROVAL_TIMEOUT_HOURS ?? 48),\n    manualVideoId: String(raw.MANUAL_VIDEO_ID || '').trim(),\n  };\n  if (!/^UC[\\w-]{22}$/.test(config.channelId)) throw new Error('Enter the UC… channel ID, not a handle or video URL.');\n  if (!['AUTOMATIC', 'EMAIL_APPROVAL'].includes(config.mode)) throw new Error('MODE must be AUTOMATIC or EMAIL_APPROVAL.');\n  if (!/^[\\w-]{5,100}$/.test(config.tableId)) throw new Error('The registry could not be created or reused. Check REGISTRY_TABLE_NAME and Data Table access.');\n  if (config.mode === 'EMAIL_APPROVAL' && [config.fromEmail, config.approvalEmail].some(v => !/^[^\\s<>@]+@[^\\s<>@]+\\.[^\\s<>@]+$/.test(v))) throw new Error('Configure one FROM_EMAIL and one APPROVAL_EMAIL.');\n  if (!Number.isInteger(config.approvalHours) || config.approvalHours < 1 || config.approvalHours > 168) throw new Error('Approval timeout must be 1–168 hours.');\n  if (config.manualVideoId && !/^[\\w-]{11}$/.test(config.manualVideoId)) throw new Error('MANUAL_VIDEO_ID must be an 11-character public YouTube video ID.');\n  return config;\n}\n\nreturn [{json:validateConfiguration({...$('Configuration').first().json,REGISTRY_TABLE_ID:$json.id})}];"
+      },
+      "position": [
+        760,
+        360
+      ]
+    },
+    {
+      "id": "86998624-2e04-24f5-74c0-c0989b8d610d",
+      "name": "Read OrbitPage API contract",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "url": "https://orbitpage.com/api/openapi.json",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "position": [
+        900,
+        700
+      ]
+    },
+    {
+      "id": "f75937a8-7313-5dc2-6359-88926443161e",
+      "name": "Require private draft support",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function requireDraftCapability(spec, config) {\n  if (config.mode === 'AUTOMATIC') return config;\n  const parameters=spec.paths?.['/links']?.put?.parameters || [];\n  const supportsDraft=parameters.some(p=>{\n    const resolved=p.$ref?.startsWith('#/components/parameters/') ? spec.components?.parameters?.[p.$ref.split('/').pop()] : p;\n    return resolved?.name==='publish' && resolved.in==='query' && resolved.schema?.enum?.some(v=>String(v)==='0');\n  });\n  if (!supportsDraft) throw new Error('This OrbitPage API does not advertise private link drafts (publish=0). Update OrbitPage before using EMAIL_APPROVAL. No card was saved.');\n  return config;\n}\n\nreturn [{json:requireDraftCapability($json,$('Validate Configuration').first().json)}];"
+      },
+      "position": [
+        1160,
+        700
+      ]
+    },
+    {
+      "id": "1d79793d-1323-2791-56cd-64963cf90fe8",
+      "name": "Read public YouTube feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "url": "={{ 'https://www.youtube.com/feeds/videos.xml?channel_id=' + $json.channelId }}",
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "feedXml"
+            }
+          }
+        }
+      },
+      "position": [
+        1020,
+        360
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "8cb04a46-ea84-82f8-d48f-ef2458f33f1e",
+      "name": "Parse channel feed",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "parameters": {
+        "mode": "xmlToJson",
+        "dataPropertyName": "feedXml",
+        "options": {
+          "explicitArray": false,
+          "ignoreAttrs": false
+        }
+      },
+      "position": [
+        1280,
+        360
+      ]
+    },
+    {
+      "id": "a6eac78f-e699-e1bc-c927-5378e3addcd7",
+      "name": "Read channel registry",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Validate Configuration').first().json.tableId }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "channel_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Validate Configuration').first().json.channelId }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "position": [
+        1540,
+        360
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "id": "505ebe3c-6594-1b46-96ac-a98d6ca38f43",
+      "name": "Select next video",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function feedVideos(document, channelId) {\n  const text = value => String(Array.isArray(value) ? value[0]?._ ?? value[0] ?? '' : value?._ ?? value ?? '');\n  const ownsChannel = value => text(value) === channelId || `UC${text(value)}` === channelId;\n  const feed = document.feed;\n  if (!feed || !ownsChannel(feed['yt:channelId'])) throw new Error('The response is not the configured YouTube channel feed.');\n  const entries = feed.entry ? (Array.isArray(feed.entry) ? feed.entry : [feed.entry]) : [];\n  const videos = entries.map(entry => {\n    const id = text(entry['yt:videoId']);\n    const publishedAt = text(entry.published);\n    if (!/^[\\w-]{11}$/.test(id) || !ownsChannel(entry['yt:channelId']) || !Number.isFinite(Date.parse(publishedAt))) throw new Error('Invalid YouTube feed entry.');\n    const media = entry['media:group'] || {};\n    return { id, title: text(entry.title).slice(0, 200), description: text(media['media:description']).slice(0, 2000), publishedAt, url: `https://www.youtube.com/watch?v=${id}` };\n  });\n  return [...new Map(videos.map(v => [v.id, v])).values()].sort((a,b) => Date.parse(a.publishedAt)-Date.parse(b.publishedAt) || a.id.localeCompare(b.id));\n}\n\nfunction selectWork(config, videos, rows, manual, now) {\n  const baselineKey = `${config.channelId}:baseline`;\n  const baseline = rows.find(r => r.key === baselineKey);\n  const known = new Set(rows.map(r => r.video_id).filter(Boolean));\n  const initial = baseline ? JSON.parse(baseline.payload || '{}').ids || [] : [];\n  initial.forEach(id => known.add(id));\n  if (manual && config.manualVideoId) {\n    if (rows.some(r => ['processing','pending','publishing'].includes(r.state))) throw new Error('Another video is pending or needs reconciliation. Finish it before replaying a video.');\n    const video = videos.find(v => v.id === config.manualVideoId);\n    if (!video) throw new Error('Manual video is not in the current public channel feed. Choose a recent public video.');\n    // An explicit manual replay may select an initial-baseline video, never a claimed video.\n    if (rows.some(r => r.video_id === video.id)) return { action:'noop', message:'Video already registered; no second email or card.' };\n    return { action:'video', config, video, key:`${config.channelId}:${video.id}`, startedAt:now, expiresAt:new Date(Date.parse(now)+config.approvalHours*3600000).toISOString() };\n  }\n  if (!baseline) return { action:'baseline', config, key:baselineKey, startedAt:now, baselineIds:videos.map(v=>v.id), message:'Baseline saved. Existing videos were not imported.' };\n  if (rows.some(r => ['processing','pending','publishing'].includes(r.state))) return { action:'noop', message:'Another video is pending or needs reconciliation. No second draft was created.' };\n  const video = videos.find(v => !known.has(v.id));\n  if (!video) return { action:'noop', message:'No new public video.' };\n  return { action:'video', config, video, key:`${config.channelId}:${video.id}`, startedAt:now, expiresAt:new Date(Date.parse(now)+config.approvalHours*3600000).toISOString() };\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst config=$('Validate Configuration').first().json;\nconst parsed=$('Parse channel feed').first().json;\nconst videos=feedVideos(parsed.feedXml || parsed,config.channelId);\nconst now=new Date().toISOString();\nconst work=selectWork(config,videos,$input.all().map(i=>i.json),$execution.mode === 'manual',now);\nif(work.action!=='noop')work.registry=registryRow(work,work.action==='baseline'?'baseline':'processing',$execution.id,now);\nreturn [{json:work}];"
+      },
+      "position": [
+        1800,
+        360
+      ]
+    },
+    {
+      "id": "9ef981fb-f32e-f36e-f9af-d8942fbe7255",
+      "name": "Has new work",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "78d213e9-f9f6-f77e-4f4c-6a2b6f3aba92",
+              "leftValue": "={{ $json.action !== 'noop' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        2060,
+        360
+      ]
+    },
+    {
+      "id": "e0cfe9a5-075a-f151-61e3-ab075e3b7fa1",
+      "name": "Claim video or remember baseline",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Validate Configuration').first().json.tableId }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "={{ $('Select next video').first().json.key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Select next video').first().json.registry.key }}",
+            "channel_id": "={{ $('Select next video').first().json.registry.channel_id }}",
+            "video_id": "={{ $('Select next video').first().json.registry.video_id }}",
+            "state": "={{ $('Select next video').first().json.registry.state }}",
+            "title": "={{ $('Select next video').first().json.registry.title }}",
+            "execution_id": "={{ $('Select next video').first().json.registry.execution_id }}",
+            "updated_at": "={{ $('Select next video').first().json.registry.updated_at }}",
+            "payload": "={{ $('Select next video').first().json.registry.payload }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "channel_id",
+              "displayName": "channel_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "position": [
+        2320,
+        280
+      ]
+    },
+    {
+      "id": "acda6b38-614f-c610-c856-8163a29772a7",
+      "name": "Is a video",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8187abe2-ffd9-9fe5-0288-94be39c9b312",
+              "leftValue": "={{ $('Select next video').first().json.action === 'video' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        2580,
+        280
+      ]
+    },
+    {
+      "id": "b5507db9-cfd6-e011-d739-cce4ebcd27af",
+      "name": "Read current blocks",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "links",
+        "operation": "listLinks",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        2840,
+        200
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "4d19728e-f64c-f8b5-3373-3aed35df796e",
+      "name": "Check publication before staging",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "publication",
+        "operation": "getPublication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        3100,
+        200
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "4417ea84-ae70-b6b4-9182-a262c9990232",
+      "name": "Prepare YouTube card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function proposedCard(work) {\n  return { id:`smartbio-${work.video.id}`, type:'embed', title:work.config.showTitle ? work.video.title : '', description:work.config.showDescription ? work.video.description : '',\n    url:'', content:JSON.stringify({provider:'youtube',snippet:work.video.url,consentCategory:'marketing',height:360}),\n    isActive:work.config.mode === 'AUTOMATIC', status:work.config.mode === 'AUTOMATIC' ? 'live' : 'draft',\n    availability:'available', position:0, campaignName:'orbitpage-smart-bio' };\n}\n\nfunction sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction prepareCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision)) throw new Error('Invalid OrbitPage block response.');\n  const card=proposedCard(work);\n  const matches=body.data.filter(b=>b.id===card.id);\n  if (matches.length > 1 || (matches[0] && !sameCard(matches[0],card))) throw new Error('The existing Smart Bio card was edited. Review it manually; nothing was overwritten.');\n  const existing=matches[0];\n  if (existing && !(existing.isActive === true && existing.status==='live') && !(existing.isActive === false && existing.status==='draft')) throw new Error('The existing card visibility was changed. Review it manually.');\n  const links=existing ? body.data : [card,...body.data];\n  return {...work, card, links:links.map((b,position)=>({...b,position})), revision:String(body.revision), needsWrite:!existing, alreadyPublished:!!existing && existing.isActive===true && existing.status==='live'};\n}\n\nconst blocks=$('Read current blocks').first().json;\nconst publication=$json.body.data;\nif(publication.draftRevision!==publication.publishedRevision || publication.draftRevision!==blocks.body.revision)throw new Error('Unpublished or concurrent edits exist. Review them before adding the video.');\n  return [{json:{...prepareCard($('Select next video').first().json,blocks),originalPublishedRevision:publication.publishedRevision}}];"
+      },
+      "position": [
+        3360,
+        200
+      ]
+    },
+    {
+      "id": "622c9f72-d8d0-2cd2-8b16-176a81a77cd4",
+      "name": "Card needs saving",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b8969216-ff20-8c7e-62a4-1be2a6452689",
+              "leftValue": "={{ $json.needsWrite }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        3620,
+        200
+      ]
+    },
+    {
+      "id": "cd6b4170-442f-6d94-aebc-b4fb8c8e916c",
+      "name": "Save video card",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "advanced",
+        "operation": "customRequest",
+        "customMethod": "PUT",
+        "customPath": "/links",
+        "customQuery": "={{ JSON.stringify({publish:$('Prepare YouTube card').first().json.config.mode === 'EMAIL_APPROVAL' ? '0' : '1'}) }}",
+        "customIfMatch": "={{ $('Prepare YouTube card').first().json.revision }}",
+        "customBody": "={{ JSON.stringify({links:$('Prepare YouTube card').first().json.links}) }}",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        3880,
+        100
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "79f395cd-ad81-cda5-306f-8c2efed8e88b",
+      "name": "Card saved",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nfunction approvalMessage(work) {\n  const escape = value => String(value).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n  return `<h2>Nuovo video pronto per OrbitPage</h2><p><strong>${escape(work.video.title)}</strong></p><p><a href=\"${escape(work.video.url)}\">Guarda il video su YouTube</a></p><p>La card YouTube è salvata come bozza nascosta. Approva per renderla pubblica oppure rifiuta per scartare la bozza.</p><p>Titolo esterno: ${work.config.showTitle?'visibile':'nascosto'} · Descrizione esterna: ${work.config.showDescription?'visibile':'nascosta'}.</p><p>Scadenza: ${escape(work.expiresAt)}. L'approvazione riguarda solo questa card; eventuali modifiche alla card richiedono una nuova revisione.</p>`;\n}\n\nconst work=$('Prepare YouTube card').first().json;\nif($('Save video card').isExecuted)work.revision=String($('Save video card').first().json.body.revision);\nwork.needsApproval=work.config.mode==='EMAIL_APPROVAL'&&!work.alreadyPublished;\nwork.registry=registryRow(work,work.needsApproval?'pending':'publishing',$execution.id,new Date().toISOString());\nwork.emailHtml=approvalMessage(work);\nreturn [{json:work}];"
+      },
+      "position": [
+        4140,
+        200
+      ]
+    },
+    {
+      "id": "9bc705e9-10a2-c8ee-4d32-d0ef21e439f7",
+      "name": "Remember saved card",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Validate Configuration').first().json.tableId }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "={{ $('Card saved').first().json.key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Card saved').first().json.registry.key }}",
+            "channel_id": "={{ $('Card saved').first().json.registry.channel_id }}",
+            "video_id": "={{ $('Card saved').first().json.registry.video_id }}",
+            "state": "={{ $('Card saved').first().json.registry.state }}",
+            "title": "={{ $('Card saved').first().json.registry.title }}",
+            "execution_id": "={{ $('Card saved').first().json.registry.execution_id }}",
+            "updated_at": "={{ $('Card saved').first().json.registry.updated_at }}",
+            "payload": "={{ $('Card saved').first().json.registry.payload }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "channel_id",
+              "displayName": "channel_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "position": [
+        4400,
+        200
+      ]
+    },
+    {
+      "id": "347ed3cc-2716-3aae-7a2a-9f159a6a0e41",
+      "name": "Email approval required",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc1b5e89-496c-4cf2-9c51-d37df695c01b",
+              "leftValue": "={{ $('Card saved').first().json.needsApproval }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        4660,
+        200
+      ]
+    },
+    {
+      "id": "7d7e8db0-6eb6-a4e8-c831-1dd2676bdf83",
+      "name": "Email approval — Approva or Rifiuta",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "parameters": {
+        "resource": "email",
+        "operation": "sendAndWait",
+        "fromEmail": "={{ $('Card saved').first().json.config.fromEmail }}",
+        "toEmail": "={{ $('Card saved').first().json.config.approvalEmail }}",
+        "subject": "={{ 'OrbitPage · Approva il video: ' + $('Card saved').first().json.video.title }}",
+        "message": "={{ $('Card saved').first().json.emailHtml }}",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approva e pubblica",
+            "disapproveLabel": "Rifiuta",
+            "buttonApprovalStyle": "primary",
+            "buttonDisapprovalStyle": "secondary"
+          }
+        },
+        "options": {
+          "appendAttribution": false,
+          "limitWaitTime": {
+            "values": {
+              "limitType": "afterTimeInterval",
+              "resumeAmount": "={{ $('Card saved').first().json.config.approvalHours }}",
+              "resumeUnit": "hours"
+            }
+          }
+        }
+      },
+      "position": [
+        4920,
+        -80
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CREDENTIAL",
+          "name": "SMTP account"
+        }
+      },
+      "retryOnFail": false,
+      "notes": "The native n8n signed approval links resume only this waiting execution. Keep the recipient mailbox and n8n approval endpoints protected.",
+      "notesInFlow": true
+    },
+    {
+      "id": "84d87d86-0392-5b99-d815-409c6ffc6196",
+      "name": "Read approval decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function approvalDecision(response, work, now) {\n  const data=response.data;\n  if (Date.parse(now)>Date.parse(work.expiresAt) || !data?.respondedAt) return 'expired';\n  return data.approved===true ? 'approved' : 'declined';\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst work=$('Card saved').first().json;const decision=approvalDecision($json,work,new Date().toISOString());return [{json:{...work,decision,registry:registryRow(work,decision,$execution.id,new Date().toISOString())}}];"
+      },
+      "position": [
+        5180,
+        -80
+      ]
+    },
+    {
+      "id": "b4be6778-f29a-cf2e-a90d-854323571877",
+      "name": "Video was approved",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7ac996dd-e0a9-3a41-7d2a-a458e4721784",
+              "leftValue": "={{ $json.decision === 'approved' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        5440,
+        -80
+      ]
+    },
+    {
+      "id": "4deb87ef-7720-b48e-cfa3-82eb1971c82b",
+      "name": "Read declined draft",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "links",
+        "operation": "listLinks",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        5700,
+        100
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "c2b32ad7-56ea-2f9c-3f0a-395acecf1d53",
+      "name": "Check declined publication",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "publication",
+        "operation": "getPublication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        5960,
+        100
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "64063d1e-2bb5-f443-2992-d28ef40c00e6",
+      "name": "Prepare declined draft cleanup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction reviewCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision) || String(body.revision)!==work.revision) throw new Error('The reviewed draft revision changed. Approval was not applied.');\n  const actual=body.data.find(b=>b.id===work.card.id);\n  if (!sameCard(actual,work.card) || actual.isActive!==false || actual.status!=='draft') throw new Error('The proposed card changed or is no longer a hidden draft. Approval was not applied.');\n  return {...work,revision:String(body.revision)};\n}\n\nconst work=$('Card saved').first().json;\nconst blocks=$('Read declined draft').first().json;\nconst publication=$json.body.data;\nif(publication.draftRevision!==Number(work.revision)||publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft changed. Declined video retained for manual review.');\nconst checked=reviewCard(work,blocks);return [{json:{...checked,links:blocks.body.data.filter(b=>b.id!==work.card.id).map((b,position)=>({...b,position}))}}];"
+      },
+      "position": [
+        6220,
+        100
+      ]
+    },
+    {
+      "id": "a943d8e0-a3f7-ea0b-ffc1-536dfd2aaddc",
+      "name": "Discard declined video draft",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "links",
+        "operation": "replaceLinks",
+        "revisionMode": "manual",
+        "ifMatchRevision": "={{ $json.revision }}",
+        "jsonBody": "={{ JSON.stringify({links:$json.links}) }}",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        6480,
+        100
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "89410512-f221-7668-4e48-6fd5152cf0e8",
+      "name": "Remember declined or expired",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Validate Configuration').first().json.tableId }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "={{ $('Read approval decision').first().json.key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Read approval decision').first().json.registry.key }}",
+            "channel_id": "={{ $('Read approval decision').first().json.registry.channel_id }}",
+            "video_id": "={{ $('Read approval decision').first().json.registry.video_id }}",
+            "state": "={{ $('Read approval decision').first().json.registry.state }}",
+            "title": "={{ $('Read approval decision').first().json.registry.title }}",
+            "execution_id": "={{ $('Read approval decision').first().json.registry.execution_id }}",
+            "updated_at": "={{ $('Read approval decision').first().json.registry.updated_at }}",
+            "payload": "={{ $('Read approval decision').first().json.registry.payload }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "channel_id",
+              "displayName": "channel_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "position": [
+        6740,
+        100
+      ]
+    },
+    {
+      "id": "b8c2d3bb-fbd1-d06e-e5f7-d4fda3057df7",
+      "name": "Read blocks after approval",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "links",
+        "operation": "listLinks",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        5700,
+        -160
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "753c5c54-ac75-7f05-826f-e4728e6207f3",
+      "name": "Check publication after approval",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "publication",
+        "operation": "getPublication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        5960,
+        -160
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "d16000e9-30fc-68a4-efdb-f58f7310e419",
+      "name": "Review exact hidden card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function sameCard(actual, expected) {\n  if (!actual || actual.type !== 'embed' || actual.id !== expected.id) return false;\n  let a,b;\n  try { a=JSON.parse(actual.content); b=JSON.parse(expected.content); } catch { return false; }\n  return ['provider','snippet','consentCategory','height'].every(k=>a[k]===b[k]) && actual.title===expected.title && actual.description===expected.description && actual.campaignName===expected.campaignName;\n}\n\nfunction reviewCard(work, response) {\n  const body=response.body || response;\n  if (!Array.isArray(body.data) || !Number.isSafeInteger(body.revision) || String(body.revision)!==work.revision) throw new Error('The reviewed draft revision changed. Approval was not applied.');\n  const actual=body.data.find(b=>b.id===work.card.id);\n  if (!sameCard(actual,work.card) || actual.isActive!==false || actual.status!=='draft') throw new Error('The proposed card changed or is no longer a hidden draft. Approval was not applied.');\n  return {...work,revision:String(body.revision)};\n}\n\nconst blocks=$('Read blocks after approval').first().json;\nconst publication=$json.body.data;\n  const work=$('Card saved').first().json;\n  if(publication.draftRevision!==Number(work.revision) || publication.draftRevision!==blocks.body.revision || publication.publishedRevision!==work.originalPublishedRevision)throw new Error('The draft or publication changed. Approval did not publish unreviewed changes.');\nreturn [{json:reviewCard($('Card saved').first().json,blocks)}];"
+      },
+      "position": [
+        6220,
+        -160
+      ]
+    },
+    {
+      "id": "869bfdfb-b9d7-632b-8710-fa23364721de",
+      "name": "Publish approved video card",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "links",
+        "operation": "updateLink",
+        "linkId": "={{ $json.card.id }}",
+        "revisionMode": "manual",
+        "ifMatchRevision": "={{ $json.revision }}",
+        "jsonBody": "{\"isActive\":true,\"status\":\"live\"}",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        6480,
+        -160
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "c2ba0973-e511-92fb-8506-6012f3ab6474",
+      "name": "Prepare publication check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "\n\nconst work=$('Card saved').first().json;\nif($('Publish approved video card').isExecuted)work.revision=String($('Publish approved video card').first().json.body.revision);\nreturn [{json:work}];"
+      },
+      "position": [
+        6740,
+        360
+      ]
+    },
+    {
+      "id": "fd747747-193c-8ebb-c36b-c3c1cbff4990",
+      "name": "Read resulting publication",
+      "type": "n8n-nodes-orbitpage.orbitPage",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "publication",
+        "operation": "getPublication",
+        "options": {
+          "includeResponseHeaders": true
+        }
+      },
+      "position": [
+        7000,
+        360
+      ],
+      "credentials": {
+        "orbitPageApi": {
+          "id": "REPLACE_WITH_ORBITPAGE_CREDENTIAL",
+          "name": "OrbitPage API account"
+        }
+      }
+    },
+    {
+      "id": "6af1fbdb-337e-79e0-a731-a5a9e44c95f8",
+      "name": "Validate public destination",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function publicDestination(value) {\n  if (typeof value!=='string' || !/^https:\\/\\/[a-z0-9.-]+(?::443)?(?:\\/[a-z0-9/_-]*)?$/i.test(value)) throw new Error('Invalid public HTTPS destination.');\n  return value;\n}\n\nreturn [{json:{url:publicDestination($json.body.data.publicUrl)}}];"
+      },
+      "position": [
+        7260,
+        360
+      ]
+    },
+    {
+      "id": "c6141771-06cf-8022-a9d7-a0e6ec91f1b6",
+      "name": "Check public page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "position": [
+        7520,
+        360
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "8b151063-31eb-c408-083a-018f9eea90a7",
+      "name": "Verify published card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "function verifyPublication(work, publication, response) {\n  const p=publication.data;\n  if (!p || !Number.isSafeInteger(Number(work.revision)) || p.publicationStatus!=='published' || p.publishedRevision < Number(work.revision)) throw new Error('OrbitPage has not confirmed the requested publication.');\n  const html=response.body ?? response.data;\n  if (response.statusCode!==200 || typeof html!=='string' || !html.includes(work.card.id) || !html.includes(work.video.id)) throw new Error('The public HTML did not contain the expected published YouTube card.');\n  return {...work,publication:{revision:p.publishedRevision,url:p.publicUrl},message:'YouTube card published and found in the public page.'};\n}\n\nfunction registryRow(work, state, executionId, now) {\n  return {\n    key:work.key, channel_id:work.config.channelId, video_id:work.video?.id || '', state,\n    title:work.video?.title || 'Channel baseline', execution_id:String(executionId), updated_at:now,\n    payload:JSON.stringify(work.action === 'baseline' ? {ids:work.baselineIds} : {blockId:`smartbio-${work.video.id}`,expiresAt:work.expiresAt}),\n  };\n}\n\nconst work=verifyPublication($('Prepare publication check').first().json,$('Read resulting publication').first().json.body,$json);work.registry=registryRow(work,'published',$execution.id,new Date().toISOString());return [{json:work}];"
+      },
+      "position": [
+        7780,
+        360
+      ]
+    },
+    {
+      "id": "8969d27e-1c2b-1c60-df0b-20c5118c50c8",
+      "name": "Remember verified publication",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Validate Configuration').first().json.tableId }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "={{ $('Verify published card').first().json.key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('Verify published card').first().json.registry.key }}",
+            "channel_id": "={{ $('Verify published card').first().json.registry.channel_id }}",
+            "video_id": "={{ $('Verify published card').first().json.registry.video_id }}",
+            "state": "={{ $('Verify published card').first().json.registry.state }}",
+            "title": "={{ $('Verify published card').first().json.registry.title }}",
+            "execution_id": "={{ $('Verify published card').first().json.registry.execution_id }}",
+            "updated_at": "={{ $('Verify published card').first().json.registry.updated_at }}",
+            "payload": "={{ $('Verify published card').first().json.registry.payload }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "channel_id",
+              "displayName": "channel_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "position": [
+        8040,
+        360
+      ]
+    },
+    {
+      "id": "24a12e2b-06be-61a1-6137-b4f8b9b93410",
+      "name": "Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "\n\nconst selected=$('Select next video').first().json;let message=selected.message||'Declined or expired video discarded; the previous public content was preserved.';\nif($('Verify published card').isExecuted)message=$('Verify published card').first().json.message;\nreturn [{json:{message,videoId:selected.video?.id||null,mode:selected.config?.mode||null}}];"
+      },
+      "position": [
+        8300,
+        600
+      ]
+    },
+    {
+      "id": "932b2db9-e6fc-eb8b-acda-56aa92559366",
+      "name": "Start here",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "# OrbitPage Smart Bio · YouTube\n\nNew public video → native YouTube player. No YouTube key and no AI charges.\n\n1. Install n8n-nodes-orbitpage ≥0.3.2.\n2. Select one OrbitPage credential on every OrbitPage node. Scopes: workspace:read, links:read, links:write, publication:read, publication:write.\n3. Set the UC channel ID in Configuration.\n4. Choose AUTOMATIC or EMAIL_APPROVAL. For approval, select SMTP and set sender/recipient.\n5. The registry is created automatically. Use a dedicated table name for each workflow/workspace.\n6. First normal run records a baseline without importing old videos. To test an existing video, set MANUAL_VIDEO_ID and run the manual trigger.\n7. Clear MANUAL_VIDEO_ID after testing, then publish the schedule.\n\nTitles/descriptions are optional. The native player remains gated by the page consent settings. Never run overlapping manual replays against the scheduled workflow.",
+        "width": 1040,
+        "height": 540,
+        "color": 5
+      },
+      "position": [
+        -80,
+        -420
+      ]
+    },
+    {
+      "id": "fb97e851-f2e5-5287-a1e4-3f632bb572a8",
+      "name": "Detection and deduplication",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "## 1 · Feed and persistent registry\n\nPublic Atom feed; channel and video IDs are validated. One new video per poll, oldest first. The first poll records current IDs. Processing/pending/declined/expired/published rows prevent repeat cards and repeat requests.\n\nA processing row after an error is intentionally held for review. Inspect the execution and current card before clearing only that row. Do not reset the whole table.",
+        "width": 1370,
+        "height": 260,
+        "color": 4
+      },
+      "position": [
+        1000,
+        -40
+      ]
+    },
+    {
+      "id": "c6ae9b49-87cd-9462-48a1-b70258da7735",
+      "name": "Reviewable draft and automatic mode",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "## 2 · Save only the requested card\n\nPreserve all existing blocks. EMAIL_APPROVAL uses the public API publish=0 option to save a private draft. AUTOMATIC saves a live card immediately. Both modes check revisions and refuse to release unrelated private drafts.\n\nApproval is bound to the exact staged revision. A stable smartbio-VIDEO_ID makes retries identifiable. Requires an OrbitPage API version exposing publish=0 on PUT /links.",
+        "width": 1610,
+        "height": 260,
+        "color": 6
+      },
+      "position": [
+        2800,
+        -430
+      ]
+    },
+    {
+      "id": "95808579-6bdd-f8f4-af48-ae4bf5c3727b",
+      "name": "Approval and verification",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "## 3 · Email decision → exact card → live check\n\nApprova e pubblica / Rifiuta. Default timeout: 48 hours. Rejection or timeout discards only the unchanged proposed card, republishing the prior content; no repeat request. Concurrent changes stop automatic cleanup for manual review.\n\nBefore publishing, re-read the card and compare the exact draft revision and content. Stale writes stop; no blind publication retry. Finally check publication metadata and the expected card in public HTML. This is an HTTP smoke check; video playback can still be restricted by YouTube.",
+        "width": 1550,
+        "height": 300,
+        "color": 3
+      },
+      "position": [
+        5120,
+        -560
+      ]
+    }
+  ],
+  "connections": {
+    "Manual check or replay": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check YouTube every 15 minutes": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Create or reuse registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or reuse registry": {
+      "main": [
+        [
+          {
+            "node": "Validate Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Configuration": {
+      "main": [
+        [
+          {
+            "node": "Read OrbitPage API contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read OrbitPage API contract": {
+      "main": [
+        [
+          {
+            "node": "Require private draft support",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Require private draft support": {
+      "main": [
+        [
+          {
+            "node": "Read public YouTube feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read public YouTube feed": {
+      "main": [
+        [
+          {
+            "node": "Parse channel feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse channel feed": {
+      "main": [
+        [
+          {
+            "node": "Read channel registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read channel registry": {
+      "main": [
+        [
+          {
+            "node": "Select next video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select next video": {
+      "main": [
+        [
+          {
+            "node": "Has new work",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has new work": {
+      "main": [
+        [
+          {
+            "node": "Claim video or remember baseline",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim video or remember baseline": {
+      "main": [
+        [
+          {
+            "node": "Is a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is a video": {
+      "main": [
+        [
+          {
+            "node": "Read current blocks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read current blocks": {
+      "main": [
+        [
+          {
+            "node": "Check publication before staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check publication before staging": {
+      "main": [
+        [
+          {
+            "node": "Prepare YouTube card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare YouTube card": {
+      "main": [
+        [
+          {
+            "node": "Card needs saving",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Card needs saving": {
+      "main": [
+        [
+          {
+            "node": "Save video card",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Card saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save video card": {
+      "main": [
+        [
+          {
+            "node": "Card saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Card saved": {
+      "main": [
+        [
+          {
+            "node": "Remember saved card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember saved card": {
+      "main": [
+        [
+          {
+            "node": "Email approval required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email approval required": {
+      "main": [
+        [
+          {
+            "node": "Email approval — Approva or Rifiuta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare publication check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email approval — Approva or Rifiuta": {
+      "main": [
+        [
+          {
+            "node": "Read approval decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read approval decision": {
+      "main": [
+        [
+          {
+            "node": "Video was approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video was approved": {
+      "main": [
+        [
+          {
+            "node": "Read blocks after approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read declined draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read declined draft": {
+      "main": [
+        [
+          {
+            "node": "Check declined publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check declined publication": {
+      "main": [
+        [
+          {
+            "node": "Prepare declined draft cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare declined draft cleanup": {
+      "main": [
+        [
+          {
+            "node": "Discard declined video draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discard declined video draft": {
+      "main": [
+        [
+          {
+            "node": "Remember declined or expired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read blocks after approval": {
+      "main": [
+        [
+          {
+            "node": "Check publication after approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check publication after approval": {
+      "main": [
+        [
+          {
+            "node": "Review exact hidden card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review exact hidden card": {
+      "main": [
+        [
+          {
+            "node": "Publish approved video card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish approved video card": {
+      "main": [
+        [
+          {
+            "node": "Prepare publication check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare publication check": {
+      "main": [
+        [
+          {
+            "node": "Read resulting publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read resulting publication": {
+      "main": [
+        [
+          {
+            "node": "Validate public destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate public destination": {
+      "main": [
+        [
+          {
+            "node": "Check public page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check public page": {
+      "main": [
+        [
+          {
+            "node": "Verify published card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify published card": {
+      "main": [
+        [
+          {
+            "node": "Remember verified publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember verified publication": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember declined or expired": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Rome",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": false
+  }
+}

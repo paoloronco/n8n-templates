@@ -42,11 +42,11 @@ The player-only presentation is available in the shared OrbitPage renderer from
    and the expected card ID and video ID in the public HTML.
 
 The card uses OrbitPage's YouTube connected-service preset, a responsive 16:9
-player on `youtube-nocookie.com`, and the page's marketing-consent gate. Title
+player on `youtube-nocookie.com`, and the page's preferences/experience consent gate. Title
 and description above the player are optional and disabled by default.
 
 If the page uses an external consent platform with automatic iframe blocking,
-declare the YouTube privacy-enhanced video widget there and enable its required
+declare the YouTube privacy-enhanced video widget there and enable its Experience purpose (3 for iubenda) or the equivalent required
 consent purpose. Otherwise that platform may suppress the iframe even after
 OrbitPage permits it. This workflow does not disable provider consent checks.
 
@@ -130,7 +130,7 @@ test video's registry row. Never clear the entire table to fix one video.
 - Public HTML verification is a smoke check, not a playback guarantee. The video
   must allow embedding, and YouTube age, region or account restrictions still apply.
 - Optional content stays behind the existing page consent settings. The workflow
-  does not make marketing content “necessary” to bypass the consent gate.
+  uses the optional preferences/experience category; it never marks the player as necessary.
 
 ## Costs and data
 

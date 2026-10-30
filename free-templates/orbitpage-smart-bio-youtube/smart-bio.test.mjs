@@ -65,7 +65,7 @@ test('approval mode builds a hidden native YouTube card with optional text off',
   assert.deepEqual(prepared.links[1],{...existing,position:1});
   assert.equal(prepared.card.title,'');assert.equal(prepared.card.description,'');
   assert.equal(prepared.card.status,'draft');assert.equal(prepared.card.isActive,false);
-  assert.deepEqual(JSON.parse(prepared.card.content),{provider:'youtube',snippet:video.url,consentCategory:'marketing',height:360});
+  assert.deepEqual(JSON.parse(prepared.card.content),{provider:'youtube',snippet:video.url,consentCategory:'preferences',height:360});
 });
 
 test('automatic mode uses a live card and never requires an AI key',()=>{

@@ -78,7 +78,7 @@ export function registryRow(work, state, executionId, now) {
 
 export function proposedCard(work) {
   return { id:`smartbio-${work.video.id}`, type:'embed', title:work.config.showTitle ? work.video.title : '', description:work.config.showDescription ? work.video.description : '',
-    url:'', content:JSON.stringify({provider:'youtube',snippet:work.video.url,consentCategory:'marketing',height:360}),
+    url:'', content:JSON.stringify({provider:'youtube',snippet:work.video.url,consentCategory:'preferences',height:360}),
     isActive:work.config.mode === 'AUTOMATIC', status:work.config.mode === 'AUTOMATIC' ? 'live' : 'draft',
     availability:'available', position:0, campaignName:'orbitpage-smart-bio' };
 }

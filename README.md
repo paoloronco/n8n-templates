@@ -16,7 +16,7 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 | Template | Description | GitHub | Gumroad | n8n Creators | Setup guide |
 |---|---|---|---|---|---|
-| OrbitPage Smart Bio — YouTube | Add new YouTube videos as native players, automatically or after email approval. No YouTube API key. | [Folder](./free-templates/orbitpage-smart-bio-youtube/) | — | — | — |
+| Add New YouTube Videos to OrbitPage | Add new YouTube videos as native players, automatically or after email approval. No YouTube API key. | [Folder](./free-templates/add-new-youtube-videos-to-orbitpage/) | — | — | — |
 | OrbitPage AI Page Editor | Edit OrbitPage pages through AI chat, review validated previews and approve publication. | [Folder](./free-templates/orbitpage-ai-page-editor/) | [View](https://paoloronco.gumroad.com/l/orbitpage-ai-pageeditor) | — | [Guide](./free-templates/orbitpage-ai-page-editor/README.md) |
 | OrbitPage Release Guardian | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. | [Folder](./free-templates/orbitpage-release-guardian/) | — | — | [Guide](./free-templates/orbitpage-release-guardian/README.md) |
 | Website AI Chatbot | Authenticated website RAG chatbot with OpenAI, Qdrant, Cohere reranking and structured JSON responses. | [Folder](./free-templates/website-ai-chatbot/) | [View](https://paoloronco.gumroad.com/l/ai-website-chatbot) | [View](https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/) | [Guide](https://paoloronco.notion.site/Website-AI-Chatbot-404f0ba27c32807bad10d69e95ef3179?pvs=73) |

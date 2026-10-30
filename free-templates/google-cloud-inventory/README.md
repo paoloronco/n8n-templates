@@ -1,17 +1,17 @@
 # Audit Google Cloud inventory and IAM changes with BigQuery and Sheets
 
-Reusable Google Cloud inventory and change-audit workflows for n8n. **Start with v2** for IAM findings, a Google Sheets review dashboard, HTML/CSV reports and conditional email digests.
+Reusable Google Cloud inventory and change-audit workflows for n8n. **Start with v2.1.0** for IAM findings, a Google Sheets review dashboard, HTML/CSV reports and conditional email digests.
 
 ## Releases
 
 | Version | Workflow | Documentation | Distribution |
 | --- | --- | --- | --- |
-| **v2 — current** | [Importable JSON](./v2/google-cloud-inventory-workflow.json) | [Quick setup](./v2/README.md) · [Complete guide](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73) | [Gumroad](https://paoloronco.gumroad.com/l/googlecloud-inventorychange) |
+| **v2.1.0 — current** | [Importable JSON](./v2/google-cloud-inventory-workflow.json) | [Quick setup](./v2/README.md) · [Complete guide](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73) | [Gumroad](https://paoloronco.gumroad.com/l/googlecloud-inventorychange) |
 | v1 — legacy | [Original JSON](./Google%20Cloud%20Inventory%20%26%20Change%20Audit.json) | [Legacy reference below](#legacy-v1-documentation) | Retained for existing installations. |
 
 ## Current release
 
-The 47-node v2 template collects resources within a configured project, folder or organization scope, assesses selected IAM/governance controls, persists completed snapshots in BigQuery and updates a five-tab Google Sheets dashboard. The first successful scan establishes a baseline.
+The 49-node v2.1.0 template collects resources across an explicit list of projects (or one folder/organization scope), assesses selected IAM/governance controls, persists completed snapshots in BigQuery and updates a five-tab Google Sheets dashboard. The first successful scan establishes a baseline. The first run creates one central BigQuery dataset/four tables and an n8n registry; users configure APIs, IAM, credentials and an editable Sheets model copy. No Cloud Run or Cloud Scheduler deployment is required.
 
 [Copy the Google Sheets model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy) and follow the [v2 README](./v2/README.md). Create your own editable spreadsheet and configure your own Google API/SMTP credentials before running.
 

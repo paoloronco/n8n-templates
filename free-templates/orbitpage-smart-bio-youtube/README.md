@@ -1,7 +1,7 @@
 # OrbitPage Smart Bio — New YouTube Videos to Your Page
 
 Add new public YouTube videos to an OrbitPage as native, responsive YouTube
-players. Choose immediate automatic publication or a private draft followed by
+players with a cover and Play button. Choose immediate automatic publication or a private draft followed by
 email approval. No YouTube API key, Google Cloud project, OAuth connection to
 YouTube, or AI provider is required.
 
@@ -19,7 +19,7 @@ YouTube, or AI provider is required.
 - A reachable n8n HTTPS URL for the native signed approval links. If the instance
   is behind an access gateway, the approver must be able to authenticate there.
 
-The player-only presentation is available in the shared OrbitPage renderer from
+The cover-and-player presentation is available in the shared OrbitPage renderer from
 4.21.162. Older renderers may show an additional YouTube heading.
 
 ## What happens
@@ -42,7 +42,8 @@ The player-only presentation is available in the shared OrbitPage renderer from
    and the expected card ID and video ID in the public HTML.
 
 The card uses OrbitPage's YouTube connected-service preset, a responsive 16:9
-player on `youtube-nocookie.com`, and the page's preferences/experience consent gate. Title
+cover and an on-click player on `youtube-nocookie.com`, behind the page's
+preferences/experience consent gate. The thumbnail is also gated. Title
 and description above the player are optional and disabled by default.
 
 If the page uses an external consent platform with automatic iframe blocking,

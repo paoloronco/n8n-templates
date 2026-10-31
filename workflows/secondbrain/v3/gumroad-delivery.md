@@ -2,9 +2,9 @@
 Thank you for downloading this personal second-brain capture workflow. It helps you save diverse content from Telegram—such as Instagram Reels, public TikTok videos, webpages, screenshots, and free-form notes—into a structured Notion database with concise English titles, summaries, and actionable tasks.
 
 ## Download & Documentation
-Use the workflow JSON supplied with this product, or [download the current v3 workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/free-templates/secondbrain/v3/Telegram-Multimodal-to-Notion-Second-Brain_sanitized.json).
+Use the workflow JSON supplied with this product, or [download the current v3 workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/secondbrain/v3/Telegram-Multimodal-to-Notion-Second-Brain_sanitized.json).
 
-[GitHub version folder](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/secondbrain/v3) · [Complete setup guide](https://paoloronco.notion.site/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998)
+[GitHub version folder](https://github.com/paoloronco/n8n-templates/tree/main/workflows/secondbrain/v3) · [Complete setup guide](https://paoloronco.notion.site/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998)
 
 ## What's Included
 

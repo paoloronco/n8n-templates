@@ -55,9 +55,9 @@ Full technical documentation: https://paoloronco.notion.site/Telegram-Multimodal
 
 ## Download v3
 
-- [Download the workflow JSON](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/free-templates/secondbrain/v3/Telegram-Multimodal-to-Notion-Second-Brain_sanitized.json)
+- [Download the workflow JSON](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/secondbrain/v3/Telegram-Multimodal-to-Notion-Second-Brain_sanitized.json)
 - [Get the free product on Gumroad (EUR 0+, optional contribution)](https://paoloronco.gumroad.com/l/telegram-notion-secondbrain-v3)
-- [Browse this version on GitHub](https://github.com/paoloronco/n8n-templates/tree/main/free-templates/secondbrain/v3)
+- [Browse this version on GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/secondbrain/v3)
 - [Read the complete setup and technical guide](https://paoloronco.notion.site/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998)
 
 ## Supported inputs and limits

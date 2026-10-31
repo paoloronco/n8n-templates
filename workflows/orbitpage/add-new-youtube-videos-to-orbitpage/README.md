@@ -16,7 +16,7 @@ Add new public YouTube videos to your OrbitPage as native video cards with a cov
 
 ## Setup
 
-1. Import [the workflow JSON](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/add-new-youtube-videos-to-orbitpage/Add_New_YouTube_Videos_to_OrbitPage.json) and install `n8n-nodes-orbitpage` 0.3.2 or newer.
+1. Import [the workflow JSON](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/add-new-youtube-videos-to-orbitpage/Add_New_YouTube_Videos_to_OrbitPage.json) and install `n8n-nodes-orbitpage` 0.3.2 or newer.
 2. Select the same OrbitPage credential on all OrbitPage nodes, including `Save video card`; keep tokens in n8n credentials.
 3. In `Configuration`, set `YOUTUBE_CHANNEL_ID` to the channel's `UC…` ID, choose `MODE` and set a dedicated `REGISTRY_TABLE_NAME`.
 4. For `EMAIL_APPROVAL`, select SMTP on `Email approval — Approva or Rifiuta` and set `FROM_EMAIL` and `APPROVAL_EMAIL` to authorized addresses.

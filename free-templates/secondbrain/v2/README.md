@@ -1,4 +1,6 @@
-# Instagram Reel to Notion Second Brain
+# Instagram Reel to Notion Second Brain — v2
+
+[All Second Brain versions](../README.md) · [Multimodal v3](../v3/README.md)
 
 ## Quick Overview
 

@@ -30,7 +30,7 @@ Importing the JSON and creating a service account alone is not enough. Complete 
 | n8n | Import into a new workflow, choose credentials in all eleven HTTP nodes, fill Configuration, execution-link host, timezone and an Error Workflow. | The `gcp_inventory_template_runs` Data Table and run/delivery records. |
 | Email and schedule | Configure SMTP, sender and recipient if `sendEmail=true`; validate manually, then publish to enable the daily schedule. | Conditional digests when enabled. No Cloud Run, VM, container, Cloud Scheduler or separate collector deployment is needed. |
 
-Use an n8n release supporting the supplied node versions: Data Table, HTTP Request 4.2, Code 2 and Send Email 2.1. No usable credentials are included; the SMTP slot is a null placeholder.
+Use an n8n release supporting the supplied node versions: Data Table, HTTP Request 4.2, Code 2 and Send Email 2.1. No usable credentials are included; select your own Google credentials and SMTP credential when email is enabled.
 
 ### Required access
 

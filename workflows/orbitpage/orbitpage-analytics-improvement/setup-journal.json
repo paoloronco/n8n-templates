@@ -1,0 +1,273 @@
+{
+  "name": "Setup · OrbitPage growth journal",
+  "nodes": [
+    {
+      "id": "cae1e4e3-9afc-42fd-9e28-f14cbf81bf18",
+      "name": "Initialize growth journal",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "6b7a7705-5b4a-4708-b4a2-d0d4184af547",
+      "name": "Create growth journal",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "OrbitPage growth template journal",
+        "columns": {
+          "column": [
+            {
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "context",
+              "type": "string"
+            },
+            {
+              "name": "execution_id",
+              "type": "string"
+            },
+            {
+              "name": "snapshot",
+              "type": "string"
+            },
+            {
+              "name": "updated_at",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "ae38f377-f1b5-4776-817a-4b3955bb0e78",
+      "name": "Read growth control",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create growth journal').first().json.id }}",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "control"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "110730f1-931b-4f24-9731-330995b6ee90",
+      "name": "Seed growth control",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(i=>i.json).filter(r=>r.id);if(rows.length)throw Error('Control already initialized; do not run setup twice');return [{json:{key:'control',state:'idle',context:'growth',execution_id:'setup',snapshot:JSON.stringify({runs:{},plan:null,lastVerified:null}),updated_at:new Date().toISOString()}}];"
+      }
+    },
+    {
+      "id": "f57c45fe-ce41-412f-9d61-d74af3b5a72a",
+      "name": "Insert growth control",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Create growth journal').first().json.id }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $json.key }}",
+            "state": "={{ $json.state }}",
+            "context": "={{ $json.context }}",
+            "execution_id": "={{ $json.execution_id }}",
+            "snapshot": "={{ $json.snapshot }}",
+            "updated_at": "={{ $json.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "growth-setup-result",
+      "name": "Copy this journal table ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{tableId:$('Create growth journal').first().json.id,control:$('Insert growth control').first().json,kind:'growth',nextStep:'Select this table in every Data Table row node of the main workflow.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Initialize growth journal": {
+      "main": [
+        [
+          {
+            "node": "Create growth journal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create growth journal": {
+      "main": [
+        [
+          {
+            "node": "Read growth control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read growth control": {
+      "main": [
+        [
+          {
+            "node": "Seed growth control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed growth control": {
+      "main": [
+        [
+          {
+            "node": "Insert growth control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert growth control": {
+      "main": [
+        [
+          {
+            "node": "Copy this journal table ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none"
+  },
+  "active": false,
+  "pinData": {}
+}

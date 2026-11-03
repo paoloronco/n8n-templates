@@ -18,6 +18,8 @@ The email contains **campaign-launch-kit.json**, **campaign-qr.svg** and **READM
 
 Run the setup companion, configure tables/credentials/email, submit a test brief and approve the exact package. Verify price, deadline, CTA, subpage content and delivered files. Replay the identical brief to confirm it produces no second publication or delivery. Reject a new request to confirm no page is published. Rejected/expired requests remain recorded; use a new reviewed version for a retry.
 
+The import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.
+
 ## Workflow canvas
 
 ![Workflow canvas](./canvas.png)
@@ -30,7 +32,7 @@ Run the setup companion, configure tables/credentials/email, submit a test brief
 4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.
 5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.
 6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.
-7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Success/error execution data is not retained by default; maintain private diagnostics appropriate for your environment.
+7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.
 
 ### Select the same journal in these nodes
 

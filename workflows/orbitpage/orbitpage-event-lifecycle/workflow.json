@@ -1,47 +1,7 @@
 {
-  "name": "OrbitPage Event Lifecycle",
-  "description": "# Update an OrbitPage Event Before, During and After\n\nPublish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR.\n\n![OrbitPage workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-event-lifecycle/cover.png)\n\n## How it works\n\nSubmit a complete versioned event plan through the owner form. SMTP review shows all three phase snapshots and absolute timestamps. Approval saves the exact plan; a five-minute schedule selects the current phase, including after downtime. It reads the complete baseline, claims the journal, saves the merged native subpage collection privately, verifies the entire result, publishes the exact revision and checks the public HTML before recording success. The final output includes a locally generated SVG QR for the stable event URL.\n\n## Input and operating rules\n\nPaste [example-input.json](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-event-lifecycle/example-input.json) into the **event_plan** form field and replace dates, facts and HTTPS destinations. Timestamps require an explicit UTC offset. The timezone is descriptive; the supplied instants determine transitions. Titles and descriptions must be trimmed, non-empty strings. Before start selects **before**, start inclusive selects **during**, end inclusive selects **after**.\n\nOne imported workflow and journal owns one event. Keep its id and slug, increment version for any reviewed change, and submit all three phase snapshots again. Set paused=true in a new reviewed version to suspend transitions. A repeat of the identical approved plan or already verified phase performs no mutation. Use a separate workflow and separately named journal for another event.\n\nAn approved phase may publish the workspace. The workflow refuses pre-existing unpublished changes and owned subpage drift. Do not share the intake form publicly. The QR is stable because the subpage slug stays fixed; it does not route through a tracking provider.\n\n## First run\n\nRun the setup companion, configure all table/credential/email fields, and test the form with dates suitable for your test workspace. Confirm the approval link, run the schedule branch, inspect the native subpage and the **Verified event result and stable QR** output. Test each date boundary before enabling the five-minute schedule.\n\n## Workflow canvas\n\n![Workflow canvas](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-event-lifecycle/canvas.png)\n\n## Requirements and setup\n\n1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.\n2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, pages:read, pages:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.\n3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.\n4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.\n5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.\n6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.\n7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Success/error execution data is not retained by default; maintain private diagnostics appropriate for your environment.\n\n### Select the same journal in these nodes\n\n- Store approved plan\n- Read active plan and journal\n- Reserve transition intent\n- Read plan registration state\n- Persist prepared event revision\n- Store verified event journal\n\n## Concurrency and recovery\n\nUse one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.\n\nNormal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.\n\nBefore retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.\n\nCampaign publication is recorded before email. If sending fails or acceptance is unknown, verify publication and SMTP logs, then resend the saved files manually if required. Replaying the same brief will not automatically send a duplicate. A 250 SMTP acceptance means the sending server accepted the message; it does not prove inbox delivery.\n\nJournal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.\n\n## Files and validation\n\n- **workflow.json** — executable import, without credentials or instance identifiers.\n- **setup-journal.json** — native one-time journal creation.\n- **README.md** — setup, examples, operation and recovery.\n- **VALIDATION.md** — actual acceptance scope and boundaries.\n- **cover.png / thumbnail.png** — original design-edition artwork, reused.\n- **example-input.json** — editable form payload.\n- **THIRD_PARTY_NOTICES.md** — embedded QR library MIT attribution.\n\nSee [validation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-event-lifecycle/VALIDATION.md) and the [dependency-free checks](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.\n\n[More OrbitPage templates](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/README.md)\n",
+  "name": "Update an OrbitPage Event Before, During and After",
+  "description": "# Update an OrbitPage Event Before, During and After\n\nPublish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR.\n\n![OrbitPage workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-event-lifecycle/cover.png)\n\n## How it works\n\nSubmit a complete versioned event plan through the owner form. SMTP review shows all three phase snapshots and absolute timestamps. Approval saves the exact plan; a five-minute schedule selects the current phase, including after downtime. It reads the complete baseline, claims the journal, saves the merged native subpage collection privately, verifies the entire result, publishes the exact revision and checks the public HTML before recording success. The final output includes a locally generated SVG QR for the stable event URL.\n\n## Input and operating rules\n\nPaste [example-input.json](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-event-lifecycle/example-input.json) into the **event_plan** form field and replace dates, facts and HTTPS destinations. Timestamps require an explicit UTC offset. The timezone is descriptive; the supplied instants determine transitions. Titles and descriptions must be trimmed, non-empty strings. Before start selects **before**, start inclusive selects **during**, end inclusive selects **after**.\n\nOne imported workflow and journal owns one event. Keep its id and slug, increment version for any reviewed change, and submit all three phase snapshots again. Set paused=true in a new reviewed version to suspend transitions. A repeat of the identical approved plan or already verified phase performs no mutation. Use a separate workflow and separately named journal for another event.\n\nAn approved phase may publish the workspace. The workflow refuses pre-existing unpublished changes and owned subpage drift. Do not share the intake form publicly. The QR is stable because the subpage slug stays fixed; it does not route through a tracking provider.\n\n## First run\n\nRun the setup companion, configure all table/credential/email fields, and test the form with dates suitable for your test workspace. Confirm the approval link, run the schedule branch, inspect the native subpage and the **Verified event result and stable QR** output. Test each date boundary before enabling the five-minute schedule.\n\nThe import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.\n\n## Workflow canvas\n\n![Workflow canvas](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-event-lifecycle/canvas.png)\n\n## Requirements and setup\n\n1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.\n2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, pages:read, pages:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.\n3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.\n4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.\n5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.\n6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.\n7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.\n\n### Select the same journal in these nodes\n\n- Store approved plan\n- Read active plan and journal\n- Reserve transition intent\n- Read plan registration state\n- Persist prepared event revision\n- Store verified event journal\n\n## Concurrency and recovery\n\nUse one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.\n\nNormal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.\n\nBefore retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.\n\nJournal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.\n\n## Files and validation\n\n- **workflow.json** — executable import, without credentials or instance identifiers.\n- **setup-journal.json** — native one-time journal creation.\n- **README.md** — setup, examples, operation and recovery.\n- **VALIDATION.md** — actual acceptance scope and boundaries.\n- **cover.png / thumbnail.png** — original design-edition artwork, reused.\n- **example-input.json** — editable form payload.\n- **THIRD_PARTY_NOTICES.md** — embedded QR library MIT attribution.\n\nSee [validation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-event-lifecycle/VALIDATION.md) and the [dependency-free checks](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.\n\n[More OrbitPage templates](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/README.md)\n",
   "nodes": [
-    {
-      "parameters": {},
-      "id": "9c3d5849-64d7-4b79-bc4b-d5735df6ce3c",
-      "name": "Run isolated design examples",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        928,
-        256
-      ],
-      "notesInFlow": false
-    },
-    {
-      "parameters": {
-        "jsCode": "function designRules() {\n  function eventPhase(plan, now) {\n    const start = Date.parse(plan.startAt), end = Date.parse(plan.endAt), time = Date.parse(now);\n    if (![start, end, time].every(Number.isFinite) || start >= end) throw Error('invalid_event_window');\n    if (!/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(plan.startAt) || !/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(plan.endAt)) throw Error('explicit_offset_required');\n    return time < start ? 'before' : time < end ? 'during' : 'after';\n  }\n  function nextTransition({ plan, now, recordedPhase, approvedPlanVersion, currentOwnedContent, expectedOwnedContent, draftRevision, publishedRevision, pending }) {\n    if (plan.paused) return { action: 'paused' };\n    if (plan.version !== approvedPlanVersion) return { action: 'review_required', reason: 'plan_changed' };\n    if (pending) return { action: 'reconcile', reason: 'pending_or_unknown_outcome' };\n    if (draftRevision !== publishedRevision) return { action: 'review_required', reason: 'unpublished_draft' };\n    if (JSON.stringify(currentOwnedContent) !== JSON.stringify(expectedOwnedContent)) return { action: 'review_required', reason: 'manual_edit' };\n    const phase = eventPhase(plan, now);\n    return phase === recordedPhase ? { action: 'no_change', phase } : { action: 'prepare', phase, key: `${plan.id}:${plan.version}:${phase}` };\n  }\n  function mergePage(existing, proposed, ownedId) {\n    if (!Array.isArray(existing)) throw Error('invalid_pages');\n    const current = existing.find(p => p.id === proposed.id);\n    if (current && proposed.id !== ownedId) throw Error('unowned_page');\n    if (existing.some(p => p.slug === proposed.slug && p.id !== ownedId)) throw Error('slug_collision');\n    if (!current && existing.length >= 20) throw Error('page_limit');\n    return current ? existing.map(p => p.id === ownedId ? proposed : p) : [...existing, proposed];\n  }\n  function campaign(brief) {\n    if (!/^[a-z0-9][a-z0-9-]{0,47}$/.test(brief.id)) throw Error('invalid_campaign_id');\n    if (!Number.isSafeInteger(brief.priceMinor) || brief.priceMinor < 0 || !/^[A-Z]{3}$/.test(brief.currency)) throw Error('invalid_price');\n    if (!brief.title?.trim() || brief.title.length > 80 || !brief.audience?.trim()) throw Error('incomplete_brief');\n    const deadline = Date.parse(brief.endsAt);\n    if (!Number.isFinite(deadline) || !/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(brief.endsAt)) throw Error('invalid_deadline');\n    const target = new URL(brief.ctaUrl), page = new URL(brief.pageUrl);\n    if ([target, page].some(u => u.protocol !== 'https:' || u.username || u.password)) throw Error('https_required');\n    const price = `${(brief.priceMinor / 100).toFixed(2)} ${brief.currency}`;\n    const facts = { title: brief.title.trim(), price, endsAt: brief.endsAt, ctaUrl: target.href };\n    const urls = {};\n    for (const [channel, medium] of [['social', 'paid_social'], ['qr', 'offline']]) {\n      const url = new URL(page);\n      for (const [key, value] of Object.entries({ utm_source: channel, utm_medium: medium, utm_campaign: brief.id })) url.searchParams.set(key, value);\n      urls[channel] = url.href;\n    }\n    return { facts, page: { title: facts.title, description: `${price} · ${facts.endsAt}`, ctaUrl: facts.ctaUrl }, ad: { headline: facts.title, body: `${price} · ${facts.endsAt}`, destination: urls.social }, urls, qrPayload: urls.qr };\n  }\n  function growth(report, minimum = 100) {\n    if (report.configured !== true) return { state: 'not_configured', recommendation: null };\n    if (![7, 30, 90].includes(report.periodDays)) throw Error('unexpected_period');\n    const s = report.summary;\n    if (!s || ![s.visits, s.clicks, report.comparison?.previous?.visits].every(n => Number.isFinite(n) && n >= 0)) throw Error('invalid_metrics');\n    const observed = { periodDays: report.periodDays, visits: s.visits, clicks: s.clicks, clicksPer100Visits: s.visits ? Math.round(s.clicks / s.visits * 1000) / 10 : 0 };\n    if (s.visits < minimum || report.comparison.previous.visits < minimum) return { state: 'insufficient_data', observed, recommendation: null };\n    if (!report.detailed || !report.links?.length) return { state: 'summary_only', observed, recommendation: null };\n    return { state: 'eligible_for_one_hypothesis', observed, recommendation: { kind: 'review_cta_clarity', hypothesis: 'Review one existing CTA against the most clicked destination.', causalClaim: false } };\n  }\n  return { eventPhase, nextTransition, mergePage, campaign, growth };\n}\nfunction exampleScenarios(kind) {\n  const r = designRules(), outcomes = [];\n  function check(name, test) {\n    try { if (test() !== true) throw Error('assertion_failed'); outcomes.push({ scenario: name, passed: true }); }\n    catch (error) { throw Error(`${name}: ${error.message}`); }\n  }\n  function throws(fn, message) { try { fn(); return false; } catch (e) { return e.message === message; } }\n  const plan = { id: 'demo-workshop', version: 1, startAt: '2026-12-05T10:00:00+01:00', endAt: '2026-12-05T18:00:00+01:00', paused: false };\n  const context = { plan, now: '2026-12-05T10:00:00+01:00', recordedPhase: 'before', approvedPlanVersion: 1, currentOwnedContent: ['approved-before'], expectedOwnedContent: ['approved-before'], draftRevision: 8, publishedRevision: 8, pending: false };\n  const brief = { id: 'photo-workshop', title: 'Photography workshop', audience: 'Beginners', priceMinor: 4900, currency: 'EUR', endsAt: '2026-12-05T18:00:00+01:00', ctaUrl: 'https://example.com/book', pageUrl: 'https://example.com/demo/photo-workshop' };\n  const report = { configured: true, detailed: true, periodDays: 7, summary: { visits: 250, clicks: 330 }, comparison: { previous: { visits: 200 } }, links: [{ label: 'portfolio', value: 100 }] };\n  if (kind === 'event') {\n    check('start boundary selects during', () => r.eventPhase(plan, context.now) === 'during');\n    check('end boundary selects after', () => r.eventPhase(plan, plan.endAt) === 'after');\n    check('downtime catches up directly to current phase', () => r.nextTransition({ ...context, now: '2026-12-06T10:00:00+01:00' }).phase === 'after');\n    check('same phase does not repeat publication', () => r.nextTransition({ ...context, recordedPhase: 'during' }).action === 'no_change');\n    check('changed plan requires approval', () => r.nextTransition({ ...context, approvedPlanVersion: 0 }).reason === 'plan_changed');\n    check('foreign draft blocks publication', () => r.nextTransition({ ...context, draftRevision: 9 }).reason === 'unpublished_draft');\n    check('manual change blocks transition', () => r.nextTransition({ ...context, currentOwnedContent: ['manual'] }).reason === 'manual_edit');\n    check('unknown outcome requires reconciliation', () => r.nextTransition({ ...context, pending: true }).action === 'reconcile');\n    check('pause preserves the public phase', () => r.nextTransition({ ...context, plan: { ...plan, paused: true } }).action === 'paused');\n    check('winter and summer use explicit offsets', () => r.eventPhase({ ...plan, startAt: '2027-07-05T10:00:00+02:00', endAt: '2027-07-05T18:00:00+02:00' }, '2027-07-05T08:00:00Z') === 'during');\n    check('missing offset is rejected', () => throws(() => r.eventPhase({ ...plan, startAt: '2026-12-05T10:00:00' }, context.now), 'explicit_offset_required'));\n    check('invalid interval is rejected', () => throws(() => r.eventPhase({ ...plan, endAt: plan.startAt }, context.now), 'invalid_event_window'));\n  } else if (kind === 'campaign') {\n    const kit = r.campaign(brief);\n    check('page and ad share exact price and deadline', () => kit.ad.body === kit.page.description);\n    check('UTM query keeps existing values and escapes inputs', () => new URL(r.campaign({ ...brief, pageUrl: brief.pageUrl + '?ref=owner' }).urls.social).searchParams.get('ref') === 'owner');\n    check('QR points to the same stable campaign destination', () => new URL(kit.qrPayload).pathname === new URL(brief.pageUrl).pathname);\n    const other = { id: 'other', slug: 'other', links: [{ id: 'manual' }] }, proposed = { id: 'campaign-photo-workshop', slug: 'photo-workshop' };\n    check('unmanaged pages are preserved exactly', () => r.mergePage([other], proposed, proposed.id)[0] === other);\n    check('replay updates the same page without duplication', () => r.mergePage([other, proposed], { ...proposed, title: 'updated' }, proposed.id).length === 2);\n    check('slug collision fails closed', () => throws(() => r.mergePage([{ id: 'foreign', slug: proposed.slug }], proposed, proposed.id), 'slug_collision'));\n    check('negative price is rejected', () => throws(() => r.campaign({ ...brief, priceMinor: -1 }), 'invalid_price'));\n    check('non HTTPS destination is rejected', () => throws(() => r.campaign({ ...brief, ctaUrl: 'http://example.com' }), 'https_required'));\n    check('subpage cap is enforced', () => throws(() => r.mergePage(Array.from({ length: 20 }, (_, i) => ({ id: String(i), slug: `page-${i}` })), proposed, proposed.id), 'page_limit'));\n    check('an unowned page cannot be adopted', () => throws(() => r.mergePage([proposed], proposed, 'someone-else'), 'unowned_page'));\n  } else if (kind === 'growth') {\n    check('missing analytics does not create a recommendation', () => r.growth({ configured: false }).state === 'not_configured');\n    check('low current traffic returns insufficient evidence', () => r.growth({ ...report, summary: { visits: 20, clicks: 2 } }).recommendation === null);\n    check('low previous traffic blocks comparison', () => r.growth({ ...report, comparison: { previous: { visits: 0 } } }).state === 'insufficient_data');\n    check('basic plan produces summary only', () => r.growth({ ...report, detailed: false }).state === 'summary_only');\n    check('no link attribution produces summary only', () => r.growth({ ...report, links: [] }).recommendation === null);\n    check('sufficient data allows only one hypothesis', () => r.growth(report).recommendation.kind === 'review_cta_clarity');\n    check('multiple clicks per visit may exceed 100', () => r.growth(report).observed.clicksPer100Visits === 132);\n    check('hypothesis does not claim causality', () => r.growth(report).recommendation.causalClaim === false);\n    check('invalid metrics stop analysis', () => throws(() => r.growth({ ...report, summary: { visits: -1, clicks: 0 } }), 'invalid_metrics'));\n    check('actual supported period is required', () => throws(() => r.growth({ ...report, periodDays: 14 }), 'unexpected_period'));\n  } else throw Error('unknown_design');\n  return { design: kind, mode: 'SAMPLE', scenarios: outcomes.length, allPassed: true, externalCalls: 0, pageWrites: 0, emailsSent: 0, outcomes };\n}\nreturn [{json:exampleScenarios(\"event\")}];"
-      },
-      "id": "1055fd99-f777-4061-a738-97af806faac2",
-      "name": "Check design rules with fictional data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1184,
-        256
-      ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
-    },
-    {
-      "parameters": {},
-      "id": "fc5e6232-a4b1-4971-82df-4badbd3cfe5c",
-      "name": "Sample validation result",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1440,
-        256
-      ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
-    },
     {
       "parameters": {
         "formTitle": "Approve an OrbitPage event plan",
@@ -66,7 +26,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "Owner intake only. Use the example-input.json schema from the README and protect this form with your authenticated deployment. A separate owner email review is required before any page publication."
     },
     {
       "parameters": {
@@ -80,8 +40,7 @@
         1184,
         640
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -117,7 +76,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select SMTP credentials and configure REPLACE_WITH_SENDER_EMAIL / REPLACE_WITH_OWNER_EMAIL. Review links must be reachable using your n8n webhook URL. Approval applies only to the exact displayed payload and expiry.",
       "retryOnFail": false
     },
     {
@@ -154,7 +113,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -266,7 +225,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "parameters": {
@@ -288,7 +247,7 @@
         1312
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "Every five minutes in Europe/Rome. The approved offset-bearing timestamps determine the current phase; unchanged phases do not write."
     },
     {
       "parameters": {
@@ -320,7 +279,7 @@
         1312
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select the journal created by setup-journal.json for this imported instance. Keep exactly one control row. Every Data Table node in this workflow must use the same table.",
       "alwaysOutputData": true
     },
     {
@@ -340,7 +299,7 @@
         1312
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -362,7 +321,7 @@
         1312
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -379,8 +338,7 @@
         2032,
         1312
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -416,7 +374,7 @@
         1312
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -528,7 +486,7 @@
         1296
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "parameters": {
@@ -542,8 +500,7 @@
         2896,
         1296
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -566,7 +523,7 @@
         1296
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select your OrbitPage credential. This node writes only the reviewed payload/revision. Automatic write retries are disabled. If the provider response is unknown, reconcile the saved journal intent before another write.",
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -588,7 +545,7 @@
         1296
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -605,8 +562,7 @@
         3680,
         1296
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -626,7 +582,7 @@
         1296
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "Select your OrbitPage credential. This node writes only the reviewed payload/revision. Automatic write retries are disabled. If the provider response is unknown, reconcile the saved journal intent before another write.",
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -658,7 +614,7 @@
         1296
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle",
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules.",
       "retryOnFail": true,
       "maxTries": 5,
       "waitBetweenTries": 2000
@@ -675,8 +631,7 @@
         4496,
         1296
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notesInFlow": false
     },
     {
       "parameters": {},
@@ -689,7 +644,7 @@
         832
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {},
@@ -702,16 +657,16 @@
         1488
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
-        "content": "# Update an OrbitPage Event Before, During and After\n\nPublish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR.\n\nRun setup-journal.json once, select its table in every Data Table node, select OrbitPage and SMTP credentials, and configure the owner email.\n\n[Full setup and recovery guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
+        "content": "# Update an OrbitPage Event Before, During and After\n\nPublish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR.\n\n## Setup\n1. Install OrbitPage nodes 0.3.6 or newer on a compatible n8n instance (tested on 2.43.6).\n2. Run **setup-journal.json** once and select its table in every Data Table node.\n3. Select OrbitPage and SMTP credentials. Replace the sender and owner email placeholders.\n4. Protect the owner intake form and test the approval links.\n5. Follow the first-run checks in the README before enabling scheduled/form triggers.\n\n## Operating rules\nUse a separate journal per imported instance and keep one writer per workspace. All individual nodes are enabled. Revision checks stop concurrent edits; they do not silently overwrite them.\n\nIf an execution stops with a busy journal, inspect the saved intent and provider state before recovery. Do not clear pending state or repeat a write blindly.\n\n[Complete setup, inputs and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 1200,
         "width": 560
       },
       "id": "2ae5f5c0-b903-42ed-817a-592daf650c13",
-      "name": "Read me - design status and scope",
+      "name": "Start here · setup and operation",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -722,13 +677,13 @@
     },
     {
       "parameters": {
-        "content": "## 1 · Plan and approval\n\nA versioned event plan owns one subpage. Review all three phases and dates before scheduling.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
+        "content": "## 1 · Review the complete event plan\n\nSubmit the versioned JSON from the README. The owner reviews all three content phases, dates and destinations by email. Approval lasts 24 hours. A changed plan needs a larger version and new approval. Rejection or expiry leaves the current plan unchanged.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 486,
         "width": 1590,
         "color": 7
       },
       "id": "9ee83b7c-2743-4c78-80d5-b20332bf31e4",
-      "name": "Design section 1",
+      "name": "Guide · 1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -739,13 +694,13 @@
     },
     {
       "parameters": {
-        "content": "## 2 · Reconcile every five minutes\n\nCalculate the current phase from absolute times, recover missed transitions, and stop on pause, manual edits or pending results.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
+        "content": "## 2 · Select the current phase\n\nEvery five minutes, read the approved plan, journal, publication and full draft. Use absolute timestamps to select before, during or after. Skip an unchanged phase. Pause or a manual content change stops publication until reviewed.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 534,
         "width": 1910,
         "color": 7
       },
       "id": "8144557b-2626-49f4-856e-19aede22a8d8",
-      "name": "Design section 2",
+      "name": "Guide · 2",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -756,13 +711,13 @@
     },
     {
       "parameters": {
-        "content": "## 3 · Publish and verify\n\nPreserve other subpages; exact revision; verify draft and public page before recording success.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
+        "content": "## 3 · Save, publish and verify\n\nClaim the journal before writing. Preserve other content, save privately with its ETag, verify the full result and publish that exact revision. Confirm the public content before recording success. A pending or uncertain result requires reconciliation; never blindly retry a write.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 534,
         "width": 1590,
         "color": 7
       },
       "id": "012abeee-f8de-4040-a41e-cc7b8da7e7df",
-      "name": "Design section 3",
+      "name": "Guide · 3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -773,35 +728,18 @@
     },
     {
       "parameters": {
-        "content": "## 3 · Publish and verify · continued\n\nPreserve other subpages; exact revision; verify draft and public page before recording success.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
+        "content": "## Verified result\n\nRecord the published phase and return its stable URL and SVG QR. Read the recovery guide before releasing a busy journal.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 534,
         "width": 438,
         "color": 7
       },
       "id": "da1f0589-d771-47f4-82fa-8d5d86293f29",
-      "name": "Design section 4",
+      "name": "Guide · 4",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         4432,
         1120
-      ],
-      "notesInFlow": false
-    },
-    {
-      "parameters": {
-        "content": "## Executable design-rule examples\n\nFictional inputs; pure decisions only. SAMPLE does not call OrbitPage, SMTP, AI or a QR service. Passing it does not establish authenticated integration acceptance.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
-        "height": 290,
-        "width": 880,
-        "color": 7
-      },
-      "id": "7c962fd3-ef0d-419c-8221-7c10d69a8f31",
-      "name": "Isolated examples explanation",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        864,
-        128
       ],
       "notesInFlow": false
     },
@@ -834,7 +772,8 @@
         },
         "returnAll": true
       },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "notes": "Select the journal created by setup-journal.json for this imported instance. Keep exactly one control row. Every Data Table node in this workflow must use the same table."
     },
     {
       "id": "93378ab7-545f-43ee-b29d-51b27d59501a",
@@ -854,7 +793,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "0c3d83be-df5b-4661-a758-111f32312619",
@@ -888,7 +828,8 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "id": "3148e049-c356-4a64-92ca-b27b58276ba7",
@@ -908,7 +849,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "db3f836e-bac8-4e0b-af17-74f1abb829ac",
@@ -1018,7 +960,8 @@
           "convertFieldsToString": false
         },
         "options": {}
-      }
+      },
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "id": "2fe6333a-34e3-4633-8cbc-ea2fd7fe2936",
@@ -1032,7 +975,8 @@
       "parameters": {
         "amount": 2,
         "unit": "seconds"
-      }
+      },
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "id": "80143ace-1cd0-4003-b7ab-e7c82671a5e8",
@@ -1065,7 +1009,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "cadb4a36-16b7-4c92-987a-57e518b6af7e",
@@ -1175,7 +1120,8 @@
           "convertFieldsToString": false
         },
         "options": {}
-      }
+      },
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "id": "cfda7031-da37-4d5a-b2ab-8e677e458d02",
@@ -1244,7 +1190,7 @@
     },
     {
       "id": "ea726701-ff48-474f-8c1e-3ca493bbd933",
-      "name": "Implementation and validation status",
+      "name": "Before first run",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -1252,7 +1198,7 @@
         -224
       ],
       "parameters": {
-        "content": "# Implemented template · November 2026\n\nAll nodes enabled. Authenticated acceptance covered publication, public verification, journal guards and SMTP; analytics AI used controlled sufficient-traffic input and approval decisions.\n\nRead VALIDATION.md and the [current guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle). Configure and verify your own instance before activation.",
+        "content": "# Before first run\n\n**Requires:** OrbitPage workspace/token, OrbitPage community package, native Data Tables and SMTP.\n\nRun the journal setup, select your credentials and table, configure the sender and owner inbox, then follow the README checks. Enable the workflow only after your setup passes.\n\n[Setup and examples](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle)",
         "height": 300,
         "width": 560,
         "color": 5
@@ -1260,28 +1206,6 @@
     }
   ],
   "connections": {
-    "Run isolated design examples": {
-      "main": [
-        [
-          {
-            "node": "Check design rules with fictional data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check design rules with fictional data": {
-      "main": [
-        [
-          {
-            "node": "Sample validation result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Review event plan": {
       "main": [
         [
@@ -1653,7 +1577,7 @@
     "binaryMode": "separate",
     "timezone": "Europe/Rome",
     "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
+    "saveDataErrorExecution": "all",
     "saveManualExecutions": false,
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false

@@ -266,7 +266,7 @@
     "executionOrder": "v1",
     "saveManualExecutions": false,
     "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none"
+    "saveDataErrorExecution": "all"
   },
   "active": false,
   "pinData": {}

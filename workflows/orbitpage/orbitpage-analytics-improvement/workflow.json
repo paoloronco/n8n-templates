@@ -1,47 +1,7 @@
 {
-  "name": "OrbitPage Analytics Improvement",
-  "description": "# Review OrbitPage Analytics and Approve One CTA Improvement\n\nSend a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement.\n\n![OrbitPage workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-analytics-improvement/cover.png)\n\n## How it works\n\nEvery Monday at 09:00 Europe/Rome, read publication, the actual seven-day analytics response and the full draft. Prepare one report with current/previous visits and clicks. With missing/basic analytics, fewer than 100 visits in either window, ambiguous root CTA attribution or unpublished changes, send a report without proposing an edit. Otherwise request permission to prepare one preview. This first approval does not publish.\n\nAfter approval, re-read allowance, draft and publication. Request one server AI preview and validate that it changes exactly one selected root CTA title: same block id, destination, count, order, profile and theme. A second email asks approval for this exact preview, with an eight-minute wait and the server's expiry checked again. Commit that token once with publication enabled, then verify the public snapshot and complete draft before recording the result.\n\n## Evidence and review rules\n\nThe floor of 100 visits in both periods is an operational threshold, not statistical significance. Clicks per 100 visits are not a conversion rate. The template does not promise uplift or attribute causality. Only existing root link/CTA titles are eligible; it does not rewrite subpages, destinations, prices, products or unrelated blocks. An unavailable/invalid AI preview stops without publication. AI preview may consume the workspace allowance.\n\nReports are deduplicated by UTC date and actual API period. A repeated same-day run produces no second report. Rejected or expired proposals are recorded; wait for a new report window. The journal retains at most 100 reports and needs deliberate archival. Never put preview tokens into email, public output or journal snapshots.\n\n## First run\n\nRun the setup companion, configure tables/credentials/email and execute the weekly trigger manually. Confirm the real report and SMTP acceptance. With sufficient real analytics, approve preparation, inspect the returned title diff and approve the exact server preview while it remains valid. Check that the title alone changed. On low traffic, a report-only result is expected.\n\n## Workflow canvas\n\n![Workflow canvas](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-analytics-improvement/canvas.png)\n\n## Requirements and setup\n\n1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.\n2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, analytics:read, ai:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.\n3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.\n4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.\n5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.\n6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.\n7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Success/error execution data is not retained by default; maintain private diagnostics appropriate for your environment.\n\n### Select the same journal in these nodes\n\n- Record report identity\n- Record outcome and next measurement\n- Read analytics report journal\n- Persist exact AI publication intent\n- Store report-only journal\n\n## Concurrency and recovery\n\nUse one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.\n\nNormal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.\n\nBefore retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.\n\nCampaign publication is recorded before email. If sending fails or acceptance is unknown, verify publication and SMTP logs, then resend the saved files manually if required. Replaying the same brief will not automatically send a duplicate. A 250 SMTP acceptance means the sending server accepted the message; it does not prove inbox delivery.\n\nJournal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.\n\n## Files and validation\n\n- **workflow.json** — executable import, without credentials or instance identifiers.\n- **setup-journal.json** — native one-time journal creation.\n- **README.md** — setup, examples, operation and recovery.\n- **VALIDATION.md** — actual acceptance scope and boundaries.\n- **cover.png / thumbnail.png** — original design-edition artwork, reused.\n\nSee [validation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-analytics-improvement/VALIDATION.md) and the [dependency-free checks](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.\n\n[More OrbitPage templates](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/README.md)\n",
+  "name": "Review OrbitPage Analytics and Approve One CTA Improvement",
+  "description": "# Review OrbitPage Analytics and Approve One CTA Improvement\n\nSend a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement.\n\n![OrbitPage workflow](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-analytics-improvement/cover.png)\n\n## How it works\n\nEvery Monday at 09:00 Europe/Rome, read publication, the actual seven-day analytics response and the full draft. Prepare one report with current/previous visits and clicks. With missing/basic analytics, fewer than 100 visits in either window, ambiguous root CTA attribution or unpublished changes, send a report without proposing an edit. Otherwise request permission to prepare one preview. This first approval does not publish.\n\nAfter approval, re-read allowance, draft and publication. Request one server AI preview and validate that it changes exactly one selected root CTA title: same block id, destination, count, order, profile and theme. A second email asks approval for this exact preview, with an eight-minute wait and the server's expiry checked again. Commit that token once with publication enabled, then verify the public snapshot and complete draft before recording the result.\n\n## Evidence and review rules\n\nThe floor of 100 visits in both periods is an operational threshold, not statistical significance. Clicks per 100 visits are not a conversion rate. The template does not promise uplift or attribute causality. Only existing root link/CTA titles are eligible; it does not rewrite subpages, destinations, prices, products or unrelated blocks. An unavailable/invalid AI preview stops without publication. AI preview may consume the workspace allowance.\n\nReports are deduplicated by UTC date and actual API period. A repeated same-day run produces no second report. Rejected or expired proposals are recorded; wait for a new report window. The journal retains at most 100 reports and needs deliberate archival. Never put preview tokens into email, public output or journal snapshots.\n\n## First run\n\nRun the setup companion, configure tables/credentials/email and execute the weekly trigger manually. Confirm the real report and SMTP acceptance. With sufficient real analytics, approve preparation, inspect the returned title diff and approve the exact server preview while it remains valid. Check that the title alone changed. On low traffic, a report-only result is expected.\n\nThe import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.\n\n## Workflow canvas\n\n![Workflow canvas](https://raw.githubusercontent.com/paoloronco/n8n-templates/main/workflows/orbitpage/orbitpage-analytics-improvement/canvas.png)\n\n## Requirements and setup\n\n1. Use an n8n installation supporting native Data Tables, Schedule Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.\n2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, analytics:read, ai:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.\n3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.\n4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.\n5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.\n6. Ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.\n7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.\n\n### Select the same journal in these nodes\n\n- Record report identity\n- Record outcome and next measurement\n- Read analytics report journal\n- Persist exact AI publication intent\n- Store report-only journal\n\n## Concurrency and recovery\n\nUse one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.\n\nNormal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.\n\nBefore retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.\n\nJournal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.\n\n## Files and validation\n\n- **workflow.json** — executable import, without credentials or instance identifiers.\n- **setup-journal.json** — native one-time journal creation.\n- **README.md** — setup, examples, operation and recovery.\n- **VALIDATION.md** — actual acceptance scope and boundaries.\n- **cover.png / thumbnail.png** — original design-edition artwork, reused.\n\nSee [validation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-analytics-improvement/VALIDATION.md) and the [dependency-free checks](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.\n\n[More OrbitPage templates](https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/README.md)\n",
   "nodes": [
-    {
-      "parameters": {},
-      "id": "ae558d7b-2932-42d1-a42d-c175e7200ef2",
-      "name": "Run isolated design examples",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        928,
-        256
-      ],
-      "notesInFlow": false
-    },
-    {
-      "parameters": {
-        "jsCode": "function designRules() {\n  function eventPhase(plan, now) {\n    const start = Date.parse(plan.startAt), end = Date.parse(plan.endAt), time = Date.parse(now);\n    if (![start, end, time].every(Number.isFinite) || start >= end) throw Error('invalid_event_window');\n    if (!/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(plan.startAt) || !/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(plan.endAt)) throw Error('explicit_offset_required');\n    return time < start ? 'before' : time < end ? 'during' : 'after';\n  }\n  function nextTransition({ plan, now, recordedPhase, approvedPlanVersion, currentOwnedContent, expectedOwnedContent, draftRevision, publishedRevision, pending }) {\n    if (plan.paused) return { action: 'paused' };\n    if (plan.version !== approvedPlanVersion) return { action: 'review_required', reason: 'plan_changed' };\n    if (pending) return { action: 'reconcile', reason: 'pending_or_unknown_outcome' };\n    if (draftRevision !== publishedRevision) return { action: 'review_required', reason: 'unpublished_draft' };\n    if (JSON.stringify(currentOwnedContent) !== JSON.stringify(expectedOwnedContent)) return { action: 'review_required', reason: 'manual_edit' };\n    const phase = eventPhase(plan, now);\n    return phase === recordedPhase ? { action: 'no_change', phase } : { action: 'prepare', phase, key: `${plan.id}:${plan.version}:${phase}` };\n  }\n  function mergePage(existing, proposed, ownedId) {\n    if (!Array.isArray(existing)) throw Error('invalid_pages');\n    const current = existing.find(p => p.id === proposed.id);\n    if (current && proposed.id !== ownedId) throw Error('unowned_page');\n    if (existing.some(p => p.slug === proposed.slug && p.id !== ownedId)) throw Error('slug_collision');\n    if (!current && existing.length >= 20) throw Error('page_limit');\n    return current ? existing.map(p => p.id === ownedId ? proposed : p) : [...existing, proposed];\n  }\n  function campaign(brief) {\n    if (!/^[a-z0-9][a-z0-9-]{0,47}$/.test(brief.id)) throw Error('invalid_campaign_id');\n    if (!Number.isSafeInteger(brief.priceMinor) || brief.priceMinor < 0 || !/^[A-Z]{3}$/.test(brief.currency)) throw Error('invalid_price');\n    if (!brief.title?.trim() || brief.title.length > 80 || !brief.audience?.trim()) throw Error('incomplete_brief');\n    const deadline = Date.parse(brief.endsAt);\n    if (!Number.isFinite(deadline) || !/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(brief.endsAt)) throw Error('invalid_deadline');\n    const target = new URL(brief.ctaUrl), page = new URL(brief.pageUrl);\n    if ([target, page].some(u => u.protocol !== 'https:' || u.username || u.password)) throw Error('https_required');\n    const price = `${(brief.priceMinor / 100).toFixed(2)} ${brief.currency}`;\n    const facts = { title: brief.title.trim(), price, endsAt: brief.endsAt, ctaUrl: target.href };\n    const urls = {};\n    for (const [channel, medium] of [['social', 'paid_social'], ['qr', 'offline']]) {\n      const url = new URL(page);\n      for (const [key, value] of Object.entries({ utm_source: channel, utm_medium: medium, utm_campaign: brief.id })) url.searchParams.set(key, value);\n      urls[channel] = url.href;\n    }\n    return { facts, page: { title: facts.title, description: `${price} · ${facts.endsAt}`, ctaUrl: facts.ctaUrl }, ad: { headline: facts.title, body: `${price} · ${facts.endsAt}`, destination: urls.social }, urls, qrPayload: urls.qr };\n  }\n  function growth(report, minimum = 100) {\n    if (report.configured !== true) return { state: 'not_configured', recommendation: null };\n    if (![7, 30, 90].includes(report.periodDays)) throw Error('unexpected_period');\n    const s = report.summary;\n    if (!s || ![s.visits, s.clicks, report.comparison?.previous?.visits].every(n => Number.isFinite(n) && n >= 0)) throw Error('invalid_metrics');\n    const observed = { periodDays: report.periodDays, visits: s.visits, clicks: s.clicks, clicksPer100Visits: s.visits ? Math.round(s.clicks / s.visits * 1000) / 10 : 0 };\n    if (s.visits < minimum || report.comparison.previous.visits < minimum) return { state: 'insufficient_data', observed, recommendation: null };\n    if (!report.detailed || !report.links?.length) return { state: 'summary_only', observed, recommendation: null };\n    return { state: 'eligible_for_one_hypothesis', observed, recommendation: { kind: 'review_cta_clarity', hypothesis: 'Review one existing CTA against the most clicked destination.', causalClaim: false } };\n  }\n  return { eventPhase, nextTransition, mergePage, campaign, growth };\n}\nfunction exampleScenarios(kind) {\n  const r = designRules(), outcomes = [];\n  function check(name, test) {\n    try { if (test() !== true) throw Error('assertion_failed'); outcomes.push({ scenario: name, passed: true }); }\n    catch (error) { throw Error(`${name}: ${error.message}`); }\n  }\n  function throws(fn, message) { try { fn(); return false; } catch (e) { return e.message === message; } }\n  const plan = { id: 'demo-workshop', version: 1, startAt: '2026-12-05T10:00:00+01:00', endAt: '2026-12-05T18:00:00+01:00', paused: false };\n  const context = { plan, now: '2026-12-05T10:00:00+01:00', recordedPhase: 'before', approvedPlanVersion: 1, currentOwnedContent: ['approved-before'], expectedOwnedContent: ['approved-before'], draftRevision: 8, publishedRevision: 8, pending: false };\n  const brief = { id: 'photo-workshop', title: 'Photography workshop', audience: 'Beginners', priceMinor: 4900, currency: 'EUR', endsAt: '2026-12-05T18:00:00+01:00', ctaUrl: 'https://example.com/book', pageUrl: 'https://example.com/demo/photo-workshop' };\n  const report = { configured: true, detailed: true, periodDays: 7, summary: { visits: 250, clicks: 330 }, comparison: { previous: { visits: 200 } }, links: [{ label: 'portfolio', value: 100 }] };\n  if (kind === 'event') {\n    check('start boundary selects during', () => r.eventPhase(plan, context.now) === 'during');\n    check('end boundary selects after', () => r.eventPhase(plan, plan.endAt) === 'after');\n    check('downtime catches up directly to current phase', () => r.nextTransition({ ...context, now: '2026-12-06T10:00:00+01:00' }).phase === 'after');\n    check('same phase does not repeat publication', () => r.nextTransition({ ...context, recordedPhase: 'during' }).action === 'no_change');\n    check('changed plan requires approval', () => r.nextTransition({ ...context, approvedPlanVersion: 0 }).reason === 'plan_changed');\n    check('foreign draft blocks publication', () => r.nextTransition({ ...context, draftRevision: 9 }).reason === 'unpublished_draft');\n    check('manual change blocks transition', () => r.nextTransition({ ...context, currentOwnedContent: ['manual'] }).reason === 'manual_edit');\n    check('unknown outcome requires reconciliation', () => r.nextTransition({ ...context, pending: true }).action === 'reconcile');\n    check('pause preserves the public phase', () => r.nextTransition({ ...context, plan: { ...plan, paused: true } }).action === 'paused');\n    check('winter and summer use explicit offsets', () => r.eventPhase({ ...plan, startAt: '2027-07-05T10:00:00+02:00', endAt: '2027-07-05T18:00:00+02:00' }, '2027-07-05T08:00:00Z') === 'during');\n    check('missing offset is rejected', () => throws(() => r.eventPhase({ ...plan, startAt: '2026-12-05T10:00:00' }, context.now), 'explicit_offset_required'));\n    check('invalid interval is rejected', () => throws(() => r.eventPhase({ ...plan, endAt: plan.startAt }, context.now), 'invalid_event_window'));\n  } else if (kind === 'campaign') {\n    const kit = r.campaign(brief);\n    check('page and ad share exact price and deadline', () => kit.ad.body === kit.page.description);\n    check('UTM query keeps existing values and escapes inputs', () => new URL(r.campaign({ ...brief, pageUrl: brief.pageUrl + '?ref=owner' }).urls.social).searchParams.get('ref') === 'owner');\n    check('QR points to the same stable campaign destination', () => new URL(kit.qrPayload).pathname === new URL(brief.pageUrl).pathname);\n    const other = { id: 'other', slug: 'other', links: [{ id: 'manual' }] }, proposed = { id: 'campaign-photo-workshop', slug: 'photo-workshop' };\n    check('unmanaged pages are preserved exactly', () => r.mergePage([other], proposed, proposed.id)[0] === other);\n    check('replay updates the same page without duplication', () => r.mergePage([other, proposed], { ...proposed, title: 'updated' }, proposed.id).length === 2);\n    check('slug collision fails closed', () => throws(() => r.mergePage([{ id: 'foreign', slug: proposed.slug }], proposed, proposed.id), 'slug_collision'));\n    check('negative price is rejected', () => throws(() => r.campaign({ ...brief, priceMinor: -1 }), 'invalid_price'));\n    check('non HTTPS destination is rejected', () => throws(() => r.campaign({ ...brief, ctaUrl: 'http://example.com' }), 'https_required'));\n    check('subpage cap is enforced', () => throws(() => r.mergePage(Array.from({ length: 20 }, (_, i) => ({ id: String(i), slug: `page-${i}` })), proposed, proposed.id), 'page_limit'));\n    check('an unowned page cannot be adopted', () => throws(() => r.mergePage([proposed], proposed, 'someone-else'), 'unowned_page'));\n  } else if (kind === 'growth') {\n    check('missing analytics does not create a recommendation', () => r.growth({ configured: false }).state === 'not_configured');\n    check('low current traffic returns insufficient evidence', () => r.growth({ ...report, summary: { visits: 20, clicks: 2 } }).recommendation === null);\n    check('low previous traffic blocks comparison', () => r.growth({ ...report, comparison: { previous: { visits: 0 } } }).state === 'insufficient_data');\n    check('basic plan produces summary only', () => r.growth({ ...report, detailed: false }).state === 'summary_only');\n    check('no link attribution produces summary only', () => r.growth({ ...report, links: [] }).recommendation === null);\n    check('sufficient data allows only one hypothesis', () => r.growth(report).recommendation.kind === 'review_cta_clarity');\n    check('multiple clicks per visit may exceed 100', () => r.growth(report).observed.clicksPer100Visits === 132);\n    check('hypothesis does not claim causality', () => r.growth(report).recommendation.causalClaim === false);\n    check('invalid metrics stop analysis', () => throws(() => r.growth({ ...report, summary: { visits: -1, clicks: 0 } }), 'invalid_metrics'));\n    check('actual supported period is required', () => throws(() => r.growth({ ...report, periodDays: 14 }), 'unexpected_period'));\n  } else throw Error('unknown_design');\n  return { design: kind, mode: 'SAMPLE', scenarios: outcomes.length, allPassed: true, externalCalls: 0, pageWrites: 0, emailsSent: 0, outcomes };\n}\nreturn [{json:exampleScenarios(\"growth\")}];"
-      },
-      "id": "ca03c5c9-15ff-49fa-aac1-c76bc3e7d0d3",
-      "name": "Check design rules with fictional data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1184,
-        256
-      ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
-    },
-    {
-      "parameters": {},
-      "id": "1aa153fe-ff49-4f8e-8a5e-db1f5f2a24d6",
-      "name": "Sample validation result",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1440,
-        256
-      ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
-    },
     {
       "parameters": {
         "rule": {
@@ -62,7 +22,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "Monday 09:00 Europe/Rome. Reports are deduplicated by UTC date and actual API period. Low evidence produces report-only output."
     },
     {
       "parameters": {
@@ -81,7 +41,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -104,7 +64,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -121,8 +81,7 @@
         1696,
         640
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -158,7 +117,7 @@
         640
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -177,7 +136,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -194,8 +153,7 @@
         2560,
         624
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -307,7 +265,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "parameters": {
@@ -343,7 +301,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select SMTP credentials and configure REPLACE_WITH_SENDER_EMAIL / REPLACE_WITH_OWNER_EMAIL. Review links must be reachable using your n8n webhook URL. Approval applies only to the exact displayed payload and expiry.",
       "retryOnFail": false
     },
     {
@@ -380,7 +338,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -399,7 +357,7 @@
         608
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -416,8 +374,7 @@
         3840,
         608
       ],
-      "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -437,7 +394,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select your OrbitPage credential. This request uses the workspace AI allowance to prepare a preview; it does not apply a page change. Automatic retries are disabled. The next guard accepts only one exact CTA-title change.",
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -476,7 +433,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select SMTP credentials and configure REPLACE_WITH_SENDER_EMAIL / REPLACE_WITH_OWNER_EMAIL. Review links must be reachable using your n8n webhook URL. Approval applies only to the exact displayed payload and expiry.",
       "retryOnFail": false
     },
     {
@@ -513,7 +470,7 @@
         624
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -533,7 +490,7 @@
         608
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select your OrbitPage credential. Commit only the exact reviewed, unexpired server preview. Automatic retries are disabled. If the provider response is unknown, reconcile the saved journal intent before another write.",
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -555,7 +512,7 @@
         608
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state.",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500
@@ -670,7 +627,7 @@
         608
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "parameters": {},
@@ -683,7 +640,7 @@
         832
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {},
@@ -696,16 +653,16 @@
         816
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement"
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
-        "content": "# Review OrbitPage Analytics and Approve One CTA Improvement\n\nSend a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement.\n\nRun setup-journal.json once, select its table in every Data Table node, select OrbitPage and SMTP credentials, and configure the owner email.\n\n[Full setup and recovery guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
+        "content": "# Review OrbitPage Analytics and Approve One CTA Improvement\n\nSend a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement.\n\n## Setup\n1. Install OrbitPage nodes 0.3.6 or newer on a compatible n8n instance (tested on 2.43.6).\n2. Run **setup-journal.json** once and select its table in every Data Table node.\n3. Select OrbitPage and SMTP credentials. Replace the sender and owner email placeholders.\n4. Verify your analytics/AI plan and approval links.\n5. Follow the first-run checks in the README before enabling scheduled/form triggers.\n\n## Operating rules\nUse a separate journal per imported instance and keep one writer per workspace. All individual nodes are enabled. Revision checks stop concurrent edits; they do not silently overwrite them.\n\nIf an execution stops with a busy journal, inspect the saved intent and provider state before recovery. Do not clear pending state or repeat a write blindly.\n\n[Complete setup, inputs and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
         "height": 1200,
         "width": 560
       },
       "id": "7b53c9b1-466d-440b-8817-35c802e73a8c",
-      "name": "Read me - design status and scope",
+      "name": "Start here · setup and operation",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -716,13 +673,13 @@
     },
     {
       "parameters": {
-        "content": "## 1 · Report and evidence gate\n\nUse the actual API period/plan. Low traffic or missing analytics produces an honest report with no recommendation.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
+        "content": "## 1 · Report the observed analytics\n\nRead the actual seven-day period and compare visits/clicks with the previous window. Missing or low traffic, ambiguous CTA attribution or a private draft produces a report without an edit. Clicks per 100 visits are not a conversion rate.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
         "height": 486,
         "width": 1590,
         "color": 7
       },
       "id": "634bc8a7-22c9-4736-9fa5-93135f8fb7f5",
-      "name": "Design section 1",
+      "name": "Guide · 1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -733,13 +690,13 @@
     },
     {
       "parameters": {
-        "content": "## 2 · Ask to prepare one edit\n\nSeparate report approval from edit approval. Generate an AI preview only when the reviewer is present.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
+        "content": "## 2 · Ask permission to prepare a preview\n\nThe first approval permits one AI preview only. Re-read the workspace and AI allowance first. Accept only a server preview that changes the title of one existing root CTA and preserves its destination and every unrelated field.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
         "height": 502,
         "width": 1590,
         "color": 7
       },
       "id": "59c4e753-c6cb-40d9-8b73-2bbc089058ca",
-      "name": "Design section 2",
+      "name": "Guide · 2",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -750,35 +707,18 @@
     },
     {
       "parameters": {
-        "content": "## 3 · Review server preview\n\nApply only the opaque, unexpired preview token associated with the exact reviewed proposal. Verify publication afterward.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
+        "content": "## 3 · Review the exact change\n\nThe second approval covers the displayed title change. The eight-minute review must finish before the server preview expires. Commit that token once, verify the complete draft and public snapshot, then record the outcome. Unknown commit results are reconciled by reads.\n\n[Setup and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
         "height": 502,
         "width": 1590,
         "color": 7
       },
       "id": "565f6924-aaf1-4b56-a437-7f381eb1d7e9",
-      "name": "Design section 3",
+      "name": "Guide · 3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         4112,
         496
-      ],
-      "notesInFlow": false
-    },
-    {
-      "parameters": {
-        "content": "## Executable design-rule examples\n\nFictional inputs; pure decisions only. SAMPLE does not call OrbitPage, SMTP, AI or a QR service. Passing it does not establish authenticated integration acceptance.\n\n[Current setup, operating rules and recovery](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
-        "height": 290,
-        "width": 880,
-        "color": 7
-      },
-      "id": "844bdddd-cd5d-4f7e-a4e3-7d4b9305babc",
-      "name": "Isolated examples explanation",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        864,
-        128
       ],
       "notesInFlow": false
     },
@@ -811,7 +751,8 @@
         },
         "returnAll": true
       },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "notes": "Select the journal created by setup-journal.json for this imported instance. Keep exactly one control row. Every Data Table node in this workflow must use the same table."
     },
     {
       "id": "4cc38afc-de8e-4a06-9b4e-da875c32e909",
@@ -845,7 +786,8 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "id": "8cc06949-9a18-4e15-b7fb-b512744c7c03",
@@ -879,7 +821,8 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "parameters": {
@@ -901,7 +844,7 @@
         1024
       ],
       "notesInFlow": false,
-      "notes": "Implemented template. Configure credentials, the journal and owner email. Current guide: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement",
+      "notes": "Select SMTP credentials and configure the sender and one owner recipient. Publication is verified before sending. SMTP acceptance does not prove inbox delivery; check logs before manually resending an uncertain delivery.",
       "retryOnFail": false
     },
     {
@@ -922,7 +865,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "812165c2-42ff-4960-a939-a2e343cbbe67",
@@ -942,7 +886,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "05d0c592-7314-4210-b2c5-c4e2507c1021",
@@ -1078,7 +1023,8 @@
           "convertFieldsToString": false
         },
         "options": {}
-      }
+      },
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "id": "bbe70476-f5a0-4003-be8a-c3225ba059a5",
@@ -1092,7 +1038,8 @@
       "parameters": {
         "amount": 2,
         "unit": "seconds"
-      }
+      },
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "id": "e6d5c150-c268-481d-a0ff-67955c746ba9",
@@ -1135,7 +1082,8 @@
       },
       "retryOnFail": true,
       "maxTries": 5,
-      "waitBetweenTries": 2000
+      "waitBetweenTries": 2000,
+      "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
       "id": "c4093e1d-969c-4739-977d-69b2c87befd5",
@@ -1155,7 +1103,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 1500,
+      "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
       "id": "2ee9d335-6271-4714-b884-17a595487ea1",
@@ -1291,7 +1240,8 @@
           "convertFieldsToString": false
         },
         "options": {}
-      }
+      },
+      "notes": "Select this instance’s journal table. Conditional updates require the expected control-row state and execution owner. An empty/lost claim stops downstream work. Back up the control row before supervised recovery."
     },
     {
       "id": "c21df86d-0068-482d-8466-41f796f8f1df",
@@ -1321,7 +1271,7 @@
     },
     {
       "id": "2501f9f1-4c5c-4d36-ab58-b381c94e32bc",
-      "name": "Implementation and validation status",
+      "name": "Before first run",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -1329,7 +1279,7 @@
         -224
       ],
       "parameters": {
-        "content": "# Implemented template · November 2026\n\nAll nodes enabled. Authenticated acceptance covered publication, public verification, journal guards and SMTP; analytics AI used controlled sufficient-traffic input and approval decisions.\n\nRead VALIDATION.md and the [current guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement). Configure and verify your own instance before activation.",
+        "content": "# Before first run\n\n**Requires:** OrbitPage workspace/token, OrbitPage community package, native Data Tables and SMTP.\n\nRun the journal setup, select your credentials and table, configure the sender and owner inbox, then follow the README checks. Enable the workflow only after your setup passes.\n\n[Setup and examples](https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement)",
         "height": 300,
         "width": 560,
         "color": 5
@@ -1337,28 +1287,6 @@
     }
   ],
   "connections": {
-    "Run isolated design examples": {
-      "main": [
-        [
-          {
-            "node": "Check design rules with fictional data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check design rules with fictional data": {
-      "main": [
-        [
-          {
-            "node": "Sample validation result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Weekly analytics review": {
       "main": [
         [
@@ -1796,7 +1724,7 @@
     "binaryMode": "separate",
     "timezone": "Europe/Rome",
     "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
+    "saveDataErrorExecution": "all",
     "saveManualExecutions": false,
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false

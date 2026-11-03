@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const d=new URL('./',import.meta.url);
-const files={"event":"../orbitpage-event-lifecycle/workflow.json","campaign":"../orbitpage-campaign-launch-kit/workflow.json","growth":"../orbitpage-analytics-improvement/workflow.json"};
+const files={"event":"../orbitpage-event-lifecycle/OrbitPage-Event-Lifecycle.json","campaign":"../orbitpage-campaign-launch-kit/OrbitPage-Campaign-Launch-Kit.json","growth":"../orbitpage-analytics-improvement/OrbitPage-Analytics-Improvement.json"};
 const workflows=Object.fromEntries(Object.entries(files).map(([k,f])=>[k,JSON.parse(fs.readFileSync(new URL(f,d)))]));
 const src=workflows.event.nodes.find(n=>n.parameters.jsCode?.startsWith('function orbitRuntime()')).parameters.jsCode.split('\nconst r=orbitRuntime();\n')[0];
 for(const w of Object.values(workflows))for(const n of w.nodes.filter(n=>n.parameters.jsCode?.startsWith('function orbitRuntime()')))assert.equal(n.parameters.jsCode.split('\nconst r=orbitRuntime();\n')[0],src,'Shared guard source drift');

@@ -31,7 +31,7 @@ This workflow reviews weekly OrbitPage analytics, sends a measured report, and o
 27. Verifies the exact published AI result.
 28. Records the outcome and schedules the next measurement.
 ## Setup
-1. Run the `setup-journal.json` workflow once to create six string columns and seed exactly one control row; running only the Create table is insufficient.
+1. Initialize the journal using the instructions below; creating the table without its control row is insufficient.
 2. In every Data Table node, select the dedicated table created in setup.
 3. In every OrbitPage node, select OrbitPage API Token credentials and set Base URL to `https://orbitpage.com` without `/api/v1`.
 4. In all email nodes, select SMTP credentials and replace sender and owner email placeholders.
@@ -54,6 +54,25 @@ This workflow reviews weekly OrbitPage analytics, sends a measured report, and o
 
 ## Additional Details
 
-This workflow requires running the setup-journal.json workflow once to initialize the data table with six string columns and a single control row. It strictly validates workspace content consistency and requires manual reconciliation if a journal is pending. The workflow sends weekly analytics reports and supports a double email approval process for one exact AI-generated CTA title improvement. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
+This workflow requires a data table initialized with six string columns and a single control row, as described below. It strictly validates workspace content consistency and requires manual reconciliation if a journal is pending. The workflow sends weekly analytics reports and supports a double email approval process for one exact AI-generated CTA title improvement. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
 Full technical documentation: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement#readme
+
+## Download and import
+
+Import [OrbitPage-Analytics-Improvement.json](./OrbitPage-Analytics-Improvement.json) into n8n. Configure OrbitPage and SMTP credentials, sender and owner email addresses, and the journal table before activation.
+
+## Initialize the journal
+
+Create a dedicated n8n Data Table for this workflow. Add six **String** columns and exactly one row with these values:
+
+| Column | Initial value |
+| --- | --- |
+| `key` | `control` |
+| `state` | `idle` |
+| `context` | `growth` |
+| `execution_id` | `setup` |
+| `snapshot` | `{"runs":{},"plan":null,"lastVerified":null}` |
+| `updated_at` | Current UTC timestamp in ISO 8601 format |
+
+Select this same table in every Data Table node. Keep a separate journal for each imported workflow instance. Initialize the control row only once; do not reset an existing journal or add duplicate control rows.

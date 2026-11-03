@@ -20,9 +20,13 @@ An approved phase may publish the workspace. The workflow refuses pre-existing u
 
 Run the setup companion, configure all table/credential/email fields, and test the form with dates suitable for your test workspace. Confirm the approval link, run the schedule branch, inspect the native subpage and the **Verified event result and stable QR** output. Test each date boundary before enabling the five-minute schedule.
 
+## Workflow canvas
+
+![Workflow canvas](./canvas.png)
+
 ## Requirements and setup
 
-1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with package **0.3.6**. Community package installation must be available on your n8n plan.
+1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.
 2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, pages:read, pages:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.
 3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.
 4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.

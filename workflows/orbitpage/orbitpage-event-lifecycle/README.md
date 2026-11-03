@@ -1,70 +1,52 @@
-# Update an OrbitPage Event Before, During and After
-
-Publish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR.
-
-![OrbitPage workflow](./cover.png)
-
+# OrbitPage Event Lifecycle
+## Quick overview
+This workflow manages the lifecycle of an OrbitPage event by approving event plans, publishing event phases before, during, and after the event, and maintaining a durable journal and stable URL with QR code.
 ## How it works
+1. The workflow starts with the `Review event plan` form trigger where the event owner submits a JSON event plan for approval.
+2. The `Validate complete event plan` code node validates the submitted plan for correctness and completeness.
+3. An email is sent via `Approve all three phases` node to request owner approval of the event phases.
+4. If approved, the `Store approved plan` node updates the journal with the approved plan.
+5. Every five minutes, the `Every five minutes` schedule trigger initiates a reconciliation process.
+6. The workflow reads the active plan and journal state using `Read active plan and journal`.
+7. It fetches the current workspace publication and subpages via `Read workspace and publication` and `Read current subpages`.
+8. The `Read complete event draft` node retrieves the current draft workspace.
+9. The `Calculate phase and detect drift` code node determines the current event phase (before, during, after) and detects any content drift.
+10. If a transition is needed, the workflow either recovers an already published event or reserves a transition intent.
+11. The `Build merged subpage collection` node constructs the updated subpage collection for the event phase.
+12. The updated subpages are saved to a private draft using `Save exact revision to private draft`.
+13. The draft is verified with `Verify resulting private draft`.
+14. The workflow reads the event publication before publishing with `Read event publication before publish`.
+15. The publication is bound to the approved phase in `Bind publication to approved phase`.
+16. The prepared revision is persisted in the journal via `Persist prepared event revision`.
+17. The draft is published using `Publish exact prepared revision`.
+18. After a short wait, the public state is verified with `Verify public state`.
+19. The published event revision is read using `Read published event revision`.
+20. The verified phase is recorded in the journal via `Record verified phase` and `Store verified event journal`.
+21. A stable QR code for the verified event URL is generated in `Verified event result and stable QR`.
+## Setup
+1. Run the `setup-journal.json` workflow once to create six string columns and seed exactly one control row.
+2. In every `Data Table` node, select the dedicated event journal table.
+3. Configure OrbitPage API Token credentials on all OrbitPage nodes, set Base URL to `https://orbitpage.com` without `/api/v1`.
+4. Configure SMTP credentials on all email nodes and replace sender and owner email placeholders.
+5. Ensure one writer per workspace with exact revision/ETag and draft/public verification enabled.
+6. Use the example `event_plan` JSON from `example-input.json` for the owner intake form.
+7. Confirm token scopes include `workspace:read`, `publication:read`, `publication:write`, `pages:read`, and `pages:write`.
+## Requirements
+- n8n version 2.43.6 or later.
+- n8n-nodes-orbitpage version 0.3.6.
+- A dedicated event journal data table with six string columns and one control row.
+- OrbitPage API token with appropriate scopes.
+- SMTP credentials for sending approval emails.
+- Properly formatted event plan JSON with before/during/after snapshots and ISO timestamps.
+## Customization
+- Replace email placeholders in the `Approve all three phases` node with actual sender and owner emails.
+- Adjust the event plan JSON schema and validation logic in the `Validate complete event plan` code node if event structure changes.
+- Modify the schedule interval in the `Every five minutes` trigger node if a different reconciliation frequency is desired.
+- Customize the QR code generation logic in the `Verified event result and stable QR` code node if needed.
+- Update the journal table selection in `Data Table` nodes to match your environment.
 
-Submit a complete versioned event plan through the owner form. SMTP review shows all three phase snapshots and absolute timestamps. Approval saves the exact plan; a five-minute schedule selects the current phase, including after downtime. It reads the complete baseline, claims the journal, saves the merged native subpage collection privately, verifies the entire result, publishes the exact revision and checks the public HTML before recording success. The final output includes a locally generated SVG QR for the stable event URL.
+## Additional Details
 
-## Input and operating rules
+This workflow requires running the setup-journal.json workflow once to create the necessary event journal table with six string columns and a single control row. It uses exact revision and ETag checks to protect content integrity and requires manual approval of event plans via email within 24 hours. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Paste [example-input.json](./example-input.json) into the **event_plan** form field and replace dates, facts and HTTPS destinations. Timestamps require an explicit UTC offset. The timezone is descriptive; the supplied instants determine transitions. Titles and descriptions must be trimmed, non-empty strings. Before start selects **before**, start inclusive selects **during**, end inclusive selects **after**.
-
-One imported workflow and journal owns one event. Keep its id and slug, increment version for any reviewed change, and submit all three phase snapshots again. Set paused=true in a new reviewed version to suspend transitions. A repeat of the identical approved plan or already verified phase performs no mutation. Use a separate workflow and separately named journal for another event.
-
-An approved phase may publish the workspace. The workflow refuses pre-existing unpublished changes and owned subpage drift. Do not share the intake form publicly. The QR is stable because the subpage slug stays fixed; it does not route through a tracking provider.
-
-## First run
-
-Run the setup companion, configure all table/credential/email fields, and test the form with dates suitable for your test workspace. Confirm the approval link, run the schedule branch, inspect the native subpage and the **Verified event result and stable QR** output. Test each date boundary before enabling the five-minute schedule.
-
-The import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.
-
-## Workflow canvas
-
-![Workflow canvas](./canvas.png)
-
-## Requirements and setup
-
-1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.
-2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, pages:read, pages:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.
-3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.
-4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.
-5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.
-6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.
-7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.
-
-### Select the same journal in these nodes
-
-- Store approved plan
-- Read active plan and journal
-- Reserve transition intent
-- Read plan registration state
-- Persist prepared event revision
-- Store verified event journal
-
-## Concurrency and recovery
-
-Use one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.
-
-Normal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.
-
-Before retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.
-
-Journal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.
-
-## Files and validation
-
-- **workflow.json** — executable import, without credentials or instance identifiers.
-- **setup-journal.json** — native one-time journal creation.
-- **README.md** — setup, examples, operation and recovery.
-- **VALIDATION.md** — actual acceptance scope and boundaries.
-- **cover.png / thumbnail.png** — original design-edition artwork, reused.
-- **example-input.json** — editable form payload.
-- **THIRD_PARTY_NOTICES.md** — embedded QR library MIT attribution.
-
-See [validation](./VALIDATION.md) and the [dependency-free checks](../tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.
-
-[More OrbitPage templates](../README.md)
+Full technical documentation: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-event-lifecycle#readme

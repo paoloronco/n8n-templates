@@ -1,67 +1,59 @@
 # Review OrbitPage Analytics and Approve One CTA Improvement
-
-Send a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement.
-
-![OrbitPage workflow](./cover.png)
-
+## Quick overview
+This workflow reviews weekly OrbitPage analytics, sends a measured report, and optionally prepares, reviews, and publishes one exact server AI preview of a CTA title improvement after email approvals.
 ## How it works
+1. Triggered every Monday at 09:00 Europe/Rome by the `Weekly analytics review` schedule trigger.
+2. Reads the current publication data using the `Read current publication` OrbitPage node.
+3. Retrieves the last seven days of analytics with the `Read seven-day analytics` node.
+4. Reads the current page draft from the workspace via `Read current page draft`.
+5. Validates the evidence and plan using the `Validate evidence and plan` code node.
+6. Checks if there is sufficient evidence for one hypothesis with the `Sufficient evidence for one hypothesis` IF node.
+7. Reads the analytics report journal from the data table.
+8. Prepares a measured report in the `Prepare measured report` code node.
+9. Checks if an AI change has already been applied with `Recover already applied AI change` IF node.
+10. If no recovery, selects analytics verification context and records report identity.
+11. Determines if the report can propose an edit with the `Report can propose an edit` IF node.
+12. If no edit is proposed, sends the report without an edit and records a report-only outcome.
+13. If an edit is proposed, sends the report and asks to prepare an edit.
+14. Waits for reviewer approval to prepare the edit with `Reviewer requests edit preparation` IF node.
+15. Reads fresh page draft and AI allowance.
+16. Reads fresh analytics publication and draft.
+17. Prepares a concise edit instruction.
+18. Creates a fresh AI preview of the proposed changes.
+19. Validates the exact server AI preview.
+20. Sends the exact AI proposal for review and approval via email.
+21. Checks if the exact preview is approved and unexpired.
+22. If approved, records the approved AI intent and persists it in the journal.
+23. Applies the exact approved preview to the publication.
+24. Waits briefly for AI edge publication to propagate.
+25. Verifies the published revision matches expectations.
+26. Reads the public AI result and verified analytics draft.
+27. Verifies the exact published AI result.
+28. Records the outcome and schedules the next measurement.
+## Setup
+1. Run the `setup-journal.json` workflow once to create six string columns and seed exactly one control row; running only the Create table is insufficient.
+2. In every Data Table node, select the dedicated table created in setup.
+3. In every OrbitPage node, select OrbitPage API Token credentials and set Base URL to `https://orbitpage.com` without `/api/v1`.
+4. In all email nodes, select SMTP credentials and replace sender and owner email placeholders.
+5. Configure the `Weekly analytics review` schedule trigger to run every Monday at 09:00 Europe/Rome.
+6. Ensure one writer per workspace is configured with exact revision/ETag and full draft/public verification enabled.
+7. Verify email approval labels and limits are set as required for double approval flows.
+## Requirements
+- OrbitPage API Token credentials with scopes: workspace:read, publication:read, publication:write, analytics:read, ai:write.
+- SMTP credentials for sending approval and report emails.
+- A dedicated data table with six string columns and one control row seeded by the setup workflow.
+- n8n version 2.43.6 or later.
+- n8n-nodes-orbitpage version 0.3.6 or later.
+## Customization
+- Replace all sender and owner email placeholders in email nodes with actual email addresses.
+- Adjust the schedule trigger time or timezone if needed.
+- Modify email subject lines and message templates in email nodes as required.
+- Customize validation logic in code nodes if business rules change.
+- Update the maximum wait times for approvals in email nodes if different timing is desired.
+- Change the Base URL in OrbitPage nodes if using a different environment or API endpoint.
 
-Every Monday at 09:00 Europe/Rome, read publication, the actual seven-day analytics response and the full draft. Prepare one report with current/previous visits and clicks. With missing/basic analytics, fewer than 100 visits in either window, ambiguous root CTA attribution or unpublished changes, send a report without proposing an edit. Otherwise request permission to prepare one preview. This first approval does not publish.
+## Additional Details
 
-After approval, re-read allowance, draft and publication. Request one server AI preview and validate that it changes exactly one selected root CTA title: same block id, destination, count, order, profile and theme. A second email asks approval for this exact preview, with an eight-minute wait and the server's expiry checked again. Commit that token once with publication enabled, then verify the public snapshot and complete draft before recording the result.
+This workflow requires running the setup-journal.json workflow once to initialize the data table with six string columns and a single control row. It strictly validates workspace content consistency and requires manual reconciliation if a journal is pending. The workflow sends weekly analytics reports and supports a double email approval process for one exact AI-generated CTA title improvement. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-## Evidence and review rules
-
-The floor of 100 visits in both periods is an operational threshold, not statistical significance. Clicks per 100 visits are not a conversion rate. The template does not promise uplift or attribute causality. Only existing root link/CTA titles are eligible; it does not rewrite subpages, destinations, prices, products or unrelated blocks. An unavailable/invalid AI preview stops without publication. AI preview may consume the workspace allowance.
-
-Reports are deduplicated by UTC date and actual API period. A repeated same-day run produces no second report. Rejected or expired proposals are recorded; wait for a new report window. The journal retains at most 100 reports and needs deliberate archival. Never put preview tokens into email, public output or journal snapshots.
-
-## First run
-
-Run the setup companion, configure tables/credentials/email and execute the weekly trigger manually. Confirm the real report and SMTP acceptance. With sufficient real analytics, approve preparation, inspect the returned title diff and approve the exact server preview while it remains valid. Check that the title alone changed. On low traffic, a report-only result is expected.
-
-The import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.
-
-## Workflow canvas
-
-![Workflow canvas](./canvas.png)
-
-## Requirements and setup
-
-1. Use an n8n installation supporting native Data Tables, Schedule Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.
-2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, analytics:read, ai:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.
-3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.
-4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.
-5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.
-6. Ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.
-7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.
-
-### Select the same journal in these nodes
-
-- Record report identity
-- Record outcome and next measurement
-- Read analytics report journal
-- Persist exact AI publication intent
-- Store report-only journal
-
-## Concurrency and recovery
-
-Use one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.
-
-Normal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.
-
-Before retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.
-
-Journal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.
-
-## Files and validation
-
-- **workflow.json** — executable import, without credentials or instance identifiers.
-- **setup-journal.json** — native one-time journal creation.
-- **README.md** — setup, examples, operation and recovery.
-- **VALIDATION.md** — actual acceptance scope and boundaries.
-- **cover.png / thumbnail.png** — original design-edition artwork, reused.
-
-See [validation](./VALIDATION.md) and the [dependency-free checks](../tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.
-
-[More OrbitPage templates](../README.md)
+Full technical documentation: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement#readme

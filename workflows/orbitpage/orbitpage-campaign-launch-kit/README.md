@@ -1,71 +1,63 @@
-# Build an OrbitPage Campaign Page with Ad Copy, UTM Links and QR
-
-Review one offer, publish its campaign subpage, verify the result and deliver matching ad copy, UTM links and a local QR.
-
-![OrbitPage workflow](./cover.png)
-
+# OrbitPage Campaign Launch Kit
+## Quick overview
+This workflow builds an OrbitPage campaign subpage from a submitted campaign brief, generates ad copy with UTM links and a local QR code, manages email approval, publishes the approved campaign page, verifies the publication, and delivers the launch package.
 ## How it works
+1. Triggered by a form submission with a JSON campaign brief containing offer, audience, CTA, price, and date facts.
+2. Validate the submitted campaign brief JSON structure and field values using a Code node.
+3. Read the campaign journal data table to retrieve the control row state.
+4. Read the complete campaign draft and publication baseline from OrbitPage API.
+5. Read the current subpage collection for the campaign from OrbitPage.
+6. Build ad copy text blocks and append UTM tracking links based on the campaign brief.
+7. Check if the campaign is already published to handle recovery scenarios.
+8. Generate a local QR code asset representing the campaign URL.
+9. Prepare a full review package including the campaign page, ad copy, UTM links, and QR code.
+10. Reserve delivery intent by updating the campaign journal control row.
+11. Send an approval email to the campaign owner with the review package, with Approve and Decline options, expiring at the earlier of 24 hours or the offer end time.
+12. Wait for email approval and check if the approval is still valid before proceeding.
+13. On approval, read the current publication revision again to ensure no workspace changes.
+14. Read the fresh campaign draft and guard the approved payload and ownership.
+15. Mark the campaign mutation as pending in the journal.
+16. Save the reviewed subpages privately to OrbitPage without publishing.
+17. Read back the private draft result to confirm changes.
+18. Read the campaign publication before publishing to get the latest revision.
+19. Bind the exact publication revision for concurrency control.
+20. Persist the prepared campaign revision in the journal.
+21. Confirm persistence and publish the approved campaign page.
+22. Wait briefly for the campaign page to propagate through the CDN edge.
+23. Select the verified campaign context and verify the page CTA and campaign facts by fetching the public URL.
+24. Read the published campaign revision and record the verified campaign in the journal.
+25. Store the verified campaign journal state.
+26. Prepare verified launch attachments including the QR code and launch kit.
+27. Deliver the launch package email to the campaign owner with attachments.
+28. Mark the launch package as delivered in the journal.
+29. Store the campaign delivery outcome in the journal.
+30. If the campaign review is rejected or expired, release the rejected campaign review and update the journal accordingly.
+## Setup
+1. Run the `setup-journal.json` workflow once to create six string columns and seed exactly one control row; running only Create table is insufficient.
+2. In every Data Table node, select the dedicated campaign journal table.
+3. In every OrbitPage node, select OrbitPage API Token credentials, set Base URL to `https://orbitpage.com` without `/api/v1`.
+4. In all email nodes, select SMTP credentials and replace sender and owner email placeholders.
+5. Configure the protected campaign_brief form to accept the closed-schema example-input.json with one offer, audience, CTA, price, and date facts.
+6. Ensure one writer per workspace with exact revision/ETag and full draft/public verification to protect unrelated content.
+## Requirements
+- OrbitPage API Token credentials with scopes: workspace:read, publication:read, publication:write, pages:read, pages:write.
+- SMTP credentials for sending approval and launch emails.
+- A dedicated campaign journal data table initialized with one control row.
+- The `setup-journal.json` workflow executed to prepare the journal schema.
+- Campaign briefs submitted as JSON matching the closed schema.
+- n8n version 2.43.6 and n8n-nodes-orbitpage version 0.3.6.
+## Customization
+- Replace sender and owner email placeholders in email nodes.
+- Adjust email subject lines and message templates in the emailSend nodes.
+- Modify the campaign brief form fields or validation logic in the Code nodes if campaign data structure changes.
+- Update UTM parameters or QR code generation parameters in the respective Code nodes.
+- Customize the timing for approval expiration or wait durations in the Wait and If nodes.
+- Adapt the campaign journal table ID and column mappings if using a different data table.
+- Extend or modify the review package content in the Prepare full review package Code node.
+- Adjust the number of allowed subpages or slug restrictions in the validation code if needed.
 
-An owner submits one closed-schema brief. The workflow validates the offer facts, reads the complete baseline and builds native page blocks, matching ad draft/caption, UTM destinations and a local SVG QR. Email approval covers the exact package and expires after 24 hours. It then re-reads the revision and full draft, saves the merged collection privately, verifies all sections, binds publication to that revision, verifies the public page and only then emails the launch files.
+## Additional Details
 
-## Input and delivery
+This workflow requires a dedicated campaign journal table initialized with exactly one control row and proper selection in all Data Table nodes. Email review approvals expire after 24 hours or at the offer end time, whichever is earlier, and must be verified before proceeding. The workflow does not handle Ads API integration or ad spend management. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Paste [example-input.json](./example-input.json) into the **campaign_brief** form field. Replace all example facts and HTTPS destinations. priceMinor is a non-negative integer in cents; currency is EUR, USD or GBP. endsAt requires an explicit UTC offset. Use an unchanged id and slug with a larger version to update an owned campaign. A separate id/slug represents another campaign. The journal allows at most 100 recorded requests; archive completed history deliberately rather than truncating pending intent.
-
-The email contains **campaign-launch-kit.json**, **campaign-qr.svg** and **README.txt**. Canonical price/deadline facts are reused in the page and copy. The ad link uses utm_source=social / utm_medium=paid_social; the offline QR uses utm_source=qr / utm_medium=offline. Existing URL queries and fragments are retained. Ad copy remains a draft: the workflow does not buy ads or publish to an advertising account.
-
-## First run
-
-Run the setup companion, configure tables/credentials/email, submit a test brief and approve the exact package. Verify price, deadline, CTA, subpage content and delivered files. Replay the identical brief to confirm it produces no second publication or delivery. Reject a new request to confirm no page is published. Rejected/expired requests remain recorded; use a new reviewed version for a retry.
-
-The import contains only the operational paths. Development examples are kept in the repository checks, outside the production canvas.
-
-## Workflow canvas
-
-![Workflow canvas](./canvas.png)
-
-## Requirements and setup
-
-1. Use an n8n installation supporting native Data Tables, Form Trigger, SMTP send-and-wait and the **n8n-nodes-orbitpage** community package. This release was verified with **n8n 2.43.6** and package **0.3.6**. Follow the [OrbitPage package installation guide](https://github.com/paoloronco/n8n-nodes-orbitpage/blob/main/docs/guides/getting-started.md). Community package installation must be available on your n8n plan.
-2. Connect an OrbitPage workspace with the required features and a token scoped to **workspace:read, publication:read, publication:write, pages:read, pages:write**. Confirm your plan exposes subpages or detailed analytics/AI as applicable. The public HTTPS page must be reachable from n8n.
-3. Import **setup-journal.json**. For each additional imported instance, first give its Create-table node a distinct table name. Run it once to create six string columns and exactly one control row. A second run stops rather than resetting history. Record the resulting table id.
-4. Import **workflow.json**. Select that table in **every** Data Table row node listed below. Do not share a journal between templates or workspace credentials. Keep the single control row; do not manually duplicate it.
-5. Select your OrbitPage credential on every OrbitPage node and your SMTP credential on every Send Email node. Replace all **REPLACE_WITH_SENDER_EMAIL** and **REPLACE_WITH_OWNER_EMAIL** values with your verified sender and one owner inbox.
-6. Protect intake forms for the owner and ensure n8n's approval resume URLs are reachable through your normal authenticated deployment. For self-hosted n8n, configure its externally reachable webhook URL and test an actual approval email. Avoid production customers while checking your setup.
-7. Run the relevant first-run checks, then activate the appropriate production triggers. The imported workflow starts inactive while **all individual nodes are enabled**. Successful executions are not retained by default. Failed executions are retained privately for troubleshooting and journal recovery; configure n8n pruning/retention for your environment.
-
-### Select the same journal in these nodes
-
-- Reserve delivery intent
-- Read campaign journal
-- Mark campaign mutation pending
-- Persist prepared campaign revision
-- Store verified campaign journal
-- Store campaign delivery outcome
-- Store rejected campaign review
-
-## Concurrency and recovery
-
-Use one writer at a time per OrbitPage workspace. Revision/ETag checks reject concurrent changes rather than overwrite them. The native control row uses conditional updates plus exact execution-owner/record verification; it is not a general-purpose distributed locking service. Other workflows and dashboard edits may cause a conflict requiring fresh review.
-
-Normal reads may retry. Mutating operations, AI requests/commits and SMTP delivery do not automatically retry. A pending/review journal protects against uncertain provider outcomes. A failed execution can deliberately leave this journal busy.
-
-Before retrying, inspect the control row's state/snapshot and the failed node privately. Compare current publication and the full draft with the saved baseline and intended revision. Never simply clear pending state or republish an unknown outcome. A normal rerun only reconciles an already-public exact intended result after read-back verification. If the private draft or content has changed, stop, reconcile it in OrbitPage and request a new review. Expired review locks may require supervised release after verifying that no mutation occurred. Back up the row before any manual correction.
-
-Campaign publication is recorded before email. If sending fails or acceptance is unknown, verify publication and SMTP logs, then resend the saved files manually if required. Replaying the same brief will not automatically send a duplicate. A 250 SMTP acceptance means the sending server accepted the message; it does not prove inbox delivery.
-
-Journal snapshots may contain private business content. Keep them in your n8n project. Do not publish previews, logs, credential references or populated journals with a shared template.
-
-## Files and validation
-
-- **workflow.json** — executable import, without credentials or instance identifiers.
-- **setup-journal.json** — native one-time journal creation.
-- **README.md** — setup, examples, operation and recovery.
-- **VALIDATION.md** — actual acceptance scope and boundaries.
-- **cover.png / thumbnail.png** — original design-edition artwork, reused.
-- **example-input.json** — editable form payload.
-- **THIRD_PARTY_NOTICES.md** — embedded QR library MIT attribution.
-
-See [validation](./VALIDATION.md) and the [dependency-free checks](../tests/README.md). No ad spend, purchase or paid third-party QR service is required by this template. Your n8n, SMTP, OrbitPage plan and any AI allowance are separate services.
-
-[More OrbitPage templates](../README.md)
+Full technical documentation: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-campaign-launch-kit#readme

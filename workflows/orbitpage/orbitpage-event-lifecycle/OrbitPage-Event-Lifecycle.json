@@ -1,5 +1,5 @@
 {
-  "name": "Update an OrbitPage Event Before, During and After",
+  "name": "Publish phased OrbitPage event pages with email approvals and Data Tables",
   "nodes": [
     {
       "parameters": {

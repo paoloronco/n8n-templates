@@ -25,7 +25,6 @@
         384
       ],
       "notesInFlow": false,
-      "webhookId": "32188c73-dd69-4cc2-86fa-668a97486722",
       "notes": "Owner intake only. Use the example-input.json schema from the README and protect this form with your authenticated deployment. A separate owner email review is required before any page publication."
     },
     {
@@ -76,13 +75,6 @@
       ],
       "notesInFlow": false,
       "retryOnFail": false,
-      "webhookId": "1bfe00b6-6f07-431a-9e32-f3f9c6c644c9",
-      "credentials": {
-        "smtp": {
-          "id": "DZIiGpg15xATLSCI",
-          "name": "Send PurelyMail newsletter email"
-        }
-      },
       "notes": "Select SMTP credentials and configure REPLACE_WITH_SENDER_EMAIL / REPLACE_WITH_OWNER_EMAIL. Review links must be reachable using your n8n webhook URL. Approval applies only to the exact displayed payload and expiry."
     },
     {
@@ -300,12 +292,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -327,12 +313,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -529,12 +509,6 @@
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select your OrbitPage credential. This node writes only the reviewed payload/revision. Automatic write retries are disabled. If the provider response is unknown, reconcile the saved journal intent before another write."
     },
     {
@@ -556,12 +530,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -599,12 +567,6 @@
       "retryOnFail": false,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select your OrbitPage credential. This node writes only the reviewed payload/revision. Automatic write retries are disabled. If the provider response is unknown, reconcile the saved journal intent before another write."
     },
     {
@@ -811,12 +773,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -872,12 +828,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -999,7 +949,6 @@
         4400,
         944
       ],
-      "webhookId": "cd76486a-54e4-4197-9435-daf114f4bd7a",
       "notes": "See the neighboring section note and the README for this branch’s operating and recovery rules."
     },
     {
@@ -1033,12 +982,6 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1500,
-      "credentials": {
-        "orbitPageApi": {
-          "id": "2lkr1b5Ay6G4Q1U9",
-          "name": "OrbitPage account"
-        }
-      },
       "notes": "Select the same OrbitPage workspace credential throughout this workflow. Revision/ETag guards check that sequential reads still describe one workspace state."
     },
     {
@@ -1213,7 +1156,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Review event plan": {
       "main": [
@@ -1583,11 +1525,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "063bcd19-4491-450b-8f90-8ca550385450",
-  "meta": {
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
   "nodeGroups": [],
-  "id": "ubtEhIYdKLntjZYS",
   "tags": []
 }

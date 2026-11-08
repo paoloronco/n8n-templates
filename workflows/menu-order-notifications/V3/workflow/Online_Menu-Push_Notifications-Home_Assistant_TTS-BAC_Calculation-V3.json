@@ -1,114 +1,132 @@
 {
+  "name": "Menu Order Notifications with NTFY and BAC Calculation",
   "nodes": [
     {
       "parameters": {
-        "content": "## Notify on menu orders via ntfy and Home Assistant TTS with daily BAC tracking\n\n📖 [Full documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)\n\n### How it works\n\n1. Receives a menu order through a webhook (POST body: `name`, `time`, `items[]`).\n2. Normalizes the customer name and formats the order string.\n3. Logs the order to a DataTable (item, person, alcohol_grams, date, order_time).\n4. Reads all of today's orders for that person from the DataTable.\n5. Calculates a cumulative BAC estimate using the Widmark formula.\n6. Sends a push notification via ntfy and announces the order via Home Assistant TTS.\n\n### Setup steps\n\n- [ ] Create a DataTable node with columns: `item`, `person`, `alcohol_grams`, `date`, `order_time`\n- [ ] Set up ntfy credentials (HTTP Header Auth) in the **Send Ntfy Notification** node\n- [ ] Set the ntfy URL to your server/topic (e.g. `https://ntfy.sh/your-topic`)\n- [ ] Set up Home Assistant credentials and update the script service name\n- [ ] Adjust the Widmark formula weight/factor if needed (default: 70 kg, 0.68)\n\n### Customization\n\nThe BAC thresholds, weight constant, and notification message format can all be adjusted in the **Calculate Cumulative BAC** node.",
-        "height": 800,
-        "width": 480
+        "content": "## 🍸 Menu Order Notifications with NTFY and BAC Calculation\n\nAutomates menu order notifications through **ntfy** and **Home Assistant TTS**, with order history and estimated alcohol tracking.\n\n📖 [Full Documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)\n\n**Need help?** Customization, deployment, and integration support available. [Request a consultation](https://paoloronco.it).\n\n### How It Works\n1. Receives and normalizes orders via webhook.\n2. Prevents duplicate processing using order IDs.\n3. Logs orders and retrieves daily customer history.\n4. Calculates an estimated cumulative BAC.\n5. Sends **ntfy push notifications** and queues **Italian TTS announcements**.\n\n### Setup\n- Configure the webhook authentication and order source.\n- Connect the order history and deduplication **n8n DataTables**.\n- Configure the **ntfy** endpoint and credentials.\n- Set up the local TTS queue service and Home Assistant integration.\n\n### Customization\n- Adjust notification content and Italian TTS pronunciation aliases.\n- Modify BAC calculation parameters and thresholds.\n- Change the weekly DataTable cleanup schedule (**Monday, 04:00**).",
+        "height": 794,
+        "width": 504
       },
+      "id": "265b6099-c527-4a17-a036-4b31bee491b4",
+      "name": "Workflow Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1152,
-        368
-      ],
-      "id": "709a58d2-d2fe-422d-bb31-7c7ae04af1c3",
-      "name": "Sticky Note"
+        -752,
+        -384
+      ]
     },
     {
       "parameters": {
-        "content": "## Receive and prepare orders\n\nReceives the menu order via a webhook and prepares the data by normalizing and calculating necessary order information.",
-        "height": 304,
-        "width": 432,
+        "content": "### 01 · Order Intake\nReceive and normalize the request, including the text used for voice announcements.",
+        "height": 262,
+        "width": 455,
         "color": 7
       },
+      "id": "3ea39d12-bae5-4fb5-a212-4ebbd902c95a",
+      "name": "01 Intake",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1648,
-        368
-      ],
-      "id": "9e8f77e4-7dcb-4647-a5e2-fb00028c5b16",
-      "name": "Sticky Note1"
+        -224,
+        -144
+      ]
     },
     {
       "parameters": {
-        "content": "## Log order and read data\n\nLogs the prepared order into the database and reads the accumulated orders for the day.",
-        "height": 304,
-        "width": 432,
+        "content": "### 02 · Idempotency & Response\nClaim each order ID, check for duplicates, and return the appropriate webhook response.",
+        "height": 715,
+        "width": 860,
         "color": 7
       },
+      "id": "0a489cb1-7347-44f8-8fde-7205019de3a0",
+      "name": "02 Deduplication",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2096,
-        368
-      ],
-      "id": "067991b5-23c9-4174-b9a5-6b6bb6982808",
-      "name": "Sticky Note2"
+        256,
+        -304
+      ]
     },
     {
       "parameters": {
-        "content": "## Calculate BAC and notify\n\nCalculates the cumulative BAC from today's orders and sends notifications followed by TTS announcements.",
-        "height": 304,
-        "width": 672,
+        "content": "### 03 · Notifications & History\nQueue the voice message, save the order, calculate daily BAC, and send the ntfy alert. Duplicate and unavailable responses terminate here.",
+        "height": 825,
+        "width": 970,
         "color": 7
       },
+      "id": "53546d15-4eca-46b6-9562-b65a5d4dafb3",
+      "name": "03 Delivery",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2560,
-        368
-      ],
-      "id": "efea2242-1257-4f84-ac0b-1c8d1281d491",
-      "name": "Sticky Note3"
+        1136,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 04 · Weekly Maintenance\nEvery Monday at **04:00**, clear order-history rows while preserving the table schema.",
+        "height": 262,
+        "width": 454,
+        "color": 7
+      },
+      "id": "e1de704f-73a0-4c40-a4ad-fb74e1291cb3",
+      "name": "04 Maintenance",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        144
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "menu",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
         "options": {}
       },
+      "id": "fc6d7f2a-9ea9-40eb-b650-1b055a45751a",
+      "name": "Receive Menu Order",
+      "webhookId": "f967893c-ce62-4b03-95a7-8b456c86c6f7",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        1696,
-        496
-      ],
-      "id": "817f6c00-fbfd-4d4f-b0cf-0af68bc32893",
-      "name": "When Order Received",
-      "webhookId": "00000000-0000-0000-0000-000000000001"
+        -160,
+        -32
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Normalize name, calculate alcohol amount and order string for current order\nconst body        = $input.first().json.body;\nconst rawName     = (body.name || 'Anonymous').trim();\nconst name        = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();\nconst orderTime   = body.time || new Date().toLocaleString();\nconst items       = body.items || [];\nconst today       = new Date().toISOString().slice(0, 10);\n\nconst alcoholGrams = items.reduce((s, i) => s + (i.alcohol_grams || 0) * (i.quantity || 1), 0);\n\nconst orderStr = items\n  .map(i => {\n    let s = i.quantity + 'x ' + i.name;\n    if (i.detail) s += ' ' + i.detail;\n    return s;\n  })\n  .join(', ');\n\nreturn [{ json: { name, orderTime, items, orderStr, alcoholGrams: Math.round(alcoholGrams * 10) / 10, today } }];"
+        "jsCode": "// Normalizza nome, calcola alcolOrdine e testi per l'ordine corrente\nconst input = $input.first().json || {};\nconst body = input.body || input;\n// Stable per client attempt; legacy cached pages receive a unique execution receipt.\nconst incomingOrderId = body.orderId;\nif (incomingOrderId != null && (typeof incomingOrderId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(incomingOrderId))) throw new Error('Invalid orderId');\nconst orderId = incomingOrderId || ('legacy:' + $execution.id);\n\n\nconst toText = (value, fallback = '') => {\n  if (value === null || value === undefined) return fallback;\n  if (typeof value === 'string') return value.trim();\n  if (typeof value === 'number' || typeof value === 'boolean') return String(value).trim();\n  return fallback;\n};\n\nconst titleName = (value) => {\n  const s = toText(value, 'Anonimo');\n  if (!s) return 'Anonimo';\n  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();\n};\n\nconst normalizeKey = (value) => toText(value).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();\n\nconst nome = titleName(body.nome || body.name || body.person || body.cliente);\nconst orario = toText(body.orario || body.time) || new Date().toLocaleString('it-IT');\nconst today = new Date().toISOString().slice(0, 10);\n\nconst qty = (value) => {\n  const n = Number(value || 1);\n  if (!Number.isFinite(n) || n <= 0) return 1;\n  return Math.max(1, Math.round(n));\n};\n\nconst normalizeOrderArray = (value) => {\n  if (Array.isArray(value)) return value;\n  if (value && typeof value === 'object') return Object.values(value);\n  if (typeof value === 'string' && value.trim()) {\n    return value.split(',').map(x => ({ nome: x.trim(), quantita: 1 })).filter(x => x.nome);\n  }\n  return [];\n};\n\nconst baseName = (item) => toText(\n  item?.nome ?? item?.name ?? item?.item ?? item?.label ?? item?.title ?? item?.prodotto ?? item?.drink,\n  ''\n);\n\nconst baseDetail = (item) => toText(\n  item?.dettaglio ?? item?.detail ?? item?.variant ?? item?.variante ?? item?.opzione ?? item?.option ?? item?.note,\n  ''\n);\n\nconst cleanVariantItem = (item) => {\n  const src = (item && typeof item === 'object') ? item : { nome: item };\n  const out = { ...src };\n  let rawName = baseName(src);\n  let detailRaw = baseDetail(src);\n  const variant = detailRaw.replace(/^\\((.*)\\)$/, '$1').trim();\n\n  // Backward-compatible fallback for old cached clients:\n  // \"Gin Tonic / Lemon\" + \"(Lemon)\" -> \"Gin Lemon\"\n  // \"Vodka Tonic / Lemon\" + \"(Tonic)\" -> \"Vodka Tonic\"\n  if (variant && rawName.includes(' / ')) {\n    const parts = rawName.split('/').map(p => p.trim()).filter(Boolean);\n    const left = parts[0] || rawName;\n    const alternatives = [left.split(/\\s+/).pop(), ...parts.slice(1)].filter(Boolean);\n    const matched = alternatives.find(a => a.toLowerCase() === variant.toLowerCase());\n    if (matched) {\n      const words = left.split(/\\s+/).filter(Boolean);\n      if (words.length > 1) {\n        const prefix = words.slice(0, -1).join(' ');\n        rawName = (prefix + ' ' + matched).trim();\n      } else {\n        rawName = matched;\n      }\n      detailRaw = '';\n    }\n  }\n\n  // If frontend accidentally sends a container label with a detail, prefer the detail for voice.\n  // This prevents umbrella items like \"Digestivi\" being spoken instead of the selected bottle.\n  const genericContainers = new Set(['gin','rum','vodka','whisky / bourbon','whisky/bourbon','liquori','digestivi','premium','premium & digestivi']);\n  if (variant && genericContainers.has(rawName.toLowerCase())) {\n    rawName = variant;\n    detailRaw = '';\n  }\n\n  out.nome = rawName || 'Elemento menu non riconosciuto';\n  out.dettaglio = detailRaw;\n  out.quantita = qty(src.quantita ?? src.quantity ?? src.qty ?? 1);\n  out.alcol_grammi = Number(src.alcol_grammi ?? src.alcol ?? src.alcohol ?? 0) || 0;\n  return out;\n};\n\nconst speechAliases = {\n  // Analcolici / base\n  'cocacola': 'Coca Cola',\n  'coca cola': 'Coca Cola',\n  'redbull': 'Red Bull',\n  'red bull': 'Red Bull',\n  'the freddo pesca': 'Te freddo alla pesca',\n  'acqua tonica': 'acqua tonica',\n  'birra bionda': 'birra bionda',\n\n  // Cocktail: evita parole inglesi lette male usando descrizioni italiane naturali\n  'aperol spritz': 'Aperol Spritz',\n  'campari spritz': 'Campari Spritz',\n  'limoncello spritz': 'Limoncello Spritz',\n  'il venturo spritz': 'Venturo Spritz',\n  'summer spritz': 'Spritz estivo',\n  'gin tonic': 'gin con acqua tonica',\n  'gin lemon': 'gin lemon',\n  'vodka tonic': 'vodka con acqua tonica',\n  'vodka lemon': 'vodka lemon',\n  'vodka coffee tonic': 'vodka con caffe e tonica',\n  'cuba libre': 'Cuba Libre',\n  'negroni': 'Negroni',\n  'negroni sbagliato': 'Negroni Sbagliato',\n  'dry martini': 'Martini dry',\n  'watermelon gin tonic': 'gin tonic all anguria',\n  'white dragon': 'Drago Bianco',\n  'jagermeister bomb': 'Iegermaister Bomb',\n  'jagermeister deer beer': 'Iegermaister con birra',\n\n  // Premium / distillati: pronuncia italiana o descrittiva, non inglese forzato\n  'mg dry gin villanova spagna': 'emme gi gin secco, Villanova Spagna',\n  'larios malaga spagna': 'Larios, Malaga Spagna',\n  'martin miller s london uk': 'Martin Millers, Londra Regno Unito',\n  'tanqueray': 'Tancherè',\n  'boigin sardegna': 'Boi Gin, Sardegna',\n  'sabatini toscana': 'Sabatini, Toscana',\n  'malfy limone torino': 'Malfy Limone, Torino',\n  'etsu hokkaido giappone': 'Etsu, Hokkaido Giappone',\n  'ginnastic match citrus blend': 'Ginnastic Match agli agrumi',\n  'cabana': 'Cabana',\n  'pampero anniversario': 'Pampero Anniversario',\n  'monkai': 'Monkai',\n  'finland': 'Finlandia',\n  'wyborowa russia': 'Wyborowa, Russia',\n  'jack daniel s no 7 apple': 'Jack Daniels numero sette alla mela',\n  'talisker skye single malt 10 anni': 'Talisker Sky single malt, dieci anni',\n  'lagavulin 16 anni': 'Lagavulin, sedici anni',\n  'glengrant': 'Glen Grant',\n  'limoncello menton': 'Limoncello Menton',\n  'jagermeister': 'Iegermaister',\n  'grand marnier': 'Gran Marnier',\n  'molinari sambuca': 'Molinari Sambuca',\n  'sandeman porto': 'Sandeman Porto',\n  'fernet branca': 'Fernet Branca',\n};\n\n\nconst speechName = (name, detail = '') => {\n  let label = toText(name);\n  if (detail) label += ' ' + toText(detail);\n  const key = normalizeKey(label);\n  return speechAliases[key] || speechAliases[normalizeKey(name)] || label;\n};\n\nconst articleOverrides = {\n  // Femminili evidenti\n  'birra bionda': 'una',\n  'cocacola': 'una',\n  'coca cola': 'una',\n  'acqua tonica': 'una',\n  'redbull': 'una',\n  'red bull': 'una',\n  'the freddo pesca': 'un',\n  'vodka': 'una',\n  'finland': 'una',\n  'wyborowa russia': 'una',\n  'molinari sambuca': 'una',\n  // Cocktail / bicchieri / liquori di solito richiesti come \"un\"\n  'aperol spritz': 'un', 'campari spritz': 'un', 'limoncello spritz': 'un', 'il venturo spritz': 'un', 'summer spritz': 'un',\n  'prosecco': 'un', 'gin tonic': 'un', 'gin lemon': 'un', 'vodka tonic': 'un', 'vodka lemon': 'un', 'vodka coffee tonic': 'un',\n  'cuba libre': 'un', 'negroni': 'un', 'negroni sbagliato': 'un', 'dry martini': 'un', 'watermelon gin tonic': 'un', 'white dragon': 'un',\n  'jagermeister bomb': 'un', 'jagermeister deer beer': 'un', 'jagermeister': 'un', 'limoncello menton': 'un', 'fernet branca': 'un',\n  'grand marnier': 'un', 'sandeman porto': 'un',\n  'mg dry gin villanova spagna': 'un', 'larios malaga spagna': 'un', 'martin miller s london uk': 'un', 'tanqueray': 'un', 'boigin sardegna': 'un', 'sabatini toscana': 'un', 'malfy limone torino': 'un', 'etsu hokkaido giappone': 'un', 'ginnastic match citrus blend': 'un',\n  'cabana': 'un', 'pampero anniversario': 'un', 'monkai': 'un', 'jack daniel s no 7 apple': 'un', 'talisker skye single malt 10 anni': 'un', 'lagavulin 16 anni': 'un', 'glengrant': 'un'\n};\n\nconst articleFor = (name, detail = '') => {\n  const combined = normalizeKey((name || '') + ' ' + (detail || ''));\n  const exact = articleOverrides[combined] || articleOverrides[normalizeKey(name)];\n  if (exact) return exact;\n  const spoken = normalizeKey(speechName(name, detail));\n  if (articleOverrides[spoken]) return articleOverrides[spoken];\n  // Conservative fallback: un before vowel sound / masculine drink names, otherwise una.\n  if (/^(aperol|campari|gin|vodka|negroni|martini|prosecco|limoncello|jager|ieger|fernet|grand|talisker|lagavulin|jack|rum|whisky|dry|white|watermelon|cuba)/.test(normalizeKey(name))) return 'un';\n  return 'una';\n};\n\nconst ordine = normalizeOrderArray(body.ordine || body.order || body.items).map(cleanVariantItem);\nif (!ordine.length) {\n  ordine.push({ nome: 'Ordine ricevuto senza dettagli', dettaglio: '', quantita: 1, alcol_grammi: 0 });\n}\n\nconst alcolOrdine = ordine.reduce((s, i) => s + (Number(i.alcol_grammi) || 0) * (Number(i.quantita) || 1), 0);\n\nconst ordine_str = ordine\n  .map(i => {\n    let s = i.quantita + 'x ' + i.nome;\n    if (i.dettaglio) s += ' ' + i.dettaglio;\n    return s;\n  })\n  .join(', ');\n\nconst qtyToSpeech = (q, itemName, detail) => {\n  const n = Number(q || 1);\n  if (n === 1) return articleFor(itemName, detail);\n  const words = {2: 'due', 3: 'tre', 4: 'quattro', 5: 'cinque', 6: 'sei', 7: 'sette', 8: 'otto', 9: 'nove', 10: 'dieci'};\n  return words[n] || String(n);\n};\n\nconst ordine_voce = ordine\n  .map(i => {\n    const detail = i.dettaglio || '';\n    return qtyToSpeech(i.quantita, i.nome, detail) + ' ' + speechName(i.nome, detail);\n  })\n  .join(', ');\n\nconst messaggio_voce = 'Nuovo ordine da ' + nome + '. ' + ordine_voce + '.';\nreturn [{ json: { nome, orario, ordine, ordine_str, ordine_voce, messaggio_voce, alcolOrdine: Math.round(alcolOrdine * 10) / 10, today, orderId } }];"
       },
+      "id": "a9c5426a-7993-4fde-93a1-cc0861e5dcf7",
+      "name": "Normalize Order & Speech",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        496
+        64,
+        -32
       ],
-      "id": "a19b54cd-144d-4fd1-b0dc-0aa34f25a972",
-      "name": "Calculate Alcohol and Format Order"
+      "notes": "Normalizes order details and generates Italian speech text. Preserves product names in stored orders."
     },
     {
       "parameters": {
         "dataTableId": {
           "__rl": true,
-          "value": "",
-          "mode": "list",
-          "cachedResultName": "",
-          "cachedResultUrl": ""
+          "value": "REPLACE_WITH_ORDERS_TABLE_ID",
+          "mode": "id"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "item": "={{ $json.orderStr }}",
-            "person": "={{ $json.name }}",
-            "alcohol_grams": "={{ $json.alcoholGrams }}",
-            "date": "={{ $json.today }}",
-            "order_time": "={{ $json.orderTime }}"
+            "item": "={{ $json.ordine_str }}",
+            "person": "={{ $json.nome }}",
+            "alcol_grammi": "={{ $json.alcolOrdine }}",
+            "data": "={{ $json.today }}",
+            "orario": "={{ $json.orario }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -133,8 +151,8 @@
               "removed": false
             },
             {
-              "id": "alcohol_grams",
-              "displayName": "alcohol_grams",
+              "id": "alcol_grammi",
+              "displayName": "alcol_grammi",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -143,8 +161,8 @@
               "removed": false
             },
             {
-              "id": "date",
-              "displayName": "date",
+              "id": "data",
+              "displayName": "data",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -153,8 +171,8 @@
               "removed": false
             },
             {
-              "id": "order_time",
-              "displayName": "order_time",
+              "id": "orario",
+              "displayName": "orario",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -168,143 +186,437 @@
         },
         "options": {}
       },
+      "id": "e1c59ed1-60fd-439a-9f33-ab02a99fffc0",
+      "name": "Save Order to History",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2144,
-        496
-      ],
-      "id": "114d6f2c-17f4-422b-b6d9-6072b6b3e9aa",
-      "name": "Log Order to Database"
+        1200,
+        -128
+      ]
     },
     {
       "parameters": {
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "",
-          "mode": "list",
-          "cachedResultName": "",
-          "cachedResultUrl": ""
+          "value": "REPLACE_WITH_ORDERS_TABLE_ID",
+          "mode": "id"
         },
         "matchType": "allConditions",
         "filters": {
           "conditions": [
             {
               "keyName": "person",
-              "keyValue": "={{ $('Calculate Alcohol and Format Order').item.json.name }}"
+              "keyValue": "={{ $('Normalize Order & Speech').item.json.nome }}"
             },
             {
-              "keyName": "date",
-              "keyValue": "={{ $('Calculate Alcohol and Format Order').item.json.today }}"
+              "keyName": "data",
+              "keyValue": "={{ $('Normalize Order & Speech').item.json.today }}"
             }
           ]
         },
         "returnAll": true
       },
+      "id": "493ca624-2939-4ea6-908f-e8b1ffb39cd2",
+      "name": "Load Today Orders",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2384,
-        496
-      ],
-      "id": "52f52c12-7940-4364-9b77-1fa63ecbd2c5",
-      "name": "Read Today's Orders"
+        1424,
+        -128
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Calculate cumulative BAC by reading today's rows from the DataTable\n// rows = all orders for this person today (including the one just inserted)\nconst rows       = $input.all().map(i => i.json);\nconst name       = $('Calculate Alcohol and Format Order').item.json.name;\nconst orderTime  = $('Calculate Alcohol and Format Order').item.json.orderTime;\nconst orderStr   = $('Calculate Alcohol and Format Order').item.json.orderStr;\n\nconst totalAlcohol = Math.round(rows.reduce((s, r) => s + (r.alcohol_grams || 0), 0) * 10) / 10;\nconst orderCount   = rows.length;\nconst bac          = totalAlcohol > 0 ? totalAlcohol / (70 * 0.68) : 0;\nconst bacStr       = bac.toFixed(2);\n\nconst E_OK    = String.fromCodePoint(0x1F7E2);\nconst E_WARN  = String.fromCodePoint(0x1F7E1);\nconst E_OVER  = String.fromCodePoint(0x1F534);\nconst E_NONE  = String.fromCodePoint(0x2B1C);\nconst E_LIST  = String.fromCodePoint(0x1F4CB);\nconst E_CLOCK = String.fromCodePoint(0x1F552);\nconst E_DRINK = String.fromCodePoint(0x1F378);\nconst E_WATER = String.fromCodePoint(0x1F964);\nconst E_TIME  = String.fromCodePoint(0x1F550);\n\nlet bacLevel;\nif      (bac === 0)  bacLevel = E_NONE;\nelse if (bac < 0.2)  bacLevel = E_OK;\nelse if (bac < 0.5)  bacLevel = E_WARN;\nelse                  bacLevel = E_OVER;\n\n// Previous orders = all rows except the last one (just inserted)\nconst prevOrders = rows.slice(0, -1);\nconst historyStr = prevOrders.length > 0\n  ? '\\n' + E_LIST + ' Already ordered today (' + prevOrders.length + ' orders):\\n'\n    + prevOrders.map(r => '  - ' + r.item + '  ' + E_CLOCK + ' ' + r.order_time).join('\\n')\n  : '';\n\nconst bacRow = totalAlcohol > 0\n  ? '\\n' + E_DRINK + ' BAC ~' + bacStr + ' g/L  ' + bacLevel\n  : '\\n' + E_WATER + ' no alcohol';\n\nconst message = name + ': ' + orderStr\n  + '\\n' + E_TIME + ' ' + orderTime\n  + historyStr\n  + bacRow;\n\nreturn [{\n  json: {\n    name,\n    orderTime,\n    orderStr,\n    message,\n    bac:          bacStr,\n    bacLevel,\n    totalAlcohol,\n    alcoholGrams: $('Calculate Alcohol and Format Order').item.json.alcoholGrams,\n    orderCount,\n    today: $('Calculate Alcohol and Format Order').item.json.today\n  }\n}];"
+        "jsCode": "// Calcola BAC cumulativo leggendo le righe di oggi dal DataTable\n// rows = tutti gli ordini di questa persona oggi (incluso quello appena inserito)\nconst rows      = $input.all().map(i => i.json);\nconst nome      = $('Normalize Order & Speech').item.json.nome;\nconst orario    = $('Normalize Order & Speech').item.json.orario;\nconst ordine_str = $('Normalize Order & Speech').item.json.ordine_str;\n\nconst totalAlcol = Math.round(rows.reduce((s, r) => s + (r.alcol_grammi || 0), 0) * 10) / 10;\nconst nOrdini    = rows.length;\nconst bac        = totalAlcol > 0 ? totalAlcol / (70 * 0.68) : 0;\nconst bacStr     = bac.toFixed(2);\n\nconst E_OK    = String.fromCodePoint(0x1F7E2);\nconst E_WARN  = String.fromCodePoint(0x1F7E1);\nconst E_OVER  = String.fromCodePoint(0x1F534);\nconst E_NONE  = String.fromCodePoint(0x2B1C);\nconst E_LIST  = String.fromCodePoint(0x1F4CB);\nconst E_CLOCK = String.fromCodePoint(0x1F552);\nconst E_DRINK = String.fromCodePoint(0x1F378);\nconst E_WATER = String.fromCodePoint(0x1F964);\nconst E_TIME  = String.fromCodePoint(0x1F550);\n\nlet bacLevel;\nif      (bac === 0)  bacLevel = E_NONE;\nelse if (bac < 0.2)  bacLevel = E_OK;\nelse if (bac < 0.5)  bacLevel = E_WARN;\nelse                  bacLevel = E_OVER;\n\n// Ordini precedenti = tutte le righe tranne l'ultima (quella appena inserita)\nconst prevOrders = rows.slice(0, -1);\nconst storStr = prevOrders.length > 0\n  ? '\\n' + E_LIST + ' Gia ordinato oggi (' + prevOrders.length + ' ordini):\\n'\n    + prevOrders.map(r => '  - ' + r.item + '  ' + E_CLOCK + ' ' + r.orario).join('\\n')\n  : '';\n\nconst bacRow = totalAlcol > 0\n  ? '\\n' + E_DRINK + ' BAC ~' + bacStr + ' g/L  ' + bacLevel\n  : '\\n' + E_WATER + ' nessun alcolico';\n\nconst messaggio = nome + ': ' + ordine_str\n  + '\\n' + E_TIME + ' ' + orario\n  + storStr\n  + bacRow;\n\nreturn [{\n  json: {\n    nome,\n    orario,\n    ordine_str,\n    messaggio,\n    bac:        bacStr,\n    bacLevel,\n    totalAlcol,\n    alcolOrdine: $('Normalize Order & Speech').item.json.alcolOrdine,\n    nOrdini,\n    today: $('Normalize Order & Speech').item.json.today\n  }\n}];"
       },
+      "id": "784884fb-0f6a-4f84-b0ad-ed1db07c8e4a",
+      "name": "Calculate Cumulative BAC",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2608,
-        496
-      ],
-      "id": "634dc78b-3e39-4b2e-b030-ba4c734f7548",
-      "name": "Calculate Cumulative BAC"
+        1648,
+        -128
+      ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://YOUR_NTFY_SERVER/YOUR_TOPIC",
+        "url": "http://ntfy/YOUR_TOPIC",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "text/plain",
-        "body": "={{ $json.message }}",
+        "body": "={{ $json.messaggio }}",
         "options": {}
       },
+      "id": "b5bcfbfb-72aa-4e8c-9ae6-1d2905dd90c0",
+      "name": "Send ntfy Push Notification",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2848,
-        496
-      ],
-      "id": "929d8f78-ead4-4545-8e45-77c32b8a5d16",
-      "name": "Send Ntfy Notification"
+        1872,
+        -128
+      ]
     },
     {
       "parameters": {
-        "resource": "service",
-        "operation": "call",
-        "domain": "script",
-        "service": "announce_order",
-        "serviceAttributes": {
-          "attributes": [
+        "method": "POST",
+        "url": "http://YOUR_TTS_QUEUE_HOST:8098/announce",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Menu-TTS-Secret",
+              "value": "REPLACE_WITH_TTS_QUEUE_SECRET"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "message",
-              "value": "={{ $json.name }} HAS ORDERED {{ $('When Order Received').item.json.body.items[0].name }}"
+              "value": "={{ String($json.messaggio_voce || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^A-Za-z0-9 .,:;!?()'\\-/]/g, ' ').replace(/\\s+/g, ' ').trim() }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 3000
+        }
+      },
+      "id": "e42a19ad-14ed-41a3-be00-12ffa8be05e7",
+      "name": "Queue TTS Announcement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "position": [
+        1200,
+        -320
+      ],
+      "notes": "Sends sanitized Italian speech to the local TTS queue, which plays announcements sequentially."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 4
             }
           ]
         }
       },
-      "type": "n8n-nodes-base.homeAssistant",
+      "id": "4b33f57e-9fa4-413d-8407-456aa1df893b",
+      "name": "Weekly Cleanup Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        240
+      ],
+      "notes": "Runs every Monday at 04:00 to reset the order history."
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "clear",
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ORDERS_TABLE_ID",
+          "mode": "id"
+        }
+      },
+      "id": "c7638596-c6ce-4133-b126-562b021d2964",
+      "name": "Clear Order History",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        240
+      ],
+      "notes": "Deletes all order-history rows while retaining the DataTable schema."
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_CLAIMS_TABLE_ID",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sid": "={{ 'menu:order:' + $json.orderId }}",
+            "workflow": "={{ $workflow.id }}",
+            "channel": "menu_order",
+            "state": "pending"
+          },
+          "schema": [
+            {
+              "id": "sid",
+              "displayName": "sid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "channel",
+              "displayName": "channel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "498d8624-b68e-4082-b84d-c5caabbe04c3",
+      "name": "Claim Order ID",
+      "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        3088,
-        496
+        336,
+        144
       ],
-      "id": "e1accf02-8716-4f2e-ae39-9b1dbc6bd392",
-      "name": "Announce Order with Home Assistant"
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "672dae0f-1530-46e1-9ee5-0af203e2d150",
+      "name": "Restore Validated Order",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_CLAIMS_TABLE_ID",
+          "mode": "id"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ 'menu:order:' + $('Normalize Order & Speech').first().json.orderId }}"
+            }
+          ]
+        }
+      },
+      "id": "209afc7f-1e1d-4fed-8d62-29e2b2cf8976",
+      "name": "Look Up Existing Claim",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        736,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "1b9ead7c-07ed-463a-a585-97328bfd181b",
+              "leftValue": "={{ !!$json.sid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e503a4a8-cd7c-454c-9e61-de3855e1989e",
+      "name": "Is Order a Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status:'accepted', orderId:$('Normalize Order & Speech').first().json.orderId } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "dadc3800-69fb-4510-ae5f-3d9ff043bcf2",
+      "name": "Respond: Order Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status:'duplicate', orderId:$('Normalize Order & Speech').first().json.orderId } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "49973ebd-8b90-4192-bda2-add0b683af40",
+      "name": "Respond: Duplicate Order",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"Order state unavailable; retry later with the same orderId\"}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "id": "0f6be2a2-43bd-45d5-8cf0-6a7fec014735",
+      "name": "Respond: Claim Unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "943ec5c9-08be-4d45-b098-f6c71bd6f45e",
+              "leftValue": "={{ $json.sid === ('menu:order:' + $('Normalize Order & Speech').first().json.orderId) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0bcfad62-e04c-43de-b143-38e80125fc60",
+      "name": "Was Order Claim Saved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
-    "When Order Received": {
+    "Receive Menu Order": {
       "main": [
         [
           {
-            "node": "Calculate Alcohol and Format Order",
+            "node": "Normalize Order & Speech",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Calculate Alcohol and Format Order": {
+    "Normalize Order & Speech": {
       "main": [
         [
           {
-            "node": "Log Order to Database",
+            "node": "Claim Order ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore Validated Order",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Log Order to Database": {
+    "Save Order to History": {
       "main": [
         [
           {
-            "node": "Read Today's Orders",
+            "node": "Load Today Orders",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Read Today's Orders": {
+    "Load Today Orders": {
       "main": [
         [
           {
@@ -319,18 +631,110 @@
       "main": [
         [
           {
-            "node": "Send Ntfy Notification",
+            "node": "Send ntfy Push Notification",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Send Ntfy Notification": {
+    "Weekly Cleanup Schedule": {
       "main": [
         [
           {
-            "node": "Announce Order with Home Assistant",
+            "node": "Clear Order History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim Order ID": {
+      "main": [
+        [
+          {
+            "node": "Was Order Claim Saved?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Look Up Existing Claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up Existing Claim": {
+      "main": [
+        [
+          {
+            "node": "Is Order a Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Order a Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Respond: Duplicate Order",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Validated Order": {
+      "main": [
+        [
+          {
+            "node": "Respond: Order Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Order Accepted": {
+      "main": [
+        [
+          {
+            "node": "Save Order to History",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Queue TTS Announcement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was Order Claim Saved?": {
+      "main": [
+        [
+          {
+            "node": "Restore Validated Order",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Look Up Existing Claim",
             "type": "main",
             "index": 0
           }
@@ -338,9 +742,13 @@
       ]
     }
   },
-  "pinData": {},
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": ""
-  }
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "nodeGroups": []
 }

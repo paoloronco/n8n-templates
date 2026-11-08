@@ -1,64 +1,40 @@
-# Menu Order Notifications with Home Assistant TTS and BAC Estimation
+# Menu Order Notifications with ntfy, Home Assistant TTS and BAC Estimation
 
 ## Quick Overview
-
-Process online menu orders with n8n, log daily orders, send ntfy push notifications, announce orders through Home Assistant TTS, and calculate a simple cumulative BAC estimate from configured alcohol-gram values.
+Receive menu orders through an authenticated n8n webhook, prevent duplicate processing, store daily order history, send ntfy notifications and queue Italian voice announcements. Includes a simplified cumulative alcohol estimate.
 
 ## How It Works
-
-- **Order webhook** — The `/menu` webhook receives the customer name, order time, and an array of ordered items.
-- **Order normalization** — JavaScript normalizes the customer name, formats the order, calculates alcohol grams from item metadata, and adds the current date.
-- **Order logging** — The workflow stores the formatted order, customer, alcohol grams, date, and order time in an n8n Data Table.
-- **Daily history lookup** — The Data Table is queried for all orders placed by the same person on the current date.
-- **BAC estimation** — JavaScript sums logged alcohol grams and applies a configurable simplified Widmark-style calculation using the workflow's weight and distribution-factor constants.
-- **Push notification** — ntfy receives a formatted message containing the current order, previous daily orders, alcohol total, and calculated estimate.
-- **Home Assistant TTS** — n8n calls a Home Assistant script to announce the newly ordered item through the configured media device.
+1. **Receive & normalize:** Parse the order, quantities, variants, alcohol metadata and Italian speech text.
+2. **Deduplicate:** Claim a stable order UUID; return HTTP 202 for accepted orders, 200 for duplicates or 503 if claim state is unavailable.
+3. **Announce:** Submit the spoken order to a separately deployed HTTP TTS queue.
+4. **Record & notify:** Save the full order, read today's history for the same person, calculate an indicative BAC value and publish the ntfy message.
+5. **Maintain:** Clear the order-history table every Monday at 04:00 (workflow timezone). The claims table is not cleared.
 
 ## Setup
-
-- **Import the workflow** — Import `workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation-V3.json` into n8n.
-- **Configure the Data Table** — Create `item`, `person`, `alcohol_grams`, `date`, and `order_time` fields and select the table in both Data Table nodes.
-- **Configure menu data** — Ensure each relevant menu item sends the expected `alcohol_grams` value along with name, quantity, and optional detail.
-- **Configure ntfy** — Set the server/topic URL and add the required HTTP Header Auth credential.
-- **Connect Home Assistant** — Configure Home Assistant credentials and update the script service used by the announcement node.
-- **Review calculation constants** — Change the hard-coded weight and distribution factor if you are experimenting with different calculation assumptions.
-- **Test and activate** — Send representative test orders and verify storage, notifications, calculation output, and TTS before activation.
+1. Import [the workflow JSON](./workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation-V3.json) into n8n. It is distributed inactive.
+2. Configure Webhook Header Auth and send a consistent v4 UUID `orderId` from the website.
+3. Create two DataTables: **Orders** (`item`, `person`, `alcol_grammi`, `data`, `orario`) and **Claims** (`sid`, `workflow`, `channel`, `state`). Set the correct table IDs in the workflow and enforce unique claims for `sid` where supported.
+4. Configure ntfy Header Auth and replace `http://ntfy/YOUR_TOPIC` with your endpoint.
+5. Deploy a compatible, authenticated HTTP TTS queue; replace its URL and `X-Menu-TTS-Secret` placeholder. The queue service is **not included** in the workflow JSON.
+6. Test a new order, retry the same `orderId`, verify history, notification and voice playback; then activate.
 
 ## Requirements
-
-- n8n instance
-- Online menu or frontend sending the expected webhook payload
-- n8n Data Table with the required order and alcohol fields
-- ntfy server and authentication credentials
-- Home Assistant instance and n8n credentials
-- Home Assistant announcement script and TTS-capable media device
-
-### Optional
-
-- Included website mockup
-- Cloudflare Tunnel or another secure exposure method
-- Additional order-history fields
-- Alternative notification or TTS providers
+- n8n with DataTables and an accessible authenticated webhook
+- Menu frontend sending an order payload and stable UUIDs
+- ntfy server, topic and publisher credentials
+- A separate HTTP announcement queue and Home Assistant/TTS-capable speaker
+- Two configured DataTables
 
 ## Customization
+- Update drink pronunciation aliases in **Normalize Order & Speech**.
+- Adjust notification text and the illustrative BAC constants (70 kg, 0.68) in **Calculate Cumulative BAC**.
+- Modify the cleanup schedule and retention policy; claim records require separate retention management.
+- Replace local service endpoints and authentication placeholders with your deployment values.
 
-- **Menu metadata** — Define or change the alcohol-gram values associated with menu items.
-- **Calculation assumptions** — Modify the weight, distribution factor, thresholds, and related display logic in `Calculate Cumulative BAC`.
-- **Notification content** — Change the ntfy message, history formatting, indicators, or displayed values.
-- **Order history** — Extend the Data Table with prices, categories, table numbers, IDs, or other metadata.
-- **Home Assistant** — Change the announcement script, target speaker, message, or TTS implementation.
-- **Frontend** — Replace the included mockup with another ordering interface using the same webhook contract.
-
-## Links
-
-- **Documentation:** [Setup guide](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
-
-- **n8n Creator:** [View template](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
-- **Gumroad:** [View V3 on Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
+## Documentation
+- [Full setup guide (Notion)](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+- [n8n Creators listing](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
+- [Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 
 ## Additional Info
-
-- This version extends Workflow 5 v2 with normalized order processing, richer Data Table logging, daily per-person history, and a cumulative BAC estimate.
-- The included BAC calculation is a simplified estimate based on configured alcohol grams and fixed constants. It does not model absorption, elapsed-time elimination, food, individual physiology, or measurement uncertainty.
-- Do not use the calculated value to determine whether someone is safe or legally permitted to drive, operate machinery, or make medical decisions. A breath or blood alcohol measurement and applicable local rules are materially different.
-- Detailed setup material is available in the included `docs/` directory.
+The BAC value is a simplified estimate based on configured alcohol grams, without time-based elimination or individual physiology. **Never use it for driving, medical or legal decisions.** The webhook acknowledges an accepted order before all downstream notifications complete; HTTP 202 does not guarantee successful delivery. Rotate any secret that appeared in earlier exports.

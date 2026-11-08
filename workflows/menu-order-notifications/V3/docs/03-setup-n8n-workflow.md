@@ -1,132 +1,43 @@
-# 03 — Setup the n8n Workflow
+# 03 — Setup the n8n Workflow (V3)
 
-Import and configure the menu order workflow in n8n (v3 — DataTable + BAC).
+[Full Notion documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 
----
+## 1. Import and authentication
+Import [V3 JSON](../workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation-V3.json) as an inactive workflow. Configure the Webhook **Header Auth** credential and your frontend to send the matching header.
 
-## Prerequisites
+Configure ntfy HTTP Header Auth using `Authorization: Bearer YOUR_NTFY_TOKEN` and replace `http://ntfy/YOUR_TOPIC`. Use the same Docker network or a reachable HTTPS URL.
 
-- A running n8n instance
-- ntfy set up and a Bearer token ready (see `01-setup-ntfy.md`)
-- *(Optional)* A Home Assistant instance with a TTS script
+## 2. DataTables
+| Table | Columns |
+| --- | --- |
+| Orders | `item` Text, `person` Text, `alcol_grammi` Number, `data` Text, `orario` Text |
+| Claims | `sid` Text, `workflow` Text, `channel` Text, `state` Text |
 
----
+Select the correct table in each DataTable node. Enforce unique `sid` claims if supported. The weekly cleanup clears Orders only; manage Claims retention separately.
 
-## Step 1 — Create the DataTable
+## 3. TTS queue
+Deploy a separate HTTP service that accepts authenticated `POST /announce` with a `message` body field, queues announcements and plays them via Home Assistant. Set its URL and `X-Menu-TTS-Secret` in **Queue TTS Announcement**. The service code is not bundled.
 
-1. In n8n go to **Data → Tables → Create table**
-2. Name it (e.g. `menu paoloronco intranet`)
-3. Add these columns:
-
-| Column name | Type |
-|---|---|
-| `item` | Text |
-| `person` | Text |
-| `alcol_grammi` | Number |
-| `data` | Text |
-| `orario` | Text |
-
-4. Copy the DataTable ID from the browser URL — you'll need it in step 3.
-
----
-
-## Step 2 — Import the Workflow
-
-1. In n8n go to **Workflows → Import from file**
-2. Select `7 🍸 intranet menu-paoloroncoit v3.1 PUBLIC.json`
-3. The workflow will import with placeholder values — configure them in the next step
-
----
-
-## Step 3 — Configure the Nodes
-
-### Log Ordine DB & Read Today
-
-Both DataTable nodes need your real DataTable ID:
-
-- Open **Log Ordine DB** → `dataTableId` → replace `YOUR_DATATABLE_ID`
-- Open **Read Today** → `dataTableId` → replace `YOUR_DATATABLE_ID`
-
-### ntfy notification
-
-- Open the **ntfy notification** HTTP Request node
-- Set the URL to `http://YOUR_NTFY_SERVER/YOUR_NTFY_TOPIC`
-  - If ntfy is on the same Docker network: `http://ntfy/paoloronco-menu`
-  - If external: `https://ntfy.yourdomain.com/paoloronco-menu`
-- Create a **Header Auth** credential:
-  - Header Name: `Authorization`
-  - Header Value: `Bearer YOUR_NTFY_TOKEN`
-- Attach the credential to this node
-
-### Call a service (Home Assistant TTS — optional)
-
-- Open the **Call a service** Home Assistant node
-- Set `service` to your HA script name (e.g. `annuncia_ordine`)
-- Create a **Home Assistant API** credential with your HA URL and token
-- Attach the credential to this node
-- If you don't use Home Assistant: **delete this node** (disconnect it from ntfy notification first)
-
----
-
-## Step 4 — Activate and Get Webhook URL
-
-1. Click **Activate** (toggle in the top-right of the workflow editor)
-2. Open the **Webhook** node
-3. Copy the **Production URL** (e.g. `https://n8n.yourdomain.com/webhook/menu`)
-
----
-
-## Step 5 — Configure the Menu Website
-
-In `menu-data.js` (or via `admin.html`):
-
-```javascript
-window.MENU_DATA = {
-  "title": "Your Restaurant",
-  "orderWebhook": "https://n8n.yourdomain.com/webhook/menu",
-  // ...
-};
+## 4. Example webhook payload
+```json
+{
+  "orderId": "d4b47ef0-7410-4bc0-9d52-7f6152cbb702",
+  "nome": "Mario",
+  "orario": "12:30",
+  "ordine": [
+    {"nome": "Pizza", "quantita": 1, "alcol_grammi": 0},
+    {"nome": "Birra bionda", "quantita": 2, "alcol_grammi": 13}
+  ]
+}
 ```
 
-Make sure every item has `alcol_grammi` set (grams of pure alcohol per serving, `0` for non-alcoholic).
+The same order must retain its UUID across retries. Missing IDs fall back to a per-execution identifier and do not provide retry deduplication.
 
----
+## 5. Verification
+1. Send a new order: expect HTTP **202**, order history, ntfy and queued TTS.
+2. Retry the same UUID: expect **200 duplicate**, without repeated processing.
+3. Verify a second order from the same customer updates daily history and the indicative BAC.
+4. Confirm failed claim state returns **503** and retry later using the same ID.
+5. Activate the workflow and use the production webhook URL.
 
-## Workflow Nodes Reference
-
-| Node | Type | Purpose |
-|---|---|---|
-| Webhook | Webhook | Receives POST from menu website |
-| Prepare Order | Code | Normalises name (case-insensitive), calculates `alcolOrdine` |
-| Log Ordine DB | DataTable (insert) | Saves order row to DataTable |
-| Read Today | DataTable (get) | Reads all rows for this person today |
-| BAC Calculator | Code | Calculates cumulative BAC (Widmark formula) |
-| ntfy notification | HTTP Request | Sends push notification to ntfy |
-| Call a service | Home Assistant | Calls HA TTS script (optional) |
-
----
-
-## Resetting BAC
-
-Delete rows from the DataTable via **n8n → Data → Tables → your table**. The next day BAC starts from zero automatically (filter: `data = today`).
-
----
-
-## Testing
-
-Send a test POST to the webhook (replace with your Production URL):
-
-```bash
-curl -X POST https://n8n.yourdomain.com/webhook/menu \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nome": "Test",
-    "orario": "21:00",
-    "ordine": [
-      { "nome": "Negroni", "dettaglio": "", "quantita": 1, "alcol_grammi": 19 }
-    ],
-    "totale": 1
-  }'
-```
-
-Check the ntfy app for the notification. Check the DataTable for the saved row.
+**Important:** The BAC calculation is illustrative, not a clinical measurement or a driving-safety test. Accepted responses are sent before downstream delivery completes.

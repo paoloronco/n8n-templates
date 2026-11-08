@@ -31,6 +31,10 @@ Receive menu orders through an authenticated n8n webhook, prevent duplicate proc
 - Modify the cleanup schedule and retention policy; claim records require separate retention management.
 - Replace local service endpoints and authentication placeholders with your deployment values.
 
+## Website Mockup
+
+The [static website mockup](./website-mockup/) includes a customer-facing menu, browser-based admin editor and sample menu data. It is a demonstration frontend: see its README for V3 authentication, stable order IDs and security limitations.
+
 ## Documentation
 - [Full setup guide (Notion)](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
 - [n8n Creators listing](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)

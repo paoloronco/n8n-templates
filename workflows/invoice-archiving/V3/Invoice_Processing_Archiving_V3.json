@@ -1,0 +1,2438 @@
+{
+  "name": "Invoice Processing & Archiving — V3 (Test Required)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e6cfc6d8-3939-4fb5-ba29-f9d626b2b15e",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "47ce3294-80ec-40c1-8046-4d6b6fdb7ad7",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "simple": false,
+        "filters": {
+          "q": "has:attachment filename:pdf newer_than:90d",
+          "readStatus": "both"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "b24f2000-8302-47c5-95c6-a9cbc0b8de61",
+      "name": "Gmail — Find invoice PDFs",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        430
+      ],
+      "webhookId": "538ec2fa-f420-4964-9a87-ed5e328e3f37"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result=[];\nfor(let i=0;i<items.length;i++){\n const mail=items[i];\n for(const [key,b] of Object.entries(mail.binary||{})){\n  const name=String(b.fileName||'attachment.pdf');\n  if(!name.toLowerCase().endsWith('.pdf') && b.mimeType!=='application/pdf') continue;\n  result.push({json:{messageId:mail.json.id||mail.json.messageId||'',subject:mail.json.subject||'',sender:typeof mail.json.from==='string'?mail.json.from:(mail.json.from?.text||''),attachmentKey:key,originalFileName:name},binary:{data:b},pairedItem:{item:i}});\n }\n}\nreturn result;"
+      },
+      "id": "4f4f8e96-9328-4ee6-8be5-4d77dd6370a0",
+      "name": "Split PDF attachments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// EDIT THIS NODE: set the Google Drive folder ID and classification rules.\nconst config={\n  driveFolderId:'REPLACE_WITH_DRIVE_FOLDER_ID',\n  defaultCurrency:'EUR',\n  maxPdfTextChars:100000,\n  enableOCR:false, // Optional: connect an OCR endpoint before enabling\n  enableAI:false, // Optional: connect an OpenAI-compatible endpoint before enabling\n  ocrEndpoint:'https://example.invalid/ocr',\n  aiEndpoint:'https://example.invalid/v1/chat/completions',\n  reportEmail:'', // Optional: one digest per completed execution\n  labelProcessed:'', // Optional Gmail label ID\n  labelReview:'', // Optional Gmail label ID\n  folderPrefix:'Invoices',\n  categories:[\n    {name:'Utilities',keywords:['electricity','gas bill','energy invoice','utility']},\n    {name:'Internet',keywords:['broadband','internet service','telecom']},\n    {name:'Cloud',keywords:['cloud computing','cloud services','hosting','server']}\n  ]\n};\nreturn {...$input.item,json:{...$input.item.json,config}};"
+      },
+      "id": "bb85a834-cf7c-4b90-abba-7bb5604727b9",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "0df6b5f6-180a-4b58-aac3-808c9c233800",
+      "name": "Extract PDF text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const source=$('Configuration').item;\nconst cfg=source.json.config;\nconst raw=String($input.item.json.text||$input.item.json.data||'').slice(0,cfg.maxPdfTextChars||100000).replace(/\\r/g,'');\nconst subject=source.json.subject||'';\nconst fail=(reason)=>({json:{...source.json,status:'rejected',reason,processedAt:new Date().toISOString()},binary:source.binary});\nif(raw.trim().length<40) return fail('PDF has no extractable text (OCR required)');\nconst lines=raw.split('\\n').map(x=>x.trim()).filter(Boolean);\nconst find=(patterns)=>{for(const p of patterns){const m=raw.match(p);if(m)return m[1].trim();}return '';};\nconst invoiceNumber=find([/(?:invoice\\s*(?:number|no\\.?|#)|fattura\\s*(?:n\\.?|numero)|rechnungsnummer)\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/-]{2,35})/i]);\nconst dateString=find([/(?:invoice\\s*date|data\\s*fattura|rechnungsdatum|date\\s*of\\s*issue)\\s*[:\\s]*([0-9]{1,4}[.\\/-][0-9]{1,2}[.\\/-][0-9]{2,4})/i]);\nfunction parseDate(s){\n const p=s.split(/[.\\/-]/).map(Number);if(p.length!==3)return '';\n let [a,b,c]=p;let y,m,d;\n if(a>1900){y=a;m=b;d=c}else{d=a;m=b;y=c<100?2000+c:c}\n const dt=new Date(Date.UTC(y,m-1,d));\n return dt.getUTCFullYear()===y&&dt.getUTCMonth()===m-1&&dt.getUTCDate()===d?`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`:'';\n}\nconst invoiceDate=parseDate(dateString);\nconst dueDate=parseDate(find([/(?:due\\s*date|payment\\s*due|scadenza(?:\\s*pagamento)?|zahlbar\\s*bis)\\s*[:\\s]*([0-9]{1,4}[.\\/-][0-9]{1,2}[.\\/-][0-9]{2,4})/i]));\nfunction money(s){s=String(s).replace(/[^0-9,.-]/g,'');const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');\n if(comma>dot)s=s.replace(/\\./g,'').replace(',','.');else if(dot>comma)s=s.replace(/,/g,'');\n const v=Number(s);return Number.isFinite(v)?Math.round(v*100)/100:null;\n}\nconst total=find([/(?:grand\\s*total|total\\s*(?:due|amount|invoice)|amount\\s*due|totale\\s*(?:fattura|da\\s*pagare|complessivo)|gesamtbetrag)\\s*[:\\s€$]*([0-9][0-9.,]*[.,][0-9]{2})/i]);\nconst amount=total?money(total):null;\nconst currency=/\\bUSD\\b|\\$/.test(raw)?'USD':/\\bGBP\\b|£/.test(raw)?'GBP':/\\bEUR\\b|€/.test(raw)?'EUR':cfg.defaultCurrency;\nconst vendorLine=lines.find(x=>/^(?:supplier|vendor|fornitore|seller)\\s*:/i.test(x));\nconst vendor=(vendorLine?vendorLine.replace(/^[^:]+:\\s*/,''):lines.find(x=>/[A-Za-z]{3,}/.test(x)&&!/(invoice|fattura|date|data|bill to)/i.test(x))||'').slice(0,80).trim();\nconst lower=(raw.slice(0,3500)+' '+subject).toLowerCase();\nconst category=(cfg.categories.find(c=>c.keywords.some(k=>lower.includes(k.toLowerCase())))||{}).name||'Other';\nif(!invoiceNumber||!invoiceDate||amount===null||!vendor) return fail('Missing or invalid invoice number, date, total or vendor');\nif(amount<0) return fail('Negative total requires manual review');\nif(amount>100000000) return fail('Unusually large total requires manual review');\nif(dueDate && dueDate < invoiceDate) return fail('Due date precedes invoice date');\nconst clean=s=>String(s).normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,65);\nconst uniqueKey=[clean(vendor).toLowerCase(),clean(invoiceNumber).toLowerCase(),invoiceDate].join(':');\nconst fileName=`${invoiceDate}_${clean(vendor)}_${clean(invoiceNumber)}.pdf`;\nreturn {json:{...source.json,status:'validated',invoiceNumber,invoiceDate,dueDate,amount,currency,vendor,category,uniqueKey,fileName,processedAt:new Date().toISOString()},binary:source.binary};"
+      },
+      "id": "4d101383-bbd9-4e01-927b-1308b8a67a03",
+      "name": "Parse & validate invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2820,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "d95d3ec5-a0ae-42ef-b32f-0b76973a793e",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "validated",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bdd3f6d4-915a-440a-8feb-4e4fd18659ac",
+      "name": "Valid invoice?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3100,
+        430
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3405f616-6c28-43a1-8962-eee325b32dcf",
+      "name": "Rejected — review PDF",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5620,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Invoices",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "uniqueKey",
+              "lookupValue": "={{ $json.uniqueKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "16bb4103-3948-4d63-a658-a2d801a77390",
+      "name": "Sheets — Find existing invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4500,
+        430
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "eb6a2401-14f8-4318-920c-ebe83eefa5b7",
+              "leftValue": "={{ $json.uniqueKey || \"\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9bbf56cb-e69d-4342-8dc0-9d417e153343",
+      "name": "Already registered?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4780,
+        430
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "2d7bfd09-acfd-418f-acd2-b781723b9185",
+      "name": "Duplicate — skipped",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5060,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse & validate invoice').item;\nif(src.json.status!=='validated'||!src.binary?.data)throw new Error('Missing validated PDF binary');\nif(src.json.config.driveFolderId.startsWith('REPLACE_'))throw new Error('Set driveFolderId in Configuration');\nreturn {json:src.json,binary:src.binary};"
+      },
+      "id": "d2a8557c-00f5-472e-958f-bde042790d1e",
+      "name": "Restore validated PDF",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5060,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.folderId }}"
+        },
+        "options": {}
+      },
+      "id": "12159743-c1b2-43dd-902f-a4aaa74474b3",
+      "name": "Drive — Upload PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        10660,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Restore validated PDF').item.json;\nconst id=$input.item.json.id||$input.item.json.fileId||'';\nif(!id)throw new Error('Drive upload returned no file ID');\nreturn {json:{uniqueKey:src.uniqueKey,invoiceNumber:src.invoiceNumber,vendor:src.vendor,invoiceDate:src.invoiceDate,dueDate:src.dueDate||\"\",amount:src.amount,currency:src.currency,category:src.category,fileName:src.fileName,driveFileId:id,status:'archived',sourceMessageId:src.messageId,processedAt:new Date().toISOString()}};"
+      },
+      "id": "6cc028b1-00a5-4d15-97a3-ce1a327a2787",
+      "name": "Prepare invoice register row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10940,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Invoices",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "invoiceNumber": "={{ $json.invoiceNumber }}",
+            "vendor": "={{ $json.vendor }}",
+            "invoiceDate": "={{ $json.invoiceDate }}",
+            "amount": "={{ $json.amount }}",
+            "currency": "={{ $json.currency }}",
+            "category": "={{ $json.category }}",
+            "fileName": "={{ $json.fileName }}",
+            "driveFileId": "={{ $json.driveFileId }}",
+            "status": "={{ $json.status }}",
+            "sourceMessageId": "={{ $json.sourceMessageId }}",
+            "processedAt": "={{ $json.processedAt }}",
+            "dueDate": "={{ $json.dueDate }}"
+          },
+          "matchingColumns": [
+            "uniqueKey"
+          ],
+          "schema": [
+            {
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceNumber",
+              "displayName": "invoiceNumber",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vendor",
+              "displayName": "vendor",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceDate",
+              "displayName": "invoiceDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fileName",
+              "displayName": "fileName",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "driveFileId",
+              "displayName": "driveFileId",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sourceMessageId",
+              "displayName": "sourceMessageId",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processedAt",
+              "displayName": "processedAt",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dueDate",
+              "displayName": "dueDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6463807-4319-4afe-8aa9-86613e98146b",
+      "name": "Sheets — Register invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        11220,
+        520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "f7c82cd1-2930-47a6-b107-65ab496eac09",
+      "name": "Archived — completed",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        12060,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Configuration').item; const text=String($json.text||$json.data||'');return {json:{...src.json,extractedText:text,needsOCR:text.trim().length<40},binary:src.binary};"
+      },
+      "id": "7523c4b4-5f96-4993-bbe5-c838a95badb4",
+      "name": "Assess extracted text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "05e007fe-eb4f-4a71-b708-d6f6ba940c2d",
+              "leftValue": "={{ $json.needsOCR && $json.config.enableOCR }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d84ddbc5-41e0-43d1-982d-c50a6676c8ee",
+      "name": "OCR enabled and needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1980,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.config.ocrEndpoint }}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "956109f1-dea9-4073-9b03-4a7d50629b34",
+      "name": "OCR — Optional HTTP endpoint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2260,
+        250
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Assess extracted text').item; const text=String($json.text||$json.result?.text||'');return {json:{...src.json,text},binary:src.binary};"
+      },
+      "id": "46f26430-d925-4a44-afe8-4e9fa539b661",
+      "name": "Normalize OCR result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2540,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {json:{...$json,text:$json.extractedText},binary:$binary};"
+      },
+      "id": "1aaa165e-ead7-40ad-b53d-f1ba69580c79",
+      "name": "Use extracted PDF text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2260,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1de235ee-e0eb-418b-80d2-0a3846989693",
+              "leftValue": "={{ $json.config.enableAI }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "11122734-a93d-4af4-a1e1-0fcf8a9da31a",
+      "name": "AI fallback enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3380,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.config.aiEndpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:\"REPLACE_WITH_MODEL\",messages:[{role:\"system\",content:\"Extract invoiceNumber, invoiceDate (YYYY-MM-DD), dueDate (YYYY-MM-DD or empty), vendor, amount, currency as JSON. Never invent missing fields.\"},{role:\"user\",content:String($(\"Assess extracted text\").item.json.extractedText||\"\").slice(0,20000)}],temperature:0,response_format:{type:\"json_object\"}}) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "79f09c98-7da7-4edb-b8f4-67f05956ff27",
+      "name": "AI — Optional extraction",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3660,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse & validate invoice').item;let obj={};try{obj=JSON.parse($json.choices?.[0]?.message?.content||'{}')}catch(e){};const amount=Number(obj.amount);const date=String(obj.invoiceDate||'');const vendor=String(obj.vendor||'').trim();const num=String(obj.invoiceNumber||'').trim();if(!vendor||!num||!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!Number.isFinite(amount)||amount<0)return {json:{...src.json,reason:'AI could not validate required fields'},binary:src.binary};const clean=s=>String(s).normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,65);return {json:{...src.json,status:'validated',vendor,invoiceNumber:num,invoiceDate:date,dueDate:String(obj.dueDate||''),amount,currency:String(obj.currency||src.json.config.defaultCurrency),uniqueKey:[clean(vendor).toLowerCase(),clean(num).toLowerCase(),date].join(':'),fileName:`${date}_${clean(vendor)}_${clean(num)}.pdf`,extractionMethod:'AI'},binary:src.binary};"
+      },
+      "id": "8325920f-0fdf-4b13-a8a5-bb2f49275eaa",
+      "name": "Validate AI result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3940,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f73e1551-d9c1-49b0-959f-37d1c68f0184",
+              "leftValue": "={{ $json.status === 'validated' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28c2e520-0e1f-4b20-8818-1aca72092318",
+      "name": "AI result valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4220,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const x=$json;return {json:{uniqueKey:[x.messageId||'unknown',x.attachmentKey||'file'].join(':'),invoiceNumber:x.invoiceNumber||'',vendor:x.vendor||'',invoiceDate:x.invoiceDate||'',dueDate:x.dueDate||'',amount:x.amount??'',currency:x.currency||'',category:x.category||'',fileName:x.originalFileName||'',driveFileId:'',status:'review',sourceMessageId:x.messageId||'',processedAt:new Date().toISOString(),reason:x.reason||'Unable to validate'}};"
+      },
+      "id": "6a69dd96-3dcf-48c7-a40f-d024aad27c7d",
+      "name": "Prepare review row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4500,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Review Queue",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "invoiceNumber": "={{ $json.invoiceNumber }}",
+            "vendor": "={{ $json.vendor }}",
+            "invoiceDate": "={{ $json.invoiceDate }}",
+            "dueDate": "={{ $json.dueDate }}",
+            "amount": "={{ $json.amount }}",
+            "currency": "={{ $json.currency }}",
+            "category": "={{ $json.category }}",
+            "fileName": "={{ $json.fileName }}",
+            "driveFileId": "={{ $json.driveFileId }}",
+            "status": "={{ $json.status }}",
+            "sourceMessageId": "={{ $json.sourceMessageId }}",
+            "processedAt": "={{ $json.processedAt }}",
+            "reason": "={{ $json.reason }}"
+          },
+          "matchingColumns": [
+            "uniqueKey"
+          ],
+          "schema": [
+            {
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceNumber",
+              "displayName": "invoiceNumber",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vendor",
+              "displayName": "vendor",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceDate",
+              "displayName": "invoiceDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dueDate",
+              "displayName": "dueDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fileName",
+              "displayName": "fileName",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "driveFileId",
+              "displayName": "driveFileId",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sourceMessageId",
+              "displayName": "sourceMessageId",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processedAt",
+              "displayName": "processedAt",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b2c519a-351e-40c7-b031-5d591235e605",
+      "name": "Sheets — Review Queue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4780,
+        950
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "list"
+      },
+      "id": "4b92b93d-cacd-4269-ae5b-af8778bcb03c",
+      "name": "Drive — Find Year folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5620,
+        520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f82d2b52-7b6f-40b9-b947-84668c297213",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33c0f9ff-9a1a-4bc2-8e23-308c17b777cd",
+      "name": "Year folder exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5900,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $(\"Prepare Year folder\").item.json.folderName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "b8253612-8300-4e29-9cb9-4640658f0570",
+      "name": "Drive — Create Year folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6180,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:s.json.config.driveFolderId,folderName:s.json.invoiceDate.slice(0,4)},binary:s.binary};"
+      },
+      "id": "9622fa1b-03b7-4d6b-9f53-733988a24028",
+      "name": "Prepare Year folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5340,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Year folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "0e38315d-a44d-4d67-a800-b5650c6f7d97",
+      "name": "Use existing Year folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6180,
+        330
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Year folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "7db8f342-44e3-4db6-ba0a-711e89fa9103",
+      "name": "Use created Year folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6460,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list"
+      },
+      "id": "0ac42252-4d02-41c9-ab43-18c52d20b8c5",
+      "name": "Drive — Find Month folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7020,
+        520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "12e1a774-2f21-46a4-8b79-e297097d73d4",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e9a5d88b-8078-4033-9f82-064230abd759",
+      "name": "Month folder exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7300,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $(\"Prepare Month folder\").item.json.folderName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "89645977-5e95-4fdf-898e-1e2b66ee6be7",
+      "name": "Drive — Create Month folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7580,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:$json.folderId,folderName:s.json.invoiceDate.slice(5,7)},binary:s.binary};"
+      },
+      "id": "fc135a99-9924-425b-96da-1c9ef1b69b60",
+      "name": "Prepare Month folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6740,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Month folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "19546335-66f0-4039-9ade-8d90097023f7",
+      "name": "Use existing Month folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7580,
+        330
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Month folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "36109268-c36e-4c5b-9a7c-727b455c5447",
+      "name": "Use created Month folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7860,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list"
+      },
+      "id": "80784bef-a073-4afe-b7a7-55037b6db087",
+      "name": "Drive — Find Category folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8420,
+        520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "01ec53c7-3041-4a47-804e-8106c5ac8b47",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "31748413-2eb3-4b81-b1ed-07eb423fa1f6",
+      "name": "Category folder exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8700,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $(\"Prepare Category folder\").item.json.folderName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "8b43ac49-be62-4eb2-984f-4074321e1ad0",
+      "name": "Drive — Create Category folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8980,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:$json.folderId,folderName:s.json.category.replace(/[^a-zA-Z0-9_-]/g,'-')},binary:s.binary};"
+      },
+      "id": "31cd31e0-2240-438c-a8b6-e624112c6bde",
+      "name": "Prepare Category folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8140,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Category folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "bc129801-3c0c-4686-b1ed-3fa7dfe838fb",
+      "name": "Use existing Category folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8980,
+        330
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare Category folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
+      },
+      "id": "ba1e38e5-47d7-4bc4-b412-16e416997844",
+      "name": "Use created Category folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9260,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,folderId:$json.folderId},binary:s.binary};"
+      },
+      "id": "a91ed102-e620-4ef4-b961-5d8b19cd1df2",
+      "name": "Prepare Drive recovery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9540,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list"
+      },
+      "id": "07109d22-96d6-4c14-8506-3cea2543a19a",
+      "name": "Drive — Find existing PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9820,
+        520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "407797b0-800e-40a8-83eb-e36e1fc12d1f",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc13ffab-fea3-4bd2-8d03-0b2749e90fe3",
+      "name": "PDF already on Drive?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        10100,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Prepare Drive recovery').item.json;return {json:{...s,id:$json.id,recovered:true}};"
+      },
+      "id": "49aa2e24-a47b-496e-b57c-cedb99b62e1b",
+      "name": "Recover existing Drive file",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10380,
+        330
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Prepare Drive recovery').item;return {json:s.json,binary:s.binary};"
+      },
+      "id": "df6613b4-02c2-4c57-82f7-2a673d4b3a14",
+      "name": "Restore PDF for upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10380,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "355a9fe5-015c-4548-82a8-826b34f7ed0d",
+              "leftValue": "={{ !!$(\"Restore validated PDF\").item.json.config.labelProcessed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9fe8d815-fadb-4c30-9866-39e5ed179a78",
+      "name": "Processed label configured?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        11500,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $(\"Prepare invoice register row\").item.json.sourceMessageId }}",
+        "labelIds": "={{ $(\"Restore validated PDF\").item.json.config.labelProcessed }}"
+      },
+      "id": "d9de8224-338a-4a27-9945-dc8bcc148a84",
+      "name": "Gmail — Label processed",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        11780,
+        330
+      ],
+      "webhookId": "1ab9041f-677b-4755-a180-3b8f491f6651"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ce19243b-346e-4d7e-a5fb-cba01c7453c6",
+              "leftValue": "={{ !!$(\"Parse & validate invoice\").item.json.config.labelReview }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8783ec94-ee6d-4f63-82f4-484705326083",
+      "name": "Review label configured?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5060,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $(\"Prepare review row\").item.json.sourceMessageId }}",
+        "labelIds": "={{ $(\"Parse & validate invoice\").item.json.config.labelReview }}"
+      },
+      "id": "bc2265ef-fc29-4a62-b309-3765e8a51558",
+      "name": "Gmail — Label review",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        5340,
+        950
+      ],
+      "webhookId": "f1e6a528-86f5-43b0-95d1-2bbf2b41a4a5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1ddeb239-3370-45c9-82de-33682640088e",
+      "name": "Process invoices one by one",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1140,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();const counts={archived:0,duplicate:0,review:0};const totals={};for(const it of items){const x=it.json||{};if(Object.hasOwn(counts,x.status))counts[x.status]++;if(x.status==='archived'&&Number.isFinite(Number(x.amount))){const c=x.currency||'UNKNOWN';totals[c]=(totals[c]||0)+Number(x.amount)}}const reportEmail=items[0]?.json?.config?.reportEmail||'';return [{json:{...counts,totals,reportEmail,summary:`Invoice processing complete. Archived: ${counts.archived}; duplicate: ${counts.duplicate}; review: ${counts.review}. Totals by currency: ${JSON.stringify(totals)}.`}}];"
+      },
+      "id": "4ba46cd5-ed79-4ca3-9629-c92316111378",
+      "name": "Build execution summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "b024966b-2046-41f9-a891-0495a71da82d",
+              "leftValue": "={{ !!$json.reportEmail }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "189cddfe-2a98-4f44-afa2-4eb6a02f6411",
+      "name": "Send summary?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1700,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.reportEmail }}",
+        "subject": "Invoice processing summary",
+        "message": "={{ $json.summary }}",
+        "options": {}
+      },
+      "id": "74150bda-0481-44ff-b20c-4a3b6c8c38df",
+      "name": "Gmail — Send summary",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1980,
+        -120
+      ],
+      "webhookId": "98995176-39a9-4f25-a455-2b04b6028036"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'archived',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
+      },
+      "id": "64c77e59-0d1e-4a6e-9d15-4f10b59c26f7",
+      "name": "Outcome — archived",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12340,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'duplicate',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
+      },
+      "id": "4af30ae6-1de0-4074-91e1-a8724f5cc2f3",
+      "name": "Outcome — duplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5340,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'review',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
+      },
+      "id": "a7ffec27-a5c7-4a5d-8e51-efb4821f18ca",
+      "name": "Outcome — review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5900,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Invoice Processing & Archiving\nAutomate invoice intake from Gmail to Google Drive and Google Sheets, with duplicate checks, review routing and optional enrichment.\n\n### How it works\nPDF attachments are extracted and validated, then checked against the invoice register. New files are organized into Drive folders by year, month and category. Invalid invoices enter a Review Queue. Existing Drive files can be recovered after partial failures. Optional OCR and AI endpoints support difficult PDFs.\n\n### Setup\n1. Connect Gmail, Google Drive and Google Sheets.\n2. Set the Drive folder ID and optional settings in **Configuration**.\n3. Create **Invoices** and **Review Queue** tabs; configure the Sheet ID in all Sheets nodes.\n4. Set optional Gmail label IDs and report recipient.\n5. For OCR/AI, configure endpoint authentication, enable the HTTP nodes and switch on the flags.\n6. Test with sample invoices before activating the schedule.\n\n### Notes\nText-based PDFs work without OCR. Extraction is heuristic; verify amounts and dates. Folder creation and Sheets writes are not transactional. Avoid concurrent runs. No emails are deleted.",
+        "height": 850,
+        "width": 660,
+        "color": 3
+      },
+      "id": "ecaf055b-b219-472b-8a74-f998c3fa6464",
+      "name": "00 — OVERVIEW",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -790,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Email intake\nRun manually or every six hours. Gmail fetches PDF attachments and processes them individually.",
+        "height": 340,
+        "width": 1070,
+        "color": 0
+      },
+      "id": "d86b2ae2-6408-4ea6-b4a4-3cefb192b2ed",
+      "name": "01 — INTAKE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Extract PDF text\nConfigure categories and limits. OCR is optional and requires an authenticated endpoint.",
+        "height": 760,
+        "width": 1710,
+        "color": 0
+      },
+      "id": "ad8dece3-6098-4800-ba72-2589d5e3e192",
+      "name": "02 — EXTRACTION",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        130
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Validate invoices\nExtract vendor, invoice number, amount, date and optional due date. AI fallback is opt-in.",
+        "height": 680,
+        "width": 1690,
+        "color": 0
+      },
+      "id": "69c85d4a-56d7-4b74-b721-db90b0652798",
+      "name": "03 — VALIDATION",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2770,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Review queue\nUnrecognized invoices are logged in Sheets. Optional Gmail labels highlight messages needing attention.",
+        "height": 330,
+        "width": 1690,
+        "color": 0
+      },
+      "id": "b9907d4b-e994-4ed3-8ddd-b7d64a67b8cc",
+      "name": "04 — REVIEW",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4460,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Duplicate checks\nCheck the invoice register first. Existing records are skipped before uploading.",
+        "height": 650,
+        "width": 850,
+        "color": 0
+      },
+      "id": "8203b502-4575-415e-8153-c17304cebef1",
+      "name": "05 — DEDUPLICATION",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4460,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Organize Drive files\nFind or create year, month and category folders. Existing PDF filenames can be recovered.",
+        "height": 750,
+        "width": 5050,
+        "color": 0
+      },
+      "id": "d5bbfb39-5782-44e0-bc79-f931d490873a",
+      "name": "06 — FOLDERS",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5330,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Archive and register\nUpload only missing PDFs, then write metadata to Sheets. Optional Gmail labels mark processed messages.",
+        "height": 750,
+        "width": 2320,
+        "color": 0
+      },
+      "id": "8540b9d6-2f2e-4731-bb42-108ece8dc522",
+      "name": "07 — ARCHIVE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10400,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Execution report\nOptional email reports how many PDFs entered the run. Check Sheets for final processing outcomes.",
+        "height": 350,
+        "width": 920,
+        "color": 0
+      },
+      "id": "bee8f5fd-ebc5-4cde-a98c-f271ba8156e0",
+      "name": "08 — SUMMARY",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -250
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Recovery limitation\nDrive and Sheets are not atomic. Filename recovery reduces repeat uploads but does not guarantee exactly-once processing.",
+        "height": 220,
+        "width": 1000,
+        "color": 0
+      },
+      "id": "ed2f4693-5e7c-492b-bddc-693b0e81ed71",
+      "name": "09 — SAFETY",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10600,
+        990
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail — Find invoice PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail — Find invoice PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail — Find invoice PDFs": {
+      "main": [
+        [
+          {
+            "node": "Split PDF attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split PDF attachments": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Process invoices one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process invoices one by one": {
+      "main": [
+        [
+          {
+            "node": "Build execution summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract PDF text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF text": {
+      "main": [
+        [
+          {
+            "node": "Assess extracted text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess extracted text": {
+      "main": [
+        [
+          {
+            "node": "OCR enabled and needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR enabled and needed?": {
+      "main": [
+        [
+          {
+            "node": "OCR — Optional HTTP endpoint",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use extracted PDF text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR — Optional HTTP endpoint": {
+      "main": [
+        [
+          {
+            "node": "Normalize OCR result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize OCR result": {
+      "main": [
+        [
+          {
+            "node": "Parse & validate invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use extracted PDF text": {
+      "main": [
+        [
+          {
+            "node": "Parse & validate invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & validate invoice": {
+      "main": [
+        [
+          {
+            "node": "Valid invoice?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid invoice?": {
+      "main": [
+        [
+          {
+            "node": "Sheets — Find existing invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI fallback enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI fallback enabled?": {
+      "main": [
+        [
+          {
+            "node": "AI — Optional extraction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI — Optional extraction": {
+      "main": [
+        [
+          {
+            "node": "Validate AI result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate AI result": {
+      "main": [
+        [
+          {
+            "node": "AI result valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI result valid?": {
+      "main": [
+        [
+          {
+            "node": "Sheets — Find existing invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets — Find existing invoice": {
+      "main": [
+        [
+          {
+            "node": "Already registered?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already registered?": {
+      "main": [
+        [
+          {
+            "node": "Duplicate — skipped",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Restore validated PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate — skipped": {
+      "main": [
+        [
+          {
+            "node": "Outcome — duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore validated PDF": {
+      "main": [
+        [
+          {
+            "node": "Prepare Year folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Year folder": {
+      "main": [
+        [
+          {
+            "node": "Drive — Find Year folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Find Year folder": {
+      "main": [
+        [
+          {
+            "node": "Year folder exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Year folder exists?": {
+      "main": [
+        [
+          {
+            "node": "Use existing Year folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Drive — Create Year folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Create Year folder": {
+      "main": [
+        [
+          {
+            "node": "Use created Year folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use existing Year folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use created Year folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Month folder": {
+      "main": [
+        [
+          {
+            "node": "Drive — Find Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Find Month folder": {
+      "main": [
+        [
+          {
+            "node": "Month folder exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Month folder exists?": {
+      "main": [
+        [
+          {
+            "node": "Use existing Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Drive — Create Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Create Month folder": {
+      "main": [
+        [
+          {
+            "node": "Use created Month folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use existing Month folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use created Month folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Category folder": {
+      "main": [
+        [
+          {
+            "node": "Drive — Find Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Find Category folder": {
+      "main": [
+        [
+          {
+            "node": "Category folder exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category folder exists?": {
+      "main": [
+        [
+          {
+            "node": "Use existing Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Drive — Create Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Create Category folder": {
+      "main": [
+        [
+          {
+            "node": "Use created Category folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use existing Category folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Drive recovery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use created Category folder": {
+      "main": [
+        [
+          {
+            "node": "Prepare Drive recovery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Drive recovery": {
+      "main": [
+        [
+          {
+            "node": "Drive — Find existing PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Find existing PDF": {
+      "main": [
+        [
+          {
+            "node": "PDF already on Drive?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF already on Drive?": {
+      "main": [
+        [
+          {
+            "node": "Recover existing Drive file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Restore PDF for upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recover existing Drive file": {
+      "main": [
+        [
+          {
+            "node": "Prepare invoice register row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore PDF for upload": {
+      "main": [
+        [
+          {
+            "node": "Drive — Upload PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive — Upload PDF": {
+      "main": [
+        [
+          {
+            "node": "Prepare invoice register row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare invoice register row": {
+      "main": [
+        [
+          {
+            "node": "Sheets — Register invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets — Register invoice": {
+      "main": [
+        [
+          {
+            "node": "Processed label configured?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processed label configured?": {
+      "main": [
+        [
+          {
+            "node": "Gmail — Label processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Archived — completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail — Label processed": {
+      "main": [
+        [
+          {
+            "node": "Archived — completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archived — completed": {
+      "main": [
+        [
+          {
+            "node": "Outcome — archived",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare review row": {
+      "main": [
+        [
+          {
+            "node": "Sheets — Review Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets — Review Queue": {
+      "main": [
+        [
+          {
+            "node": "Review label configured?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review label configured?": {
+      "main": [
+        [
+          {
+            "node": "Gmail — Label review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected — review PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail — Label review": {
+      "main": [
+        [
+          {
+            "node": "Rejected — review PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rejected — review PDF": {
+      "main": [
+        [
+          {
+            "node": "Outcome — review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build execution summary": {
+      "main": [
+        [
+          {
+            "node": "Send summary?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send summary?": {
+      "main": [
+        [
+          {
+            "node": "Gmail — Send summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome — archived": {
+      "main": [
+        [
+          {
+            "node": "Process invoices one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome — duplicate": {
+      "main": [
+        [
+          {
+            "node": "Process invoices one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome — review": {
+      "main": [
+        [
+          {
+            "node": "Process invoices one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "nodeGroups": [],
+  "tags": [
+    {
+      "updatedAt": "2026-02-10T09:30:38.515Z",
+      "createdAt": "2026-02-10T09:30:38.515Z",
+      "id": "IlGBG80fVMCanY1L",
+      "name": "TEMPLATE"
+    }
+  ]
+}

@@ -1,50 +1,54 @@
-# WordPress Voiceovers — Google Cloud Text-to-Speech
-
-Convert WordPress articles into Italian and English audio using n8n, Google Cloud Text-to-Speech, Translate, Cloud Run, and Google Sheets. This free template includes the workflow, a TTS service, deployment guidance, and sample audio.
-
-![WordPress Voiceovers](assets/cover.png)
-
+# WordPress VoiceOvers
+## Quick overview
+This workflow converts recent WordPress posts into multilingual voiceovers using Google Cloud Text-to-Speech and Google Translate, managing job status and audio publishing through a Google Sheets queue.
 ## How it works
-
-1. Retrieve WordPress articles and track their processing status in Google Sheets.
-2. Prepare the source text and translate it into English using Google Cloud Translate.
-3. Generate long-form audio through the supplied Google Cloud Run TTS service.
-4. Publish audio players to the configured WordPress pages, avoiding duplicates by post ID.
-5. Update the processing status after both language branches finish.
-
-## Included files
-
-- [Importable n8n workflow](workflow/wordpress-google-cloud-voiceovers.json)
-- [Cloud Run TTS service](service/main.py), [Dockerfile](service/Dockerfile), [requirements](service/requirements.txt), [environment example](service/.env.example) and [tests](service/test_main.py)
-- [Installation and operations documentation](docs/00%20Home.md)
-- [Audio samples](assets/samples/)
-
-## Requirements
-
-- An n8n instance with access to WordPress and Google Sheets
-- WordPress REST API credentials and permission to update the target pages
-- A Google Sheet with columns `ID`, `Title`, `Date`, `Content`, `Link`, `Status`
-- A Google Cloud project with billing enabled and the required Cloud Run, Text-to-Speech, Translate, Cloud Storage, Cloud Build, and Artifact Registry APIs
-- Appropriate Google Cloud credentials and a secured endpoint for the TTS service
-
-**OpenAI is not required** for the current version. Google Cloud usage may incur charges even though the template is free.
-
+1. Triggered daily at 22:00 or manually to start the workflow.
+2. Load configuration settings including languages, Google Sheets IDs, and Cloud Run URLs.
+3. Fetch WordPress posts published within the configured lookback period.
+4. Extract readable text and generate a content fingerprint for each post.
+5. Read the current processing queue from Google Sheets.
+6. Compare posts with the queue to identify new, changed, or failed jobs and update the queue accordingly.
+7. Select pending and retryable jobs from the queue, respecting concurrency limits.
+8. Acquire a run lock in the queue to prevent concurrent executions.
+9. Loop over selected jobs, marking each as processing.
+10. Fetch the current full article content for each job.
+11. Build the speech text, generate deterministic audio filenames, and check if audio already exists.
+12. If audio exists, skip generation; otherwise, translate text if needed and send TTS requests to the Cloud Run service.
+13. Verify the generated audio file's existence and size.
+14. Read the WordPress language page to update.
+15. Build updated page content by inserting or replacing the voiceover player block.
+16. Update the WordPress page with the new content.
+17. Confirm the publication by verifying the saved content includes the audio player.
+18. Mark the job as done in the queue.
+19. Release the run lock after processing all jobs.
+20. Reconcile article-level statuses based on job statuses and update the queue.
+21. Collect and record any job failures for retry or reporting.
 ## Setup
+1. Configure the `Workflow Configuration` node with your WordPress source language, Google Sheet ID, queue sheet name, Cloud Run TTS URL, Google Cloud Storage bucket name, and other parameters.
+2. Enable and configure languages in the `languages` array with keys, language codes, voices, WordPress page IDs, and labels.
+3. Create and prepare the Google Sheet with the specified ID and tab name, including the required header columns.
+4. Ensure the Cloud Run TTS service and Google Cloud Storage bucket are set up and accessible.
+5. Provide credentials for WordPress API and Google APIs (Sheets, Translate).
+6. Verify that the WordPress API user has permissions to read posts and edit pages with unfiltered HTML.
+7. Test the workflow manually using the `Manual Run` trigger before enabling the daily schedule.
+## Requirements
+- WordPress site with REST API access and appropriate permissions.
+- Google Cloud project with enabled Sheets, Translate APIs, and Cloud Run TTS service.
+- Google Sheets document prepared as a processing queue with correct headers.
+- Cloud Storage bucket for storing generated audio files.
+- Credentials for WordPress and Google APIs configured in n8n.
+- Cloud Run TTS service URL and authentication configured.
+## Customization
+- Adjust `lookbackDays` to change how far back posts are scanned.
+- Modify `maxJobsPerRun` and `maxAttempts` to control concurrency and retry behavior.
+- Add or remove languages in the `languages` array, enabling or disabling them and setting page IDs.
+- Customize filename patterns for audio files per language.
+- Change labels and date locales for voiceover players.
+- Update Cloud Run TTS URL and storage bucket names as needed.
+- Modify translation chunk size and retry cooldown settings.
 
-1. Follow the [requirements](docs/03%20Requirements.md) and [Google Cloud setup](docs/04%20Google%20Cloud%20Setup.md).
-2. Deploy the service using the [TTS microservice guide](docs/05%20TTS%20Microservice.md).
-3. Import the [workflow JSON](workflow/wordpress-google-cloud-voiceovers.json) into n8n.
-4. Configure credentials, Google Sheet, WordPress pages, service endpoint, and all placeholders following the [n8n setup guide](docs/06%20n8n%20Setup.md).
-5. Test one article manually, verify both audio outputs and WordPress players, then activate scheduling.
+## Additional Details
 
-## Version notes
+This workflow requires configuration of Google Cloud Run and Storage for audio generation and hosting, as well as a Google Sheets queue to manage processing jobs. It supports multiple languages with customizable voice settings and handles retries and concurrency. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-The current v1.3 documentation describes completion checks for long-running synthesis, synchronized language branches, idempotent WordPress players, and failure tracking. Review the [troubleshooting guide](docs/10%20Troubleshooting.md) before production deployment.
-
-## Links
-
-- [n8n Creator listing](https://n8n.io/workflows/11789-convert-wordpress-articles-to-multilingual-voiceovers-with-google-tts-and-openai/) (legacy listing; currently displays a paid price and outdated OpenAI requirements — updated free submission is under review)
-- [Gumroad](https://paoloronco.gumroad.com/l/wordpress-voiceovers)
-- [Project website](https://paoloronco.it)
-
-For implementation assistance, contact [info@paoloronco.it](mailto:info@paoloronco.it).
+Full technical documentation: https://app.notion.com/p/WordPress-VoiceOvers-415f0ba27c32816a960ac1a8a51dc5f9

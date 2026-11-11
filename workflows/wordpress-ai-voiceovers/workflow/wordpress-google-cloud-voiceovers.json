@@ -11,37 +11,37 @@
           ]
         }
       },
-      "id": "e81521ce-ced7-404a-b0ff-f893aff3b034",
+      "id": "30c4e809-f305-4f79-a0c4-242915233f00",
       "name": "Daily Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -96,
-        -352
+        -16,
+        -368
       ]
     },
     {
       "parameters": {},
-      "id": "e8bf8377-2a66-4e14-b9a4-bcbb004d39a1",
+      "id": "e5acc59c-1ef5-4def-9043-e5c811c107a3",
       "name": "Manual Run",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -96,
-        -192
+        -16,
+        -208
       ]
     },
     {
       "parameters": {
         "jsCode": "// ════════════════════════════════════════════════════════════════════\n//  WORKFLOW CONFIGURATION  –  edit ONLY the CONFIG block below.\n//  Every other node reads its settings from this node's output.\n// ════════════════════════════════════════════════════════════════════\nconst CONFIG = {\n  // ── WordPress ──────────────────────────────────────────────────────\n  sourceLanguage: 'it',          // language the articles are written in (Google Translate code)\n  lookbackDays: 30,              // only posts PUBLISHED in the last N days are scanned\n\n  // ── Google Sheets processing queue ─────────────────────────────────\n  googleSheetId: 'YOUR_GOOGLE_SHEET_ID',   // the ID in the spreadsheet URL\n  queueSheetName: 'Queue',                 // tab name (header row required, see README)\n\n  // ── Batch, retry and concurrency ───────────────────────────────────\n  maxJobsPerRun: 12,             // max article-language jobs per execution\n  maxAttempts: 3,                // max attempts per article + language + content version\n  retryCooldownMinutes: 60,      // minimum wait before a failed job is retried\n  lockTimeoutMinutes: 240,       // a run lock older than this is considered abandoned\n  fingerprintSalt: 'v2',         // change this value to force regeneration of ALL audio\n  translationChunkChars: 4500,   // max characters sent to Google Translate per request\n\n  // ── Google Cloud Run (TTS) and Cloud Storage ───────────────────────\n  cloudRunTtsUrl: 'https://YOUR_CLOUD_RUN_URL/long-tts',\n  gcsBucketName: 'YOUR_BUCKET_NAME',       // bucket used by your Cloud Run service\n  audioPublicBaseUrl: '',                  // empty = https://storage.googleapis.com/<gcsBucketName>\n  audioMimeType: 'audio/wav',\n  minAudioBytes: 1024,                     // smaller files are treated as broken\n  // Tokens: {postId} {lang} {langCode} {version}. {postId}, {lang} and {version} are required.\n  defaultFilenamePattern: '{postId}-{lang}-{version}.wav',\n\n  // ── Languages (one processing pipeline for all of them) ────────────\n  // To add a language: copy an entry, set enabled:true, fill in the fields.\n  //   key             short id used in filenames, queue keys and page markers (a-z, 0-9, -)\n  //   languageCode    Google Cloud TTS language code\n  //   voice           Google Cloud TTS voice name\n  //   translateTo     Google Translate target code (default: first part of languageCode)\n  //   wordpressPageId ID of the WordPress page that receives this language's players\n  //   dateLocale      locale used to format the date shown in the player\n  //   labels          texts shown in the player\n  //   filenamePattern optional per-language override of defaultFilenamePattern\n  languages: [\n    {\n      key: 'it', enabled: true,\n      languageCode: 'it-IT', voice: 'it-IT-Neural2-F', translateTo: 'it',\n      wordpressPageId: 1172, dateLocale: 'it-IT',\n      labels: { voiceOver: 'VoiceOver', date: 'Data', readArticle: 'Leggi l’articolo' },\n    },\n    {\n      key: 'en', enabled: true,\n      languageCode: 'en-US', voice: 'en-US-Neural2-D', translateTo: 'en',\n      wordpressPageId: 1523, dateLocale: 'en-US',\n      labels: { voiceOver: 'VoiceOver', date: 'Date', readArticle: 'Read the article' },\n    },\n    {\n      key: 'es', enabled: false,   // example – set enabled:true and a real page ID to activate\n      languageCode: 'es-ES', voice: 'es-ES-Neural2-A', translateTo: 'es',\n      wordpressPageId: 0, dateLocale: 'es-ES',\n      labels: { voiceOver: 'VoiceOver', date: 'Fecha', readArticle: 'Leer el artículo' },\n    },\n  ],\n};\n\n// ───────────────────── validation (do not edit below) ─────────────────────\nconst problems = [];\nconst isPlaceholder = (v) => typeof v === 'string' && v.includes('YOUR_');\nfor (const k of ['googleSheetId', 'queueSheetName', 'cloudRunTtsUrl', 'gcsBucketName']) {\n  if (!CONFIG[k] || isPlaceholder(CONFIG[k])) problems.push(`Set \"${k}\" in the Workflow Configuration node (still empty or a placeholder).`);\n}\nfor (const k of ['maxJobsPerRun', 'maxAttempts', 'retryCooldownMinutes', 'lockTimeoutMinutes', 'translationChunkChars', 'lookbackDays']) {\n  if (!Number.isFinite(Number(CONFIG[k])) || Number(CONFIG[k]) <= 0) problems.push(`\"${k}\" must be a positive number.`);\n}\nconst pattern = CONFIG.defaultFilenamePattern;\nconst checkPattern = (p, where) => {\n  for (const t of ['{postId}', '{lang}', '{version}']) {\n    if (typeof p !== 'string' || !p.includes(t)) problems.push(`Filename pattern of ${where} must contain ${t}.`);\n  }\n};\ncheckPattern(pattern, 'defaultFilenamePattern');\n\nconst norm = (s) => String(s || '').trim().toLowerCase();\nconst seen = new Set();\nconst languages = [];\nfor (const l of CONFIG.languages) {\n  if (l.enabled === false) continue;\n  const key = norm(l.key);\n  if (!/^[a-z0-9-]+$/.test(key)) { problems.push(`Language key \"${l.key}\" may only contain a-z, 0-9 and \"-\".`); continue; }\n  if (seen.has(key)) problems.push(`Duplicate language key \"${key}\".`);\n  seen.add(key);\n  for (const f of ['languageCode', 'voice', 'wordpressPageId']) {\n    if (!l[f]) problems.push(`Language \"${key}\": \"${f}\" is required.`);\n  }\n  const translateTo = norm(l.translateTo || String(l.languageCode || '').split('-')[0]);\n  const filenamePattern = l.filenamePattern || pattern;\n  if (l.filenamePattern) checkPattern(filenamePattern, `language \"${key}\"`);\n  languages.push({\n    key,\n    languageCode: l.languageCode,\n    voice: l.voice,\n    translateTo,\n    needsTranslation: translateTo !== norm(CONFIG.sourceLanguage),\n    pageId: String(l.wordpressPageId),\n    dateLocale: l.dateLocale || l.languageCode,\n    filenamePattern,\n    labels: { voiceOver: 'VoiceOver', date: 'Date', readArticle: 'Read the article', ...(l.labels || {}) },\n  });\n}\nif (languages.length === 0) problems.push('Enable at least one language.');\nif (problems.length) throw new Error('Configuration problem(s):\\n- ' + problems.join('\\n- '));\n\nconst base = String(CONFIG.audioPublicBaseUrl || `https://storage.googleapis.com/${CONFIG.gcsBucketName}`).replace(/\\/+$/, '');\n\nreturn [{\n  json: {\n    ...CONFIG,\n    maxJobsPerRun: Math.floor(Number(CONFIG.maxJobsPerRun)),\n    maxAttempts: Math.floor(Number(CONFIG.maxAttempts)),\n    retryCooldownMinutes: Number(CONFIG.retryCooldownMinutes),\n    lockTimeoutMinutes: Number(CONFIG.lockTimeoutMinutes),\n    lookbackDays: Number(CONFIG.lookbackDays),\n    translationChunkChars: Math.floor(Number(CONFIG.translationChunkChars)),\n    minAudioBytes: Number(CONFIG.minAudioBytes),\n    audioPublicBaseUrl: base,\n    languages,\n    lockKey: '__RUN_LOCK__',\n  },\n}];\n"
       },
-      "id": "8fee5c00-0b57-4247-9fb8-87375c0ba6bc",
+      "id": "5e6633fc-6b43-4534-8606-2777406d4d35",
       "name": "Workflow Configuration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        144,
-        -272
+        240,
+        -288
       ],
       "notes": "Single place for every setting: Sheet, Cloud Run, bucket, languages, voices, page IDs, batch size, retries."
     },
@@ -55,13 +55,13 @@
           "status": "publish"
         }
       },
-      "id": "bb1dc4c5-96b8-4a7b-b732-c3de37ff50f1",
+      "id": "83b73c28-b943-492d-b503-04cd02651ad6",
       "name": "Fetch Recent WordPress Posts",
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        384,
-        -272
+        480,
+        -288
       ],
       "alwaysOutputData": true,
       "retryOnFail": true,
@@ -72,13 +72,13 @@
       "parameters": {
         "jsCode": "// Extract readable text from every fetched post and build a content fingerprint.\n// NOTE: htmlToText() is duplicated in \"Build Speech Text\" - keep both copies identical.\nconst cfg = $('Workflow Configuration').first().json;\n\nconst NAMED = { amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", nbsp: ' ', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', ndash: '–', mdash: '—', laquo: '«', raquo: '»', euro: '€', agrave: 'à', egrave: 'è', eacute: 'é', igrave: 'ì', ograve: 'ò', ugrave: 'ù', Agrave: 'À', Egrave: 'È', Eacute: 'É', Igrave: 'Ì', Ograve: 'Ò', Ugrave: 'Ù', ccedil: 'ç', ntilde: 'ñ', uuml: 'ü', ouml: 'ö', auml: 'ä', szlig: 'ß' };\nconst cp = (n) => { try { return String.fromCodePoint(n); } catch (e) { return ' '; } };\nfunction decodeEntities(s) {\n  return s\n    .replace(/&#x([0-9a-f]+);/gi, (_, h) => cp(parseInt(h, 16)))\n    .replace(/&#(\\d+);/g, (_, d) => cp(parseInt(d, 10)))\n    .replace(/&([a-zA-Z][a-zA-Z0-9]*);/g, (m, n) => (NAMED[n] !== undefined ? NAMED[n] : m));\n}\nfunction htmlToText(html) {\n  const h = decodeEntities(\n    String(html == null ? '' : html)\n      .replace(/<!--[\\s\\S]*?-->/g, ' ')\n      .replace(/<(script|style|noscript)[^>]*>[\\s\\S]*?<\\/\\1>/gi, ' ')\n      .replace(/<br\\s*\\/?>/gi, '\\u0001')\n      .replace(/<\\/(p|li|h[1-6]|div|blockquote|figcaption|tr)>/gi, '\\u0001')\n      .replace(/<[^>]+>/g, ' ')\n  );\n  return h.split('\\u0001')\n    .map((s) => s.replace(/\\s+/g, ' ').trim())\n    .filter(Boolean)\n    .map((s) => (/[.!?…:;][\"'”’)»]?$/.test(s) ? s : s + '.'))\n    .join(' ');\n}\nfunction plain(html) {\n  return decodeEntities(String(html == null ? '' : html).replace(/<[^>]+>/g, ' ')).replace(/\\s+/g, ' ').trim();\n}\n\n// Dependency-free SHA-256 (the Code node cannot always require('crypto')).\nfunction utf8Bytes(str) {\n  const out = [];\n  for (const ch of str) {\n    const c = ch.codePointAt(0);\n    if (c < 0x80) out.push(c);\n    else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));\n    else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));\n    else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));\n  }\n  return out;\n}\nfunction sha256Hex(message) {\n  const K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];\n  const bytes = utf8Bytes(message);\n  const bitLen = bytes.length * 8;\n  bytes.push(0x80);\n  while (bytes.length % 64 !== 56) bytes.push(0);\n  const hi = Math.floor(bitLen / 0x100000000), lo = bitLen >>> 0;\n  for (const v of [hi, lo]) bytes.push((v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255);\n  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];\n  const rotr = (x, n) => (x >>> n) | (x << (32 - n));\n  const w = new Array(64);\n  for (let off = 0; off < bytes.length; off += 64) {\n    for (let i = 0; i < 16; i++) w[i] = ((bytes[off + i * 4] << 24) | (bytes[off + i * 4 + 1] << 16) | (bytes[off + i * 4 + 2] << 8) | bytes[off + i * 4 + 3]) >>> 0;\n    for (let i = 16; i < 64; i++) {\n      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);\n      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);\n      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;\n    }\n    let [a, b, c, d, e, f, g, h] = H;\n    for (let i = 0; i < 64; i++) {\n      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);\n      const ch = (e & f) ^ (~e & g);\n      const t1 = (h + S1 + ch + K[i] + w[i]) >>> 0;\n      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);\n      const maj = (a & b) ^ (a & c) ^ (b & c);\n      const t2 = (S0 + maj) >>> 0;\n      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;\n    }\n    H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;\n    H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;\n  }\n  return H.map((v) => v.toString(16).padStart(8, '0')).join('');\n}\n\nconst entries = $input.all()\n  .map((it, idx) => ({ p: it.json, idx }))\n  .filter(({ p }) => p && p.id !== undefined && p.id !== null && p.id !== '');\nif (entries.length === 0) {\n  // Keep one item flowing so the queue is still processed (retries) on days without new posts.\n  return [{ json: { _noPosts: true } }];\n}\nreturn entries.map(({ p, idx }) => {\n  const title = plain(p.title && p.title.rendered);\n  const text = htmlToText(p.content && p.content.rendered);\n  return {\n    json: {\n      postId: String(p.id),\n      title,\n      link: p.link || '',\n      date: p.date_gmt || p.date || '',\n      modified: p.modified_gmt || p.modified || '',\n      hasText: text.length > 0,\n      textLength: text.length,\n      fingerprint: sha256Hex(`${cfg.fingerprintSalt}\\n${title}\\n${text}`),\n    },\n    pairedItem: { item: idx },\n  };\n});\n"
       },
-      "id": "7100b1d6-0cf4-4c05-86a8-ce4f09f41f28",
+      "id": "194415fe-4235-450b-b61f-e91ba32266e3",
       "name": "Extract Text & Fingerprint",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        -272
+        768,
+        -288
       ]
     },
     {
@@ -96,13 +96,13 @@
         },
         "options": {}
       },
-      "id": "a2c62b54-657a-4570-b40d-57927f8ccd8f",
+      "id": "9e6cfae2-f9ba-49f5-af8d-9581a0a7a6f7",
       "name": "Read Processing Queue",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        912,
-        -272
+        1008,
+        -288
       ],
       "executeOnce": true,
       "alwaysOutputData": true,
@@ -114,13 +114,13 @@
       "parameters": {
         "jsCode": "// Compare WordPress posts with the queue and decide which queue rows must be created or reset.\nconst cfg = $('Workflow Configuration').first().json;\nconst LOCK = cfg.lockKey;\nconst nowMs = Date.now();\nconst nowIso = new Date(nowMs).toISOString();\n\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.JobKey);\nconst posts = $('Extract Text & Fingerprint').all().map((i) => i.json).filter((p) => p && p.postId);\n\n// ── Run lock: another execution is (probably) still working → touch nothing ──\nconst lockRow = rows.find((r) => r.JobKey === LOCK);\nconst lockAgeMs = lockRow ? nowMs - Date.parse(lockRow.LastAttemptAt) : Infinity;\nconst locked = !!lockRow && String(lockRow.Status).trim().toLowerCase() === 'processing' && lockAgeMs < cfg.lockTimeoutMinutes * 60000;\nif (locked) {\n  return [{ json: { _upsert: false, _reason: 'locked', message: `Another run holds the lock (${Math.round(lockAgeMs / 60000)} min old). Nothing was changed.` } }];\n}\n\nconst COLS = ['JobKey', 'PostID', 'Language', 'Title', 'Link', 'Date', 'Modified', 'Fingerprint', 'Status', 'Attempts', 'LastAttemptAt', 'CompletedAt', 'AudioFile', 'AudioUrl', 'Error'];\nconst rowOut = (o, reason) => {\n  const r = {};\n  for (const c of COLS) r[c] = o[c] === undefined || o[c] === null ? '' : o[c];\n  r.Attempts = Number(o.Attempts) || 0;\n  return { json: { _upsert: true, _reason: reason, ...r } };\n};\n\nconst byKey = new Map(rows.map((r) => [r.JobKey, r]));\nconst out = new Map();\nconst stats = { newJobs: 0, contentChanged: 0, linkChanged: 0, recovered: 0, unchanged: 0, unreadable: 0 };\n\n// ── 1. Orphaned \"processing\" rows (no live lock → the previous run died) ──\nfor (const r of rows) {\n  if (r.JobKey === LOCK) continue;\n  if (String(r.Status).trim().toLowerCase() === 'processing') {\n    out.set(r.JobKey, rowOut({ ...r, Status: 'failed', Error: 'Interrupted: the previous run ended before this job finished.' }, 'recovered'));\n    stats.recovered++;\n  }\n}\n\n// ── 2. New and changed articles, for every enabled language ──\nfor (const p of posts) {\n  for (const lang of cfg.languages) {\n    const key = `${p.postId}:${lang.key}`;\n    const existing = byKey.get(key);\n    let reason = null;\n    if (!existing) reason = 'new';\n    else if (String(existing.Fingerprint) !== p.fingerprint) reason = 'content-changed';\n    else if (existing.Link && p.link && String(existing.Link) !== p.link) reason = 'link-changed';\n    if (!reason) { stats.unchanged++; continue; }\n\n    const base = {\n      JobKey: key, PostID: p.postId, Language: lang.key, Title: p.title, Link: p.link,\n      Date: p.date, Modified: p.modified, Fingerprint: p.fingerprint,\n    };\n    if (p.hasText) {\n      // Status \"pending\" + Attempts 0 = the retry counter is reset for the new version.\n      out.set(key, rowOut({ ...base, Status: 'pending', Attempts: 0, LastAttemptAt: '', CompletedAt: '', AudioFile: '', AudioUrl: '', Error: '' }, reason));\n    } else {\n      stats.unreadable++;\n      out.set(key, rowOut({ ...base, Status: 'failed', Attempts: cfg.maxAttempts, LastAttemptAt: nowIso, CompletedAt: '', AudioFile: '', AudioUrl: '', Error: 'The WordPress post has no readable text. It is retried automatically when the content changes.' }, reason));\n    }\n    if (reason === 'new') stats.newJobs++; else if (reason === 'content-changed') stats.contentChanged++; else stats.linkChanged++;\n  }\n}\n\nif (out.size === 0) {\n  return [{ json: { _upsert: false, _reason: 'no changes', stats, message: 'No new or changed articles.' } }];\n}\nreturn [...out.values()];\n"
       },
-      "id": "86e76056-a513-47f3-85ee-fcac490b0ec4",
+      "id": "66769b01-4be8-454d-a0cf-85b20260083a",
       "name": "Plan Queue Changes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1152,
-        -272
+        1248,
+        -288
       ],
       "notes": "Compares each post fingerprint with the queue. New or changed content becomes a pending row with Attempts reset to 0. Does nothing while another run holds the lock."
     },
@@ -150,13 +150,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "b8bf5516-f836-4d77-b585-97cac0ea1334",
+      "id": "2856e8e2-7920-4788-bcf0-8a12fd9165ee",
       "name": "Has Queue Changes?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1392,
-        -272
+        1488,
+        -288
       ]
     },
     {
@@ -364,13 +364,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "9d2c72f5-fd83-4621-bb1d-50cb741be0fe",
+      "id": "0992f0af-2da1-4dc7-9bde-718f85867afd",
       "name": "Upsert Queue Rows",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        1632,
-        -384
+        1728,
+        -400
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -391,13 +391,13 @@
         },
         "options": {}
       },
-      "id": "634ddecd-19f6-4b72-9ceb-dc97d499605a",
+      "id": "4d8905d1-3383-4822-9256-d5c73b44937a",
       "name": "Read Queue for Selection",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        1904,
-        -272
+        2000,
+        -288
       ],
       "executeOnce": true,
       "alwaysOutputData": true,
@@ -409,13 +409,13 @@
       "parameters": {
         "jsCode": "// Pick up to maxJobsPerRun jobs: pending first (oldest article first), then retryable failures.\nconst cfg = $('Workflow Configuration').first().json;\nconst LOCK = cfg.lockKey;\nconst nowMs = Date.now();\n\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.JobKey);\n\nconst lockRow = rows.find((r) => r.JobKey === LOCK);\nconst lockAgeMs = lockRow ? nowMs - Date.parse(lockRow.LastAttemptAt) : Infinity;\nif (lockRow && String(lockRow.Status).trim().toLowerCase() === 'processing' && lockAgeMs < cfg.lockTimeoutMinutes * 60000) {\n  return [{ json: { jobCount: 0, jobs: [], reason: 'locked', message: `Another run holds the lock (${Math.round(lockAgeMs / 60000)} min old).` } }];\n}\n\nconst langByKey = new Map(cfg.languages.map((l) => [l.key, l]));\nconst cooldownMs = cfg.retryCooldownMinutes * 60000;\nconst stats = { pending: 0, retryable: 0, coolingDown: 0, exhausted: 0, done: 0, other: 0 };\nconst pending = [];\nconst retries = [];\n\nfor (const r of rows) {\n  if (r.JobKey === LOCK) continue;\n  const lang = langByKey.get(String(r.Language));\n  if (!lang) continue; // disabled language or foreign row\n  const status = String(r.Status === undefined || r.Status === null ? '' : r.Status).trim().toLowerCase();\n  const attempts = Number(r.Attempts) || 0;\n  if (status === '' || status === 'pending') { pending.push({ r, lang }); stats.pending++; }\n  else if (status === 'failed') {\n    if (attempts >= cfg.maxAttempts) { stats.exhausted++; continue; }\n    const last = Date.parse(r.LastAttemptAt);\n    if (Number.isFinite(last) && nowMs - last < cooldownMs) { stats.coolingDown++; continue; }\n    retries.push({ r, lang }); stats.retryable++;\n  } else if (status === 'done') stats.done++;\n  else stats.other++;\n}\n\nconst ts = (v) => { const t = Date.parse(v); return Number.isFinite(t) ? t : 0; };\npending.sort((a, b) => ts(a.r.Date) - ts(b.r.Date));\nretries.sort((a, b) => ts(a.r.LastAttemptAt) - ts(b.r.LastAttemptAt));\n\nconst selected = [...pending, ...retries].slice(0, cfg.maxJobsPerRun);\nconst jobs = selected.map(({ r, lang }) => ({\n  jobKey: r.JobKey,\n  postId: String(r.PostID),\n  lang: lang.key,\n  title: r.Title || '',\n  link: r.Link || '',\n  date: r.Date || '',\n  modified: r.Modified || '',\n  fingerprint: String(r.Fingerprint || ''),\n  attempts: Number(r.Attempts) || 0,\n  previousStatus: String(r.Status || 'pending'),\n  languageCode: lang.languageCode,\n  voice: lang.voice,\n  translateTo: lang.translateTo,\n  needsTranslation: lang.needsTranslation,\n  pageId: lang.pageId,\n  dateLocale: lang.dateLocale,\n  labels: lang.labels,\n  filenamePattern: lang.filenamePattern,\n  cloudRunTtsUrl: cfg.cloudRunTtsUrl,\n  audioBaseUrl: cfg.audioPublicBaseUrl,\n  audioMimeType: cfg.audioMimeType,\n  minAudioBytes: cfg.minAudioBytes,\n  translationChunkChars: cfg.translationChunkChars,\n}));\n\nreturn [{\n  json: {\n    jobCount: jobs.length,\n    jobs,\n    reason: jobs.length ? 'ok' : 'queue empty',\n    message: jobs.length ? `${jobs.length} job(s) selected.` : 'No pending or retryable jobs.',\n    stats,\n  },\n}];\n"
       },
-      "id": "dca52d84-ba50-497a-83d9-65fa717128cb",
+      "id": "9092764f-0e39-47e3-abfc-70314f49d20b",
       "name": "Select Pending & Retryable Jobs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2144,
-        -272
+        2240,
+        -288
       ],
       "notes": "Pending first (oldest article first), then failed jobs under the attempt limit and past the cooldown. Limited to maxJobsPerRun."
     },
@@ -444,13 +444,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "4e309086-2abf-402e-b590-88e67aae596d",
+      "id": "3f1cb64a-c27c-4413-8c20-41e5c54e5245",
       "name": "Any Jobs to Process?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2384,
-        -272
+        2480,
+        -288
       ]
     },
     {
@@ -648,13 +648,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "7ac2531c-6166-43fa-a4f4-7d25034e6654",
+      "id": "dd5a69bc-87fc-4086-a5ef-11e42393530a",
       "name": "Acquire Run Lock",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        2624,
-        -384
+        2720,
+        -400
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -663,13 +663,13 @@
     },
     {
       "parameters": {},
-      "id": "1c34885b-12d0-455e-a991-4c30730123a1",
+      "id": "6cf0db0b-5ca7-4359-b414-ec7deffdf204",
       "name": "No Jobs to Process",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2624,
-        -176
+        2720,
+        -192
       ],
       "notes": "Empty queue, nothing to retry yet, or another run holds the lock. The input item says which."
     },
@@ -677,26 +677,26 @@
       "parameters": {
         "jsCode": "// Turn the selected jobs back into one item per job for the Loop Over Jobs node.\nconst selection = $('Select Pending & Retryable Jobs').first().json;\nreturn (selection.jobs || []).map((job) => ({ json: job, pairedItem: { item: 0 } }));\n"
       },
-      "id": "d1211894-84f7-482a-88d4-682de68ab4cf",
+      "id": "2d758819-cd33-48fa-ba79-713f6f1f17f9",
       "name": "Expand Jobs for Loop",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2864,
-        -384
+        2960,
+        -400
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "bf326371-728c-4843-b942-68d77250d5ff",
+      "id": "7c96f281-5cc4-42fb-a721-f8d6586323b7",
       "name": "Loop Over Jobs",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        3136,
-        -96
+        3232,
+        -112
       ],
       "notes": "Batch size MUST stay 1: every iteration has to hand exactly one item back to this node."
     },
@@ -705,13 +705,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// First node inside the loop. Every later node can look the job up here with $('Prepare Job').item.\nconst j = $json;\nfor (const k of ['jobKey', 'postId', 'lang', 'languageCode', 'voice', 'pageId', 'cloudRunTtsUrl', 'audioBaseUrl', 'filenamePattern', 'fingerprint']) {\n  if (!j[k]) throw new Error(`The queued job is missing \"${k}\". Check the queue row ${j.jobKey || ''}.`);\n}\nreturn { ...j, attempts: Number(j.attempts) || 0, startedAt: new Date().toISOString() };\n"
       },
-      "id": "67a53b7c-9bba-4e12-98c1-ae82ffe99ca5",
+      "id": "97fa1c11-92a5-4155-9c46-025a026306e0",
       "name": "Prepare Job",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3376,
-        -80
+        3472,
+        -96
       ],
       "onError": "continueErrorOutput",
       "notes": "Validates the job. Later nodes reference it with $('Prepare Job').item (item linking), never .first()."
@@ -911,13 +911,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "cad5ed58-6e0b-4ce3-bb20-0d44c5d8fb37",
+      "id": "75997289-e652-432c-b04d-ab6f7c505eb0",
       "name": "Mark Job as Processing",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        3632,
-        -96
+        3728,
+        -112
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -930,13 +930,13 @@
         "postId": "={{ $('Prepare Job').item.json.postId }}",
         "options": {}
       },
-      "id": "6fbf63eb-0dfb-4712-9afe-f3a34603267a",
+      "id": "ea87e25b-0d90-407f-97c3-803c2ae113de",
       "name": "Fetch Current Article",
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        3872,
-        -112
+        3968,
+        -128
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -949,13 +949,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// Combine the queued job with the freshly fetched article: text to speak, audio filename and URL.\n// NOTE: htmlToText() is duplicated in \"Extract Text & Fingerprint\" - keep both copies identical.\nconst job = $('Prepare Job').item.json;\nconst post = $json;\n\nconst NAMED = { amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", nbsp: ' ', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', ndash: '–', mdash: '—', laquo: '«', raquo: '»', euro: '€', agrave: 'à', egrave: 'è', eacute: 'é', igrave: 'ì', ograve: 'ò', ugrave: 'ù', Agrave: 'À', Egrave: 'È', Eacute: 'É', Igrave: 'Ì', Ograve: 'Ò', Ugrave: 'Ù', ccedil: 'ç', ntilde: 'ñ', uuml: 'ü', ouml: 'ö', auml: 'ä', szlig: 'ß' };\nconst cp = (n) => { try { return String.fromCodePoint(n); } catch (e) { return ' '; } };\nfunction decodeEntities(s) {\n  return s\n    .replace(/&#x([0-9a-f]+);/gi, (_, h) => cp(parseInt(h, 16)))\n    .replace(/&#(\\d+);/g, (_, d) => cp(parseInt(d, 10)))\n    .replace(/&([a-zA-Z][a-zA-Z0-9]*);/g, (m, n) => (NAMED[n] !== undefined ? NAMED[n] : m));\n}\nfunction htmlToText(html) {\n  const h = decodeEntities(\n    String(html == null ? '' : html)\n      .replace(/<!--[\\s\\S]*?-->/g, ' ')\n      .replace(/<(script|style|noscript)[^>]*>[\\s\\S]*?<\\/\\1>/gi, ' ')\n      .replace(/<br\\s*\\/?>/gi, '\\u0001')\n      .replace(/<\\/(p|li|h[1-6]|div|blockquote|figcaption|tr)>/gi, '\\u0001')\n      .replace(/<[^>]+>/g, ' ')\n  );\n  return h.split('\\u0001')\n    .map((s) => s.replace(/\\s+/g, ' ').trim())\n    .filter(Boolean)\n    .map((s) => (/[.!?…:;][\"'”’)»]?$/.test(s) ? s : s + '.'))\n    .join(' ');\n}\nfunction plain(html) {\n  return decodeEntities(String(html == null ? '' : html).replace(/<[^>]+>/g, ' ')).replace(/\\s+/g, ' ').trim();\n}\n\nconst title = plain(post.title && post.title.rendered) || job.title;\nconst text = htmlToText(post.content && post.content.rendered);\nif (!text) throw new Error('The WordPress post has no readable text.');\n\n// Deterministic, versioned filename: the version is the first 10 characters of the content fingerprint.\nconst version = String(job.fingerprint).slice(0, 10);\nconst audioFile = job.filenamePattern\n  .split('{postId}').join(job.postId)\n  .split('{lang}').join(job.lang)\n  .split('{langCode}').join(job.languageCode)\n  .split('{version}').join(version)\n  .replace(/[^A-Za-z0-9._-]/g, '-');\nconst audioUrl = `${String(job.audioBaseUrl).replace(/\\/+$/, '')}/${audioFile}`;\n\nreturn {\n  ...job,\n  title,\n  link: post.link || job.link,\n  date: post.date_gmt || job.date,\n  modified: post.modified_gmt || job.modified,\n  version,\n  audioFile,\n  audioUrl,\n  speechText: `${title}. ${text}`.replace(/\\s+/g, ' ').trim(),\n};\n"
       },
-      "id": "b0b34c62-36be-4ba0-ad1c-f9027776ec05",
+      "id": "704cc7f3-3738-4cec-93cb-387ec5eaa65b",
       "name": "Build Speech Text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4112,
-        -128
+        4208,
+        -144
       ],
       "onError": "continueErrorOutput"
     },
@@ -982,13 +982,13 @@
           "timeout": 30000
         }
       },
-      "id": "f3073ea9-eae8-403d-a50d-a42d966a9325",
+      "id": "4f5e554a-79a9-4396-94b7-ef56461a7dba",
       "name": "Check Existing Audio",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        4352,
-        -144
+        4448,
+        -160
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1001,13 +1001,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// Interpret the HEAD request that looks for an audio file already generated for this content version.\nconst job = $('Build Speech Text').item.json;\nconst status = Number($json.statusCode);\nconst rawLen = $json.headers ? $json.headers['content-length'] : undefined;\nconst len = rawLen === undefined || rawLen === '' ? NaN : Number(rawLen);\nconst exists = status >= 200 && status < 300 && (!Number.isFinite(len) || len >= job.minAudioBytes);\nconst audioCheck = `HTTP ${status}${Number.isFinite(len) ? `, ${len} bytes` : ''}`;\nif (exists) {\n  const { speechText, ...rest } = job; // the text is not needed any more\n  return { ...rest, audioExists: true, audioCheck };\n}\nreturn { ...job, audioExists: false, audioCheck };\n"
       },
-      "id": "56bdfbda-be8f-43ac-95ad-ab5f5eac9630",
+      "id": "43bbd667-0b03-4985-aaa6-d72e90ea6d5d",
       "name": "Evaluate Existing Audio",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4592,
-        -160
+        4688,
+        -176
       ],
       "onError": "continueErrorOutput"
     },
@@ -1037,13 +1037,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "58814770-4263-4d74-b822-01ce570d181b",
+      "id": "b54bc9a0-90fe-4086-83de-d080cff1f6fd",
       "name": "Audio Already Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4832,
-        -176
+        4928,
+        -192
       ]
     },
     {
@@ -1072,26 +1072,26 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "7dcbb143-b1b2-44d0-b8f2-e2b89e57c23b",
+      "id": "b45790c2-6069-4cbf-b001-ced6cab9ffb0",
       "name": "Translation Needed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5072,
-        -160
+        5168,
+        -176
       ]
     },
     {
       "parameters": {
         "jsCode": "// Split the speech text into sentence-aligned chunks that fit one Google Translate request.\nconst job = $input.all()[0].json;\nconst max = Math.max(500, Number(job.translationChunkChars) || 4500);\n\nfunction splitText(text, limit) {\n  const sentences = String(text).split(/(?<=[.!?…])\\s+/);\n  const chunks = [];\n  let cur = '';\n  const flush = () => { if (cur.trim()) chunks.push(cur.trim()); cur = ''; };\n  for (let s of sentences) {\n    while (s.length > limit) {            // a single very long sentence: cut on whitespace\n      let cut = s.lastIndexOf(' ', limit);\n      if (cut < limit * 0.5) cut = limit;\n      flush();\n      chunks.push(s.slice(0, cut).trim());\n      s = s.slice(cut).trim();\n    }\n    if (!s) continue;\n    if (cur && (cur + ' ' + s).length > limit) flush();\n    cur = cur ? cur + ' ' + s : s;\n  }\n  flush();\n  return chunks;\n}\n\nconst { speechText, ...jobLite } = job; // do not copy the full text into every chunk\nconst chunks = splitText(speechText, max);\nif (chunks.length === 0) throw new Error('There is no text to translate.');\nreturn chunks.map((chunkText, i) => ({\n  json: { chunkIndex: i, chunkCount: chunks.length, chunkText, translateTo: job.translateTo, job: jobLite },\n  pairedItem: { item: 0 },\n}));\n"
       },
-      "id": "508a3700-6e57-4221-9256-65bb5d59ca3f",
+      "id": "42aaec84-a7ea-4cc6-94d4-bbed91a7357e",
       "name": "Split Text into Chunks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5360,
-        -176
+        5456,
+        -192
       ],
       "onError": "continueErrorOutput"
     },
@@ -1101,13 +1101,13 @@
         "text": "={{ $json.chunkText }}",
         "translateTo": "={{ $json.translateTo }}"
       },
-      "id": "b144a07c-17a1-46c8-a26f-a0edd8ffe942",
+      "id": "73572748-1227-4f9e-8b0d-9b12f99d7659",
       "name": "Translate Text Chunk",
       "type": "n8n-nodes-base.googleTranslate",
       "typeVersion": 2,
       "position": [
-        5584,
-        -192
+        5680,
+        -208
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1119,13 +1119,13 @@
       "parameters": {
         "jsCode": "// Re-assemble the translated chunks. This node must NEVER throw: it receives N items, and a failing\n// multi-item node could hand N items to the error path. A problem is returned as ONE item with\n// \"translationError\"; the single-item node \"Prepare TTS Request\" raises it.\nconst items = $input.all();\n\nconst NAMED = { amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", nbsp: ' ', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', ndash: '–', mdash: '—' };\nconst cp = (n) => { try { return String.fromCodePoint(n); } catch (e) { return ' '; } };\n// Google Translate returns HTML-escaped text (e.g. &#39;) - decode it so the voice does not read entities aloud.\nconst decode = (s) => s\n  .replace(/&#x([0-9a-f]+);/gi, (_, h) => cp(parseInt(h, 16)))\n  .replace(/&#(\\d+);/g, (_, d) => cp(parseInt(d, 10)))\n  .replace(/&([a-zA-Z][a-zA-Z0-9]*);/g, (m, n) => (NAMED[n] !== undefined ? NAMED[n] : m));\n\nlet ctx = null;\ntry { ctx = $('Split Text into Chunks').itemMatching(0).json.job; } catch (e) { ctx = null; }\nif (!ctx) { const withJob = items.find((it) => it.json && it.json.job); ctx = withJob ? withJob.json.job : null; }\n\nlet problem = '';\nif (!ctx) {\n  problem = 'Internal error: the job context was lost during translation.';\n} else {\n  const missing = [];\n  let firstError = '';\n  items.forEach((it, i) => {\n    const t = it.json ? it.json.translatedText : undefined;\n    if (typeof t !== 'string' || t.trim() === '') {\n      missing.push(i + 1);\n      const e = it.json ? it.json.error : undefined;\n      if (!firstError && e) firstError = String(typeof e === 'string' ? e : (e.message || JSON.stringify(e))).slice(0, 200);\n    }\n  });\n  if (missing.length) problem = `Google Translate returned no text for chunk(s) ${missing.join(', ')} of ${items.length}${firstError ? ': ' + firstError : ''}.`;\n}\n\nif (problem) {\n  return [{ json: { ...(ctx || {}), translationError: problem }, pairedItem: { item: 0 } }];\n}\nconst speechText = items.map((it) => decode(it.json.translatedText)).join(' ').replace(/\\s+/g, ' ').trim();\nreturn [{ json: { ...ctx, speechText, translatedChunks: items.length }, pairedItem: { item: 0 } }];\n"
       },
-      "id": "0a9cc016-552c-4f21-a371-2af52b55567e",
+      "id": "2250797d-475c-402f-ae30-cefa59b76260",
       "name": "Join Translated Chunks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5792,
-        -192
+        5888,
+        -208
       ],
       "notes": "Never throws and always returns exactly one item. A translation problem is passed on as translationError and raised by Prepare TTS Request."
     },
@@ -1134,13 +1134,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// Build the request for the existing Cloud Run service. Only the documented fields are sent.\nconst { speechText, translationError, ...job } = $json;\nif (translationError) throw new Error(translationError);\nconst text = String(speechText || '').replace(/\\s+/g, ' ').trim();\nif (!text) throw new Error('The text to synthesize is empty.');\nreturn {\n  ...job,\n  ttsRequest: { text, language: job.languageCode, voice: job.voice, filename: job.audioFile },\n};\n"
       },
-      "id": "c2ecf6de-f95f-48df-bd02-42ea134a6bab",
+      "id": "010d429f-9123-4826-8066-66a1c4ae5e49",
       "name": "Prepare TTS Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6016,
-        -192
+        6112,
+        -208
       ],
       "onError": "continueErrorOutput"
     },
@@ -1157,13 +1157,13 @@
           "timeout": 900000
         }
       },
-      "id": "6d438594-3cb3-4066-930d-b6cb2899a1b5",
+      "id": "73b826a8-9de8-4593-97ee-76a8087e2e7f",
       "name": "Generate VoiceOver (Cloud Run)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6240,
-        -208
+        6336,
+        -224
       ],
       "retryOnFail": true,
       "maxTries": 2,
@@ -1193,13 +1193,13 @@
           "timeout": 30000
         }
       },
-      "id": "a2e69780-694d-4aad-a3d3-369f3b1d4270",
+      "id": "9538da0f-5ff3-4c6a-b775-927c2cf78472",
       "name": "Verify Generated Audio",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6464,
-        -224
+        6560,
+        -240
       ],
       "retryOnFail": true,
       "maxTries": 4,
@@ -1212,13 +1212,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// Two ways in:\n//  A) \"Audio Already Exists?\" (true)  -> $json is the job (audioExists = true), nothing to verify again.\n//  B) \"Verify Generated Audio\"        -> $json is the HEAD response of the freshly generated file.\nif ($json.audioExists === true && $json.jobKey) {\n  const { audioExists, audioCheck, ...job } = $json;\n  return { ...job, audioSource: 'existing' };\n}\nconst { ttsRequest, ...job } = $('Prepare TTS Request').item.json;\nconst status = Number($json.statusCode);\nconst rawLen = $json.headers ? $json.headers['content-length'] : undefined;\nconst len = rawLen === undefined || rawLen === '' ? NaN : Number(rawLen);\nif (!(status >= 200 && status < 300)) {\n  throw new Error(`The generated audio is not accessible at ${job.audioUrl} (HTTP ${status || 'no response'}). Check the Cloud Storage bucket and its public access.`);\n}\nif (Number.isFinite(len) && len < job.minAudioBytes) {\n  throw new Error(`The generated audio file is too small (${len} bytes, minimum ${job.minAudioBytes}): ${job.audioUrl}`);\n}\nreturn { ...job, audioSource: 'generated' };\n"
       },
-      "id": "d621212f-d17e-47bc-81a8-72c03db1949b",
+      "id": "6a432c75-32a7-4302-8181-68c46de0eb38",
       "name": "Confirm Audio Ready",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6704,
-        -240
+        6800,
+        -256
       ],
       "onError": "continueErrorOutput"
     },
@@ -1231,13 +1231,13 @@
           "context": "edit"
         }
       },
-      "id": "9c7cd601-c44b-4891-bdd1-c9e1d88986d2",
+      "id": "953d55a0-8f26-44f8-8082-5a0c98fb7f53",
       "name": "Read Language Page",
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        6928,
-        -256
+        7024,
+        -272
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1249,13 +1249,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// Replace (or append) this article's player block and keep everything else on the page untouched.\nconst job = $('Confirm Audio Ready').item.json;\nconst page = $json;\n\nconst raw = page.content && page.content.raw;\nif (typeof raw !== 'string') {\n  throw new Error(`WordPress page ${job.pageId} returned no \"content.raw\". The API user needs permission to edit this page (context=edit). The page was NOT modified.`);\n}\n\nconst esc = (s) => String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst labels = { voiceOver: 'VoiceOver', date: 'Date', readArticle: 'Read the article', ...(job.labels || {}) };\n\nfunction formatDate(d, locale) {\n  if (!d) return '';\n  const s = String(d);\n  const iso = /(Z|[+-]\\d\\d:?\\d\\d)$/i.test(s) || !/T/.test(s) ? s : s + 'Z';\n  const dt = new Date(iso);\n  if (isNaN(dt.getTime())) return s;\n  try { return dt.toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }); }\n  catch (e) { return dt.toISOString().slice(0, 10); }\n}\n\nconst id = String(job.postId);\nconst lang = String(job.lang);\nconst tag = `${id}:${lang}`;\nconst block = [\n  `<!-- wp-voiceover:start:${tag} -->`,\n  `<div class=\"wp-voiceover\" data-voiceover-post=\"${esc(id)}\" data-voiceover-lang=\"${esc(lang)}\" data-voiceover-version=\"${esc(job.version)}\">`,\n  `<p>🎧 ${esc(labels.voiceOver)}: ${esc(job.title)}</p>`,\n  `<p>${esc(labels.date)}: ${esc(formatDate(job.date, job.dateLocale))}</p>`,\n  `<p><a href=\"${esc(job.link)}\">${esc(labels.readArticle)}</a></p>`,\n  `<audio controls preload=\"none\"><source src=\"${esc(job.audioUrl)}\" type=\"${esc(job.audioMimeType)}\"></audio>`,\n  `</div>`,\n  `<!-- wp-voiceover:end:${tag} -->`,\n].join('\\n');\n\nconst rx = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n// The tempered pattern never runs across another voiceover marker, so a damaged block cannot swallow other players.\nconst currentRe = new RegExp(`<!-- wp-voiceover:start:${rx(tag)} -->(?:(?!<!-- wp-voiceover:start:)[\\\\s\\\\S])*?<!-- wp-voiceover:end:${rx(tag)} -->`, 'g');\nconst legacyRe = new RegExp(`<!-- wp-voiceover:${rx(tag)} -->(?:(?!<!-- wp-voiceover:)[\\\\s\\\\S])*?</audio>`, 'g'); // v1.x blocks\n\nlet replaced = 0;\nlet content = raw.replace(currentRe, () => (replaced++ === 0 ? block : ''));      // 1st match replaced, duplicates removed\ncontent = content.replace(legacyRe, () => (replaced++ === 0 ? block : ''));\nif (replaced === 0) content = (raw.trim() ? raw.replace(/\\s+$/, '') + '\\n\\n' : '') + block + '\\n';\n\nreturn { ...job, newPageContent: content, playerAction: replaced === 0 ? 'appended' : (replaced > 1 ? 'replaced-and-deduplicated' : 'replaced') };\n"
       },
-      "id": "5409d2dd-f369-48ed-8927-7debf72a0c88",
+      "id": "f1cec429-ae81-42f8-a5c8-e75285904f0b",
       "name": "Build Updated Page Content",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7152,
-        -272
+        7248,
+        -288
       ],
       "onError": "continueErrorOutput",
       "notes": "Replaces only this article's marked block (v2 and v1.x markers). Everything else on the page is preserved."
@@ -1269,13 +1269,13 @@
           "content": "={{ $json.newPageContent }}"
         }
       },
-      "id": "eb94315a-7d48-4ef2-8829-88cc1682ac7e",
+      "id": "5c4db19b-4510-490b-b4c1-bd0dcadf7a1b",
       "name": "Update WordPress Page",
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        7392,
-        -288
+        7488,
+        -304
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1287,13 +1287,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "// WordPress can answer 200 and still strip the <audio> tag (HTML filtering). Verify the saved content.\nconst { newPageContent, ...job } = $('Build Updated Page Content').item.json;\nconst page = $json;\nconst raw = page.content && page.content.raw;\nconst rendered = page.content && page.content.rendered;\nconst savedRaw = typeof raw === 'string';\nconst present = (savedRaw && raw.includes(job.audioFile)) || (typeof rendered === 'string' && rendered.includes(job.audioFile));\nif (!present) {\n  throw new Error(`WordPress accepted the update of page ${job.pageId} but the audio player is not in the saved content. The API user probably lacks the \"unfiltered_html\" capability, so <audio> was stripped.`);\n}\nif (savedRaw && !raw.includes(`<!-- wp-voiceover:start:${job.postId}:${job.lang} -->`)) {\n  throw new Error(`WordPress saved page ${job.pageId} without the voiceover marker for ${job.postId}:${job.lang}.`);\n}\nreturn { ...job, publishedAt: new Date().toISOString() };\n"
       },
-      "id": "9cad6807-4e45-48e5-9184-d203d8650e7a",
+      "id": "8ffedb32-1049-4cf6-9e21-0ff93f36fe5c",
       "name": "Confirm Publication",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7632,
-        -304
+        7728,
+        -320
       ],
       "onError": "continueErrorOutput"
     },
@@ -1491,13 +1491,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "a7aa3776-01f7-4643-8ca6-344b50d9f197",
+      "id": "679d1f9c-f74c-4b44-bf13-cfc96d645ede",
       "name": "Release Run Lock",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        4832,
-        480
+        4928,
+        464
       ],
       "executeOnce": true,
       "retryOnFail": true,
@@ -1520,13 +1520,13 @@
         },
         "options": {}
       },
-      "id": "d0be61c2-2171-4862-835b-fc1628367192",
+      "id": "81d5faac-42c4-4ba1-90dc-535c47ee68c6",
       "name": "Read Queue for Reconciliation",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        5072,
-        480
+        5168,
+        464
       ],
       "executeOnce": true,
       "alwaysOutputData": true,
@@ -1538,13 +1538,13 @@
       "parameters": {
         "jsCode": "// Derive the article-level status (done / partial / failed / pending / processing) for every post.\nconst cfg = $('Workflow Configuration').first().json;\nconst LOCK = cfg.lockKey;\nconst enabled = new Set(cfg.languages.map((l) => l.key));\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.JobKey && r.JobKey !== LOCK && enabled.has(String(r.Language)));\n\nconst groups = new Map();\nfor (const r of rows) {\n  const id = String(r.PostID);\n  if (!groups.has(id)) groups.set(id, []);\n  groups.get(id).push(r);\n}\nconst norm = (s) => { const v = String(s === undefined || s === null ? '' : s).trim().toLowerCase(); return v === '' ? 'pending' : v; };\n\nconst updates = [];\nfor (const list of groups.values()) {\n  const st = list.map((r) => norm(r.Status));\n  const done = st.filter((s) => s === 'done').length;\n  let article;\n  if (st.includes('processing')) article = 'processing';\n  else if (done === st.length) article = 'done';\n  else if (done > 0) article = 'partial';\n  else if (st.includes('failed')) article = 'failed';\n  else article = 'pending';\n  for (const r of list) {\n    if (String(r.ArticleStatus === undefined || r.ArticleStatus === null ? '' : r.ArticleStatus) !== article) {\n      updates.push({ json: { JobKey: r.JobKey, ArticleStatus: article } });\n    }\n  }\n}\nreturn updates; // empty array = nothing to write\n"
       },
-      "id": "74b65092-0cf5-4849-a0d5-5e44580c703a",
+      "id": "963c1c8d-17f9-4970-a789-6c64d353eb70",
       "name": "Reconcile Article Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5312,
-        480
+        5408,
+        464
       ],
       "notes": "Article-level status: done (all languages), partial (some), failed, pending, processing."
     },
@@ -1740,13 +1740,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "24f2c0b7-d2f5-4828-8e6e-bcaacc4b4d77",
+      "id": "6b7813e9-8989-4869-8ac8-7592bf5bd786",
       "name": "Update Article Status",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        5552,
-        480
+        5648,
+        464
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1954,13 +1954,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "8b120515-6877-422c-9e37-5646faf8fbbb",
+      "id": "d6a783bf-ff41-4d21-9807-db9c3b30a1a2",
       "name": "Mark Job as Done",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        7936,
-        -320
+        8032,
+        -336
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1970,13 +1970,13 @@
     },
     {
       "parameters": {},
-      "id": "fe3ed1d3-8c02-4eb7-844f-8c7a499b84d0",
+      "id": "a58221eb-d6a9-4259-90e2-ca750bb08247",
       "name": "Collect Job Failures",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        8640,
-        368
+        8736,
+        352
       ],
       "notes": "Error bus: the error output of every node in the job loop ends here."
     },
@@ -1984,13 +1984,13 @@
       "parameters": {
         "jsCode": "// Turn whatever reached the error bus into ONE queue update. Runs in \"all items\" mode on purpose:\n// no matter how many error items arrive, exactly one item goes back to the loop. Must never throw.\nfunction messageOf(e) {\n  if (e === undefined || e === null) return 'Unknown error';\n  if (typeof e === 'string') return e;\n  const parts = [];\n  if (e.message) parts.push(String(e.message));\n  if (e.description && e.description !== e.message) parts.push(String(e.description));\n  if (e.httpCode) parts.push(`HTTP ${e.httpCode}`);\n  if (parts.length) return parts.join(' - ');\n  try { return JSON.stringify(e).slice(0, 300); } catch (x) { return 'Unknown error'; }\n}\n\nconst items = $input.all();\nconst first = items[0] ? items[0].json || {} : {};\n\n// Identify the job ONLY through item linking (or the item itself). There is deliberately no\n// \"latest run\" fallback: guessing could write the failure onto a different article's row.\nlet job = null;\ntry { job = $('Prepare Job').itemMatching(0).json; } catch (e1) { job = null; }\nif (!job && first.jobKey) job = first;\n\nlet err = first.error;\nif (err === undefined && first.message) err = first.message;\nconst step = err && typeof err === 'object' && err.node && err.node.name ? `[${err.node.name}] ` : '';\nconst message = (step + messageOf(err)).replace(/\\s+/g, ' ').slice(0, 500);\n\nreturn [{\n  json: {\n    jobKey: job ? job.jobKey : '__UNMATCHED_ERROR__',\n    attempts: job ? (Number(job.attempts) || 0) + 1 : 0,\n    lastAttemptAt: new Date().toISOString(),\n    errorMessage: job ? message : `Could not identify the failing job. ${message}`,\n  },\n  pairedItem: { item: 0 },\n}];\n"
       },
-      "id": "3444e728-5af3-4c05-a7c0-d2d6e9e0c8b8",
+      "id": "7e642545-ff41-427d-bb58-eb355c4856bb",
       "name": "Build Failure Update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8880,
-        368
+        8976,
+        352
       ],
       "notes": "Never throws and always returns exactly ONE item, whatever arrives on the error bus. Identifies the job through $('Prepare Job') and formats the error for the queue."
     },
@@ -2189,13 +2189,13 @@
           "cellFormat": "RAW"
         }
       },
-      "id": "8fa5e8ef-0b56-4421-83bb-488dc31a8f91",
+      "id": "05045f37-1057-4357-b596-5e96d0d26b16",
       "name": "Record Job Failure",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        9120,
-        368
+        9216,
+        352
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -2204,18 +2204,18 @@
     },
     {
       "parameters": {
-        "content": "# WordPress VoiceOvers v2.0 – Batch & Resilient Multilingual\n\nTurns WordPress articles into audio in every configured language with Google Cloud Translation, Text-to-Speech (Cloud Run) and Cloud Storage, then publishes HTML5 players on dedicated WordPress pages. Processes up to 12 article-language jobs per run, retries failures safely and regenerates audio only when an article changes.\n\n## How It Works\n\n1. **Fetch** – Reads recent WordPress posts on a daily schedule (or manually).\n2. **Detect Changes** – Builds a content fingerprint per post and upserts one queue row per article and language in Google Sheets.\n3. **Select Jobs** – Picks pending jobs, plus failed jobs that are past the retry cooldown and under the attempt limit. A run lock prevents overlapping runs.\n4. **Translate & Speak** – One loop handles every job: translate only when needed, then call Cloud Run `/long-tts`. Audio that already exists is reused.\n5. **Verify & Publish** – Checks the audio URL, then replaces that article's player block on the language page.\n6. **Track Status** – Marks `done` only after publication is confirmed. Failures keep the error, attempt count and retry time.\n\n## Requirements\n\n- WordPress with REST API and an application-password user that can edit pages (`unfiltered_html` for `<audio>`)\n- Google Cloud: Translation, Text-to-Speech, Cloud Run, Cloud Storage\n- Public audio URL (bucket or CDN)\n- Google Sheet with the queue header row\n- Cloud Run `POST /long-tts` accepting `text`, `language`, `voice`, `filename`\n\n## Setup\n\n1. Create the Sheet tab and header row from the README.\n2. Edit **Workflow Configuration**: sheet ID, Cloud Run URL, bucket, page IDs, languages.\n3. Connect credentials: WordPress, Google service account (Sheets + Translate), Header Auth for Cloud Run (if your service requires a key).\n4. Run manually with a small batch, check the Sheet, then activate the schedule.\n5. Keep **Loop Over Jobs** at batch size 1 and run only one execution at a time.\n\n## Customization\n\nAdd languages, voices, labels and filename patterns in **Workflow Configuration**. Change the schedule in **Daily Schedule**.\n\n## Documentation & Support\n\n**Documentation:** README.md shipped with this workflow (setup, schema, troubleshooting, Cloud Run requirements).\n\nFor custom implementation, workflow integration, troubleshooting or consulting services, contact me through [paoloronco.it](https://paoloronco.it).\n\n---\n\n**Note:** This template requires your own Google Cloud infrastructure and credentials. Cloud services may incur usage costs. Review all configuration values and permissions before activating the workflow.",
+        "content": "# WordPress VoiceOvers v2.0 – Batch & Resilient Multilingual\n\nTurns WordPress articles into audio in every configured language with Google Cloud Translation, Text-to-Speech (Cloud Run) and Cloud Storage, then publishes HTML5 players on dedicated WordPress pages. Processes up to 12 article-language jobs per run, retries failures safely and regenerates audio only when an article changes.\n\n## How It Works\n\n1. **Fetch** – Reads recent WordPress posts on a daily schedule (or manually).\n2. **Detect Changes** – Builds a content fingerprint per post and upserts one queue row per article and language in Google Sheets.\n3. **Select Jobs** – Picks pending jobs, plus failed jobs that are past the retry cooldown and under the attempt limit. A run lock prevents overlapping runs.\n4. **Translate & Speak** – One loop handles every job: translate only when needed, then call Cloud Run `/long-tts`. Audio that already exists is reused.\n5. **Verify & Publish** – Checks the audio URL, then replaces that article's player block on the language page.\n6. **Track Status** – Marks `done` only after publication is confirmed. Failures keep the error, attempt count and retry time.\n\n## Requirements\n\n- WordPress with REST API and an application-password user that can edit pages (`unfiltered_html` for `<audio>`)\n- Google Cloud: Translation, Text-to-Speech, Cloud Run, Cloud Storage\n- Public audio URL (bucket or CDN)\n- Google Sheet with the queue header row\n- Cloud Run `POST /long-tts` accepting `text`, `language`, `voice`, `filename`\n\n## Setup\n\n1. Create the Sheet tab and header row from the README.\n2. Edit **Workflow Configuration**: sheet ID, Cloud Run URL, bucket, page IDs, languages.\n3. Connect credentials: WordPress, Google service account (Sheets + Translate), Header Auth for Cloud Run (if your service requires a key).\n4. Run manually with a small batch, check the Sheet, then activate the schedule.\n5. Keep **Loop Over Jobs** at batch size 1 and run only one execution at a time.\n\n## Customization\n\nAdd languages, voices, labels and filename patterns in **Workflow Configuration**. Change the schedule in **Daily Schedule**.\n\n## Documentation & Support\n\n[Documentation & Setup Guide](https://app.notion.com/p/paoloronco/WordPress-VoiceOvers-415f0ba27c32816a960ac1a8a51dc5f9)\n\nFor custom implementation, workflow integration, troubleshooting or consulting services, contact me through [paoloronco.it](https://paoloronco.it).\n\n---\n\n**Note:** This template requires your own Google Cloud infrastructure and credentials. Cloud services may incur usage costs. Review all configuration values and permissions before activating the workflow.",
         "height": 1184,
         "width": 592,
         "color": 2
       },
-      "id": "94a24ef9-a9b9-491c-8ffb-d5bd10bd0657",
+      "id": "4bdcb5c0-545c-4dd6-b71a-d3b740f6cbb1",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -768,
-        -432
+        -688,
+        -448
       ]
     },
     {
@@ -2225,13 +2225,13 @@
         "width": 720,
         "color": 7
       },
-      "id": "f7b10180-24c5-4e83-b8b9-84983c00e17f",
+      "id": "ffdc781e-7801-421b-95ad-d1f66ab6247a",
       "name": "Section Note 1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -144,
-        -432
+        -64,
+        -448
       ]
     },
     {
@@ -2241,13 +2241,13 @@
         "width": 1200,
         "color": 7
       },
-      "id": "e34988e1-3b15-42f8-b8f3-34cf0ca2dd48",
+      "id": "b8de251e-bf59-4962-afb8-b860c653a0eb",
       "name": "Section Note 2",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        608,
-        -432
+        704,
+        -448
       ]
     },
     {
@@ -2257,13 +2257,13 @@
         "width": 1200,
         "color": 7
       },
-      "id": "f0c624c1-5237-4304-b2ef-6acaba22892b",
+      "id": "2ad8d84e-afae-4c35-a105-69494aa87958",
       "name": "Section Note 3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1840,
-        -432
+        1936,
+        -448
       ]
     },
     {
@@ -2273,13 +2273,13 @@
         "width": 3312,
         "color": 7
       },
-      "id": "39d311b7-ec03-44d7-90e8-cf84c041bf15",
+      "id": "cacb0dc4-65dc-401a-acd4-40b42dc93cc1",
       "name": "Section Note 4",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3072,
-        -432
+        3168,
+        -448
       ]
     },
     {
@@ -2289,13 +2289,13 @@
         "width": 1676,
         "color": 7
       },
-      "id": "ea37b831-8c86-489d-9aee-dba7e5f840ed",
+      "id": "53ec1015-67d4-43a6-907d-b357d406a963",
       "name": "Section Note 5",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        6432,
-        -432
+        6528,
+        -448
       ]
     },
     {
@@ -2305,13 +2305,13 @@
         "width": 4684,
         "color": 7
       },
-      "id": "c5e7e837-e0a6-4647-a6c4-8394cf431b88",
+      "id": "354bcdbf-8a33-4978-b422-6b3c3b847002",
       "name": "Section Note 6",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4640,
-        320
+        4736,
+        304
       ]
     }
   ],

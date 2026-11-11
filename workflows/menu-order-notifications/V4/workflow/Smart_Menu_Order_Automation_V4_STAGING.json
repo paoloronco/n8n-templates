@@ -1,0 +1,2703 @@
+{
+  "name": "Smart Menu Order Automation — Real-Time Alerts, Voice Announcements & BAC Tracking (V4 Staging)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🍸 Smart Menu Order Automation — Alerts, TTS & BAC Tracking\n\nAutomate menu orders with **ntfy notifications, Home Assistant TTS, BAC tracking, n8n DataTables**, error handling, and daily reports.\n\n### ⚙️ How It Works\n\n1. **Order Intake:** Authenticated webhook with input validation.\n2. **Deduplication:** Tracks order IDs and processing states.\n3. **History & BAC:** Stores orders and estimates cumulative alcohol levels.\n4. **Notifications:** Sends ntfy alerts and Italian TTS announcements.\n5. **Error Handling:** Telegram/email fallbacks for failed deliveries.\n6. **Reports:** Daily order statistics and configurable data retention.\n\n### 🛠️ Setup\n\n1. Import the workflow and configure **Webhook, ntfy, TTS, Telegram, and SMTP** credentials.\n2. Configure the two required **n8n DataTables**.\n3. Update endpoints, recipients, and workflow variables.\n4. Set timezone to `Europe/Rome` and test before activation.\n\n### 🔧 Customization\n\nCustomize notification messages, TTS pronunciation, BAC parameters, customer data, reporting schedules, and retention settings.\n\n### 📖 Documentation\n\n[Full Setup & Documentation — Notion](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)\n\n### 🤝 Consulting & Support\n\n[Request a Consultation](https://paoloronco.it)\n\n---\n\n*Staging version: validate concurrency, TTS idempotency, and data cleanup before production. BAC estimates are informational only.*\n\n**V4 GitHub staging export:** all five unfiltered DataTable Delete nodes removed; maintenance and legacy auto-setup disconnected. Configure all credentials and DataTable IDs after import. Not production-ready.",
+        "height": 692,
+        "width": 540,
+        "color": 2
+      },
+      "id": "d0f6fa71-481a-4ab3-9e68-eb81a554d986",
+      "name": "Workflow Overview1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 01 · Order Intake & Validation\nReceives the order, strictly requires `orderId` (UUID v4) and `customerId`, validates items and quantities, and builds Italian TTS speech text + `items_json`.",
+        "height": 340,
+        "width": 680,
+        "color": 7
+      },
+      "id": "7454e6b8-4952-4e84-bea5-44549285cfc3",
+      "name": "01 Intake1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 02 · Best-Effort Deduplication & Webhook Responses\nUses DataTable claims and claim-token verification. This is NOT an atomic lock; strict concurrency-safe deduplication requires a transactional unique constraint. Unsafe concurrent-row deletion is removed.",
+        "height": 1144,
+        "width": 2536,
+        "color": 7
+      },
+      "id": "841d7537-44dc-41cb-8d46-62c493ae2393",
+      "name": "02 Deduplication1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 03 · Independent Delivery, Time-Adjusted BAC & State Consolidation\nRuns History+BAC+ntfy and TTS in parallel, computes time-elapsed Widmark BAC (`0.15 g/L/h` elimination), explicitly merges both branches, and validates DataTable updates.",
+        "height": 880,
+        "width": 2280,
+        "color": 7
+      },
+      "id": "dd738572-281d-4cca-aeec-d5bf5c38018f",
+      "name": "03 Delivery1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3024,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 04 · Error Fallbacks (Telegram & Email)\nTriggered strictly when `needsFallback === true`. Sends complete diagnostic body (Text + HTML) with original order message, voice text, and failed services.",
+        "height": 508,
+        "width": 720,
+        "color": 7
+      },
+      "id": "f364b916-8701-43fc-9f99-429acfc2448d",
+      "name": "04 Fallbacks1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5360,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 05 · Complete Daily Report (00:10)\nSummarizes yesterday's orders using structured `items_json` (with legacy string fallback), top products, customers, and alcohol/BAC statistics.",
+        "height": 404,
+        "width": 1432,
+        "color": 7
+      },
+      "id": "c48388d8-1b89-49a8-8317-e94adac504f8",
+      "name": "05 Daily Report1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 06 · Retention — DISABLED IN STAGING\nRetention selection is present for review, but automated cleanup and all destructive DataTable Delete nodes were removed for safety. Validate and implement safe scoped deletion before enabling.",
+        "height": 528,
+        "width": 1432,
+        "color": 7
+      },
+      "id": "a4a4816a-47e1-4d67-9c5b-a66e8e0cf376",
+      "name": "06 Maintenance1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 07 · DataTables Setup — DISABLED / MANUAL\nThe legacy GET API step does not create tables. Manual setup is required; this branch is disconnected and cannot be triggered automatically.",
+        "height": 528,
+        "width": 1440,
+        "color": 7
+      },
+      "id": "e74a09b9-d01e-43c0-a07f-a3bb5f65ab31",
+      "name": "07 Auto-Create DataTables",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "menu",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "79359e66-10e0-4972-a119-7725735ca7b6",
+      "name": "Receive Menu Order1",
+      "webhookId": "f967893c-ce62-4b03-95a7-8b456c86c6f7",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input (P2: orderId mandatory UUID v4), normalize customerId + nome, compute alcohol grams, structured items_json, and Italian TTS speech\nconst input = $input.first()?.json || {};\nconst body = (input.body && typeof input.body === 'object') ? input.body : input;\nconst validationErrors = [];\n\nconst toText = (value, fallback = '') => {\n  if (value === null || value === undefined) return fallback;\n  if (typeof value === 'string') return value.trim();\n  if (typeof value === 'number' || typeof value === 'boolean') return String(value).trim();\n  return fallback;\n};\n\nconst normalizeKey = (value) =>\n  toText(value)\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim();\n\n// 1. Validate mandatory orderId (UUID v4 required for reliable deduplication)\nconst incomingOrderId = toText(body.orderId ?? body.order_id);\nconst uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;\nif (!incomingOrderId) {\n  validationErrors.push('Missing mandatory orderId: a valid UUID v4 is required for idempotent deduplication.');\n} else if (!uuidRegex.test(incomingOrderId)) {\n  validationErrors.push('Invalid orderId: must be a valid UUID v4.');\n}\nconst orderId = uuidRegex.test(incomingOrderId) ? incomingOrderId.toLowerCase() : 'invalid-order-id';\nconst claimSid = 'menu:order:' + orderId;\nconst ttsIdempotencyKey = 'menu:tts:' + orderId;\n\n// 2. Validate customer identification (customerId required or derived deterministically)\nconst rawCustomerId = toText(body.customerId ?? body.customer_id ?? body.userId ?? body.user_id ?? body.clientId);\nconst rawName = toText(body.nome ?? body.name ?? body.person ?? body.cliente);\n\nif (!rawCustomerId && !rawName) {\n  validationErrors.push('Missing customer identification: provide customerId (and optionally nome).');\n}\n\nconst titleName = (value) => {\n  const s = toText(value);\n  if (!s) return 'Anonimo';\n  return s.split(/\\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');\n};\n\nconst nome = titleName(rawName || rawCustomerId);\nconst customerId = rawCustomerId\n  ? rawCustomerId.toLowerCase().replace(/[^a-z0-9:_-]+/g, '_')\n  : ('cust:' + (normalizeKey(rawName).replace(/\\s+/g, '_') || 'anonymous'));\n\n// Optional physiological parameters for Widmark BAC estimate\nconst pesoKg = Math.min(200, Math.max(40, Number(body.pesoKg ?? body.weightKg ?? 70) || 70));\nconst widmarkR = Number(body.widmarkR ?? (body.sesso === 'F' ? 0.55 : 0.68)) || 0.68;\n\n// 3. Timezone-aware date & time (Europe/Rome)\nconst now = new Date();\nconst today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(now);\nconst defaultOrario = new Intl.DateTimeFormat('it-IT', {\n  timeZone: 'Europe/Rome',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit'\n}).format(now);\nconst orario = toText(body.orario || body.time) || defaultOrario;\n\n// 4. Validate order items & quantities\nconst rawOrderInput = body.ordine ?? body.order ?? body.items;\nlet rawItems = [];\nif (Array.isArray(rawOrderInput)) {\n  rawItems = rawOrderInput;\n} else if (rawOrderInput && typeof rawOrderInput === 'object') {\n  rawItems = Object.values(rawOrderInput);\n} else if (typeof rawOrderInput === 'string' && rawOrderInput.trim()) {\n  rawItems = rawOrderInput.split(',').map(x => ({ nome: x.trim(), quantita: 1 })).filter(x => x.nome);\n}\n\nif (!Array.isArray(rawItems) || rawItems.length === 0) {\n  validationErrors.push('Order cannot be empty: provide at least one item in ordine.');\n}\n\nconst baseName = (item) => toText(\n  item?.nome ?? item?.name ?? item?.item ?? item?.label ?? item?.title ?? item?.prodotto ?? item?.drink,\n  ''\n);\n\nconst baseDetail = (item) => toText(\n  item?.dettaglio ?? item?.detail ?? item?.variant ?? item?.variante ?? item?.opzione ?? item?.option ?? item?.note,\n  ''\n);\n\nconst genericContainers = new Set([\n  'gin', 'rum', 'vodka', 'whisky / bourbon', 'whisky/bourbon',\n  'liquori', 'digestivi', 'premium', 'premium & digestivi'\n]);\n\nconst ordine = rawItems.map((item, idx) => {\n  const src = (item && typeof item === 'object') ? item : { nome: item, quantita: 1 };\n  let rawItemName = baseName(src);\n  let detailRaw = baseDetail(src);\n  const variant = detailRaw.replace(/^\\((.*)\\)$/, '$1').trim();\n\n  if (!rawItemName) {\n    validationErrors.push(`Item at index ${idx} is missing a product name.`);\n  }\n\n  const rawQty = src.quantita ?? src.quantity ?? src.qty ?? 1;\n  const parsedQty = Number(rawQty);\n  if (\n    rawQty === '' ||\n    rawQty === null ||\n    typeof rawQty === 'boolean' ||\n    !Number.isFinite(parsedQty) ||\n    !Number.isInteger(parsedQty) ||\n    parsedQty <= 0 ||\n    parsedQty > 50\n  ) {\n    validationErrors.push(`Invalid quantity \"${rawQty}\" for item \"${rawItemName || '#' + idx}\": must be an integer between 1 and 50.`);\n  }\n\n  const rawAlcohol = src.alcol_grammi ?? src.alcol ?? src.alcohol ?? 0;\n  const parsedAlcohol = Number(rawAlcohol);\n  if (!Number.isFinite(parsedAlcohol) || parsedAlcohol < 0 || parsedAlcohol > 500) {\n    validationErrors.push(`Invalid alcol_grammi \"${rawAlcohol}\" for item \"${rawItemName || '#' + idx}\".`);\n  }\n\n  if (variant && rawItemName.includes(' / ')) {\n    const parts = rawItemName.split('/').map(p => p.trim()).filter(Boolean);\n    const left = parts[0] || rawItemName;\n    const alternatives = [left.split(/\\s+/).pop(), ...parts.slice(1)].filter(Boolean);\n    const matched = alternatives.find(a => a.toLowerCase() === variant.toLowerCase());\n    if (matched) {\n      const words = left.split(/\\s+/).filter(Boolean);\n      rawItemName = words.length > 1 ? (words.slice(0, -1).join(' ') + ' ' + matched).trim() : matched;\n      detailRaw = '';\n    }\n  }\n\n  if (variant && genericContainers.has(rawItemName.toLowerCase())) {\n    rawItemName = variant;\n    detailRaw = '';\n  }\n\n  const cleanQty = Number.isInteger(parsedQty) && parsedQty > 0 ? parsedQty : 1;\n  const cleanAlcol = Number.isFinite(parsedAlcohol) && parsedAlcohol >= 0 ? parsedAlcohol : 0;\n\n  return {\n    nome: rawItemName || 'Elemento non valido',\n    dettaglio: detailRaw,\n    quantita: cleanQty,\n    alcol_grammi: cleanAlcol\n  };\n});\n\nconst speechAliases = {\n  'cocacola': 'Coca Cola',\n  'coca cola': 'Coca Cola',\n  'redbull': 'Red Bull',\n  'red bull': 'Red Bull',\n  'the freddo pesca': 'Te freddo alla pesca',\n  'acqua tonica': 'acqua tonica',\n  'birra bionda': 'birra bionda',\n  'aperol spritz': 'Aperol Spritz',\n  'campari spritz': 'Campari Spritz',\n  'limoncello spritz': 'Limoncello Spritz',\n  'il venturo spritz': 'Venturo Spritz',\n  'summer spritz': 'Spritz estivo',\n  'gin tonic': 'gin con acqua tonica',\n  'gin lemon': 'gin lemon',\n  'vodka tonic': 'vodka con acqua tonica',\n  'vodka lemon': 'vodka lemon',\n  'vodka coffee tonic': 'vodka con caffe e tonica',\n  'cuba libre': 'Cuba Libre',\n  'negroni': 'Negroni',\n  'negroni sbagliato': 'Negroni Sbagliato',\n  'dry martini': 'Martini dry',\n  'watermelon gin tonic': 'gin tonic all anguria',\n  'white dragon': 'Drago Bianco',\n  'jagermeister bomb': 'Iegermaister Bomb',\n  'jagermeister deer beer': 'Iegermaister con birra',\n  'mg dry gin villanova spagna': 'emme gi gin secco, Villanova Spagna',\n  'larios malaga spagna': 'Larios, Malaga Spagna',\n  'martin miller s london uk': 'Martin Millers, Londra Regno Unito',\n  'tanqueray': 'Tancherè',\n  'boigin sardegna': 'Boi Gin, Sardegna',\n  'sabatini toscana': 'Sabatini, Toscana',\n  'malfy limone torino': 'Malfy Limone, Torino',\n  'etsu hokkaido giappone': 'Etsu, Hokkaido Giappone',\n  'ginnastic match citrus blend': 'Ginnastic Match agli agrumi',\n  'cabana': 'Cabana',\n  'pampero anniversario': 'Pampero Anniversario',\n  'monkai': 'Monkai',\n  'finland': 'Finlandia',\n  'wyborowa russia': 'Wyborowa, Russia',\n  'jack daniel s no 7 apple': 'Jack Daniels numero sette alla mela',\n  'talisker skye single malt 10 anni': 'Talisker Sky single malt, dieci anni',\n  'lagavulin 16 anni': 'Lagavulin, sedici anni',\n  'glengrant': 'Glen Grant',\n  'limoncello menton': 'Limoncello Menton',\n  'jagermeister': 'Iegermaister',\n  'grand marnier': 'Gran Marnier',\n  'molinari sambuca': 'Molinari Sambuca',\n  'sandeman porto': 'Sandeman Porto',\n  'fernet branca': 'Fernet Branca'\n};\n\nconst speechName = (name, detail = '') => {\n  let label = toText(name);\n  if (detail) label += ' ' + toText(detail);\n  const key = normalizeKey(label);\n  return speechAliases[key] || speechAliases[normalizeKey(name)] || label;\n};\n\nconst articleOverrides = {\n  'birra bionda': 'una', 'cocacola': 'una', 'coca cola': 'una', 'acqua tonica': 'una',\n  'redbull': 'una', 'red bull': 'una', 'the freddo pesca': 'un', 'vodka': 'una',\n  'finland': 'una', 'wyborowa russia': 'una', 'molinari sambuca': 'una',\n  'aperol spritz': 'un', 'campari spritz': 'un', 'limoncello spritz': 'un',\n  'il venturo spritz': 'un', 'summer spritz': 'un', 'prosecco': 'un',\n  'gin tonic': 'un', 'gin lemon': 'un', 'vodka tonic': 'un', 'vodka lemon': 'un',\n  'vodka coffee tonic': 'un', 'cuba libre': 'un', 'negroni': 'un',\n  'negroni sbagliato': 'un', 'dry martini': 'un', 'watermelon gin tonic': 'un',\n  'white dragon': 'un', 'jagermeister bomb': 'un', 'jagermeister deer beer': 'un',\n  'jagermeister': 'un', 'limoncello menton': 'un', 'fernet branca': 'un',\n  'grand marnier': 'un', 'sandeman porto': 'un', 'mg dry gin villanova spagna': 'un',\n  'larios malaga spagna': 'un', 'martin miller s london uk': 'un', 'tanqueray': 'un',\n  'boigin sardegna': 'un', 'sabatini toscana': 'un', 'malfy limone torino': 'un',\n  'etsu hokkaido giappone': 'un', 'ginnastic match citrus blend': 'un',\n  'cabana': 'un', 'pampero anniversario': 'un', 'monkai': 'un',\n  'jack daniel s no 7 apple': 'un', 'talisker skye single malt 10 anni': 'un',\n  'lagavulin 16 anni': 'un', 'glengrant': 'un'\n};\n\nconst articleFor = (name, detail = '') => {\n  const combined = normalizeKey((name || '') + ' ' + (detail || ''));\n  const exact = articleOverrides[combined] || articleOverrides[normalizeKey(name)];\n  if (exact) return exact;\n  const spoken = normalizeKey(speechName(name, detail));\n  if (articleOverrides[spoken]) return articleOverrides[spoken];\n  if (/^(aperol|campari|gin|vodka|negroni|martini|prosecco|limoncello|jager|ieger|fernet|grand|talisker|lagavulin|jack|rum|whisky|dry|white|watermelon|cuba)/.test(normalizeKey(name))) return 'un';\n  return 'una';\n};\n\nconst qtyToSpeech = (q, itemName, detail) => {\n  const n = Number(q || 1);\n  if (n === 1) return articleFor(itemName, detail);\n  const words = { 2: 'due', 3: 'tre', 4: 'quattro', 5: 'cinque', 6: 'sei', 7: 'sette', 8: 'otto', 9: 'nove', 10: 'dieci' };\n  return words[n] || String(n);\n};\n\nconst alcolOrdine = Math.round(\n  ordine.reduce((s, i) => s + (Number(i.alcol_grammi) || 0) * (Number(i.quantita) || 1), 0) * 10\n) / 10;\n\nconst ordine_str = ordine\n  .map(i => {\n    let s = i.quantita + 'x ' + i.nome;\n    if (i.dettaglio) s += ' ' + i.dettaglio;\n    return s;\n  })\n  .join(', ');\n\nconst items_json = JSON.stringify(ordine);\n\nconst ordine_voce = ordine\n  .map(i => {\n    const detail = i.dettaglio || '';\n    return qtyToSpeech(i.quantita, i.nome, detail) + ' ' + speechName(i.nome, detail);\n  })\n  .join(', ');\n\nconst messaggio_voce = 'Nuovo ordine da ' + nome + '. ' + ordine_voce + '.';\nconst sanitized_voce = String(messaggio_voce)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z0-9 .,:;!?()'\\-/]/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nreturn [{\n  json: {\n    isValid: validationErrors.length === 0,\n    validationErrors,\n    orderId,\n    claimSid,\n    ttsIdempotencyKey,\n    customerId,\n    nome,\n    pesoKg,\n    widmarkR,\n    orario,\n    today,\n    ordine,\n    items_json,\n    ordine_str,\n    ordine_voce,\n    messaggio_voce,\n    sanitized_voce,\n    alcolOrdine\n  }\n}];"
+      },
+      "id": "da91f3bd-0d6d-461a-b1b6-843771d4880e",
+      "name": "Validate & Normalize Order1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        688
+      ],
+      "notes": "Requires UUID v4 orderId, customerId, non-empty items, and integer quantities. Produces structured items_json and Italian TTS text."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c7a89f2e-1111-4a2b-9c3d-100000000001",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "421180c4-33d6-4c02-ba02-e53c011ff22f",
+      "name": "Is Input Valid?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        176,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'invalid_input', orderId: $json.orderId, customerId: $json.customerId, errors: $json.validationErrors } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "608e8ab9-cc25-424f-8ca4-7055119003cb",
+      "name": "Respond: Invalid Input1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// A staticData object is NOT a cross-worker atomic mutex. Use a unique claim token and verify persisted rows.\n// IMPORTANT: DataTables without a unique SID constraint cannot guarantee exactly-once under concurrent execution.\nconst order=$input.first().json;\nconst claimToken=String($execution.id)+':'+Date.now()+':'+Math.random().toString(36).slice(2);\nreturn [{json:{...order,claimToken,inMemoryDuplicate:false,claimTimestamp:new Date().toISOString()}}];"
+      },
+      "id": "1a951dd5-a729-447b-9fcb-4ce2b01f6d1f",
+      "name": "Acquire Atomic Lock & Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        592
+      ],
+      "notes": "WARNING: DataTable first-writer verification is best effort, not atomic. Production requires unique constraint or transactional external storage."
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $json.claimSid }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "967faac3-b147-4ed4-93b8-fea046e41a31",
+      "name": "Check Pre-Existing Claim",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        720,
+        592
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "b1234567-89ab-4cde-9012-100000000032",
+              "leftValue": "={{ !$json.error && !$json.sid && !$('Acquire Atomic Lock & Token').first().json.inMemoryDuplicate }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "44c6e723-00d1-40cd-b2fa-ac8bcf38b166",
+      "name": "Is Order Unclaimed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        944,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sid": "={{ $('Acquire Atomic Lock & Token').first().json.claimSid }}",
+            "claim_token": "={{ $('Acquire Atomic Lock & Token').first().json.claimToken }}",
+            "order_id": "={{ $('Acquire Atomic Lock & Token').first().json.orderId }}",
+            "customer_id": "={{ $('Acquire Atomic Lock & Token').first().json.customerId }}",
+            "workflow": "rXR1joSjCCaG3w8v",
+            "channel": "menu_order",
+            "state": "pending",
+            "error_detail": "",
+            "updated_at": "={{ $('Acquire Atomic Lock & Token').first().json.claimTimestamp }}"
+          },
+          "schema": [
+            {
+              "id": "sid",
+              "displayName": "sid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "claim_token",
+              "displayName": "claim_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "channel",
+              "displayName": "channel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error_detail",
+              "displayName": "error_detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "09bfc6b5-293e-4010-8159-ef44f7b1b4aa",
+      "name": "Claim Order ID",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        400
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimSid }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "a66d1b0e-3783-4dd0-a993-d5d9e534bef3",
+      "name": "Verify Claim in DataTable",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        1392,
+        320
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// First-Writer-Wins verification on DataTable rows + P1 DataTable output validation\nconst rawItems = $input.all().map(i => i.json);\nconst lockInfo = $('Acquire Atomic Lock & Token').first().json;\nconst claimInsertItem = $('Claim Order ID').first()?.json || {};\n\nconst hasError = rawItems.some(r => r && r.error) || Boolean(claimInsertItem.error);\nconst rows = rawItems.filter(r => r && !r.error && r.sid === lockInfo.claimSid);\n\nif (hasError || rows.length === 0) {\n  return [{\n    json: {\n      ...lockInfo,\n      isAtomicWinner: false,\n      storageFailed: true,\n      loserRowId: null,\n      loserClaimToken: null\n    }\n  }];\n}\n\nconst sorted = [...rows].sort((a, b) => {\n  if (a.id !== undefined && b.id !== undefined && a.id !== b.id) {\n    return Number(a.id) - Number(b.id);\n  }\n  return String(a.updated_at || '').localeCompare(String(b.updated_at || ''));\n});\n\nconst winnerRow = sorted[0];\nconst isAtomicWinner = !lockInfo.inMemoryDuplicate && winnerRow.claim_token === lockInfo.claimToken;\nconst myRedundantRow = !isAtomicWinner\n  ? sorted.slice(1).find(r => r.claim_token === lockInfo.claimToken)\n  : null;\n\nreturn [{\n  json: {\n    ...lockInfo,\n    isAtomicWinner,\n    storageFailed: false,\n    winnerRowId: winnerRow.id ?? null,\n    winnerState: winnerRow.state || 'pending',\n    loserRowId: myRedundantRow?.id ?? null,\n    loserClaimToken: myRedundantRow ? lockInfo.claimToken : null\n  }\n}];"
+      },
+      "id": "821e78db-05dc-47b7-aac5-789a10f77c62",
+      "name": "Evaluate Atomic Claim Winner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "943ec5c9-08be-4d45-b098-f6c71bd6f45e",
+              "leftValue": "={{ $json.isAtomicWinner && !$json.storageFailed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b03ab40e-efe3-4e4f-9b7d-270bcf1a325e",
+      "name": "Was Order Claim Saved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "743ec5c9-08be-4d45-b098-f6c71bd6f450",
+              "leftValue": "={{ !$json.storageFailed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5e5f41cf-b9c8-4bdb-b621-b5d2b554e09a",
+      "name": "Is Concurrent Loser (Not Storage Error)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "743ec5c9-08be-4d45-b098-f6c71bd6f451",
+              "leftValue": "={{ Boolean($json.loserRowId !== null && $json.loserRowId !== undefined && $json.loserClaimToken && $json.claimSid) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e48308dd-42c7-44a3-8d47-4c079eeabbde",
+      "name": "Has Redundant Loser Row?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        448
+      ],
+      "notes": "P0 Guard: Blocks Delete Redundant Concurrent Row unless loserRowId, claimSid, and loserClaimToken are all present."
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimSid }}"
+            }
+          ]
+        }
+      },
+      "id": "aa779b7b-194d-48e5-b209-dbdfdddb0e76",
+      "name": "Look Up Existing Claim1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        1840,
+        1008
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "1b9ead7c-07ed-463a-a585-97328bfd181b",
+              "leftValue": "={{ !$json.error && (Boolean($json.sid) || $('Acquire Atomic Lock & Token').first().json.inMemoryDuplicate) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "39ffa306-dad3-407e-8658-0cffe03078eb",
+      "name": "Is Order a Duplicate?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: 'accepted',\n  orderId: $('Acquire Atomic Lock & Token').first().json.orderId,\n  customerId: $('Acquire Atomic Lock & Token').first().json.customerId,\n  state: 'pending'\n} }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "b407fdb3-8113-48f8-9b4c-06e6bb8f95bd",
+      "name": "Respond: Order Accepted1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2608,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: 'duplicate',\n  orderId: $('Acquire Atomic Lock & Token').first().json.orderId,\n  customerId: $('Acquire Atomic Lock & Token').first().json.customerId,\n  claimState: $json.state || $json.winnerState || 'pending',\n  requiresReview: ['history_failed', 'ntfy_failed', 'tts_uncertain', 'needs_review'].includes($json.state || $json.winnerState || '')\n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "a2b8d5cc-a6f6-4c3b-b15b-a4a863be59bc",
+      "name": "Respond: Duplicate Order1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2752,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: 'storage_error',\n  error: 'Order state DataTable unavailable; retry later with the same orderId',\n  orderId: $('Acquire Atomic Lock & Token').first().json.orderId\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "id": "2f0110f5-f7f4-4fde-8770-b02677a17f47",
+      "name": "Respond: Claim Unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $('Acquire Atomic Lock & Token').first().json.orderId }}",
+            "customer_id": "={{ $('Acquire Atomic Lock & Token').first().json.customerId }}",
+            "person": "={{ $('Acquire Atomic Lock & Token').first().json.nome }}",
+            "item": "={{ $('Acquire Atomic Lock & Token').first().json.ordine_str }}",
+            "items_json": "={{ $('Acquire Atomic Lock & Token').first().json.items_json }}",
+            "alcol_grammi": "={{ $('Acquire Atomic Lock & Token').first().json.alcolOrdine }}",
+            "data": "={{ $('Acquire Atomic Lock & Token').first().json.today }}",
+            "orario": "={{ $('Acquire Atomic Lock & Token').first().json.orario }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "person",
+              "displayName": "person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "items_json",
+              "displayName": "items_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "alcol_grammi",
+              "displayName": "alcol_grammi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "orario",
+              "displayName": "orario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4d872186-0b8f-4e57-b83b-5d416f87c69e",
+      "name": "Save Order to History1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3120,
+        704
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "843ec5c9-08be-4d45-b098-f6c71bd6f452",
+              "leftValue": "={{ !$json.error && Boolean($json.order_id || $json.id !== undefined) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6a1936d6-0c0c-4113-9ce7-83e5436f7ded",
+      "name": "Was History Row Saved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3344,
+        640
+      ],
+      "notes": "P1 Fix: Validates DataTable insert output so silent errors are never treated as successes."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimSid }}"
+            },
+            {
+              "keyName": "claim_token",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimToken }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "state": "history_saved",
+            "updated_at": "={{ new Date().toISOString() }}"
+          },
+          "schema": [
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "61a9d610-f159-4155-860e-4bf52d2f444e",
+      "name": "Update State: history_saved1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3568,
+        560
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "customer_id",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.customerId }}"
+            },
+            {
+              "keyName": "data",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.today }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "24510448-6a27-40ce-a6a7-6d2a40b99132",
+      "name": "Load Today Orders1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        3792,
+        496
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// P1 Fix: Time-adjusted Widmark BAC estimation (accounts for bioavailability 0.80 and hepatic elimination 0.15 g/L/h)\nconst rawItems = $input.all().map(i => i.json);\nconst order = $('Acquire Atomic Lock & Token').first().json;\nconst { nome, customerId, orario, ordine_str, alcolOrdine, today, orderId, pesoKg = 70, widmarkR = 0.68 } = order;\n\nconst rows = rawItems.filter(r => r && !r.error && (r.item || r.alcol_grammi !== undefined));\nconst effectiveRows = rows.length > 0 ? rows : [{ item: ordine_str, alcol_grammi: alcolOrdine, orario, customer_id: customerId, person: nome, order_id: orderId }];\n\nconst parseHourMin = (timeStr) => {\n  const m = String(timeStr || '').match(/(\\d{1,2}):(\\d{2})(?::(\\d{2}))?/);\n  if (!m) return null;\n  return Number(m[1]) * 60 + Number(m[2]) + (Number(m[3] || 0) / 60);\n};\n\nconst nowMinutes = parseHourMin(orario);\n// Only compare clock times for same-day records; this remains an approximation, not a safety measurement.\nconst ABSORPTION_FACTOR = 0.80; // gastro-intestinal bioavailability\nconst BETA_G_L_PER_HOUR = 0.15; // standard Widmark elimination rate (g/L per hour)\nconst distributionVolume = pesoKg * widmarkR;\n\nlet totalAlcol = 0;\nlet firstDrinkMinutes = null;\n\nfor (const r of effectiveRows) {\n  const grams = Number(r.alcol_grammi) || 0;\n  totalAlcol += grams;\n  if (grams > 0) {\n    const tMin = parseHourMin(r.orario);\n    if (tMin !== null && (firstDrinkMinutes === null || tMin < firstDrinkMinutes)) {\n      firstDrinkMinutes = tMin;\n    }\n  }\n}\n\ntotalAlcol = Math.round(totalAlcol * 10) / 10;\nconst nOrdini = effectiveRows.length;\n\nconst elapsedHours = (firstDrinkMinutes !== null && nowMinutes !== null && nowMinutes > firstDrinkMinutes)\n  ? (nowMinutes - firstDrinkMinutes) / 60\n  : 0;\n\n// Gross theoretical peak (un-metabolized) vs Time-adjusted active BAC estimate\nconst bacLordo = totalAlcol > 0 ? (totalAlcol * ABSORPTION_FACTOR) / distributionVolume : 0;\nconst bacAttivo = totalAlcol > 0 ? Math.max(0, bacLordo - (BETA_G_L_PER_HOUR * elapsedHours)) : 0;\nconst bacStr = bacAttivo.toFixed(2);\nconst bacLordoStr = bacLordo.toFixed(2);\n\nconst E_OK    = String.fromCodePoint(0x1F7E2);\nconst E_WARN  = String.fromCodePoint(0x1F7E1);\nconst E_OVER  = String.fromCodePoint(0x1F534);\nconst E_NONE  = String.fromCodePoint(0x2B1C);\nconst E_LIST  = String.fromCodePoint(0x1F4CB);\nconst E_CLOCK = String.fromCodePoint(0x1F552);\nconst E_DRINK = String.fromCodePoint(0x1F378);\nconst E_WATER = String.fromCodePoint(0x1F964);\nconst E_TIME  = String.fromCodePoint(0x1F550);\n\nlet bacLevel;\nif      (bacAttivo === 0) bacLevel = E_NONE;\nelse if (bacAttivo < 0.2) bacLevel = E_OK;\nelse if (bacAttivo < 0.5) bacLevel = E_WARN;\nelse                      bacLevel = E_OVER;\n\nconst prevOrders = effectiveRows.filter(r => r.order_id !== orderId);\nconst storStr = prevOrders.length > 0\n  ? '\\n' + E_LIST + ' Gia ordinato oggi (' + prevOrders.length + ' ordini):\\n'\n    + prevOrders.map(r => '  - ' + r.item + '  ' + E_CLOCK + ' ' + r.orario).join('\\n')\n  : '';\n\nconst bacRow = totalAlcol > 0\n  ? '\\n' + E_DRINK + ' Stima BAC attivo ~' + bacStr + ' g/L ' + bacLevel + ' (picco lordo ' + bacLordoStr + ' g/L | ' + totalAlcol + 'g alcol, stima indicativa Widmark)'\n  : '\\n' + E_WATER + ' nessun alcolico';\n\nconst messaggio = nome + ' [' + customerId + ']: ' + ordine_str\n  + '\\n' + E_TIME + ' ' + orario\n  + storStr\n  + bacRow;\n\nreturn [{\n  json: {\n    orderId,\n    customerId,\n    nome,\n    orario,\n    ordine_str,\n    messaggio,\n    bac: bacStr,\n    bacLordo: bacLordoStr,\n    bacLevel,\n    totalAlcol,\n    alcolOrdine,\n    nOrdini,\n    today,\n    historyOk: true,\n    historyState: 'history_saved',\n    historyError: null\n  }\n}];"
+      },
+      "id": "3e0040a5-7ee1-4d50-9e62-64cd62cc2e68",
+      "name": "Calculate Cumulative BAC1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4240,
+        448
+      ],
+      "notes": "P1 Fix: Uses time-elapsed Widmark formula with 0.80 bioavailability and 0.15 g/L/h elimination, clearly labeled as an indicative estimate."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimSid }}"
+            },
+            {
+              "keyName": "claim_token",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimToken }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "state": "history_failed",
+            "error_detail": "={{ String($json.error?.message || $json.message || 'History DataTable operation failed') }}",
+            "updated_at": "={{ new Date().toISOString() }}"
+          },
+          "schema": [
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error_detail",
+              "displayName": "error_detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1a640d80-b25a-456d-b386-06df8febb9d9",
+      "name": "Update State: history_failed1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4016,
+        784
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a fallback ntfy message when History DataTable fails so ntfy still delivers the order\nconst order = $('Acquire Atomic Lock & Token').first().json;\nconst errDetail = $input.first()?.json?.error?.message || $input.first()?.json?.message || 'History DataTable unavailable';\nconst { nome, customerId, orario, ordine_str, alcolOrdine, today, orderId, pesoKg = 70, widmarkR = 0.68 } = order;\n\nconst bacSingle = alcolOrdine > 0 ? ((alcolOrdine * 0.80) / (pesoKg * widmarkR)).toFixed(2) : '0.00';\nconst messaggio = nome + ' [' + customerId + ']: ' + ordine_str\n  + '\\n🕐 ' + orario\n  + '\\n⚠️ Storico giornaliero non disponibile (history_failed)'\n  + (alcolOrdine > 0 ? ('\\n🍸 Stima BAC singolo ordine ~' + bacSingle + ' g/L (stima indicativa)') : '\\n🥤 nessun alcolico');\n\nreturn [{\n  json: {\n    orderId,\n    customerId,\n    nome,\n    orario,\n    ordine_str,\n    messaggio,\n    bac: bacSingle,\n    bacLevel: '⚠️',\n    totalAlcol: alcolOrdine,\n    alcolOrdine,\n    nOrdini: 1,\n    today,\n    historyOk: false,\n    historyState: 'history_failed',\n    historyError: String(errDetail)\n  }\n}];"
+      },
+      "id": "a3ab20d8-c4a8-4100-b904-72f90fbdd77e",
+      "name": "Build Fallback Message (History Failed)1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4240,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ntfy/paoloronco-menu",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{ $json.messaggio }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "ba11b884-d358-4a0b-8f63-05881bee8e81",
+      "name": "Send ntfy Push Notification1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "retryOnFail": false,
+      "position": [
+        4464,
+        688
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Calculate Cumulative BAC1').isExecuted\n  ? $('Calculate Cumulative BAC1').first().json\n  : $('Build Fallback Message (History Failed)1').first().json;\n\nreturn [{\n  json: {\n    branch: 'ntfy_and_history',\n    orderId: prev.orderId,\n    customerId: prev.customerId,\n    historyOk: prev.historyOk,\n    historyState: prev.historyState,\n    historyError: prev.historyError,\n    ntfyOk: true,\n    ntfyState: 'completed',\n    ntfyError: null,\n    messaggio: prev.messaggio,\n    bac: prev.bac,\n    totalAlcol: prev.totalAlcol\n  }\n}];"
+      },
+      "id": "9b9ef7fb-8c69-4ef5-88d3-431337939991",
+      "name": "Capture ntfy Success1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4688,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Calculate Cumulative BAC1').isExecuted\n  ? $('Calculate Cumulative BAC1').first().json\n  : $('Build Fallback Message (History Failed)1').first().json;\nconst errObj = $input.first()?.json || {};\nconst errMsg = errObj.error?.message || errObj.message || 'ntfy request failed';\n\nreturn [{\n  json: {\n    branch: 'ntfy_and_history',\n    orderId: prev.orderId,\n    customerId: prev.customerId,\n    historyOk: prev.historyOk,\n    historyState: prev.historyState,\n    historyError: prev.historyError,\n    ntfyOk: false,\n    ntfyState: 'ntfy_failed',\n    ntfyError: String(errMsg),\n    messaggio: prev.messaggio,\n    bac: prev.bac,\n    totalAlcol: prev.totalAlcol\n  }\n}];"
+      },
+      "id": "0bed1521-2d0b-4485-ba52-bd74387262fc",
+      "name": "Capture ntfy Failure1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4688,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.17.0.1:8098/announce",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.ttsIdempotencyKey }}"
+            },
+            {
+              "name": "X-Order-Id",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.orderId }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.sanitized_voce }}"
+            },
+            {
+              "name": "orderId",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.orderId }}"
+            },
+            {
+              "name": "idempotencyKey",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.ttsIdempotencyKey }}"
+            },
+            {
+              "name": "claimToken",
+              "value": "={{ $('Acquire Atomic Lock & Token').first().json.claimToken }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 3500
+        }
+      },
+      "id": "7c2235b0-b844-4963-a708-66b03d13b0ce",
+      "name": "Queue TTS Announcement1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": false,
+      "position": [
+        4448,
+        224
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Idempotency header sent; must be enforced durably by receiver. No automatic retry on timeout."
+    },
+    {
+      "parameters": {
+        "jsCode": "const order = $('Acquire Atomic Lock & Token').first().json;\nreturn [{\n  json: {\n    ttsBranch: 'tts',\n    ttsOrderId: order.orderId,\n    ttsCustomerId: order.customerId,\n    ttsIdempotencyKey: order.ttsIdempotencyKey,\n    ttsOk: true,\n    ttsUncertain: false,\n    ttsState: 'completed',\n    ttsError: null,\n    messaggio_voce: order.messaggio_voce\n  }\n}];"
+      },
+      "id": "fbe1e41b-7322-47ad-96e9-984a65e990a4",
+      "name": "Capture TTS Success1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4672,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Distinguish definite failure (connection refused / 4xx / 5xx) from uncertain timeout after dispatch\nconst order = $('Acquire Atomic Lock & Token').first().json;\nconst errItem = $input.first()?.json || {};\nconst rawMsg = String(errItem.error?.message || errItem.message || 'TTS request failed');\nconst rawCode = String(errItem.error?.code || errItem.code || '');\nconst statusCode = Number(errItem.statusCode || errItem.error?.statusCode || 0);\n\nconst isDefiniteRefusal = /econnrefused|ehostunreach|enetunreach|enotfound/i.test(rawMsg + ' ' + rawCode) || statusCode >= 400;\nconst isTimeoutOrUncertain = !isDefiniteRefusal && (\n  /timeout|timed out|etimedout|esockettimedout|econnaborted|socket hang up|econnreset/i.test(rawMsg + ' ' + rawCode) ||\n  statusCode === 0\n);\n\nreturn [{\n  json: {\n    ttsBranch: 'tts',\n    ttsOrderId: order.orderId,\n    ttsCustomerId: order.customerId,\n    ttsIdempotencyKey: order.ttsIdempotencyKey,\n    ttsOk: false,\n    ttsUncertain: isTimeoutOrUncertain,\n    ttsState: isTimeoutOrUncertain ? 'tts_uncertain' : 'needs_review',\n    ttsError: rawMsg,\n    doNotAutoReplayTts: isTimeoutOrUncertain,\n    messaggio_voce: order.messaggio_voce\n  }\n}];"
+      },
+      "id": "54fd27fa-4a53-4da3-b7ae-34584c15995e",
+      "name": "Classify TTS Error1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4672,
+        320
+      ],
+      "notes": "Marks timeouts as tts_uncertain (do not auto-replay) and definite errors as needs_review."
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "6ceb6e2c-b57a-468b-b492-9bb6d7dcd7a8",
+      "name": "Merge Delivery Results1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4912,
+        448
+      ],
+      "notes": "P1 Fix: Explicit mode='combine', combineBy='combineByPosition', numberInputs=2 so both branches are deterministically merged into one item."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolidate Results from both merged branches (combineByPosition merges TTS + ntfy/history fields into a single item)\nconst allItems = $input.all().map(i => i.json);\nconst merged = Object.assign({}, ...allItems);\nconst order = $('Acquire Atomic Lock & Token').first().json;\n\nconst historyOk = merged.historyOk === true;\nconst ntfyOk = merged.ntfyOk === true;\nconst ttsOk = merged.ttsOk === true;\nconst ttsUncertain = merged.ttsUncertain === true;\n\nconst failedServices = [];\nif (!historyOk) failedServices.push(`History (${merged.historyError || 'failed'})`);\nif (!ntfyOk) failedServices.push(`ntfy (${merged.ntfyError || 'failed'})`);\nif (!ttsOk) {\n  failedServices.push(\n    ttsUncertain\n      ? `TTS Uncertain/Timeout (${merged.ttsError || 'timeout - do not auto-replay'})`\n      : `TTS Definite Failure (${merged.ttsError || 'error'})`\n  );\n}\n\nconst issueCount = (!historyOk ? 1 : 0) + (!ntfyOk ? 1 : 0) + (!ttsOk ? 1 : 0);\n\nlet finalState = 'completed';\nif (issueCount === 0) {\n  finalState = 'completed';\n} else if (issueCount > 1) {\n  finalState = 'needs_review';\n} else if (!historyOk) {\n  finalState = 'history_failed';\n} else if (!ntfyOk) {\n  finalState = 'ntfy_failed';\n} else if (ttsUncertain) {\n  finalState = 'tts_uncertain';\n} else {\n  finalState = 'needs_review';\n}\n\nconst errorSummary = failedServices.join(' | ');\nconst messaggio = merged.messaggio || (order.nome + ': ' + order.ordine_str);\n\nconst fallbackAlertText = [\n  `🚨 *Menu Order Alert — State: ${finalState.toUpperCase()}*`,\n  `• *Order ID*: ${order.orderId}`,\n  `• *Customer*: ${order.nome} (${order.customerId})`,\n  `• *Time*: ${order.orario}`,\n  `• *Failed Services*: ${errorSummary || 'None'}`,\n  ttsUncertain ? `⚠️ *TTS Note*: Timeout after dispatch (tts_uncertain, Idempotency-Key: ${order.ttsIdempotencyKey}). Do NOT replay automatically to avoid duplicate voice announcement.` : '',\n  '',\n  `📋 *Original Order Message*:`,\n  messaggio,\n  '',\n  `🔊 *Original Voice Text*:`,\n  order.messaggio_voce\n].filter(Boolean).join('\\n');\n\nconst escapeHtml = (s) => String(s || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;');\n\nconst fallbackAlertHtml = `\n<div style=\"font-family: sans-serif; line-height: 1.5; color: #1f2937;\">\n  <h2 style=\"color: #b91c1c;\">🚨 Menu Order Alert — State: ${escapeHtml(finalState.toUpperCase())}</h2>\n  <ul>\n    <li><strong>Order ID:</strong> <code>${escapeHtml(order.orderId)}</code></li>\n    <li><strong>Claim SID:</strong> <code>${escapeHtml(order.claimSid)}</code></li>\n    <li><strong>Customer:</strong> ${escapeHtml(order.nome)} (<code>${escapeHtml(order.customerId)}</code>)</li>\n    <li><strong>Time:</strong> ${escapeHtml(order.orario)}</li>\n    <li><strong>History Status:</strong> ${historyOk ? 'OK' : 'FAILED (' + escapeHtml(merged.historyError) + ')'}</li>\n    <li><strong>ntfy Status:</strong> ${ntfyOk ? 'OK' : 'FAILED (' + escapeHtml(merged.ntfyError) + ')'}</li>\n    <li><strong>TTS Status:</strong> ${ttsOk ? 'OK' : (ttsUncertain ? 'UNCERTAIN / TIMEOUT (' + escapeHtml(merged.ttsError) + ')' : 'FAILED (' + escapeHtml(merged.ttsError) + ')')}</li>\n    <li><strong>TTS Idempotency Key:</strong> <code>${escapeHtml(order.ttsIdempotencyKey)}</code></li>\n  </ul>\n  ${ttsUncertain ? '<p style=\"color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 4px;\"><strong>⚠️ TTS Note:</strong> Timeout after dispatch (<code>tts_uncertain</code>). Do NOT replay automatically without verifying whether the announcement already played.</p>' : ''}\n  <h3>📋 Original Order Message</h3>\n  <pre style=\"background: #f3f4f6; padding: 12px; border-radius: 4px;\">${escapeHtml(messaggio)}</pre>\n  <h3>🔊 Original Voice Text</h3>\n  <pre style=\"background: #f3f4f6; padding: 12px; border-radius: 4px;\">${escapeHtml(order.messaggio_voce)}</pre>\n</div>`.trim();\n\nreturn [{\n  json: {\n    orderId: order.orderId,\n    claimSid: order.claimSid,\n    customerId: order.customerId,\n    nome: order.nome,\n    orario: order.orario,\n    today: order.today,\n    ordine_str: order.ordine_str,\n    messaggio,\n    messaggio_voce: order.messaggio_voce,\n    finalState,\n    needsFallback: finalState !== 'completed',\n    historyOk,\n    ntfyOk,\n    ttsOk,\n    ttsUncertain,\n    failedServices,\n    errorSummary,\n    fallbackAlertText,\n    fallbackAlertHtml\n  }\n}];"
+      },
+      "id": "e513faf7-997b-4b5d-8cc1-c04d52550f39",
+      "name": "Consolidate Results1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5120,
+        448
+      ],
+      "notes": "Evaluates both branch outcomes and builds both Markdown/Text and HTML diagnostic payloads."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sid",
+              "keyValue": "={{ $json.claimSid }}"
+            },
+            {
+              "keyName": "claim_token",
+              "keyValue": "={{ $('Acquire Atomic Lock & Token').first().json.claimToken }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "state": "={{ $json.finalState }}",
+            "error_detail": "={{ $json.errorSummary || '' }}",
+            "updated_at": "={{ new Date().toISOString() }}"
+          },
+          "schema": [
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error_detail",
+              "displayName": "error_detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b58b7baf-296b-48c5-98b4-8166b541386c",
+      "name": "Update Final State (DataTable)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5424,
+        448
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "b1234567-89ab-4cde-9012-100000000016",
+              "leftValue": "={{ Boolean($('Consolidate Results1').first().json.needsFallback || $json.error) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ded9ec8d-72f2-4b3e-9984-9ea8aef35bb4",
+      "name": "Requires Error Fallback?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5648,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.MENU_FALLBACK_TELEGRAM_CHAT_ID }}",
+        "text": "={{ $('Consolidate Results1').first().json.fallbackAlertText }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "8c2d4f64-1e03-451c-9a18-5fe8609fd858",
+      "name": "Send Telegram Fallback Alert1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5872,
+        400
+      ],
+      "webhookId": "e0715f5d-5c97-42c0-8b5d-da0c07228f81",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fromEmail": "menu-alerts@paoloronco.it",
+        "toEmail": "alerts@paoloronco.it",
+        "subject": "={{ '[Menu Order Alert] ' + $('Consolidate Results1').first().json.finalState.toUpperCase() + ' - ' + $('Consolidate Results1').first().json.nome + ' (' + $('Consolidate Results1').first().json.orderId + ')' }}",
+        "emailFormat": "both",
+        "text": "={{ $('Consolidate Results1').first().json.fallbackAlertText }}",
+        "html": "={{ $('Consolidate Results1').first().json.fallbackAlertHtml }}",
+        "options": {}
+      },
+      "id": "79608dc4-2133-4108-b1a6-93ac8860437c",
+      "name": "Send Email Fallback Alert1",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5872,
+        592
+      ],
+      "webhookId": "e0c32c6f-4cc1-4a8c-a8a2-c1c43530d0ac",
+      "onError": "continueRegularOutput",
+      "notes": "P1 Fix: Populates both text and html diagnostic bodies with full order details and failed services."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "10 0 * * *"
+            }
+          ]
+        }
+      },
+      "id": "bd08c212-0530-42c2-8cbf-4397ae59434b",
+      "name": "Daily Report Schedule (00:10)1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -272,
+        1440
+      ],
+      "notes": "Runs daily at 00:10 (Europe/Rome) to summarize the previous day."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compute yesterday's date in Europe/Rome timezone\nconst now = new Date();\nconst romeNowStr = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(now);\nconst [y, m, d] = romeNowStr.split('-').map(Number);\nconst yesterdayUtc = new Date(Date.UTC(y, m - 1, d - 1, 12, 0, 0));\nconst yesterday = yesterdayUtc.toISOString().slice(0, 10);\nconst yesterdayDisplay = `${String(yesterdayUtc.getUTCDate()).padStart(2, '0')}/${String(yesterdayUtc.getUTCMonth() + 1).padStart(2, '0')}/${yesterdayUtc.getUTCFullYear()}`;\n\nreturn [{ json: { yesterday, yesterdayDisplay } }];"
+      },
+      "id": "cf7474c3-c252-4998-b5c0-5b5d34841472",
+      "name": "Prepare Yesterday Filter1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "data",
+              "keyValue": "={{ $json.yesterday }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "0a6fd6d0-fd5d-4abb-9372-93e62c0b7b1e",
+      "name": "Load Yesterday Orders1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        176,
+        1440
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// P2 Fix: Build complete daily summary report using structured items_json (with fallback to item string for legacy records)\nconst { yesterday, yesterdayDisplay } = $('Prepare Yesterday Filter1').first().json;\nconst rawItems = $input.all().map(i => i.json);\nif (rawItems.some(r => r && r.error)) throw new Error('Daily report DataTable read failed: cannot report zero orders');\nconst rows = rawItems.filter(r => r && !r.error && (r.items_json || r.item));\n\nif (rows.length === 0) {\n  return [{\n    json: {\n      yesterday,\n      totalOrders: 0,\n      reportMessage: `📊 Report Giornaliero Menu (${yesterdayDisplay})\\nNessun ordine registrato nella giornata di ieri.`\n    }\n  }];\n}\n\nconst productCounts = new Map();\nconst customerStats = new Map();\nlet totalDrinks = 0;\nlet totalAlcolGrams = 0;\n\nfor (const row of rows) {\n  const custKey = row.customer_id || row.person || 'anonimo';\n  const custName = row.person || custKey;\n  const rowAlcol = Number(row.alcol_grammi) || 0;\n  totalAlcolGrams += rowAlcol;\n\n  if (!customerStats.has(custKey)) {\n    customerStats.set(custKey, { customerId: custKey, nome: custName, orders: 0, drinks: 0, alcol: 0 });\n  }\n  const cStat = customerStats.get(custKey);\n  cStat.orders += 1;\n  cStat.alcol = Math.round((cStat.alcol + rowAlcol) * 10) / 10;\n\n  let parsedItems = null;\n  if (row.items_json && typeof row.items_json === 'string') {\n    try {\n      const candidate = JSON.parse(row.items_json);\n      if (Array.isArray(candidate)) parsedItems = candidate;\n    } catch (_) {\n      parsedItems = null;\n    }\n  }\n\n  if (parsedItems && parsedItems.length > 0) {\n    for (const it of parsedItems) {\n      const qty = Number(it.quantita) || 1;\n      const label = [it.nome, it.dettaglio].filter(Boolean).join(' ').trim() || 'Prodotto';\n      totalDrinks += qty;\n      cStat.drinks += qty;\n      productCounts.set(label, (productCounts.get(label) || 0) + qty);\n    }\n  } else {\n    const parts = String(row.item || '').split(',').map(s => s.trim()).filter(Boolean);\n    for (const part of parts) {\n      const m = part.match(/^(\\d+)x\\s+(.+)$/i);\n      const qty = m ? Number(m[1]) : 1;\n      const prodName = m ? m[2].trim() : part;\n      totalDrinks += qty;\n      cStat.drinks += qty;\n      productCounts.set(prodName, (productCounts.get(prodName) || 0) + qty);\n    }\n  }\n}\n\nconst topProducts = [...productCounts.entries()]\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 10)\n  .map(([name, count], idx) => `  ${idx + 1}. ${name}: ${count}x`)\n  .join('\\n');\n\nconst customerList = [...customerStats.values()]\n  .sort((a, b) => b.alcol - a.alcol || b.drinks - a.drinks)\n  .map(c => {\n    const bacLordo = c.alcol > 0 ? ((c.alcol * 0.80) / (70 * 0.68)).toFixed(2) : '0.00';\n    return `  - ${c.nome} [${c.customerId}]: ${c.orders} ordini (${c.drinks} prod.) | ${c.alcol.toFixed(1)}g alcol (picco lordo ~${bacLordo} g/L)`;\n  })\n  .join('\\n');\n\nconst maxCustomerAlcol = Math.max(...[...customerStats.values()].map(c => c.alcol), 0);\nconst maxBac = maxCustomerAlcol > 0 ? ((maxCustomerAlcol * 0.80) / (70 * 0.68)).toFixed(2) : '0.00';\nconst avgBac = customerStats.size > 0\n  ? (((totalAlcolGrams / customerStats.size) * 0.80) / (70 * 0.68)).toFixed(2)\n  : '0.00';\n\nconst reportMessage = [\n  `📊 Report Giornaliero Menu — ${yesterdayDisplay}`,\n  `🧾 Ordini totali: ${rows.length} (${totalDrinks} consumazioni)`,\n  `👥 Clienti attivi: ${customerStats.size}`,\n  `🍸 Alcol totale erogato: ${totalAlcolGrams.toFixed(1)} g (picco lordo medio ~${avgBac} g/L | max ~${maxBac} g/L)`,\n  '',\n  `🏆 Prodotti più richiesti:`,\n  topProducts,\n  '',\n  `👤 Dettaglio clienti:`,\n  customerList\n].join('\\n');\n\nreturn [{\n  json: {\n    yesterday,\n    yesterdayDisplay,\n    totalOrders: rows.length,\n    totalDrinks,\n    activeCustomers: customerStats.size,\n    totalAlcolGrams: Math.round(totalAlcolGrams * 10) / 10,\n    avgBac,\n    maxBac,\n    reportMessage\n  }\n}];"
+      },
+      "id": "298ce8f3-e905-4b0a-89fb-7eb8c90fd54e",
+      "name": "Build Daily Report1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ntfy/paoloronco-menu",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "={{ $json.reportMessage }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "e887e197-a0ff-48e6-91dd-2c1eba8b90b8",
+      "name": "Send Daily Report (ntfy)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        1360
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.MENU_FALLBACK_TELEGRAM_CHAT_ID }}",
+        "text": "={{ '⚠️ *ntfy unreachable or DataTable error for Daily Report*\\n\\n' + ($('Build Daily Report1').isExecuted ? $('Build Daily Report1').first().json.reportMessage : 'Impossibile caricare gli ordini di ieri dalla DataTable.') }}",
+        "additionalFields": {}
+      },
+      "id": "1b889ccf-d794-4829-9ca9-836604d6a9d2",
+      "name": "Send Daily Report Fallback (Telegram)1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        1440
+      ],
+      "webhookId": "4fc88f2e-4c89-44d1-b9c9-8f4fa388fc13",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// P2 Fix: Unified retention policy (default 30 days) aligned across both Order History and Completed Claims\nconst retentionDays = Math.max(7, Number($vars.MENU_RETENTION_DAYS || $vars.MENU_HISTORY_RETENTION_DAYS || 30));\n\nconst now = new Date();\nconst cutoffTimeMs = now.getTime() - retentionDays * 86400000;\nconst historyCutoff = new Date(cutoffTimeMs).toISOString().slice(0, 10);\nconst claimsCutoffIso = new Date(cutoffTimeMs).toISOString();\n\nreturn [{\n  json: {\n    retentionDays,\n    historyRetentionDays: retentionDays,\n    completedClaimsRetentionDays: retentionDays,\n    historyCutoff,\n    claimsCutoffIso,\n    protectedStates: ['pending', 'history_saved', 'history_failed', 'ntfy_failed', 'tts_uncertain', 'needs_review']\n  }\n}];"
+      },
+      "id": "7025da0b-414e-4872-ab0a-901ae7a04b1c",
+      "name": "Maintenance Retention Config1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        1936
+      ],
+      "notes": "P2 Fix: Aligns historyCutoff and claimsCutoffIso to the same retention window (30 days)."
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "returnAll": true
+      },
+      "id": "198500c0-a56e-40db-b857-db3f9655e3d2",
+      "name": "Load Claims for Retention (DataTable)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        160,
+        1840
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter only 'completed' claims older than claimsCutoffIso. Never delete recovery/review or recent claims.\nconst { claimsCutoffIso } = $('Maintenance Retention Config1').first().json;\nconst expiredClaims = $input.all()\n  .map(i => i.json)\n  .filter(r =>\n    r &&\n    !r.error &&\n    r.id !== undefined &&\n    r.sid &&\n    r.state === 'completed' &&\n    r.updated_at &&\n    String(r.updated_at) < String(claimsCutoffIso)\n  );\n\nreturn expiredClaims.map(r => ({\n  json: {\n    id: r.id,\n    sid: r.sid,\n    state: 'completed',\n    updated_at: r.updated_at\n  }\n}));"
+      },
+      "id": "29249c29-6f85-4b44-8e43-5c38d8b2ef78",
+      "name": "Filter Expired Completed Claims",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "643ec5c9-08be-4d45-b098-f6c71bd6f460",
+              "leftValue": "={{ Boolean($json.id !== undefined && $json.id !== null && $json.sid && $json.state === 'completed') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "884ad2f9-9a94-42cc-bb4f-614e5789e864",
+      "name": "Has Expired Claim Target?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        608,
+        1840
+      ],
+      "notes": "P0 Guard: Prevents unfiltered Delete execution."
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "returnAll": true
+      },
+      "id": "c205de85-8541-47ee-9472-62e8eb821eab",
+      "name": "Load Order History for Retention1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        160,
+        2032
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { historyCutoff } = $('Maintenance Retention Config1').first().json;\nconst expiredRows = $input.all()\n  .map(i => i.json)\n  .filter(r =>\n    r &&\n    !r.error &&\n    r.id !== undefined &&\n    r.order_id &&\n    r.data &&\n    String(r.data) < String(historyCutoff)\n  );\n\nreturn expiredRows.map(r => ({\n  json: {\n    id: r.id,\n    order_id: r.order_id,\n    data: r.data\n  }\n}));"
+      },
+      "id": "4eba86ec-646c-4f40-b331-1e3893ae9a79",
+      "name": "Filter Expired History Rows1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "643ec5c9-08be-4d45-b098-f6c71bd6f461",
+              "leftValue": "={{ Boolean($json.id !== undefined && $json.id !== null && $json.order_id && $json.data) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a5a1a898-3466-48fe-9939-bb56e0377ea6",
+      "name": "Has Expired History Target?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        608,
+        2032
+      ],
+      "notes": "P0 Guard: Prevents unfiltered Delete execution."
+    },
+    {
+      "parameters": {},
+      "id": "228aee49-2132-4f90-9d8f-cc7ea51d6eca",
+      "name": "Click to Create & Init DataTables",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        2480
+      ],
+      "notes": "DISABLED: legacy setup does not create tables and uses fixed DataTable IDs. Provision tables manually; rebind DataTable IDs; then test in staging."
+    },
+    {
+      "parameters": {
+        "jsCode": "// P1 Fix: Portable blueprint for creating/verifying each required DataTable individually\nreturn [\n  {\n    json: {\n      initMarker: '__schema_init__',\n      apiBaseUrl: ($vars.N8N_INTERNAL_URL || 'http://127.0.0.1:5678').replace(/\\/$/, ''),\n      requiredTables: [\n        {\n          name: 'menu paoloronco intranet',\n          columns: [\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'person', type: 'string' },\n            { name: 'item', type: 'string' },\n            { name: 'items_json', type: 'string' },\n            { name: 'alcol_grammi', type: 'number' },\n            { name: 'data', type: 'string' },\n            { name: 'orario', type: 'string' }\n          ]\n        },\n        {\n          name: 'Notification SID Claims',\n          columns: [\n            { name: 'sid', type: 'string' },\n            { name: 'claim_token', type: 'string' },\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'workflow', type: 'string' },\n            { name: 'channel', type: 'string' },\n            { name: 'state', type: 'string' },\n            { name: 'error_detail', type: 'string' },\n            { name: 'updated_at', type: 'string' }\n          ]\n        }\n      ]\n    }\n  }\n];"
+      },
+      "id": "f91cf521-4593-4675-be81-05b93d4d5493",
+      "name": "Prepare DataTables Blueprint",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        2480
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.apiBaseUrl + '/api/v1/data-tables' }}",
+        "options": {
+          "timeout": 4000
+        }
+      },
+      "id": "96dbb231-2bdd-408a-97ff-f012016939fe",
+      "name": "Auto-Create DataTables (n8n API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        2480
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "LEGACY / DISCONNECTED: GET does not create tables. Requires API authentication and explicit create/migration workflow."
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lJniAGuag6Sijwzf",
+          "mode": "list",
+          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "__schema_init__",
+            "customer_id": "__schema_init__",
+            "person": "Schema Init",
+            "item": "1x Schema Init",
+            "items_json": "[{\"nome\":\"Schema Init\",\"dettaglio\":\"\",\"quantita\":1,\"alcol_grammi\":0}]",
+            "alcol_grammi": 0,
+            "data": "1970-01-01",
+            "orario": "00:00:00"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "person",
+              "displayName": "person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "items_json",
+              "displayName": "items_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "alcol_grammi",
+              "displayName": "alcol_grammi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "orario",
+              "displayName": "orario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f04c1468-6761-4203-9c4f-d67697e31fd2",
+      "name": "Init History DataTable Columns",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        2384
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "643ec5c9-08be-4d45-b098-f6c71bd6f462",
+              "leftValue": "={{ !$json.error && $json.order_id === '__schema_init__' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "54a318dd-642f-447a-a1a5-f8e46007f65b",
+      "name": "Verify Init Row Created (History)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        2384
+      ],
+      "notes": "P0 Guard: Ensures Clean Init Row only runs when __schema_init__ was created."
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "W8ke5cmCDIpYnbRU",
+          "mode": "list",
+          "cachedResultName": "Notification SID Claims",
+          "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/W8ke5cmCDIpYnbRU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sid": "__schema_init__",
+            "claim_token": "__schema_init__",
+            "order_id": "__schema_init__",
+            "customer_id": "__schema_init__",
+            "workflow": "rXR1joSjCCaG3w8v",
+            "channel": "menu_order",
+            "state": "completed",
+            "error_detail": "",
+            "updated_at": "1970-01-01T00:00:00.000Z"
+          },
+          "schema": [
+            {
+              "id": "sid",
+              "displayName": "sid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "claim_token",
+              "displayName": "claim_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "channel",
+              "displayName": "channel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error_detail",
+              "displayName": "error_detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e748760c-3270-4600-8ed0-7b8e20421750",
+      "name": "Init Claims DataTable Columns",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        2576
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "643ec5c9-08be-4d45-b098-f6c71bd6f463",
+              "leftValue": "={{ !$json.error && $json.sid === '__schema_init__' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7c2aaf11-800b-48fe-8c58-4f1c2a4cb6de",
+      "name": "Verify Init Row Created (Claims)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        2576
+      ],
+      "notes": "P0 Guard: Ensures Clean Init Row only runs when __schema_init__ was created."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "id": "1acd9614-2dfd-4431-aef8-d173fbc83112",
+      "name": "Weekly Cleanup Schedule1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        1936
+      ],
+      "notes": "SAFETY HOLD: disabled automatic destructive cleanup pending staging verification of filters, row identity and retention policy."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Menu Order1": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize Order1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize Order1": {
+      "main": [
+        [
+          {
+            "node": "Is Input Valid?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Input Valid?1": {
+      "main": [
+        [
+          {
+            "node": "Acquire Atomic Lock & Token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Invalid Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Atomic Lock & Token": {
+      "main": [
+        [
+          {
+            "node": "Check Pre-Existing Claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Pre-Existing Claim": {
+      "main": [
+        [
+          {
+            "node": "Is Order Unclaimed?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Order Unclaimed?": {
+      "main": [
+        [
+          {
+            "node": "Claim Order ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Look Up Existing Claim1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim Order ID": {
+      "main": [
+        [
+          {
+            "node": "Verify Claim in DataTable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Look Up Existing Claim1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Claim in DataTable": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Atomic Claim Winner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Atomic Claim Winner": {
+      "main": [
+        [
+          {
+            "node": "Was Order Claim Saved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was Order Claim Saved?": {
+      "main": [
+        [
+          {
+            "node": "Respond: Order Accepted1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Concurrent Loser (Not Storage Error)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Concurrent Loser (Not Storage Error)?": {
+      "main": [
+        [
+          {
+            "node": "Has Redundant Loser Row?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Redundant Loser Row?": {
+      "main": [
+        [
+          {
+            "node": "Respond: Duplicate Order1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Duplicate Order1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up Existing Claim1": {
+      "main": [
+        [
+          {
+            "node": "Is Order a Duplicate?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Order a Duplicate?1": {
+      "main": [
+        [
+          {
+            "node": "Respond: Duplicate Order1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Claim Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Order Accepted1": {
+      "main": [
+        [
+          {
+            "node": "Save Order to History1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Queue TTS Announcement1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Order to History1": {
+      "main": [
+        [
+          {
+            "node": "Was History Row Saved?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update State: history_failed1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was History Row Saved?": {
+      "main": [
+        [
+          {
+            "node": "Update State: history_saved1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update State: history_failed1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update State: history_saved1": {
+      "main": [
+        [
+          {
+            "node": "Load Today Orders1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update State: history_failed1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Today Orders1": {
+      "main": [
+        [
+          {
+            "node": "Calculate Cumulative BAC1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update State: history_failed1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Cumulative BAC1": {
+      "main": [
+        [
+          {
+            "node": "Send ntfy Push Notification1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update State: history_failed1": {
+      "main": [
+        [
+          {
+            "node": "Build Fallback Message (History Failed)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Fallback Message (History Failed)1": {
+      "main": [
+        [
+          {
+            "node": "Send ntfy Push Notification1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send ntfy Push Notification1": {
+      "main": [
+        [
+          {
+            "node": "Capture ntfy Success1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Capture ntfy Failure1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture ntfy Success1": {
+      "main": [
+        [
+          {
+            "node": "Merge Delivery Results1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Capture ntfy Failure1": {
+      "main": [
+        [
+          {
+            "node": "Merge Delivery Results1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Queue TTS Announcement1": {
+      "main": [
+        [
+          {
+            "node": "Capture TTS Success1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify TTS Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture TTS Success1": {
+      "main": [
+        [
+          {
+            "node": "Merge Delivery Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify TTS Error1": {
+      "main": [
+        [
+          {
+            "node": "Merge Delivery Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Delivery Results1": {
+      "main": [
+        [
+          {
+            "node": "Consolidate Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidate Results1": {
+      "main": [
+        [
+          {
+            "node": "Update Final State (DataTable)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Final State (DataTable)": {
+      "main": [
+        [
+          {
+            "node": "Requires Error Fallback?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requires Error Fallback?1": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Fallback Alert1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email Fallback Alert1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Report Schedule (00:10)1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Yesterday Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Yesterday Filter1": {
+      "main": [
+        [
+          {
+            "node": "Load Yesterday Orders1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Yesterday Orders1": {
+      "main": [
+        [
+          {
+            "node": "Build Daily Report1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Daily Report Fallback (Telegram)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Daily Report1": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Report (ntfy)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Daily Report (ntfy)1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send Daily Report Fallback (Telegram)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Maintenance Retention Config1": {
+      "main": [
+        [
+          {
+            "node": "Load Claims for Retention (DataTable)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Order History for Retention1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Claims for Retention (DataTable)": {
+      "main": [
+        [
+          {
+            "node": "Filter Expired Completed Claims",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Expired Completed Claims": {
+      "main": [
+        [
+          {
+            "node": "Has Expired Claim Target?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Expired Claim Target?": {
+      "main": [
+        []
+      ]
+    },
+    "Load Order History for Retention1": {
+      "main": [
+        [
+          {
+            "node": "Filter Expired History Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Expired History Rows1": {
+      "main": [
+        [
+          {
+            "node": "Has Expired History Target?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Expired History Target?": {
+      "main": [
+        []
+      ]
+    },
+    "Prepare DataTables Blueprint": {
+      "main": [
+        [
+          {
+            "node": "Auto-Create DataTables (n8n API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Create DataTables (n8n API)": {
+      "main": [
+        [
+          {
+            "node": "Init History DataTable Columns",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Init Claims DataTable Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init History DataTable Columns": {
+      "main": [
+        [
+          {
+            "node": "Verify Init Row Created (History)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Init Row Created (History)": {
+      "main": [
+        []
+      ]
+    },
+    "Init Claims DataTable Columns": {
+      "main": [
+        [
+          {
+            "node": "Verify Init Row Created (Claims)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Init Row Created (Claims)": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "Europe/Rome"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

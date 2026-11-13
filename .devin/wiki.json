@@ -1,0 +1,293 @@
+{
+  "repo_notes": [
+    {
+      "content": "Treat this repository as a catalog of independent reusable n8n automations, NOT one monolithic application. Prioritize helping visitors discover, compare, import and configure workflows. Each workflow page must start with: What it does; Who it is for; Services required; How it works (brief ordered steps); Setup; Versions/variants; Security and limitations; Links to exact README and workflow JSON. Use the current repository files as source of truth; never invent nodes, features, prices, links, compatibility or release status. Differentiate downloadable free JSON, Gumroad listings, and staging or legacy variants. Cite exact repository paths and keep content concise and practical. Group variants under one solution rather than creating a page per internal file. Avoid excessive node-by-node details unless essential."
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "A practical, navigable catalog of n8n templates. Explain what users can automate, list every solution with use case, services, access/distribution and links to the appropriate pages; distinguish free workflow JSON from Gumroad listings. Link to setup and category pages.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "How to select a workflow, find its JSON and README, import into n8n, configure credentials, variables and webhooks, run a safe test and activate it. Explain self-hosted requirements and troubleshooting.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Template Catalog & Repository Structure",
+      "purpose": "Current catalog organized by use case, not by arbitrary folder numbers. Explain workflows/, assets/, variant subfolders, README files, downloadable JSON, paid distribution and version/status labels. Link to exact repository paths.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Security & Deployment Best Practices",
+      "purpose": "Credential hygiene, sanitized exports, webhook authentication, secrets, least privilege, rate limits, idempotency, approvals, safe production activation and data privacy. Distinguish implemented safeguards from recommendations.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Automations",
+      "purpose": "Index of OrbitPage integrations, shared API requirements and how to choose between publishing, content sync, campaigns and monitoring. Link to individual workflows.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage AI Page Editor",
+      "purpose": "User problem, supported editing and approval workflow, required services, setup, preview and publish sequence, limitations, and relevant JSON/README.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Release Guardian",
+      "purpose": "Revision monitoring, verification, human approval and rollback flow, setup and failure handling.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Event Lifecycle",
+      "purpose": "Event phases at a stable URL, intake, approvals, reconciliation, QR assets, journal and drift checks.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Campaign Launch Kit",
+      "purpose": "Campaign brief, generated page, ad copy, UTM links, QR assets, approval and publish verification.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Analytics Improvement",
+      "purpose": "Analytics reports, AI CTA suggestions, preview and approval boundaries, setup and constraints.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage Google Sheets Menu Sync",
+      "purpose": "Approved Sheets menu/price rows, preview and review, native menu update, mapping, setup and failure handling.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "OrbitPage YouTube Publishing",
+      "purpose": "New YouTube video detection, native player publishing, optional email approval and no-key setup claims verified against source.",
+      "parent": "OrbitPage Automations",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "AI, Knowledge & Content",
+      "purpose": "Browse AI and content workflows by use case and services, linking to individual templates.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Second Brain (v2 and v3)",
+      "purpose": "Compare Instagram Reel to Notion and Telegram multimodal to Notion; explain sources, AI processing, outputs, prerequisites and version differences. Mention v4 only if present in repository.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Website AI Chatbot",
+      "purpose": "RAG website chatbot, frontend/backend integration, OpenAI, Qdrant and Cohere, authentication, setup, deployment and limitations.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "WordPress Multilingual Voiceovers",
+      "purpose": "Google Cloud TTS and translation pipeline, change detection, queue, WordPress updates, deployment requirements and troubleshooting.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Tech & AI News Digest",
+      "purpose": "RSS ingestion, filtering/ranking, AI summaries, email delivery, scheduling, costs and setup.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "AI News to Instagram Publishing",
+      "purpose": "RSS to AI-generated social content and Instagram publishing with Cloudinary; account requirements, setup, moderation and failure handling.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Newsletter & Release Announcements",
+      "purpose": "Subscriber management, welcome messages, GitHub releases, SMTP, triggers, consent/security and setup.",
+      "parent": "AI, Knowledge & Content",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Business & Productivity",
+      "purpose": "Catalog of finance, orders, documents and consumer workflows with clear use-case comparison.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Invoice Archiving (V1–V3)",
+      "purpose": "Compare V1, V2 and V3 by capabilities; Gmail ingestion, invoice parsing, storage, review/recovery, Sheets and Drive integration.",
+      "parent": "Business & Productivity",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Menu Order Notifications (V1–V4)",
+      "purpose": "Compare released and staging versions, webhook order intake, deduplication, ntfy, Home Assistant TTS, BAC calculations, demo frontend and safe deployment.",
+      "parent": "Business & Productivity",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Digital Certificate Creation & Validation",
+      "purpose": "Explain HTML/CSS and PDF Generator API variants, certificate generation, verification, required services and setup.",
+      "parent": "Business & Productivity",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Amazon Luna Prime Games",
+      "purpose": "Included-with-Prime game collection, Sheets synchronization, update schedule, setup and data-source caveats.",
+      "parent": "Business & Productivity",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Cloud, Security & Monitoring",
+      "purpose": "Catalog of cloud inventory, alerting and backup monitoring workflows, with requirements and risk boundaries.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Google Cloud Inventory & IAM Audit",
+      "purpose": "Multi-project inventory, IAM change detection, Cloud Asset/Service Usage, BigQuery, Sheets and email; permissions, costs and setup.",
+      "parent": "Cloud, Security & Monitoring",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Splunk Security Alert Notifications",
+      "purpose": "Compare v1 and v2, Splunk alert intake, AbuseIPDB enrichment, deduplication, Email/Telegram routing, secrets and setup.",
+      "parent": "Cloud, Security & Monitoring",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Backup & Sync Execution Validation",
+      "purpose": "Log-driven monitoring of scheduled backup/sync jobs, integrations, alert conditions, deployment and limitations.",
+      "parent": "Cloud, Security & Monitoring",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    },
+    {
+      "title": "Glossary",
+      "purpose": "Short definitions of n8n concepts and repository-specific terms with source pointers: trigger, credentials, webhook, Data Table, idempotency, RAG, Qdrant, TTS, BAC, OrbitPage approval and Gumroad.",
+      "page_notes": [
+        {
+          "content": "Use verified source paths and the solution README. Lead with practical use case, prerequisites, import/setup and expected output; distinguish verified implementation from recommendations."
+        }
+      ]
+    }
+  ]
+}

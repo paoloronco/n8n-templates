@@ -1,106 +1,106 @@
 {
-  "name": "Automate Local Video Creation and Publishing to Instagram Reels & YouTube Shorts",
+  "name": "Create local videos, approve drafts and publish Instagram Reels and YouTube Shorts",
   "nodes": [
     {
       "parameters": {},
-      "id": "f31e71ba-c349-4bdc-be14-1d44dae7bd4a",
+      "id": "e9eeeb40-1865-4c49-aa18-19e8cc9c1736",
       "name": "Create four private drafts",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -176,
-        -192
+        -624,
+        -240
       ]
     },
     {
       "parameters": {
-        "jsCode": "const choices=[['wall_text','studio'],['slideshow','restaurant'],['hook_demo','creator'],['custom_motion','creator']];return choices.map(([format,scenario])=>({json:{payload:Buffer.from(JSON.stringify({format,scenario,localCopy:true,idempotencyKey:'n8n-'+$execution.id+'-'+format})).toString('base64url')}}));"
+        "jsCode": "const example={\"idempotencyKey\": \"example-first-draft\", \"format\": \"wall_text\", \"channels\": [\"youtube\"], \"privateTest\": true, \"brief\": {\"title\": \"Dal brief alla pubblicazione approvata\", \"brand\": \"Local Video\", \"language\": \"it-IT\", \"accent\": \"#73e6b1\", \"narration\": \"Parti da un brief concreto e genera il video sul tuo computer. Guarda la bozza completa, controlla il testo e ascolta la voce. Approva soltanto la versione che vuoi pubblicare. Ogni canale conserva la propria ricevuta, per riprendere gli errori senza duplicare i video.\", \"caption\": \"Test privato di integrazione: rendering locale, approvazione della bozza e verifica della pubblicazione.\", \"scenes\": [{\"title\": \"Un brief concreto\", \"body\": \"Testo, voce e canali scelti prima di iniziare.\"}, {\"title\": \"Controlla la bozza\", \"body\": \"Guarda il video completo e ascolta la narrazione.\"}, {\"title\": \"Approva questa versione\", \"body\": \"L'approvazione corrisponde al file che hai verificato.\"}, {\"title\": \"Riprendi senza duplicare\", \"body\": \"Ogni canale conserva ID, stato e ricevuta.\"}]}};\nconst formats=['wall_text','hook_demo','custom_motion','wall_text'];\nreturn formats.map((format,i)=>({json:{payload:Buffer.from(JSON.stringify({...example,format,idempotencyKey:'n8n-'+$execution.id+'-'+i,brief:{...example.brief,title:example.brief.title+' '+(i+1)}})).toString('base64url')},pairedItem:{item:0}}));"
       },
-      "id": "df56cb64-64c6-4451-a857-0546ff1f5278",
+      "id": "79b3ff16-7509-4e15-b861-0c9ba427c006",
       "name": "Choose formats and audience",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        64,
-        -192
+        -384,
+        -240
       ]
     },
     {
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/queue.py enqueue \" + $json.payload }}"
       },
-      "id": "8fb59dac-0b39-4251-9b22-058216d464b9",
+      "id": "efcaeccc-ba85-4d7f-b6e8-ba699a3cd042",
       "name": "Queue on homelab",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        304,
-        -192
+        -144,
+        -240
       ]
     },
     {
       "parameters": {
         "jsCode": "return $input.all().map(item=>{const j=JSON.parse(item.json.stdout||'{}');if(item.json.code!==0||!/^[a-f0-9]{32}$/.test(j.id))throw Error(j.error||'Queue submission failed');return {json:j};});"
       },
-      "id": "ea20ee3f-e58c-4d20-9c9d-c35c01d0b2fd",
+      "id": "6e365fbf-7670-44fb-a3da-609588215786",
       "name": "Read job IDs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        -192
+        112,
+        -240
       ]
     },
     {
       "parameters": {
         "amount": 20
       },
-      "id": "9253306b-ad01-45ea-9a75-e76ef04dc4f5",
+      "id": "71add49e-22a0-465a-b8e1-69350d6a2434",
       "name": "Wait for the PC",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        880,
-        -192
+        432,
+        -240
       ]
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(({json:j})=>{if(!/^[a-f0-9]{32}$/.test(j.id))throw Error('Invalid job ID');if(Date.now()-Date.parse(j.createdAt)>3600000)throw Error('PC did not finish within one hour. Jobs remain in the durable queue. Check the local worker.');return {json:j};});"
+        "jsCode": "return $input.all().map(({json:j},i)=>{if(!/^[a-f0-9]{32}$/.test(j.id))throw Error('Invalid job ID');const created=Date.parse(j.createdAt);if(!Number.isFinite(created))throw Error('Job creation timestamp is missing or invalid');if(Date.now()-created>3600000)throw Error('Rendering remains in the durable queue after one hour. Inspect the worker and resume the same job.');return {json:j,pairedItem:{item:i}};});"
       },
-      "id": "895cdb7d-6f4e-40bf-9932-43f3fd3a9920",
+      "id": "b3853bec-b35f-4c02-9cb9-e87069311041",
       "name": "Validate job ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1136,
-        -192
+        688,
+        -240
       ]
     },
     {
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/queue.py status \" + $json.id }}"
       },
-      "id": "328e2b33-dbf3-4fab-92b3-675eff0f41c2",
+      "id": "c3b102d0-61bc-4eba-88d3-687ab7027a13",
       "name": "Read render status",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1376,
-        -192
+        928,
+        -240
       ]
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(item=>{const j=JSON.parse(item.json.stdout||'{}');if(item.json.code!==0||!j.id)throw Error(j.error||'Status unavailable');if(j.state==='failed')throw Error(j.result?.error||'Local rendering failed');return {json:j};});"
+        "jsCode": "return $input.all().map((item,i)=>{const j=JSON.parse(item.json.stdout||'{}');if(item.json.code!==0||!j.id)throw Error(j.error||'Status unavailable');if(j.state==='failed')throw Error(j.result?.error||'Local rendering failed; retry the same job from the review gallery');return {json:j,pairedItem:{item:i}};});"
       },
-      "id": "1f9db15c-1acd-4495-bdf1-ce17be6dd6be",
+      "id": "d0171213-5509-4599-85e6-34a58f0c4e51",
       "name": "Read local result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1632,
-        -192
+        1184,
+        -240
       ]
     },
     {
@@ -127,26 +127,26 @@
         },
         "options": {}
       },
-      "id": "fba24695-fe21-4477-8822-ccb3a5330f3f",
+      "id": "661668c8-cdc0-4de8-bb46-93abc3767c7c",
       "name": "Video ready?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1888,
-        -192
+        1440,
+        -240
       ]
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(({json:j})=>({json:{jobId:j.id,format:j.request.format,scenario:j.request.scenario,preview:j.result.preview,gallery:'http://localhost:3850/',quality:j.result.qc,copySource:j.result.copySource,apiCostUsd:0,published:false,note:'Open preview on the rendering PC. Review the draft before posting.'}}));"
+        "jsCode": "return $input.all().map(({json:j},i)=>({json:{jobId:j.id,preview:'http://127.0.0.1:3850/?job='+j.id,gallery:'http://127.0.0.1:3850/',quality:j.qc,sha256:j.sha256,approval:j.approval,published:j.published===true,note:'Review the complete video and its audio, then explicitly approve this file and its selected channels in the local gallery.'},pairedItem:{item:i}}));"
       },
-      "id": "9874bbc9-55ef-42c8-95b3-78ec3ee830fc",
+      "id": "3610b2ef-cab1-443e-81da-0f4fb383e499",
       "name": "Review on the PC",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2128,
-        -208
+        1680,
+        -256
       ]
     },
     {
@@ -156,80 +156,82 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "a276488d-8dc4-4093-8513-a25e748bd46c",
+      "id": "fe44561a-e2f8-4dc9-847b-28cf60133452",
       "name": "PC pulls signed jobs",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -176,
-        496
+        -624,
+        448
       ]
     },
     {
       "parameters": {
         "jsCode": "const e=$json.body;if(!e||typeof e!=='object'||typeof e.timestamp!=='string'||!/^\\d{13}$/.test(e.timestamp)||typeof e.nonce!=='string'||!/^[a-f0-9]{24}$/.test(e.nonce)||typeof e.signature!=='string'||!/^[a-f0-9]{64}$/.test(e.signature)||typeof e.payload!=='string'||!/^[A-Za-z0-9_-]{1,10000}$/.test(e.payload))throw Error('Invalid signed envelope');return [{json:{payload:Buffer.from(JSON.stringify({timestamp:e.timestamp,nonce:e.nonce,signature:e.signature,payload:e.payload})).toString('base64url')}}];"
       },
-      "id": "84117572-4448-4c65-86aa-adbd1d5f85d6",
+      "id": "ef653c91-8763-4f71-a841-a6e29508d4d7",
       "name": "Validate signed envelope",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        496
+        -368,
+        448
       ]
     },
     {
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/queue.py bridge \" + $json.payload }}"
       },
-      "id": "4a9b8e9a-7409-47ee-9e5f-252026e3b045",
+      "id": "7adc3f94-d632-474f-85bb-90afb1c5297e",
       "name": "Claim or finish in durable queue",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        368,
-        496
+        -80,
+        448
       ]
     },
     {
       "parameters": {
-        "jsCode": "const j=JSON.parse($json.stdout||'{}');return [{json:j}];"
+        "jsCode": "let j;try{j=JSON.parse($json.stdout||'');}catch{return [{json:{ok:false,error:'Worker helper returned no valid JSON',httpStatus:502}}];}if($json.code!==0)return [{json:{ok:false,error:j.error||'Worker helper failed',httpStatus:400}}];if(j.ok!==true)return [{json:{ok:false,error:j.error||'Worker helper returned an invalid receipt',httpStatus:502}}];return [{json:{...j,httpStatus:200}}];"
       },
-      "id": "7c748958-542b-423a-9871-2c3503acb594",
+      "id": "e94fa2b6-e0ff-48e5-b777-2505dd7db016",
       "name": "Read bridge response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        496
+        224,
+        448
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ $json }}",
-        "options": {}
+        "options": {
+          "responseCode": "={{ $json.httpStatus || 200 }}"
+        }
       },
-      "id": "bdf40d9d-579b-43c7-b21b-2ae307b480a2",
+      "id": "ca48df98-29fb-4c48-b381-9d7ece14b3b5",
       "name": "Return to local worker",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        928,
-        496
+        480,
+        448
       ]
     },
     {
       "parameters": {
         "command": "python3 /opt/local-video-production/production.py status"
       },
-      "id": "fe437edc-16ae-454a-9a63-efc6dfc73952",
+      "id": "fcbc1bc3-a584-46ba-a010-60ea18a7f5ce",
       "name": "Inspect local publishing host",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1568,
-        -48
+        1120,
+        -96
       ]
     },
     {
@@ -243,13 +245,13 @@
           ]
         }
       },
-      "id": "e495e5f9-aa1a-4b33-8fc8-6674dbe91384",
+      "id": "ed5961d0-69a1-402e-a12e-41d104ef3998",
       "name": "Prepare five daily reels",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        1472,
-        496
+        1024,
+        448
       ],
       "retryOnFail": false
     },
@@ -257,13 +259,13 @@
       "parameters": {
         "command": "python3 /opt/local-video-production/production.py batch"
       },
-      "id": "7f8db8db-8c17-4823-8cf1-dc6d002e9ee4",
+      "id": "b616da69-1c7e-42a1-a0f2-6f3d1d6047a5",
       "name": "Reserve the daily production batch",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1712,
-        496
+        1264,
+        448
       ],
       "retryOnFail": false
     },
@@ -271,13 +273,13 @@
       "parameters": {
         "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||j.ok===false)throw Error(j.error||'Production helper failed');return [{json:j}];"
       },
-      "id": "0cb2e8a8-f315-4941-844e-c1d0f61779c2",
+      "id": "c76d5d0e-1bbf-42eb-adb9-bf18e30b0cc7",
       "name": "Daily queue receipt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1952,
-        496
+        1504,
+        448
       ],
       "retryOnFail": false
     },
@@ -292,27 +294,27 @@
           ]
         }
       },
-      "id": "9badfc34-7b08-4c8a-b299-064f2bfc2019",
+      "id": "3a1f67db-1916-4bcf-b69f-fe4442531840",
       "name": "One reel at each time slot",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -208,
-        976
+        -656,
+        928
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "return [{json:{payload:Buffer.from(JSON.stringify({executionId:String($execution.id)})).toString('base64url')}}];"
+        "jsCode": "return [{json:{payload:Buffer.from(JSON.stringify({executionId:String($execution.id),manual:$execution.mode==='test'})).toString('base64url')}}];"
       },
-      "id": "40972870-caf6-4d61-b9fb-70581d0e4872",
+      "id": "a650d88e-f43e-484e-aa4c-713faaec87b2",
       "name": "Claim this publishing slot",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        32,
-        976
+        -416,
+        928
       ],
       "retryOnFail": false
     },
@@ -320,13 +322,13 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/youtube.py local-claim \" + $json.payload }}"
       },
-      "id": "f4a705a7-eee1-4f46-a8bc-d692fda3b889",
+      "id": "007b7863-6668-4743-a6ec-99bb9a1fc112",
       "name": "Claim one ready reel",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        272,
-        976
+        -176,
+        928
       ],
       "retryOnFail": false
     },
@@ -334,13 +336,13 @@
       "parameters": {
         "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||j.ok===false)throw Error(j.error||'Production helper failed');return [{json:j}];"
       },
-      "id": "844b2f3f-b02a-4024-8f78-676da8d0b743",
+      "id": "67a15730-4560-4c64-a962-ca3c57225342",
       "name": "Read publication action",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        976
+        64,
+        928
       ],
       "retryOnFail": false
     },
@@ -369,27 +371,27 @@
         },
         "options": {}
       },
-      "id": "2f814e5d-80b9-428d-9506-36d8241a14da",
+      "id": "1ea3941f-4619-4eb2-81c2-f40b5a9c7625",
       "name": "Publication completed or waiting?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        752,
-        976
+        304,
+        928
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "return [{json:{...$json,note:$json.state==='published'?'Instagram publication verified.':'No extra video is published in this execution.'}}];"
+        "jsCode": "return [{json:{...$json,note:$json.instagram?.state==='published'?'Instagram receipt verified. Other selected channels retain their own status.':$json.state==='instagram_skipped'?'Instagram was not selected.':'Inspect the per-channel states; this outcome is not proof that a post was published.'}}];"
       },
-      "id": "f4219bd6-4b78-4a7a-991f-f7b3fd1fb56c",
+      "id": "5d1296d1-904b-45b8-be47-82d5333c61a1",
       "name": "Publication receipt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        992,
-        816
+        544,
+        768
       ],
       "retryOnFail": false
     },
@@ -397,13 +399,13 @@
       "parameters": {
         "amount": "={{ Math.max(1, Number($json.action.delaySeconds)||1) }}"
       },
-      "id": "a170b566-f27a-41ad-998e-29b8929b8b29",
+      "id": "5a5fc763-9157-4bb3-882f-c4ae93a5f7cc",
       "name": "Wait for Instagram processing",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        992,
-        1136
+        544,
+        1088
       ],
       "retryOnFail": false
     },
@@ -418,28 +420,28 @@
           "queryParametersJson": "={{ JSON.stringify($json.action.query) }}"
         }
       },
-      "id": "6abac1b0-f83f-4d65-837c-a413877f236c",
+      "id": "9f95e870-57a5-4611-a099-fca716747b92",
       "name": "Instagram with official OAuth",
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
       "position": [
-        1232,
-        1136
+        784,
+        1088
       ],
       "retryOnFail": false,
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "const previous=$('Wait for Instagram processing').item.json;function clean(v){const out={};for(const k of ['id','username','caption','permalink','timestamp','media_product_type','status_code','status','quota_usage'])if(v?.[k]!==undefined)out[k]=v[k];if(Array.isArray(v?.data))out.data=v.data.map(clean);if(v?.config)out.config={quota_total:v.config.quota_total};if(v?.error)out.error={code:Number(v.error.code)||0};return out}return [{json:{payload:Buffer.from(JSON.stringify({id:previous.id,executionId:String($execution.id),stepId:previous.action.stepId,response:clean($json)})).toString('base64url')}}];"
+        "jsCode": "const previous=$('Wait for Instagram processing').item.json;function clean(v){const out={};for(const k of ['id','username','caption','permalink','timestamp','media_product_type','status_code','status','quota_usage'])if(v?.[k]!==undefined)out[k]=v[k];if(Array.isArray(v?.data))out.data=v.data.map(clean);if(v?.config)out.config={quota_total:v.config.quota_total};if(v?.error)out.error=typeof v.error==='string'?{message:v.error.slice(0,500)}:{code:v.error.code,message:String(v.error.message||'Meta request failed').slice(0,500),type:v.error.type,is_transient:v.error.is_transient===true};return out;}return [{json:{payload:Buffer.from(JSON.stringify({id:previous.id,executionId:String($execution.id),stepId:previous.action.stepId,response:clean($json)})).toString('base64url')}}];"
       },
-      "id": "3b5c482d-0305-4256-a540-4919e0bcf5e9",
+      "id": "4934b7eb-7945-41fe-b33e-69d37d29802a",
       "name": "Validate the Meta response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1472,
-        1136
+        1024,
+        1088
       ],
       "retryOnFail": false
     },
@@ -447,13 +449,13 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/production.py record \" + $json.payload }}"
       },
-      "id": "8977421c-4ece-4259-a831-507871c501a9",
+      "id": "35ea3d47-ee40-4b1f-8804-9f63d3a2dda4",
       "name": "Commit the Instagram result",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1712,
-        1136
+        1264,
+        1088
       ],
       "retryOnFail": false
     },
@@ -461,13 +463,13 @@
       "parameters": {
         "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||j.ok===false)throw Error(j.error||'Production helper failed');return [{json:j}];"
       },
-      "id": "ed312031-49dd-403b-8a78-1ffb0dff501c",
+      "id": "2f58b813-439c-4d2b-9551-f6df03fa04ec",
       "name": "Read committed publication",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1952,
-        1136
+        1504,
+        1088
       ],
       "retryOnFail": false
     },
@@ -480,27 +482,27 @@
           "binaryPropertyName": "data"
         }
       },
-      "id": "cb9950ae-618a-409d-87a5-b8e7837e63a0",
+      "id": "2c0cb565-d1ef-42d9-b74a-125c71499f5b",
       "name": "Receive a rendered production video",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -192,
-        1600
+        -640,
+        1552
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "const envelope=$json.headers?.['x-local-video-envelope'];if(typeof envelope!=='string'||!/^[A-Za-z0-9_-]{1,10000}$/.test(envelope)||!$binary?.data)throw Error('A signed production video is required');return [{json:{payload:envelope}}];"
+        "jsCode": "const envelope=$json.headers?.['x-local-video-envelope'];if(typeof envelope!=='string'||!/^[A-Za-z0-9_-]{1,10000}$/.test(envelope)||!$binary?.data)throw Error('A signed rendered video is required');return [{json:{payload:envelope}}];"
       },
-      "id": "b9ce2150-c961-46c9-ab7c-c77833d5cdb4",
+      "id": "0cc449d6-ae2f-4e24-9389-5e05329ebeea",
       "name": "Validate the upload envelope",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        1600
+        -400,
+        1552
       ],
       "retryOnFail": false
     },
@@ -508,13 +510,13 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/production.py authorize-upload \" + $json.payload }}"
       },
-      "id": "97730f0c-b49c-4a20-a0a1-a5e490c6a81d",
+      "id": "75fd3889-be96-4e24-a035-221d1622ca65",
       "name": "Authorize the production upload",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        288,
-        1600
+        -160,
+        1552
       ],
       "retryOnFail": false
     },
@@ -522,13 +524,13 @@
       "parameters": {
         "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||!j.ok||!/^[a-f0-9]{32}-[a-f0-9]{24}\\.part$/.test(j.fileName||''))throw Error(j.error||'Upload not authorized');return [{json:j,binary:$('Receive a rendered production video').first().binary}];"
       },
-      "id": "3658133f-b228-4313-8284-37c09563bb69",
+      "id": "1b273241-5ff8-4f73-9b81-be01c51f18db",
       "name": "Restore the authorized video",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        1600
+        80,
+        1552
       ],
       "retryOnFail": false
     },
@@ -540,13 +542,13 @@
           "fileName": "={{ $json.fileName }}"
         }
       },
-      "id": "c8e8796f-4e4c-4917-817e-2dd8dc23f380",
+      "id": "4245eb56-ef08-4faa-a208-ad0cae92fadd",
       "name": "Store only the authorized MP4",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        768,
-        1600
+        320,
+        1552
       ],
       "retryOnFail": false
     },
@@ -554,13 +556,13 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/production.py finish-upload \" + $('Restore the authorized video').first().json.id + \" \" + $('Restore the authorized video').first().json.nonce }}"
       },
-      "id": "fe8b76c0-a7e6-4c9e-9289-27f739945b41",
+      "id": "252becc2-9b74-48b5-8da0-d9242132ec6f",
       "name": "Verify the uploaded bytes",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1008,
-        1600
+        560,
+        1552
       ],
       "retryOnFail": false
     },
@@ -568,13 +570,13 @@
       "parameters": {
         "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||j.ok===false)throw Error(j.error||'Production helper failed');return [{json:j}];"
       },
-      "id": "8a7bbde9-09b7-4dbf-9314-c43b3bafc643",
+      "id": "22e13a18-153b-4df6-a9a7-c114b934a0be",
       "name": "Read upload receipt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1248,
-        1600
+        800,
+        1552
       ],
       "retryOnFail": false
     },
@@ -584,13 +586,13 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "6d9d4957-cafd-48fb-843d-4afc1de3cc33",
+      "id": "b263fab3-60b5-448b-b44f-b3702d003424",
       "name": "Confirm upload to the PC",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1488,
-        1600
+        1040,
+        1552
       ],
       "retryOnFail": false
     },
@@ -600,13 +602,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "1594ce95-e414-465a-924d-346cdc26b0ca",
+      "id": "d990858e-f482-4e8b-b095-f96524e39c9d",
       "name": "Instagram fetches signed video",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -192,
-        1952
+        -640,
+        1904
       ],
       "retryOnFail": false
     },
@@ -614,13 +616,13 @@
       "parameters": {
         "jsCode": "const q=$json.query||{};if(!/^[a-f0-9]{32}$/.test(q.id||'')||!/^[a-f0-9]{64}$/.test(q.sig||'')||!/^\\d{10}$/.test(String(q.expires||'')))throw Error('Invalid media link');return [{json:{payload:Buffer.from(JSON.stringify({id:q.id,sig:q.sig,expires:String(q.expires)})).toString('base64url')}}];"
       },
-      "id": "36b77726-fafc-45fb-b765-0b6275e92ad9",
+      "id": "4a381219-fbaa-4a60-bb2e-3dee47f461b0",
       "name": "Validate the expiring video link",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        1952
+        -400,
+        1904
       ],
       "retryOnFail": false
     },
@@ -628,27 +630,27 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/production.py media \" + $json.payload }}"
       },
-      "id": "4efdd089-226b-4181-9221-fd6e7c0143a6",
+      "id": "fb86dd07-433c-4dd4-82ef-89dd01d108f5",
       "name": "Authorize this media download",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        288,
-        1952
+        -160,
+        1904
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||!j.ok||!/^\\/var\\/lib\\/local-video-production\\/media\\/[a-f0-9]{32}\\/reel\\.mp4$/.test(j.path||''))throw Error(j.error||'Media unavailable');return [{json:j}];"
+        "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||!j.ok||!new RegExp(\"^/var/lib/local\\\\-video\\\\-production/media/[a-f0-9]{32}/reel\\\\.mp4$\").test(j.path||''))throw Error(j.error||'Media unavailable');return [{json:j}];"
       },
-      "id": "fe496472-0565-40e4-9092-f161836abb16",
+      "id": "22e7d200-081d-4dd6-91ee-cdf72783c812",
       "name": "Read the authorized media path",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        1952
+        80,
+        1904
       ],
       "retryOnFail": false
     },
@@ -661,13 +663,13 @@
           "fileName": "reel.mp4"
         }
       },
-      "id": "ffd68248-b276-4a7c-8a03-55508bbf4618",
+      "id": "958236cd-496b-4d8e-a0d7-5ebcbed837da",
       "name": "Read the signed video bytes",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        768,
-        1952
+        320,
+        1904
       ],
       "retryOnFail": false
     },
@@ -694,126 +696,126 @@
           }
         }
       },
-      "id": "b158613e-4b3d-4152-936c-b4f5f28df94b",
+      "id": "133c40b3-d852-4b75-9ba0-c426fb531007",
       "name": "Deliver the authorized video",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1008,
-        1952
+        560,
+        1904
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "content": "# Automate Local Video Creation and Publishing to Instagram Reels & YouTube Shorts\n\n## Quick overview\nCoordinate local video rendering and scheduled Instagram Reels / YouTube Shorts delivery. This is an orchestration template, not an installed renderer.\n\n## How it works\nManual drafts or a daily batch enter a durable queue. A PC worker renders the media and uploads authorized bytes. Publishing claims a ready video, completes Instagram, then verifies a YouTube upload of the original MP4.\n\n## Setup\n1. Keep this template inactive while configuring it.\n2. Assign your own credentials; remove inherited account associations before sharing.\n3. Install the matching external runtime and persistent storage. The JSON does not include these services.\n4. Configure service URLs, helper paths, HTTPS media routes and target accounts.\n5. Use fictional sample content, neutral colors and assets you own; inspect the rendered output for unwanted branding.\n6. Prove preview/no-publishing behavior before authorizing any live platform test.\n\n## Customization\nChange content, layouts, schedules and timezone in their actual configuration locations. Keep authorization, validation and receipts intact.\n\n## Publishing safety\nManual execution can reach real platform writes. Do not rely on a trigger name, dryRun flag or YouTube privateTest without validating its actual branch/backend behavior. This note does not certify runtime readiness.\n\n## Documentation\n[Setup, testing and operations](https://paoloronco.notion.site/Automate-Local-Video-Creation-and-Publishing-to-Instagram-Reels-YouTube-Shorts-41af0ba27c32817aac38f04798207385)",
-        "height": 832,
+        "content": "# Local video production and approved publishing\n\n### How it works\nCreate a video from your own brief, narration and optional images. The included local worker renders a vertical MP4 using HyperFrames and offline speech. n8n receives and verifies the uploaded bytes. Review the complete video in the loopback gallery, then approve its exact hash, content and destination accounts. Scheduled or deliberate manual publication uses official Instagram and YouTube OAuth credentials. Each platform keeps its own durable receipt.\n\n### Setup\nInstall the runtime from the adjacent runtime directory using its README. Configure the matching signing secret, SSH paths, HTTPS webhooks, Instagram identity and YouTube channel. Run the included tests, set your timezone and start with the private YouTube example. Keep publishing disabled until preview, upload, approval and account checks pass. Never use a private YouTube test to test Instagram: Instagram has no equivalent private publication mode.\n\n### Customization\nUse the local intake form for titles, narration, scenes, images, formats and channels. Rejected drafts cannot publish. Recover failed stages from the gallery; uncertain uploads require their existing provider ID before another attempt. The original MP4 and receipts remain available for recovery.",
+        "height": 1040,
         "width": 736,
         "color": 2
       },
-      "id": "ffc1ef26-ac8b-4115-8b52-7a459b05b336",
+      "id": "2daace20-ab34-4270-87ea-7bbc484abc2b",
       "name": "[TPA] 00 Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1040,
-        -384
+        -1488,
+        -432
       ]
     },
     {
       "parameters": {
-        "content": "## 1. Manual drafts and PC review\nChoose four format/audience pairs, enqueue jobs and poll their state. Review the previews on the rendering PC before publishing. The gallery's loopback URL opens on that PC only.\n\nRetries and separate executions can create new request keys: inspect existing jobs before resubmitting. The status diagnostic is independent.",
+        "content": "## Create private drafts\n\nThe manual example submits four explicit sample briefs. The included local intake form accepts your own content and images. Generation never grants publishing approval. Inspect the full MP4 and audio in the local gallery.",
         "height": 656,
         "width": 2576,
         "color": 7
       },
-      "id": "f3e9298d-09bb-4d6f-a626-ccb93411b361",
+      "id": "1768a575-9c5d-4302-9765-a993beb917e4",
       "name": "[TPA] 01 Queue manual drafts",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -256,
-        -384
+        -704,
+        -432
       ]
     },
     {
       "parameters": {
-        "content": "## 2. Signed worker bridge\nThe PC initiates requests to claim or finish jobs. n8n checks envelope structure; the external queue service must verify signatures, expiry, nonce replay and leases. Test invalid and replayed requests before exposure.",
+        "content": "## Signed worker bridge\n\nThe local worker sends authenticated job, review and recovery requests. The backend checks HMAC, timestamps and nonce replay. A renewable lease protects each render. Failed helper calls return explicit HTTP errors.",
         "height": 384,
         "width": 1456,
         "color": 7
       },
-      "id": "807b333c-8914-4502-a988-c4d88bad7095",
+      "id": "38eadaf2-e730-4d03-b583-dddbc5d19873",
       "name": "[TPA] 03 Signed worker bridge",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -256,
-        336
+        -704,
+        288
       ]
     },
     {
       "parameters": {
-        "content": "## 3. Batch and publishing schedules\nThe schedule requests five jobs at 09:00 and claims ready media at 10:00, 12:00, 15:00, 18:00 and 21:00.\n\nSet the workflow timezone explicitly and review both triggers. Five slots do not guarantee five posts. Keep schedules disabled until setup and recovery checks pass.",
+        "content": "## Review the daily queue\n\nAt 09:00 this branch reports up to five approved ready drafts. It does not invent content or approve videos. Publishing slots use the configured timezone; a missing approved draft produces a clear no-op receipt.",
         "height": 384,
         "width": 912,
         "color": 7
       },
-      "id": "dfbbe952-87ad-4061-8e46-414c70e2cc8e",
+      "id": "008ac396-00c7-4bac-920d-fdc396eb8367",
       "name": "[TPA] 04 Daily production batch",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1392,
-        336
+        944,
+        288
       ]
     },
     {
       "parameters": {
-        "content": "## 4. Instagram, then YouTube\nClaim a ready video, follow the helper's Instagram actions and persist results. Continue to YouTube only through the verified-Instagram gate; validate the channel and retain each upload ID before processing checks.\n\nYouTube private visibility is not a private Instagram test. Verify helper dry-run behavior; reconcile partial success before retrying. Stream metadata is not proof of audible narration or Shorts classification.",
+        "content": "## Publish selected channels\n\nClaim only approved bytes and targets. Attempt Instagram first when selected, then deliver the same MP4 to YouTube. Each channel retains its own status and IDs. A YouTube recovery reuses existing Instagram receipts and the recorded upload ID.",
         "height": 656,
         "width": 4848,
         "color": 7
       },
-      "id": "eff54358-7efa-4620-8309-e42e916182de",
+      "id": "89459c9e-5de0-4686-951f-60f7bcca6735",
       "name": "[TPA] 05 Instagram time slots",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -256,
-        768
+        -704,
+        720
       ]
     },
     {
       "parameters": {
-        "content": "## 5. Authorized MP4 upload\nValidate the envelope, obtain backend authorization, restore the original binary and transfer only to the restricted destination. Verify the uploaded bytes before acknowledging completion. Do not remove path checks or trust a filename as file validation.",
+        "content": "## Receive the rendered MP4\n\nAuthorize a signed upload against the current render lease. Verify its size, hash, full decoding and audible audio before marking it ready for human review. Unapproved files cannot be published or served to Instagram.",
         "height": 336,
         "width": 1952,
         "color": 7
       },
-      "id": "c559ddf7-76ed-44b0-80c3-0bc7c02d1ad8",
+      "id": "6e85b180-0010-4062-bc0b-d2b8ba3c67f7",
       "name": "[TPA] 06 Authorized upload",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -256,
-        1440
+        -704,
+        1392
       ]
     },
     {
       "parameters": {
-        "content": "## 6. Expiring media delivery\nLet the backend authorize the exact job/file and expiry before reading media. Serve only the approved MP4 with no-store headers. Signature-format checks alone are not cryptographic verification; test tampered and expired URLs.",
+        "content": "## Deliver approved media\n\nCheck the file-specific signature and expiry, and require a matching approval. Serve only the authorized MP4. The desktop review gallery stays on loopback; OAuth credentials stay in n8n.",
         "height": 400,
         "width": 1472,
         "color": 7
       },
-      "id": "5c98a1db-82ac-4546-add3-8c3b75e61d79",
+      "id": "408f2610-f75c-433f-9c1f-7e607baa1826",
       "name": "[TPA] 07 Expiring media delivery",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -256,
-        1808
+        -704,
+        1760
       ]
     },
     {
@@ -838,27 +840,27 @@
           "timeout": 60000
         }
       },
-      "id": "3f8b8edd-3476-4c1f-be76-422e861fb768",
+      "id": "dc3d436d-ba14-4c9f-a477-7ee980ccb1f4",
       "name": "Check YouTube channel",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1472,
-        800
+        1024,
+        752
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "command": "={{ (() => {\nif ($json.items?.length !== 1 || $json.items[0].id !== 'REPLACE_WITH_YOUTUBE_CHANNEL_ID') throw new Error('The YouTube credential must belong to your configured channel');\nconst instagram=$('Publication receipt').first().json;\nconst media=$('Read publication action').first().json.youtubePrepared;\nif(instagram.state!=='published' || !media || media.jobId!==instagram.id) throw new Error('Verified Instagram receipt and preserved local media required');\nreturn 'python3 /opt/local-video-production/youtube.py claim-prepared '+JSON.stringify({...media,executionId:$execution.id}).base64Encode();\n})() }}"
+        "command": "={{ (() => { if ($json.items?.length !== 1 || $json.items[0].id !== \"REPLACE_WITH_YOUTUBE_CHANNEL_ID\") throw new Error('The connected YouTube channel differs from the configured target');const publication=$('Publication receipt').first().json;const media=publication.youtubePrepared;if(publication.approved!==true||publication.targets?.youtube!==true||!media||media.jobId!==publication.id)throw new Error('The exact video and YouTube target must be approved');return 'python3 /opt/local-video-production/youtube.py claim-prepared '+JSON.stringify({...media,executionId:String($execution.id)}).base64Encode();})() }}"
       },
-      "id": "76bbbec6-3a1f-4446-bb30-01c44c4d35de",
+      "id": "7598b46d-e7b4-445f-9caf-23f3e87e3f92",
       "name": "Prepare YouTube media and claim",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1712,
-        800
+        1264,
+        752
       ],
       "retryOnFail": false
     },
@@ -866,13 +868,13 @@
       "parameters": {
         "jsCode": "if ($json.code !== 0) throw new Error($json.stderr || 'YouTube local operation failed');\nreturn [{json:JSON.parse($json.stdout)}];"
       },
-      "id": "acd038b4-d273-4f6d-a750-b08bde4a7fa6",
+      "id": "aa3057a2-6870-4609-a953-ae760252b504",
       "name": "Read YouTube preparation",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        800
+        1488,
+        752
       ],
       "retryOnFail": false
     },
@@ -901,13 +903,13 @@
         },
         "options": {}
       },
-      "id": "dd746a58-e74b-4645-a662-010901b7139e",
+      "id": "3b67c5e5-f8c4-43ee-ab75-3d66ca74778c",
       "name": "YouTube video delivery?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2144,
-        800
+        1696,
+        752
       ],
       "retryOnFail": false
     },
@@ -936,13 +938,13 @@
         },
         "options": {}
       },
-      "id": "618b1bb4-d511-4032-8f24-821a9ac997e7",
+      "id": "09641fa2-2db5-4063-b497-43efab697668",
       "name": "New YouTube upload?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2400,
-        784
+        1952,
+        736
       ],
       "retryOnFail": false
     },
@@ -952,16 +954,16 @@
         "operation": "download",
         "path": "={{ $json.path }}",
         "options": {
-          "fileName": "social-reel.mp4"
+          "fileName": "orbitpage-reel.mp4"
         }
       },
-      "id": "275a4183-0a48-4726-ac45-2c9687c07c05",
+      "id": "056e9249-92cd-4ec3-baf9-2128115a9b55",
       "name": "Read original YouTube video",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2800,
-        816
+        2352,
+        768
       ],
       "retryOnFail": false
     },
@@ -979,43 +981,45 @@
           "notifySubscribers": false,
           "privacyStatus": "={{ $json.privateTest === true ? 'private' : 'public' }}",
           "selfDeclaredMadeForKids": false,
-          "tags": "Reels,Shorts"
+          "tags": "OrbitPage,Shorts"
         }
       },
-      "id": "a641b5d4-3964-4c4a-a1a5-4cbcf8882ec6",
+      "id": "7bff0892-3034-443d-9195-17578a29471e",
       "name": "Upload YouTube Short",
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        3024,
-        816
+        2576,
+        768
       ],
-      "retryOnFail": false
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "command": "={{ \"python3 /opt/local-video-production/youtube.py record \" + JSON.stringify({...$('Read YouTube preparation').first().json, videoId:$json.uploadId || $json.id}).base64Encode() }}"
+        "command": "={{ 'python3 /opt/local-video-production/youtube.py record '+JSON.stringify({...$('Read YouTube preparation').first().json,executionId:String($execution.id),videoId:$json.uploadId||$json.id||null}).base64Encode() }}"
       },
-      "id": "cc2999bb-4155-4401-93d6-879c063da9b6",
-      "name": "Persist YouTube video ID",      "type": "n8n-nodes-base.ssh",
+      "id": "adc45240-69d6-4fb6-9c37-61a8be9f338b",
+      "name": "Persist YouTube video ID",
+      "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3232,
-        816
+        2784,
+        768
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "const value = $input.first().json;\nif (value.code !== undefined && value.code !== 0) throw new Error(value.stderr || 'Cannot persist YouTube video ID');\nreturn [{json:{...$('Read YouTube preparation').first().json,...(value.code !== undefined ? JSON.parse(value.stdout) : value)}}];"
+        "jsCode": "const value=$input.first().json;let result;try{result=value.code!==undefined?JSON.parse(value.stdout||'{}'):value;}catch{result={ok:false,error:'Cannot parse the durable YouTube receipt'};}return [{json:{...$('Read YouTube preparation').first().json,...result,executionId:String($execution.id),...(value.code!==undefined&&value.code!==0||result.ok===false?{verificationError:result.error||value.stderr||'Cannot persist YouTube ID'}:{})}}];"
       },
-      "id": "1c01a26a-cc0f-4f39-b2bb-d2764e9eab0a",
+      "id": "2461c794-af8b-4516-9865-77e1bd17ac13",
       "name": "YouTube publication context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3024,
-        1056
+        2576,
+        1008
       ],
       "retryOnFail": false
     },
@@ -1041,27 +1045,30 @@
           "timeout": 60000
         }
       },
-      "id": "cdb71e74-2f42-424c-bccd-383764c9ce7a",
+      "id": "9c930626-a7d6-4998-a92e-db168cf0c46a",
       "name": "Verify YouTube processing",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3264,
-        1056
+        2816,
+        1008
       ],
-      "retryOnFail": false
+      "retryOnFail": true,
+      "onError": "continueRegularOutput",
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
-        "jsCode": "const context = $('YouTube publication context').first().json;\nconst video = $json.items?.[0];\nif (!video || video.id !== context.videoId || video.snippet?.channelId !== context.channelId) throw new Error('YouTube video/channel mismatch; retain the recorded ID');\nif (['failed','rejected','deleted'].includes(video.status?.uploadStatus) || video.processingDetails?.processingStatus==='failed' || (video.processingDetails?.processingStatus==='terminated' && video.status?.uploadStatus!=='processed')) throw new Error('YouTube processing failed; inspect the recorded video');\nif ($runIndex >= 20) throw new Error('YouTube processing remains pending; resume the same recorded video ID');\nconst file=video.fileDetails, stream=file?.videoStreams?.[0];\nconst detailsReady=video.processingDetails?.fileDetailsAvailability==='available';\nif (detailsReady && !file?.audioStreams?.some(a=>a.channelCount>0)) throw new Error('YouTube received no audio stream');\nif (stream && (stream.widthPixels>stream.heightPixels || Number(file.durationMs)>180000 || Number(file.durationMs)<3000 || stream.widthPixels!==context.media.width || stream.heightPixels!==context.media.height)) throw new Error('YouTube file does not match the intended square or vertical Short');\nconst verified=Boolean(detailsReady && stream && file.audioStreams?.length);\nreturn [{json:{...context,uploadStatus:video.status.uploadStatus,privacyStatus:video.status.privacyStatus,processed:video.status.uploadStatus==='processed' && verified,youtubeAudioVerified:verified,shortsEligible:verified}}];"
+        "jsCode": "const context=$('YouTube publication context').first().json;try{const video=$json.items?.[0];if(!video||video.id!==context.videoId||video.snippet?.channelId!==context.channelId)throw Error($json.error?.message||$json.error||'YouTube video/channel mismatch; retain its recorded ID');if(['failed','rejected','deleted'].includes(video.status?.uploadStatus)||['failed','terminated'].includes(video.processingDetails?.processingStatus)&&video.status?.uploadStatus!=='processed')throw Error('YouTube processing failed');const file=video.fileDetails,stream=file?.videoStreams?.[0],detailsReady=video.processingDetails?.fileDetailsAvailability==='available';if(detailsReady&&!file?.audioStreams?.some(a=>a.channelCount>0))throw Error('YouTube received no audio stream');if(stream&&(!Number.isFinite(Number(file.durationMs))||Number(file.durationMs)<3000||Number(file.durationMs)>60000||stream.widthPixels!==context.media.width||stream.heightPixels!==context.media.height))throw Error('YouTube file differs from the approved vertical video');const verified=Boolean(detailsReady&&stream&&file.audioStreams?.some(a=>a.channelCount>0));const processed=video.status?.uploadStatus==='processed'&&verified;const expected=context.privateTest===true?'private':'public';if(processed&&video.status.privacyStatus!==expected)throw Error('YouTube visibility differs from the approved target');if(!processed&&$runIndex>=20)throw Error('YouTube processing timeout; resume the recorded video ID');return [{json:{...context,uploadStatus:video.status?.uploadStatus,privacyStatus:video.status?.privacyStatus,processed,youtubeAudioVerified:verified,shortsEligible:verified}}];}catch(error){return [{json:{...context,processed:false,verificationError:String(error.message).slice(0,500)}}];}"
       },
-      "id": "592a30ff-d2e9-4f1d-af57-c657b23963ed",
+      "id": "9cd30c2c-aca3-43d6-85e8-fd06868b68f5",
       "name": "Validate YouTube video and audio",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3504,
-        1056
+        3056,
+        1008
       ],
       "retryOnFail": false
     },
@@ -1090,13 +1097,13 @@
         },
         "options": {}
       },
-      "id": "9ade09be-6886-4650-af16-8448d58c6394",
+      "id": "fc61a0a3-4d24-4ae9-b1db-1759a373c3cc",
       "name": "YouTube ready?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3744,
-        1056
+        3296,
+        1008
       ],
       "retryOnFail": false
     },
@@ -1104,13 +1111,13 @@
       "parameters": {
         "amount": 30
       },
-      "id": "31bf25f6-7630-4b4f-89d2-18d5ab1d9507",
+      "id": "188c5008-9781-41f6-9e39-233255f92578",
       "name": "Wait for YouTube",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        3984,
-        1216
+        3536,
+        1168
       ],
       "retryOnFail": false
     },
@@ -1118,13 +1125,13 @@
       "parameters": {
         "command": "={{ \"python3 /opt/local-video-production/youtube.py finalize \" + JSON.stringify($json).base64Encode() }}"
       },
-      "id": "1a7394ec-d60a-413a-815a-51f8d38059e8",
+      "id": "0deb212e-304b-4ede-b7a3-44e191951ae2",
       "name": "Store YouTube publication receipt",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3984,
-        1040
+        3536,
+        992
       ],
       "retryOnFail": false
     },
@@ -1132,13 +1139,13 @@
       "parameters": {
         "jsCode": "if ($json.code !== 0) throw new Error($json.stderr || 'YouTube local operation failed');\nreturn [{json:JSON.parse($json.stdout)}];"
       },
-      "id": "70621ca2-dfee-4684-849c-5f58f5cb3e1e",
+      "id": "a4a8592c-5226-4142-9aa0-795ac2945f40",
       "name": "YouTube publication receipt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4224,
-        1040
+        3776,
+        992
       ],
       "retryOnFail": false
     },
@@ -1154,7 +1161,7 @@
           "conditions": [
             {
               "id": "55a49bb8-71e5-4d1c-a2ec-9867fe0a9049",
-              "leftValue": "={{ $json.state === 'published' && Boolean($json.id) }}",
+              "leftValue": "={{ $json.approved === true && $json.targets?.youtube === true && Boolean($json.youtubePrepared) }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -1167,31 +1174,158 @@
         },
         "options": {}
       },
-      "id": "f2d141b1-202f-4f4c-b435-92d5079a4c62",
+      "id": "079ef823-2658-47de-a148-60105cf3dce7",
       "name": "Local Instagram verified?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1216,
-        816
+        768,
+        768
       ],
       "retryOnFail": false
     },
     {
       "parameters": {
-        "jsCode": "if($json.kind!=='reel')throw new Error('Only approved Shorts can be delivered to YouTube');\nreturn [{json:{...$json,published:false,message:'Short format and audible audio verified; dry-run performed no upload.'}}];"
+        "jsCode": "if($json.kind!=='reel'||$json.media?.fullDecode!==true||$json.media?.audioAudible!==true)throw Error('A verified local MP4 is required');return [{json:{...$json,published:false,message:'The local MP4 passed decoding and audio measurements. This dry-run performed no YouTube upload.'}}];"
       },
-      "id": "694d06ff-f818-482f-a153-bd1f50796415",
+      "id": "ca03ed7c-7e52-4ae7-8609-677cc2b1fdf0",
       "name": "YouTube dry-run",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2400,
-        992
+        1952,
+        944
       ],
       "retryOnFail": false
+    },
+    {
+      "id": "d72048b2-0317-5014-b9d8-113ae4255dcc",
+      "name": "Recorded YouTube ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f374cc64-947d-449e-9aef-a141e57284d8",
+              "leftValue": "={{ /^[A-Za-z0-9_-]{11}$/.test($json.videoId || '') && !$json.verificationError }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        2576,
+        1520
+      ]
+    },
+    {
+      "id": "fd4c8411-e585-5c30-afa5-66ed2a239032",
+      "name": "YouTube verification failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0479e93b-1fd3-4ce0-bb54-77f866dbe5fc",
+              "leftValue": "={{ Boolean($json.verificationError) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        3056,
+        1520
+      ]
+    },
+    {
+      "id": "06d078a5-3277-543c-8008-5a8a8ece4f9e",
+      "name": "Record YouTube recovery state",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "parameters": {
+        "command": "={{ 'python3 /opt/local-video-production/youtube.py failure '+JSON.stringify({...$json,executionId:String($execution.id)}).base64Encode() }}"
+      },
+      "position": [
+        2576,
+        1904
+      ]
+    },
+    {
+      "id": "49c1191d-f4bb-52ec-94fb-46f556f52545",
+      "name": "Per-channel recovery receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const j=JSON.parse($json.stdout||'{}');if($json.code!==0||j.ok!==true)throw Error(j.error||'Cannot persist recovery state');return [{json:j}];"
+      },
+      "position": [
+        2816,
+        1904
+      ]
+    },
+    {
+      "id": "8fc73e42-1037-5858-8553-99e5f502184c",
+      "name": "[V2] Approval and recovery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "## Approval and recovery\n\nStart the included local worker and open http://127.0.0.1:3850/. Create a real brief, inspect the MP4 and explicitly approve its hash and channels. Errors retain provider IDs. Resume only the failed channel; reconcile uncertain uploads before retrying.",
+        "width": 736,
+        "height": 416,
+        "color": 7
+      },
+      "position": [
+        -1488,
+        672
+      ]
+    },
+    {
+      "id": "5e876550-c18e-5452-bc1b-2556d45c11ed",
+      "name": "[V2] Durable YouTube errors",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "content": "## Retain IDs before recovery\n\nA failed verification records its error and existing video ID. Resume from the local review gallery. An uncertain upload without an ID blocks re-upload until an operator records and verifies the existing video.",
+        "width": 976,
+        "height": 720,
+        "color": 7
+      },
+      "position": [
+        2496,
+        1392
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Create four private drafts": {
       "main": [
@@ -1720,7 +1854,7 @@
       "main": [
         [
           {
-            "node": "Verify YouTube processing",
+            "node": "Recorded YouTube ID?",
             "type": "main",
             "index": 0
           }
@@ -1742,7 +1876,7 @@
       "main": [
         [
           {
-            "node": "YouTube ready?",
+            "node": "YouTube verification failed?",
             "type": "main",
             "index": 0
           }
@@ -1810,12 +1944,61 @@
           }
         ]
       ]
+    },
+    "Recorded YouTube ID?": {
+      "main": [
+        [
+          {
+            "node": "Verify YouTube processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record YouTube recovery state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube verification failed?": {
+      "main": [
+        [
+          {
+            "node": "Record YouTube recovery state",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "YouTube ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record YouTube recovery state": {
+      "main": [
+        [
+          {
+            "node": "Per-channel recovery receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timezone": "Europe/Rome",
+    "executionTimeout": 3600
   },
-  "active": false,
-  "pinData": {}
+  "nodeGroups": []
 }

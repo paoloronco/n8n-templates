@@ -1,59 +1,38 @@
-### Quick Overview
+# Local video production, draft approval and publishing
 
-Coordinate local video rendering and scheduled publishing to Instagram Reels and YouTube Shorts with n8n. Manage durable production queues, communicate with a local rendering worker, securely transfer media, and verify publishing results using Meta and YouTube APIs.
+Create narrated vertical videos locally from your own brief and images, review the exact MP4, then deliver approved versions through n8n to Instagram Reels and/or YouTube. This version includes the complete companion runtime: durable SQLite backend, offline speech, four HyperFrames layouts, loopback intake/review gallery, verified file upload and per-channel recovery.
 
-### How It Works
+## Included
 
-1. A manual trigger creates four video drafts, while scheduled triggers reserve daily production batches and publishing slots.
-2. n8n sends rendering requests to an external Python queue service over SSH and retrieves persistent job IDs.
-3. A signed webhook bridge allows the local rendering worker to claim jobs and report completed renders.
-4. The workflow polls rendering status, detects failures, and makes completed videos available for preview.
-5. Scheduled publishing slots claim ready videos and execute Instagram Graph API actions through OAuth.
-6. Instagram responses are recorded by the local helper until publication is confirmed.
-7. After Instagram verification, the workflow checks the connected YouTube channel and uploads the preserved MP4 when required.
-8. YouTube processing, video dimensions, and available audio metadata are checked before finalizing the publication receipt.
-9. Separate webhook branches authorize MP4 uploads and deliver media through expiring signed links.
+- `workflow.json`: portable n8n workflow, credentials removed and schedules inactive.
+- `runtime/`: working Python backend, Node.js render worker/gallery, pinned dependencies, examples and tests.
+- [Runtime installation and operations guide](runtime/README.md): configuration, first private test, approval, recovery and backups.
 
-### Setup
+## Complete flow
 
-1. Import the workflow JSON into n8n and keep it inactive during configuration.
-2. Deploy the compatible Python queue service, local rendering worker, publishing helpers, and persistent storage.
-3. Configure SSH credentials and update the Python helper paths, including `/opt/local-video-production/`.
-4. Configure the signed worker bridge, authorized upload webhook, and public HTTPS media-delivery endpoint.
-5. Connect Meta OAuth credentials with the permissions required to publish Instagram Reels.
-6. Connect YouTube OAuth credentials and replace `REPLACE_WITH_YOUTUBE_CHANNEL_ID` with your intended channel ID.
-7. Configure the renderer, video formats, schedules, and workflow timezone.
-8. Verify private previews, signed requests, and publishing safeguards before enabling live execution.
+1. Create a draft from a title, narration, caption and two to five scenes. Images are optional except for slideshow.
+2. The local worker produces a 1080×1920 H.264/AAC MP4 with offline narration. HyperFrames and FFmpeg check the render.
+3. n8n accepts only a signed, leased upload. The backend verifies the exact bytes and decodes audio/video before the draft becomes reviewable.
+4. Review the complete local video. Approval binds the MP4 hash, brief, account identities, channels, visibility and earliest publishing time.
+5. n8n checks the connected accounts and uses its own OAuth credentials for delivery. Each provider ID is saved durably and read back before success.
+6. Recover the incomplete stage from the gallery. Existing IDs are verified again; uncertain uploads require reconciliation before retry.
 
-### Requirements
+The daily branch reports approved ready drafts and the publishing slots use the configured timezone. It never invents or approves content automatically. Manual publishing still requires a due approval. Keep the publishing gate closed until setup and the private YouTube test pass.
 
-- Self-hosted n8n with SSH, Webhook, Meta Graph API, and YouTube integrations.
-- Local video rendering machine and compatible Python worker.
-- External queue/backend, publishing helpers, and persistent media storage.
-- SSH access to the configured infrastructure.
-- Instagram professional account with publishing permissions.
-- YouTube OAuth credentials and YouTube Data API access.
-- Public HTTPS endpoint for authorized media delivery.
+## Requirements and setup
 
-### Customization
+Use an n8n instance with SSH, HTTPS webhooks, Meta OAuth and YouTube OAuth; a Linux helper host with Python 3.10+, FFmpeg and persistent storage; and a rendering computer with Node.js 22+, FFmpeg and Python for offline Kokoro speech. These components are supplied as source and installed separately; importing JSON does not install them.
 
-- Adjust video formats, audiences, and production settings.
-- Change daily production volume and publishing time slots.
-- Customize video layouts, captions, visual identity, and assets in the renderer.
-- Modify Instagram captions and YouTube publishing metadata.
-- Configure workflow timezone, helper paths, and storage locations.
-- Adapt review, authorization, and publishing controls to your environment.
+Follow [runtime/README.md](runtime/README.md) from backend installation through the first private YouTube test. Configure your own account IDs, channel, shared signing secret, helper paths and webhook URLs. Connect credentials in n8n and review schedules before activation. The gallery remains local to the rendering computer.
 
-### Additional Info
+A private YouTube test skips Instagram. Instagram tests publish to the selected account. Platform eligibility, permissions, quotas and classification still apply. Local audio measurements verify a non-silent stream; review remains responsible for spoken content and editorial quality.
 
-This workflow orchestrates external video-production services; the JSON does not include the renderer, worker, or Python helpers.
+## Changes from the original template
 
-Local rendering requires compatible hardware and consumes system resources. Platform API limits may apply.
+The package now includes the previously missing renderer and backend. Missing job timestamps stop polling instead of bypassing its timeout. Bridge failures surface as errors. YouTube success requires the approved privacy and actual processing/audio metadata; the final successful poll is accepted. Dry runs do not fabricate upload or audio verification. Approval and render/upload recovery are part of the actual workflow. Provider IDs survive partial failures so retries do not silently duplicate uploads.
 
-Manual executions can reach real publishing actions. Test preview-only behavior before enabling live publication.
+## Validation
 
-A private YouTube upload does not make an earlier Instagram Reel private.
+Run the included Python and Node tests, then a reviewed private test using your own n8n instance. Unit fixtures do not publish. Keep runtime state, original MP4s and configuration backed up; inspect provider state before reconciling uncertain delivery. See the runtime guide for exact recovery controls and limitations.
 
-**Documentation:** [Complete Setup Guide](https://paoloronco.notion.site/Automate-Local-Video-Creation-and-Publishing-to-Instagram-Reels-YouTube-Shorts-41af0ba27c32817aac38f04798207385)
-
-**GitHub:** [Workflow Repository](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-local-video-creation-and-publishing)
+For implementation support and customization: [paoloronco.it](https://paoloronco.it).

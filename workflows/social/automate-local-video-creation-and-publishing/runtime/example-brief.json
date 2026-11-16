@@ -1,0 +1,20 @@
+{
+  "idempotencyKey": "example-first-draft",
+  "format": "wall_text",
+  "channels": ["youtube"],
+  "privateTest": true,
+  "brief": {
+    "title": "Dal brief alla pubblicazione approvata",
+    "brand": "Local Video",
+    "language": "it-IT",
+    "accent": "#73e6b1",
+    "narration": "Parti da un brief concreto e genera il video sul tuo computer. Guarda la bozza completa, controlla il testo e ascolta la voce. Approva soltanto la versione che vuoi pubblicare. Ogni canale conserva la propria ricevuta, per riprendere gli errori senza duplicare i video.",
+    "caption": "Test privato di integrazione: rendering locale, approvazione della bozza e verifica della pubblicazione.",
+    "scenes": [
+      {"title": "Un brief concreto", "body": "Testo, voce e canali scelti prima di iniziare."},
+      {"title": "Controlla la bozza", "body": "Guarda il video completo e ascolta la narrazione."},
+      {"title": "Approva questa versione", "body": "L'approvazione corrisponde al file che hai verificato."},
+      {"title": "Riprendi senza duplicare", "body": "Ogni canale conserva ID, stato e ricevuta."}
+    ]
+  }
+}

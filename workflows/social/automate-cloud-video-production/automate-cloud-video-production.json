@@ -1,5 +1,5 @@
 {
-  "name": "OrbitPage Video Cloud Production - Review & Cloud Delivery",
+  "name": "OrbitPage Video Cloud Production",
   "nodes": [
     {
       "parameters": {},
@@ -1837,17 +1837,17 @@
     },
     {
       "parameters": {
-        "content": "## Cloud video production\n\n- **Flow:** brief \u2192 narration \u2192 cloud render \u2192 private review.\n- **Output:** vertical MP4, 1080 \u00d7 1920 at 30 fps.\n- **Setup:** connect HeyGen + Basic Auth; run storage setup once.\n- **Approve:** watch the draft; approve the exact file within 7 days.\n- **Recover:** resume the same job and render ID.\n- **Status:** local technical test passed; real cloud returned HTTP 402.\n- **Spending:** new generation is blocked in **Plan next step**.\n- **Delivery:** provider cloud link; download the master for safekeeping.\n\nStandard n8n nodes only. No extra runtime on the VM.",
-        "height": 442,
-        "width": 1376
+        "content": "# Cloud Video Production\n\nCreate narrated vertical videos with cloud rendering, private draft review and resumable jobs. Standard n8n nodes; no extra software on the VM.\n\n### How it works\n\n1. Submit a brief or run the example.\n2. Prepare narration and assets, then render in the cloud.\n3. Review the MP4 and approve or reject the exact file.\n4. Resume interrupted work using the saved job and render ID.\n\n### Setup\n\n1. Connect HeyGen to the cloud nodes; protect both forms with Basic Auth.\n2. Set your public HTTPS n8n URL in the Code nodes.\n3. Run **Set up cloud storage** once.\n4. Keep generation disabled until API-credit use is authorized.\n\n### Customization\n\n- Edit title, brand, accent, English narration, scenes and caption.\n- Choose `wall_text`, `hook_demo`, `custom_motion` or `slideshow`.\n\n### Additional info\n\n- Target: **1080 \u00d7 1920, 30 fps, H.264/AAC**.\n- Local technical test passed; real cloud rendering is pending (**HTTP 402**).\n- Approval expires after 7 days. Download the master; cloud URLs expire.\n- Cloud-file delivery; social publishing uses the separate local workflow.\n\n[Full documentation](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c?pvs=204) \u00b7 [README & downloads](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production)\n\n**Consulting & customization**\n\n[info@paoloronco.it](mailto:info@paoloronco.it) \u00b7 [paoloronco.it](https://paoloronco.it/)",
+        "height": 746,
+        "width": 640
       },
       "id": "8674ebd4-f74a-4a45-8a69-153c6e4c59df",
       "name": "Cloud video production",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -64,
-        -992
+        -736,
+        -496
       ]
     },
     {

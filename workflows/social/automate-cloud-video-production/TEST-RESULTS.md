@@ -38,3 +38,7 @@ Temporary test nodes and endpoints are excluded from this package. The live copy
 ## Canvas documentation update
 
 The owner's latest manual node arrangement was retained. The saved export contains 59 operational nodes and nine sticky notes: one orange overview and eight gray functional sections. All operational node objects (including IDs, positions, parameters and credentials), connections and settings matched the owner's pre-change export exactly. The four existing sticky-note IDs were preserved. Browser layout checks found no note text overlapping operational nodes and no clipped note text. This documentation-only update did not execute the workflow or call a video provider.
+
+## Structured overview and documentation
+
+The orange note now uses How it works, Setup, Customization and Additional info, with consulting contacts and an extended Notion guide. Comparing the saved export to the owner's latest version confirmed that all other 67 node objects, connections, settings and the owner's workflow title were unchanged. No workflow execution or provider generation was performed for this documentation update.

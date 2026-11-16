@@ -13,7 +13,11 @@ This copy delivers to cloud storage. Social publishing remains in the separate o
 - [Technical validation and known limits](TEST-RESULTS.md)
 - [Technical preview video](technical-preview.mp4) — rendered by the local simulator.
 
-The canvas has one orange overview and eight gray functional sections. It retains the owner's reviewed node arrangement.
+The orange overview is divided into How it works, Setup, Customization and Additional info, with consulting links. Eight gray notes document the functional sections. The owner's operational node arrangement is preserved.
+
+## Documentation
+
+[Open the extended Notion guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c?pvs=204) for six chapters covering setup, workflow stages, brief customization, draft review, recovery and validation. Notion access follows the page permissions.
 
 ## Setup
 
@@ -67,3 +71,7 @@ The ZIP is removed from the checkpoint after the cloud asset completes. Data Tab
 The workflow measures PCM WAV duration and levels, hashes the MP4, and parses its codecs, dimensions and duration. It does not fully decode video or measure encoded loudness inside n8n. Human review remains required. Full decoding, browser playback and Earshot measurements were performed separately on the operator PC.
 
 See [TEST-RESULTS.md](TEST-RESULTS.md). GSAP and Inter are embedded in the project builder; their licenses apply. The Inter license is included here and in generated project ZIPs. No npm installation is needed on the n8n VM.
+
+## Consulting & customization
+
+For implementation, account configuration or workflow adaptations, contact [info@paoloronco.it](mailto:info@paoloronco.it) or visit [paoloronco.it](https://paoloronco.it/).

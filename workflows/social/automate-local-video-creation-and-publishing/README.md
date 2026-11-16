@@ -2,6 +2,8 @@
 
 Create narrated vertical videos locally from your own brief and images, review the exact MP4, then deliver approved versions through n8n to Instagram Reels and/or YouTube. This version includes the complete companion runtime: durable SQLite backend, offline speech, four HyperFrames layouts, loopback intake/review gallery, verified file upload and per-channel recovery.
 
+The interface, examples and documentation are in English. New drafts default to US English narration; historical approved media and receipts retain their original content.
+
 ## Included
 
 - `workflow.json`: portable n8n workflow, credentials removed and schedules inactive.

@@ -42,7 +42,7 @@ test('review gallery rejects cross-origin writes and path traversal',async()=>{
   const app=await start({bridgeUrl:'https://example.invalid/bridge',uploadUrl:'https://example.invalid/upload',secret:'x'.repeat(32),workDir:folder,port,pollMs:60000});
   try{
     const base='http://127.0.0.1:'+port;
-    const page=await (await old(base)).text();assert.ok(page.includes('Approva questa versione'));assert.ok(!page.includes('x'.repeat(32)));
+    const page=await (await old(base)).text();assert.ok(page.includes('Approve this version'));assert.ok(!page.includes('x'.repeat(32)));
     assert.equal((await old(base+'/api/review',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://attacker.invalid','x-csrf-token':app.csrf},body:'{}'})).status,403);
     assert.equal((await old(base+'/api/review',{method:'POST',headers:{'Content-Type':'application/json','Origin':base},body:'{}'})).status,403);
     assert.equal((await old(base+'/api/list',{method:'POST',headers:{'Content-Type':'application/json','Origin':base,'x-csrf-token':app.csrf},body:'{}'})).status,200);

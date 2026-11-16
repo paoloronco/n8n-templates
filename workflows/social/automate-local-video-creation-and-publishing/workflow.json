@@ -14,7 +14,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const example={\"idempotencyKey\": \"example-first-draft\", \"format\": \"wall_text\", \"channels\": [\"youtube\"], \"privateTest\": true, \"brief\": {\"title\": \"Dal brief alla pubblicazione approvata\", \"brand\": \"Local Video\", \"language\": \"it-IT\", \"accent\": \"#73e6b1\", \"narration\": \"Parti da un brief concreto e genera il video sul tuo computer. Guarda la bozza completa, controlla il testo e ascolta la voce. Approva soltanto la versione che vuoi pubblicare. Ogni canale conserva la propria ricevuta, per riprendere gli errori senza duplicare i video.\", \"caption\": \"Test privato di integrazione: rendering locale, approvazione della bozza e verifica della pubblicazione.\", \"scenes\": [{\"title\": \"Un brief concreto\", \"body\": \"Testo, voce e canali scelti prima di iniziare.\"}, {\"title\": \"Controlla la bozza\", \"body\": \"Guarda il video completo e ascolta la narrazione.\"}, {\"title\": \"Approva questa versione\", \"body\": \"L'approvazione corrisponde al file che hai verificato.\"}, {\"title\": \"Riprendi senza duplicare\", \"body\": \"Ogni canale conserva ID, stato e ricevuta.\"}]}};\nconst formats=['wall_text','hook_demo','custom_motion','wall_text'];\nreturn formats.map((format,i)=>({json:{payload:Buffer.from(JSON.stringify({...example,format,idempotencyKey:'n8n-'+$execution.id+'-'+i,brief:{...example.brief,title:example.brief.title+' '+(i+1)}})).toString('base64url')},pairedItem:{item:0}}));"
+        "jsCode": "const example={\"idempotencyKey\": \"example-first-draft\", \"format\": \"wall_text\", \"channels\": [\"youtube\"], \"privateTest\": true, \"brief\": {\"title\": \"From your brief to approved publishing\", \"brand\": \"Local Video\", \"language\": \"en-US\", \"accent\": \"#73e6b1\", \"narration\": \"Start with a concrete brief and create the video on your computer. Watch the complete draft, check the text and listen to the voiceover. Approve only the version you want to publish. Each channel keeps its own receipt, so errors can be resumed without uploading duplicate videos.\", \"caption\": \"Private integration test: local rendering, draft approval and verified publishing.\", \"scenes\": [{\"title\": \"A concrete brief\", \"body\": \"Choose the text, voiceover and channels before you start.\"}, {\"title\": \"Review the draft\", \"body\": \"Watch the complete video and listen to the narration.\"}, {\"title\": \"Approve this version\", \"body\": \"Approval matches the exact file you reviewed.\"}, {\"title\": \"Resume without duplicates\", \"body\": \"Each channel retains its ID, status and receipt.\"}]}};\nconst formats=['wall_text','hook_demo','custom_motion','wall_text'];\nreturn formats.map((format,i)=>({json:{payload:Buffer.from(JSON.stringify({...example,format,idempotencyKey:'n8n-'+$execution.id+'-'+i,brief:{...example.brief,title:example.brief.title+' '+(i+1)}})).toString('base64url')},pairedItem:{item:0}}));"
       },
       "id": "79b3ff16-7509-4e15-b861-0c9ba427c006",
       "name": "Choose formats and audience",
@@ -1213,7 +1213,7 @@
           },
           "conditions": [
             {
-              "id": "f374cc64-947d-449e-9aef-a141e57284d8",
+              "id": "c472ae04-2e65-47ef-9110-451dd858a164",
               "leftValue": "={{ /^[A-Za-z0-9_-]{11}$/.test($json.videoId || '') && !$json.verificationError }}",
               "rightValue": true,
               "operator": {
@@ -1247,7 +1247,7 @@
           },
           "conditions": [
             {
-              "id": "0479e93b-1fd3-4ce0-bb54-77f866dbe5fc",
+              "id": "4a721df2-f715-4040-86b5-9665d30f6a0b",
               "leftValue": "={{ Boolean($json.verificationError) }}",
               "rightValue": true,
               "operator": {

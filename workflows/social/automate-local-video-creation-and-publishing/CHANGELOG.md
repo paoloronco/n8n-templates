@@ -1,5 +1,12 @@
 # Version 2
 
+## 2.0.1 — English interface and defaults
+
+- Translated the gallery, approval, rejection and recovery messages into English.
+- Made US English the default narration language and translated every sample brief.
+- Updated the installed runtime, n8n example, documentation and distributable package.
+- Preserved historical job content, approved MP4s, receipts and account configuration.
+
 - Included the previously missing backend, render worker, offline narration and local intake/review gallery.
 - Added concrete brief/image input and four working video layouts.
 - Bound approval to the actual MP4, brief, destination accounts, channels, visibility and earliest publishing time.

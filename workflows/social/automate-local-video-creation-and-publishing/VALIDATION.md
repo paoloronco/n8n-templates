@@ -1,5 +1,11 @@
 # Validation — 16 November 2026
 
+## English update — version 2.0.1
+
+The gallery, approval/recovery controls, operational guide, example briefs and default narration language are now English. The installed runtime and the n8n example were updated. The 24 backend tests passed on the SSH host with the account configuration unchanged, and all 12 Node checks passed against the installed English version. A fresh US English sample rendered successfully: 17.87 seconds, H.264/AAC 1080×1920, complete decoding and non-silent audio. This language-only verification did not upload or publish another social post. Historical media and receipts retain their original content.
+
+## Original end-to-end validation
+
 This package was tested with a real self-hosted n8n instance, a Linux SSH backend and a Windows rendering computer using Node.js 24 and Python 3.13. The portable export contains 74 nodes, has no credential bindings and is inactive for configuration.
 
 | Check | Observed result |

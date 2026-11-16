@@ -56,7 +56,7 @@ python -m venv .venv
 
 On Linux, use `.venv/bin/python` instead. `setup_models.py` downloads pinned official Kokoro model assets and verifies SHA-256 hashes. It requires about 355 MB plus the Python environment. Speech then runs offline. The worker also supports Windows SAPI or Linux `espeak-ng` when Kokoro is not configured; SAPI requires an installed voice for the selected language.
 
-Copy `worker.example.json` to `worker.local.json`. Set the matching secret, production bridge/upload HTTPS URLs, an absolute writable `workDir`, full FFmpeg/ffprobe paths if needed, and absolute `voicePython` and `modelsDir` paths for Kokoro. The supported narration languages are Italian, US English and UK English.
+Copy `worker.example.json` to `worker.local.json`. Set the matching secret, production bridge/upload HTTPS URLs, an absolute writable `workDir`, full FFmpeg/ffprobe paths if needed, and absolute `voicePython` and `modelsDir` paths for Kokoro. The interface, examples and default narration language are English. US English, UK English and Italian narration are supported; select another language explicitly for a draft.
 
 ```powershell
 node --test worker.test.mjs workflow.test.cjs

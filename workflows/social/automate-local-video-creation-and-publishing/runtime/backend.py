@@ -16,7 +16,7 @@ import time
 from contextlib import contextmanager
 from zoneinfo import ZoneInfo
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 CONFIG = Path(os.environ.get("LOCAL_VIDEO_CONFIG", Path(__file__).with_name("config.local.json")))
 ID = re.compile(r"[a-f0-9]{32}")
 HASH = re.compile(r"[a-f0-9]{64}")
@@ -136,11 +136,11 @@ def valid_request(v):
     require(not private or channels == ["youtube"], "Private tests must target YouTube alone; Instagram has no private publishing test")
     accent = b.get("accent", "#73e6b1")
     require(re.fullmatch(r"#[a-fA-F0-9]{6}", accent), "Invalid accent color")
-    require(b.get("language", "it-IT") in ("it-IT", "en-US", "en-GB"), "Supported narration languages: it-IT, en-US, en-GB")
+    require(b.get("language", "en-US") in ("it-IT", "en-US", "en-GB"), "Supported narration languages: it-IT, en-US, en-GB")
     return {"format": fmt, "scenario": v.get("scenario", "creator"), "localCopy": True,
             "brief": {"title": title, "narration": narration, "caption": caption, "scenes": clean_scenes,
                       "brand": text(b.get("brand", "Local Video"), "brand", 40), "accent": accent,
-                      "language": b.get("language", "it-IT")}, "channels": channels, "privateTest": private}
+                      "language": b.get("language", "en-US")}, "channels": channels, "privateTest": private}
 
 
 def enqueue(d, v):

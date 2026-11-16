@@ -1,0 +1,694 @@
+{
+  "name": "n8n Workflow Backup to Notion",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# n8n → Notion | Workflow Backup & Sync\n\nAutomatically backs up n8n workflows to Notion, keeping their JSON configurations up to date.\n\n### How it works\n- Runs hourly or manually.\n- Matches n8n workflows with entries in the Notion catalog.\n- Creates a `Workflow` subpage if missing.\n- Updates the JSON only when changes are detected.\n- Verifies saved content and generates a sync report.\n\n### Setup\n1. Configure n8n and Notion API credentials.\n2. Set the Notion Data Source ID.\n3. Update the catalog validation and n8n instance URL if needed.\n4. Run manually before enabling the schedule.\n\n### Notes\n- One-way sync: **n8n → Notion**.\n- Prevents overlapping executions.\n- Processes workflows sequentially.\n- No historical versioning or credential secret backup.\n\n---\n\n**Paolo Ronco** · [paoloronco.it](https://paoloronco.it)",
+        "height": 704,
+        "width": 704
+      },
+      "id": "6d4caaae-baea-4cc4-94a4-84712de7a9c5",
+      "name": "[TPA] README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -192
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Trigger and execution control\n\nStarts sync manually or on schedule and prevents overlapping workflow executions.",
+        "height": 704,
+        "width": 960,
+        "color": 7
+      },
+      "id": "a947f89a-0c74-4be4-9a9b-6a03a3b31fed",
+      "name": "[TPA] Trigger and execution control",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -192
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Workflow and catalog retrieval\n\nReads all active n8n workflows and the Notion catalog database pages for sync planning.",
+        "height": 432,
+        "width": 960,
+        "color": 7
+      },
+      "id": "704fc09c-7c17-4e80-a4ef-2b048901a236",
+      "name": "[TPA] Workflow and catalog retrieval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -48
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Sync planning and batching\n\nPlans which workflows to sync based on catalog and existing subpages, then processes them one at a time.",
+        "height": 432,
+        "width": 640,
+        "color": 7
+      },
+      "id": "49815a4d-bc3f-423b-9bc1-1fe0e10409c1",
+      "name": "[TPA] Sync planning and batching",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        -48
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "content": "## 4. Sync reporting\n\nGenerates a summary report of sync results including created, updated, unchanged, skipped workflows and errors.",
+        "height": 432,
+        "width": 640,
+        "color": 7
+      },
+      "id": "9253adaf-15c4-4831-947d-5b94fd1b5241",
+      "name": "[TPA] Sync reporting",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        -400
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "content": "## 5. Workflow JSON comparison and update\n\nChecks if Notion subpage exists, compares stored JSON with current workflow, updates or creates subpage accordingly.",
+        "height": 704,
+        "width": 2240,
+        "color": 7
+      },
+      "id": "c70952d1-319c-4225-b406-bdac9dbe8868",
+      "name": "[TPA] Workflow JSON comparison and update",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        160
+      ],
+      "notes": "tpa:auto-sticky:v3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "17 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "812bc29b-110a-40b8-842b-70c0705ff0df",
+      "name": "Every hour1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "execution",
+        "returnAll": true,
+        "filters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $workflow.id }}"
+          }
+        },
+        "options": {
+          "activeWorkflows": false
+        },
+        "requestOptions": {}
+      },
+      "id": "d812352d-a15b-4b6d-a465-a2c445b6736d",
+      "name": "Read sync executions1",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        352,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const older=$input.all().map(i=>i.json).find(e=>['new','running','waiting'].includes(e.status)&&BigInt(e.id)<BigInt($execution.id));if(older)throw new Error('Sync already running: '+older.id);return [{json:{ready:true}}];"
+      },
+      "id": "35f4b071-11fa-4f38-94b8-23597ba39c13",
+      "name": "Prevent overlapping syncs1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "04cfe48b-6bde-42f8-b0fb-4414064a4c05",
+      "name": "Read n8n workflows1",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        1104,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "[REDACTED_RESOURCE_ID]"
+        },
+        "returnAll": true,
+        "simple": false,
+        "options": {}
+      },
+      "id": "a146283c-acf6-4aed-9736-d1baad9a0aca",
+      "name": "Read catalog1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        1424,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "text": "Workflow",
+        "returnAll": true,
+        "options": {},
+        "simple": false
+      },
+      "id": "57f3ca16-3309-4e99-b575-a9c14a51ecb8",
+      "name": "Find Workflow subpages1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        1744,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function check(ok,message){if(!ok)throw new Error(message);}\nfunction key(id){return String(id||'').replace(/-/g,'').toLowerCase();}\nfunction title(p){return Object.values(p.properties||{}).filter(v=>v.type==='title').flatMap(v=>v.title||[]).map(t=>t.plain_text??t.text?.content??'').join('');}\nfunction stable(v){return Array.isArray(v)?v.map(stable):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;}\nfunction snapshot(w){\n check(w&&typeof w.id==='string'&&typeof w.name==='string'&&Array.isArray(w.nodes)&&w.connections&&typeof w.connections==='object','Invalid workflow');\n return {name:w.name,nodes:w.nodes,pinData:w.pinData||{},connections:w.connections,active:w.active===true,settings:{executionOrder:'v1',binaryMode:'separate',...(w.settings||{})},id:w.id,tags:w.tags||[],nodeGroups:w.nodeGroups||[]};\n}\nfunction markdown(w){const text=JSON.stringify(snapshot(w),null,2);const fence='`'.repeat(Math.max(3,...(text.match(/`+/g)||[]).map(s=>s.length+1)));return fence+'json\\n'+text+'\\n'+fence;}\nfunction plan(catalog,children,workflows){\n const sources=new Map(workflows.filter(w=>!w.isArchived).map(w=>[w.id,w])),items=[],skipped=[];\n for(const p of catalog){\n  if(p.archived||p.is_archived||p.in_trash)continue;\n  check(key(p.parent?.data_source_id)==='YOUR_NOTION_DATA_SOURCE_ID','Unexpected catalog parent');\n  const url=p.properties?.['Apri n8n']?.url;\n  const m=typeof url==='string'&&url.match(/^https:\\/\\/n8n\\.example\\.com\\/workflow\\/([A-Za-z0-9_-]+)\\/?(?:[?#][^\\r\\n]*)?$/);\n  const source=m&&sources.get(m[1]);\n  if(!source){skipped.push({pageId:p.id,name:title(p),reason:!url?'No n8n link':m?'Source workflow deleted or archived':'Invalid n8n link'});continue;}\n  const found=children.filter(c=>!c.archived&&!c.is_archived&&!c.in_trash&&key(c.parent?.page_id)===key(p.id)&&title(c)==='Workflow');\n  check(found.length<2,'Duplicate Workflow subpages for '+title(p));\n  const newMarkdown=markdown(source);\n  check(new TextEncoder().encode(JSON.stringify({type:'replace_content',replace_content:{new_str:newMarkdown}})).length<490000,'Workflow exceeds Notion request limit: '+source.name);\n  items.push({workflowId:source.id,name:source.name,pageId:p.id,childId:found[0]?.id||'',source:snapshot(source),newMarkdown});\n }\n check(items.length||skipped.length,'Catalog is empty');\n return {items,skipped,total:items.length+skipped.length};\n}\nconst p=plan($('Read catalog1').all().map(i=>i.json),$input.all().map(i=>i.json),$('Read n8n workflows1').all().map(i=>i.json));\ncheck(p.items.length,'No eligible workflows; catalog requires review');return p.items.map(json=>({json}));"
+      },
+      "id": "7040a9bf-1bdd-417f-8c7c-636f368764b6",
+      "name": "Plan sync1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e2e0ea54-189f-43a1-821f-b9e390aba16b",
+      "name": "One workflow at a time1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2528,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e8f2bec8-363c-453e-bba6-a69816bb8de5",
+              "leftValue": "={{ !!$json.childId }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4e316c19-9821-4763-9899-983f75ede99d",
+      "name": "Has Workflow page1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2976,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getMarkdown",
+        "pageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.childId }}"
+        }
+      },
+      "id": "eaae0fb3-a929-464f-96b6-5b8c9cef99c8",
+      "name": "Read workflow JSON1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        3296,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function check(ok,message){if(!ok)throw new Error(message);}\nfunction stable(v){return Array.isArray(v)?v.map(stable):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;}\nfunction snapshot(w){\n check(w&&typeof w.id==='string'&&typeof w.name==='string'&&Array.isArray(w.nodes)&&w.connections&&typeof w.connections==='object','Invalid workflow');\n return {name:w.name,nodes:w.nodes,pinData:w.pinData||{},connections:w.connections,active:w.active===true,settings:{executionOrder:'v1',binaryMode:'separate',...(w.settings||{})},id:w.id,tags:w.tags||[],nodeGroups:w.nodeGroups||[]};\n}\nfunction canonical(w){\n const v=snapshot(w);\n v.nodes=v.nodes.map(n=>({...n,...(n.credentials?{credentials:Object.fromEntries(Object.entries(n.credentials).map(([type,c])=>[type,c?.id?{id:c.id}:c]))}:{})}));\n v.tags=v.tags.map(t=>({id:t.id,name:t.name})).sort((a,b)=>String(a.id||a.name).localeCompare(String(b.id||b.name)));\n return JSON.stringify(stable(v));\n}\nfunction parse(r,id){\n check(r&&typeof r.markdown==='string'&&!r.truncated&&!(r.unknown_block_ids||[]).length,'Notion returned incomplete markdown');\n const lines=r.markdown.trim().split('\\n');const open=lines[0].match(/^(`{3,}|~{3,})(?:json|javascript)\\s*$/i);\n check(open&&lines.at(-1)===open[1],'Workflow subpage must contain only one JSON code block');\n let w;try{w=JSON.parse(lines.slice(1,-1).join('\\n'));}catch{throw new Error('Invalid JSON; no overwrite');}\n check(w.id===id,'JSON belongs to another workflow');snapshot(w);return w;\n}\nconst u=$('One workflow at a time1').item.json;const r=$input.first().json;check(r.id.replace(/-/g,'')===u.childId.replace(/-/g,''),'Wrong Notion page');const old=parse(r,u.workflowId);return [{json:{...u,changed:canonical(old)!==canonical(u.source)}}];"
+      },
+      "id": "5bbf8e89-5cf5-477e-8abc-262c5ad4ce77",
+      "name": "Compare JSON1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3616,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4f6302cd-37ee-4435-924d-81e2082cc0c5",
+              "leftValue": "={{ $json.changed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e92c9ead-a6cd-4437-8f8a-9ce210e43c79",
+      "name": "JSON changed1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3872,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "updateMarkdown",
+        "pageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.childId }}"
+        },
+        "markdown": "={{ $json.newMarkdown }}"
+      },
+      "id": "c1fcf5b2-95f1-4d29-8519-69827f9b4227",
+      "name": "Update workflow JSON1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        4192,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getMarkdown",
+        "pageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('One workflow at a time1').item.json.childId }}"
+        }
+      },
+      "id": "4b7430ac-6656-413e-9744-22f626935e0c",
+      "name": "Read back JSON1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        4528,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "pageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.pageId }}"
+        },
+        "title": "Workflow",
+        "contentType": "markdown",
+        "markdown": "={{ $json.newMarkdown }}",
+        "options": {},
+        "simple": false
+      },
+      "id": "8d3e48bc-1965-46e2-87fe-0b176283a43d",
+      "name": "Create Workflow page1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        3296,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getMarkdown",
+        "pageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        }
+      },
+      "id": "7bb8bfab-0f6e-41c6-892c-a25eb97adab9",
+      "name": "Read created JSON1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        3616,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function check(ok,message){if(!ok)throw new Error(message);}\nfunction stable(v){return Array.isArray(v)?v.map(stable):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;}\nfunction snapshot(w){\n check(w&&typeof w.id==='string'&&typeof w.name==='string'&&Array.isArray(w.nodes)&&w.connections&&typeof w.connections==='object','Invalid workflow');\n return {name:w.name,nodes:w.nodes,pinData:w.pinData||{},connections:w.connections,active:w.active===true,settings:{executionOrder:'v1',binaryMode:'separate',...(w.settings||{})},id:w.id,tags:w.tags||[],nodeGroups:w.nodeGroups||[]};\n}\nfunction canonical(w){\n const v=snapshot(w);\n v.nodes=v.nodes.map(n=>({...n,...(n.credentials?{credentials:Object.fromEntries(Object.entries(n.credentials).map(([type,c])=>[type,c?.id?{id:c.id}:c]))}:{})}));\n v.tags=v.tags.map(t=>({id:t.id,name:t.name})).sort((a,b)=>String(a.id||a.name).localeCompare(String(b.id||b.name)));\n return JSON.stringify(stable(v));\n}\nfunction parse(r,id){\n check(r&&typeof r.markdown==='string'&&!r.truncated&&!(r.unknown_block_ids||[]).length,'Notion returned incomplete markdown');\n const lines=r.markdown.trim().split('\\n');const open=lines[0].match(/^(`{3,}|~{3,})(?:json|javascript)\\s*$/i);\n check(open&&lines.at(-1)===open[1],'Workflow subpage must contain only one JSON code block');\n let w;try{w=JSON.parse(lines.slice(1,-1).join('\\n'));}catch{throw new Error('Invalid JSON; no overwrite');}\n check(w.id===id,'JSON belongs to another workflow');snapshot(w);return w;\n}\nconst u=$('One workflow at a time1').item.json;check(canonical(parse($input.first().json,u.workflowId))===canonical(u.source),'Notion readback differs: '+u.name);return [{json:{workflowId:u.workflowId,name:u.name,status:u.childId?'updated':'created'}}];"
+      },
+      "id": "d7648958-d5bc-4bae-a89d-ce080e812959",
+      "name": "Verify JSON1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4880,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function check(ok,message){if(!ok)throw new Error(message);}\nfunction key(id){return String(id||'').replace(/-/g,'').toLowerCase();}\nfunction title(p){return Object.values(p.properties||{}).filter(v=>v.type==='title').flatMap(v=>v.title||[]).map(t=>t.plain_text??t.text?.content??'').join('');}\nfunction stable(v){return Array.isArray(v)?v.map(stable):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;}\nfunction snapshot(w){\n check(w&&typeof w.id==='string'&&typeof w.name==='string'&&Array.isArray(w.nodes)&&w.connections&&typeof w.connections==='object','Invalid workflow');\n return {name:w.name,nodes:w.nodes,pinData:w.pinData||{},connections:w.connections,active:w.active===true,settings:{executionOrder:'v1',binaryMode:'separate',...(w.settings||{})},id:w.id,tags:w.tags||[],nodeGroups:w.nodeGroups||[]};\n}\nfunction markdown(w){const text=JSON.stringify(snapshot(w),null,2);const fence='`'.repeat(Math.max(3,...(text.match(/`+/g)||[]).map(s=>s.length+1)));return fence+'json\\n'+text+'\\n'+fence;}\nfunction plan(catalog,children,workflows){\n const sources=new Map(workflows.filter(w=>!w.isArchived).map(w=>[w.id,w])),items=[],skipped=[];\n for(const p of catalog){\n  if(p.archived||p.is_archived||p.in_trash)continue;\n  check(key(p.parent?.data_source_id)==='YOUR_NOTION_DATA_SOURCE_ID','Unexpected catalog parent');\n  const url=p.properties?.['Apri n8n']?.url;\n  const m=typeof url==='string'&&url.match(/^https:\\/\\/n8n\\.example\\.com\\/workflow\\/([A-Za-z0-9_-]+)\\/?(?:[?#][^\\r\\n]*)?$/);\n  const source=m&&sources.get(m[1]);\n  if(!source){skipped.push({pageId:p.id,name:title(p),reason:!url?'No n8n link':m?'Source workflow deleted or archived':'Invalid n8n link'});continue;}\n  const found=children.filter(c=>!c.archived&&!c.is_archived&&!c.in_trash&&key(c.parent?.page_id)===key(p.id)&&title(c)==='Workflow');\n  check(found.length<2,'Duplicate Workflow subpages for '+title(p));\n  const newMarkdown=markdown(source);\n  check(new TextEncoder().encode(JSON.stringify({type:'replace_content',replace_content:{new_str:newMarkdown}})).length<490000,'Workflow exceeds Notion request limit: '+source.name);\n  items.push({workflowId:source.id,name:source.name,pageId:p.id,childId:found[0]?.id||'',source:snapshot(source),newMarkdown});\n }\n check(items.length||skipped.length,'Catalog is empty');\n return {items,skipped,total:items.length+skipped.length};\n}\nconst p=plan($('Read catalog1').all().map(i=>i.json),$('Find Workflow subpages1').all().map(i=>i.json),$('Read n8n workflows1').all().map(i=>i.json));const rows=$input.all().map(i=>i.json);const updated=rows.filter(x=>x.status==='updated').length,created=rows.filter(x=>x.status==='created').length;check(rows.filter(x=>x.workflowId).length===p.items.length,'Incomplete sync');return [{json:{catalog:p.total,synced:p.items.length,unchanged:p.items.length-updated-created,updated,created,skipped:p.skipped,errors:[]}}];"
+      },
+      "id": "7a56fcb5-a14c-4c46-8fd7-7498ff6e1516",
+      "name": "Sync report1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2976,
+        -208
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every hour1": {
+      "main": [
+        [
+          {
+            "node": "Read sync executions1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read sync executions1": {
+      "main": [
+        [
+          {
+            "node": "Prevent overlapping syncs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prevent overlapping syncs1": {
+      "main": [
+        [
+          {
+            "node": "Read n8n workflows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read n8n workflows1": {
+      "main": [
+        [
+          {
+            "node": "Read catalog1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read catalog1": {
+      "main": [
+        [
+          {
+            "node": "Find Workflow subpages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Workflow subpages1": {
+      "main": [
+        [
+          {
+            "node": "Plan sync1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan sync1": {
+      "main": [
+        [
+          {
+            "node": "One workflow at a time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One workflow at a time1": {
+      "main": [
+        [
+          {
+            "node": "Sync report1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Has Workflow page1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Workflow page1": {
+      "main": [
+        [
+          {
+            "node": "Read workflow JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Workflow page1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read workflow JSON1": {
+      "main": [
+        [
+          {
+            "node": "Compare JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare JSON1": {
+      "main": [
+        [
+          {
+            "node": "JSON changed1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON changed1": {
+      "main": [
+        [
+          {
+            "node": "Update workflow JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "One workflow at a time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update workflow JSON1": {
+      "main": [
+        [
+          {
+            "node": "Read back JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read back JSON1": {
+      "main": [
+        [
+          {
+            "node": "Verify JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Workflow page1": {
+      "main": [
+        [
+          {
+            "node": "Read created JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read created JSON1": {
+      "main": [
+        [
+          {
+            "node": "Verify JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify JSON1": {
+      "main": [
+        [
+          {
+            "node": "One workflow at a time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

@@ -42,3 +42,9 @@ The owner's latest manual node arrangement was retained. The saved export contai
 ## Structured overview and documentation
 
 The orange note now uses How it works, Setup, Customization and Additional info, with consulting contacts and an extended Notion guide. Comparing the saved export to the owner's latest version confirmed that all other 67 node objects, connections, settings and the owner's workflow title were unchanged. No workflow execution or provider generation was performed for this documentation update.
+
+## Final review — 17 November 2026
+
+Offline checks were rerun against the current saved workflow: input and URL validation, spending guards, PCM checks, graph integrity, state transitions, retry expiry, token/hash approval, rejection, replay, read-only preview, binary handoff and the actual self-contained project builder all passed. The six Notion guide pages were fetched and their content and parent location checked. The README credential instructions now refer to the format accepted for the issued credential, avoiding an ambiguous API-key-versus-OAuth distinction.
+
+The public workflow JSON remained byte-identical during this review. These were offline checks and documentation verification; no new provider generation or paid request was performed. The pending managed-cloud rendering test remains unchanged.

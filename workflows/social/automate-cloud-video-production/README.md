@@ -22,7 +22,7 @@ The orange overview is divided into How it works, Setup, Customization and Addit
 ## Setup
 
 1. Import `automate-cloud-video-production.json` into an n8n release supporting Data Tables with table creation and lookup by name, Forms, HTTP Request, Code, Crypto, Compression and Extract from File.
-2. Connect HeyGen Cloud Header Auth credentials to **Read HeyGen Cloud**, **Call HeyGen Cloud**, and **Refresh cloud video URL**. API keys normally use `x-api-key`; OAuth tokens use `Authorization: Bearer ...`. Match the provider-issued credential.
+2. Connect HeyGen Cloud Header Auth credentials to **Read HeyGen Cloud**, **Call HeyGen Cloud**, and **Refresh cloud video URL**. Use the exact header name and value format accepted for your issued credential. Store the key or token only in n8n credentials; do not paste it into the workflow JSON.
 3. Connect one dedicated Basic Auth credential to both intake and recovery forms.
 4. Replace `https://YOUR_N8N_HOST` in the Code nodes with your public HTTPS n8n base URL. Retain the webhook paths or update the review and decision links together.
 5. Run **Set up cloud storage** once. Repeating setup preserves the generation ledger.

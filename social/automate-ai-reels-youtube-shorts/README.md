@@ -1,76 +1,69 @@
-# Automate AI-Powered Instagram Reels & YouTube Shorts Creation and Publishing
+### Quick Overview
 
-## Quick Overview
+Create AI-assisted narrated videos for Instagram Reels and YouTube Shorts using n8n and OpenAI. Automate script generation, editorial review, video rendering coordination, and cross-platform publishing with controlled approvals, persistent job tracking, and media verification.
 
-Create AI-assisted narrated vertical videos with a companion studio and renderer. Generate and review English copy, prepare the original MP4, publish approved content to Instagram Reels, and coordinate YouTube Shorts uploads. Persisted job state and publication receipts help track delivery across both platforms.
+### How It Works
 
-## How It Works
+1. A manual trigger, twice-weekly schedule, or authenticated webhook initiates video production.
+2. The external studio reserves a production job, prepares the editorial brief, and checks the available AI budget.
+3. OpenAI generates English video scripts and publishing copy using the studio's writing instructions.
+4. The studio validates content quality, novelty, factual constraints, and recorded model usage.
+5. A separate OpenAI review evaluates the draft and can request a correction before rendering.
+6. The external renderer creates a narrated vertical video while n8n monitors production status.
+7. Completed videos are available for private preview, with publishing controlled by the backend.
+8. Before Instagram publication, an SSH helper preserves the original MP4 and associates it with the production job.
+9. Authorized Instagram Graph API actions publish the Reel and persist the resulting publication receipt.
+10. The workflow verifies the YouTube OAuth channel, uploads the preserved MP4 when required, and records the video ID.
+11. YouTube processing, video dimensions, and available audio metadata are checked before finalizing delivery.
+12. A separate webhook delivers authorized media assets through expiring signed URLs.
 
-- **Reserve production** — Manual, scheduled, or authenticated webhook input requests a Reel job and budget authorization from the studio.
-- **Generate and review copy** — OpenAI writes the content; the studio validates it and coordinates independent editorial review and any correction request.
-- **Render the video** — The studio queues narrated vertical-video rendering while n8n polls for completion or failure.
-- **Apply the Instagram gate** — Preview-only jobs or disabled publishing stay in the private-preview path.
-- **Preserve the source** — Before Instagram publication, an SSH helper preserves the original MP4 and associates it with the job.
-- **Publish to Instagram** — Claim Meta actions, execute them, and persist results until a verified Instagram receipt is available.
-- **Prepare YouTube delivery** — Validate the OAuth channel, check the preserved media/job association, and claim the YouTube stage.
-- **Upload or resume** — Upload the original video only when required, persist the returned ID, and reuse recorded publication context for subsequent checks.
-- **Verify and finalize** — Check video/channel identity, processing, and available video/audio metadata before finalizing the helper receipt.
-- **Serve Instagram assets** — A separate webhook branch relies on the studio to authorize the exact media request and return the requested bytes.
+### Setup
 
-## Setup
+1. Import the workflow JSON into n8n and keep it inactive during configuration.
+2. Deploy the compatible content studio, video renderer, narration dependencies, and persistent media storage.
+3. Replace all `YOUR-STUDIO-SERVICE` placeholders with your configured backend address.
+4. Configure HTTP Header Auth credentials for studio requests and authenticated webhook access.
+5. Connect OpenAI credentials and verify the configured writing and review models.
+6. Configure Meta OAuth for your Instagram professional account.
+7. Connect YouTube OAuth and replace `YOUR_YOUTUBE_CHANNEL_ID` with your intended channel ID.
+8. Configure SSH credentials and deploy the compatible Python YouTube media helper.
+9. Customize video layouts, narration, captions, and publishing metadata.
+10. Set the workflow timezone and review the Monday/Thursday production schedule.
+11. Test complete video generation and preview-only behavior before enabling live publishing.
 
-1. Import the workflow JSON and leave the workflow inactive during configuration.
-2. Deploy the matching studio backend, video renderer, narration dependencies, persistent storage, and SSH YouTube media helper. These are external components, not installed by the JSON.
-3. Replace all studio service URL placeholders consistently and configure the studio's public media route.
-4. Connect HTTP Header Auth credentials for the studio and authentication for the test webhook.
-5. Connect your OpenAI credentials. Verify writer/reviewer model availability, prompts, budgets, and usage settings in the studio.
-6. Connect the intended Instagram professional account through your Meta credentials and confirm required publishing permissions.
-7. Connect SSH credentials to the helper host. Update every helper directory and media path, including preparation, claim, record, and finalize commands.
-8. Connect YouTube OAuth credentials, configure the required YouTube Data API access, and replace the channel-ID placeholder used by the channel guard.
-9. Configure neutral sample assets, layouts, voice, captions, and rendering settings. Keep publishing disabled while validating previews and backend dry-run behavior.
-10. Configure public HTTPS media delivery and verify authorization and expiry handling. Set the workflow timezone and review the included Monday/Thursday 10:00 schedule.
-11. Inspect a complete sample MP4 and verify both platform stages with explicitly approved test settings before enabling automatic publishing.
+### Requirements
 
-## Requirements
+- Working n8n instance with OpenAI, Meta, YouTube, SSH, and Webhook integrations.
+- OpenAI API credentials and available quota.
+- Compatible external AI content studio and video renderer.
+- Narration dependencies and persistent media storage.
+- SSH-accessible Python YouTube media helper.
+- Instagram professional account with publishing permissions.
+- YouTube OAuth credentials and YouTube Data API access.
+- Public HTTPS media-delivery endpoint.
+- Original or appropriately licensed media and audio assets.
 
-- An n8n instance with network access to the studio, OpenAI, Meta, YouTube, and the SSH helper host.
-- Compatible studio backend, video renderer, narration stack, and persistent job/media storage.
-- OpenAI API credentials and quota for generation and review.
-- Studio authentication and protected test-webhook access.
-- Meta credentials and an eligible Instagram professional account.
-- YouTube OAuth credentials for the configured channel and required API access.
-- SSH access to the matching Python media helper and its storage.
-- Public HTTPS media delivery with backend-enforced authorization and link expiry.
-- Original or licensed content, visual assets, music, and voice rights where applicable.
+### Customization
 
-## Customization
+- Adapt AI video topics, audience, and editorial style.
+- Modify script generation and independent review settings.
+- Configure narration voice, language, and timing.
+- Customize vertical video layouts, captions, and branding.
+- Adjust Instagram captions and YouTube titles, descriptions, and tags.
+- Select AI models and configure production budgets.
+- Change publishing schedules, visibility settings, and approval controls.
+- Adapt helper paths and backend configuration to your infrastructure.
 
-- **Editorial brief** — Adapt topics, audience, tone, factual constraints, and review criteria in the studio configuration.
-- **Narration and visuals** — Change voice, language, timing, captions, layouts, and colors in the renderer and its supported configuration.
-- **Models and budgets** — Adjust writer/reviewer requests and generation limits in the studio.
-- **Publishing metadata** — Review Instagram captions and YouTube title, description, tags, and visibility options.
-- **Timing** — Change `Twice-weekly private production` and explicitly set the workflow timezone.
-- **Infrastructure** — Replace backend URLs, helper paths, storage locations, and the expected channel ID consistently.
+### Additional Info
 
-## Testing & Operations
+This workflow coordinates AI-assisted video production and publishing. The external content studio, renderer, narration stack, and Python helper are not included in the JSON.
 
-- Prove preview/no-publishing behavior before using any full-flow manual or webhook test.
-- Review the original MP4 for audible narration, correct dimensions, legible captions, and unintended branding.
-- Test rejected drafts, renderer failures, unavailable assets, and invalid or expired media requests.
-- Verify that preserved media belongs to the expected job and that the configured OAuth channel is correct.
-- Keep recorded Instagram and YouTube publication IDs. Recover the incomplete stage rather than blindly restarting both publications.
-- Monitor model spend, renderer/helper health, free storage, failed executions, and videos still awaiting platform processing.
+Instagram publication is completed before YouTube delivery. A private YouTube test does not prevent or privatize an earlier Instagram publication.
 
-## Additional Info
+Video metadata checks do not guarantee audible narration or YouTube Shorts classification. Inspect rendered videos before publishing.
 
-The workflow orchestrates external production services; it is not a standalone video generator. Compatible studio and helper implementations must be supplied with the release or installed separately. API usage, narration, rendering, and hosting may have separate costs.
+OpenAI API usage, rendering, and hosting may incur additional costs.
 
-Instagram publication precedes the YouTube stage. A private YouTube test does not privatize or prevent the earlier Instagram post. Trigger names do not guarantee a dry run. Audio-stream metadata does not prove audible narration, and format checks do not guarantee Shorts classification. Separate executions can create distinct production requests.
+**Documentation:** [Complete Setup Guide](https://paoloronco.notion.site/Automate-AI-Powered-Instagram-Reels-YouTube-Shorts-Creation-and-Publishing-41af0ba27c32817490eeff675e958ce2)
 
-## Documentation
-
-[Complete Setup Guide & Technical Documentation](https://paoloronco.notion.site/Automate-AI-Powered-Instagram-Reels-YouTube-Shorts-Creation-and-Publishing-41af0ba27c32817490eeff675e958ce2)
-
-## Professional Services & Consulting
-
-For implementation support, workflow customization, or integration consulting, visit [paoloronco.it](https://paoloronco.it).
+**GitHub:** [Workflow Repository](https://github.com/paoloronco/n8n-templates/tree/main/social/automate-ai-reels-youtube-shorts)

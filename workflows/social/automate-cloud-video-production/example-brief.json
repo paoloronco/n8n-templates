@@ -1,0 +1,25 @@
+{
+  "format": "wall_text",
+  "brief": {
+    "title": "Create once. Review. Deliver.",
+    "brand": "OrbitPage",
+    "language": "en",
+    "accent": "#64DBB4",
+    "narration": "A useful video workflow starts with a clear message. Build your story, review every scene and listen to the complete narration. Approve the finished draft before delivery. Your video stays in the cloud, ready to download, with no rendering software installed on your n8n machine.",
+    "caption": "Cloud video production, with human review before delivery. #OrbitPage #Automation",
+    "scenes": [
+      {
+        "title": "Start with a clear message",
+        "body": "Turn a structured brief into a consistent vertical video."
+      },
+      {
+        "title": "Review the whole story",
+        "body": "Watch every scene and listen before approving the draft."
+      },
+      {
+        "title": "Deliver from the cloud",
+        "body": "Keep n8n simple. No extra software on the server."
+      }
+    ]
+  }
+}

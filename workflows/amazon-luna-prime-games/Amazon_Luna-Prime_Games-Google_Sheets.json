@@ -270,7 +270,7 @@
       "typeVersion": 2,
       "credentials": {
         "discordOAuth2Api": {
-          "id": "7fbjmSiUdOmdAtKf",
+          "id": null,
           "name": "Discord account"
         }
       }
@@ -390,7 +390,7 @@
       "typeVersion": 4.7,
       "credentials": {
         "googleApi": {
-          "id": "YOUR_ID",
+          "id": null,
           "name": "YOUR_ACCOUNT"
         }
       }
@@ -657,11 +657,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2f5afecd-87a5-43cf-8f24-c3e85a3971d0",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "YOUR_ID"
-  },
-  "id": "A8imlsPnCWETHm6k",
   "tags": []
 }

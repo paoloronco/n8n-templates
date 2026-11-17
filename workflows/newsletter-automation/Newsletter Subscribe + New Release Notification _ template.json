@@ -101,8 +101,8 @@
       "notesInFlow": true,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "MenuWHHeaderAuth1",
-          "name": "Header_Auth: WebHook Menu Intranet"
+          "id": null,
+          "name": "Select your Header Auth credential"
         }
       },
       "notes": "Public subscription endpoint. POST an email address to /webhook/newsletter-subscribe. Configure Header Auth before production use."
@@ -322,8 +322,8 @@
       "webhookId": "d52a54bb-abd0-496c-a8b2-6ebdb3eadf09",
       "credentials": {
         "smtp": {
-          "id": "OGDAz0qvK5roJmV0",
-          "name": "SMTP Zoho info@paoloronco.it"
+          "id": null,
+          "name": "Select your SMTP credential"
         }
       }
     },
@@ -381,8 +381,8 @@
       "notesInFlow": true,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "MenuWHHeaderAuth1",
-          "name": "Header_Auth: WebHook Menu Intranet"
+          "id": null,
+          "name": "Select your Header Auth credential"
         }
       },
       "notes": "Production release endpoint. Requires version and SEND_EMAIL=YES. Optional changelog text can override matching README sections."
@@ -509,7 +509,7 @@
       "name": "OpenAI GPT 5 Mini Model",
       "credentials": {
         "openAiApi": {
-          "id": "u0RTEr9Pum9EMs9x",
+          "id": null,
           "name": "OpenAi account"
         }
       }
@@ -632,8 +632,8 @@
       "notesInFlow": true,
       "credentials": {
         "smtp": {
-          "id": "OGDAz0qvK5roJmV0",
-          "name": "SMTP Zoho info@paoloronco.it"
+          "id": null,
+          "name": "Select your SMTP credential"
         }
       },
       "notes": "SMTP delivery node. Replace the example sender and configure SMTP credentials before production use."
@@ -691,7 +691,7 @@
       "name": "OpenAI GPT 5 Mini Helper Model",
       "credentials": {
         "openAiApi": {
-          "id": "u0RTEr9Pum9EMs9x",
+          "id": null,
           "name": "OpenAi account"
         }
       }
@@ -1157,12 +1157,6 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "835b7e8d-3850-4676-b903-e6d230a39b43",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
   "nodeGroups": [],
-  "id": "mAOTgVMcQ0l6oN0V",
   "tags": []
 }

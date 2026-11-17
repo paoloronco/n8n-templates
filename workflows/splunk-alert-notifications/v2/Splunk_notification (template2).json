@@ -1509,12 +1509,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6edb3d77-fe04-4ce2-9000-7713fdb082fa",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
   "nodeGroups": [],
-  "id": "9Wo3MdVcL5e1a3Zz",
   "tags": []
 }

@@ -691,7 +691,7 @@
           "__rl": true,
           "value": "lJniAGuag6Sijwzf",
           "mode": "list",
-          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultName": "menu_orders",
           "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
         },
         "columns": {
@@ -912,7 +912,7 @@
           "__rl": true,
           "value": "lJniAGuag6Sijwzf",
           "mode": "list",
-          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultName": "menu_orders",
           "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
         },
         "matchType": "allConditions",
@@ -1341,8 +1341,8 @@
     },
     {
       "parameters": {
-        "fromEmail": "menu-alerts@paoloronco.it",
-        "toEmail": "alerts@paoloronco.it",
+        "fromEmail": "menu-alerts@example.com",
+        "toEmail": "alerts@example.com",
         "subject": "={{ '[Menu Order Alert] ' + $('Consolidate Results1').first().json.finalState.toUpperCase() + ' - ' + $('Consolidate Results1').first().json.nome + ' (' + $('Consolidate Results1').first().json.orderId + ')' }}",
         "emailFormat": "both",
         "text": "={{ $('Consolidate Results1').first().json.fallbackAlertText }}",
@@ -1402,7 +1402,7 @@
           "__rl": true,
           "value": "lJniAGuag6Sijwzf",
           "mode": "list",
-          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultName": "menu_orders",
           "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
         },
         "matchType": "allConditions",
@@ -1573,7 +1573,7 @@
           "__rl": true,
           "value": "lJniAGuag6Sijwzf",
           "mode": "list",
-          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultName": "menu_orders",
           "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
         },
         "returnAll": true
@@ -1651,7 +1651,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// P1 Fix: Portable blueprint for creating/verifying each required DataTable individually\nreturn [\n  {\n    json: {\n      initMarker: '__schema_init__',\n      apiBaseUrl: ($vars.N8N_INTERNAL_URL || 'http://127.0.0.1:5678').replace(/\\/$/, ''),\n      requiredTables: [\n        {\n          name: 'menu paoloronco intranet',\n          columns: [\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'person', type: 'string' },\n            { name: 'item', type: 'string' },\n            { name: 'items_json', type: 'string' },\n            { name: 'alcol_grammi', type: 'number' },\n            { name: 'data', type: 'string' },\n            { name: 'orario', type: 'string' }\n          ]\n        },\n        {\n          name: 'Notification SID Claims',\n          columns: [\n            { name: 'sid', type: 'string' },\n            { name: 'claim_token', type: 'string' },\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'workflow', type: 'string' },\n            { name: 'channel', type: 'string' },\n            { name: 'state', type: 'string' },\n            { name: 'error_detail', type: 'string' },\n            { name: 'updated_at', type: 'string' }\n          ]\n        }\n      ]\n    }\n  }\n];"
+        "jsCode": "// P1 Fix: Portable blueprint for creating/verifying each required DataTable individually\nreturn [\n  {\n    json: {\n      initMarker: '__schema_init__',\n      apiBaseUrl: ($vars.N8N_INTERNAL_URL || 'http://127.0.0.1:5678').replace(/\\/$/, ''),\n      requiredTables: [\n        {\n          name: 'menu_orders',\n          columns: [\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'person', type: 'string' },\n            { name: 'item', type: 'string' },\n            { name: 'items_json', type: 'string' },\n            { name: 'alcol_grammi', type: 'number' },\n            { name: 'data', type: 'string' },\n            { name: 'orario', type: 'string' }\n          ]\n        },\n        {\n          name: 'Notification SID Claims',\n          columns: [\n            { name: 'sid', type: 'string' },\n            { name: 'claim_token', type: 'string' },\n            { name: 'order_id', type: 'string' },\n            { name: 'customer_id', type: 'string' },\n            { name: 'workflow', type: 'string' },\n            { name: 'channel', type: 'string' },\n            { name: 'state', type: 'string' },\n            { name: 'error_detail', type: 'string' },\n            { name: 'updated_at', type: 'string' }\n          ]\n        }\n      ]\n    }\n  }\n];"
       },
       "id": "f91cf521-4593-4675-be81-05b93d4d5493",
       "name": "Prepare DataTables Blueprint",
@@ -1686,7 +1686,7 @@
           "__rl": true,
           "value": "lJniAGuag6Sijwzf",
           "mode": "list",
-          "cachedResultName": "menu paoloronco intranet",
+          "cachedResultName": "menu_orders",
           "cachedResultUrl": "/projects/jmCdsRSQMosgYP5V/datatables/lJniAGuag6Sijwzf"
         },
         "columns": {

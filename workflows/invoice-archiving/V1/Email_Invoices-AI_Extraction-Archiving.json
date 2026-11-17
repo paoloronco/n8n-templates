@@ -676,36 +676,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "54ea6eaf-4f29-4b70-9b79-20cf3a309300",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "efbf05d03d3e47a9d323e384711f6bc5e7df14be0284d04bab068a214f13aa2e"
-  },
-  "id": "hAr5yxUjH6GnWhRq",
-  "tags": [
-    {
-      "name": "Utility",
-      "id": "gZvMl56PRMiUM0GB",
-      "updatedAt": "2026-01-13T18:54:25.559Z",
-      "createdAt": "2026-01-13T18:54:25.559Z"
-    },
-    {
-      "name": "Mail",
-      "id": "vghJqYF0cZvWjgCI",
-      "updatedAt": "2026-01-13T18:54:25.550Z",
-      "createdAt": "2026-01-13T18:54:25.550Z"
-    },
-    {
-      "name": "PROD",
-      "id": "r7fcfwCl5k0mTYj8",
-      "updatedAt": "2026-01-13T18:54:59.745Z",
-      "createdAt": "2026-01-13T18:54:59.745Z"
-    },
-    {
-      "name": "creator-published",
-      "id": "PlxhyZPXjXMiEkoD",
-      "updatedAt": "2026-01-13T18:54:59.705Z",
-      "createdAt": "2026-01-13T18:54:59.705Z"
-    }
-  ]
+  "tags": []
 }

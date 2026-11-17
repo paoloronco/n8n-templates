@@ -1733,40 +1733,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "09238a6c-f35c-4572-9a13-7570d156c36a",
-  "meta": {},
   "nodeGroups": [],
-  "id": "De2txKzJngS5kxty",
-  "tags": [
-    {
-      "updatedAt": "2025-09-04T13:51:20.972Z",
-      "createdAt": "2025-09-04T13:51:20.972Z",
-      "id": "7FnQEcGVfEQxsJCK",
-      "name": "AI"
-    },
-    {
-      "updatedAt": "2025-11-23T13:34:14.752Z",
-      "createdAt": "2025-11-23T13:34:14.752Z",
-      "id": "DNVBijE9cEya3mqW",
-      "name": "PROD"
-    },
-    {
-      "updatedAt": "2026-11-03T07:55:33.154Z",
-      "createdAt": "2026-11-03T07:55:33.154Z",
-      "id": "DkjrwFIRlGOblnX0",
-      "name": "Telegram"
-    },
-    {
-      "updatedAt": "2025-10-05T14:48:57.646Z",
-      "createdAt": "2025-10-05T14:48:57.646Z",
-      "id": "P7M0ADSAkITGr5vM",
-      "name": "Utility"
-    },
-    {
-      "updatedAt": "2025-11-23T13:34:30.257Z",
-      "createdAt": "2025-11-23T13:34:30.257Z",
-      "id": "it3eJJKIE2zX2skq",
-      "name": "DEV"
-    }
-  ]
+  "tags": []
 }

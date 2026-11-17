@@ -1,4 +1,4 @@
-# OrbitPage — Create and Publish Reels & Shorts with HeyGen and Dropbox
+# Create and Publish Reels & Shorts with HeyGen and Dropbox
 
 ## Quick overview
 
@@ -43,6 +43,6 @@ Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optio
 - Stock n8n nodes only: no local worker, video renderer or extra packages on the n8n host. Output targets 1080 × 1920, 30 fps, H.264/AAC MP4.
 - `maxCloudRenders` limits jobs, not spending. Generation, social publishing and Dropbox archiving start disabled.
 - Technical checks passed; live managed HeyGen rendering and social delivery by this cloud copy remain unverified.
-- [Full setup, examples and recovery guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/automate-cloud-video-production/automate-cloud-video-production.json).
-- Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the updated cloud version is not confirmed in review).
-- Support and customization: [Email support](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).
+- [Full setup, examples and recovery guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/create-and-publish-reels-shorts-heygen-dropbox/create-and-publish-reels-shorts-heygen-dropbox.json).
+- Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/create-and-publish-reels-shorts-heygen-dropbox) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the updated cloud version is not confirmed in review).
+- Support and customization: [Consulting and support](https://paoloronco.it/).

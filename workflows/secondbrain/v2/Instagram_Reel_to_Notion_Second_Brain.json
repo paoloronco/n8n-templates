@@ -978,9 +978,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "meta": {
-    "templateCredsSetupCompleted": false
-  },
   "nodeGroups": [],
   "tags": []
 }

@@ -131,8 +131,8 @@
       ],
       "credentials": {
         "googleApi": {
-          "id": "we0h2NciO4DyqxUU",
-          "name": "paoloronco2000 | inventory  | GCP SA"
+          "id": null,
+          "name": "Select your Google service account credential"
         }
       }
     },
@@ -172,8 +172,8 @@
       ],
       "credentials": {
         "googleApi": {
-          "id": "we0h2NciO4DyqxUU",
-          "name": "paoloronco2000 | inventory  | GCP SA"
+          "id": null,
+          "name": "Select your Google service account credential"
         }
       }
     },
@@ -246,8 +246,8 @@
       ],
       "credentials": {
         "googleApi": {
-          "id": "we0h2NciO4DyqxUU",
-          "name": "paoloronco2000 | inventory  | GCP SA"
+          "id": null,
+          "name": "Select your Google service account credential"
         }
       }
     },
@@ -285,8 +285,8 @@
       ],
       "credentials": {
         "googleApi": {
-          "id": "we0h2NciO4DyqxUU",
-          "name": "paoloronco2000 | inventory  | GCP SA"
+          "id": null,
+          "name": "Select your Google service account credential"
         }
       }
     },
@@ -330,8 +330,8 @@
       ],
       "credentials": {
         "googleApi": {
-          "id": "we0h2NciO4DyqxUU",
-          "name": "paoloronco2000 | inventory  | GCP SA"
+          "id": null,
+          "name": "Select your Google service account credential"
         }
       }
     },
@@ -564,11 +564,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d8918fea-96a5-4ab6-b1e4-1a1876996af5",
-  "meta": {
-    "instanceId": "123456789"
-  },
   "nodeGroups": [],
-  "id": "3UfLXXL47d0byaSP",
   "tags": []
 }

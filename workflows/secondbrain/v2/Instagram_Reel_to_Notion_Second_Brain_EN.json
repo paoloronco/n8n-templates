@@ -116,8 +116,8 @@
       "typeVersion": 1.5,
       "credentials": {
         "telegramApi": {
-          "id": "dlCGLIckGpagslOI",
-          "name": "Telegram @prhomelab_secondbrain_bot"
+          "id": null,
+          "name": "Select your Telegram credential"
         }
       }
     },
@@ -561,8 +561,8 @@
       "typeVersion": 1.2,
       "credentials": {
         "telegramApi": {
-          "id": "dlCGLIckGpagslOI",
-          "name": "Telegram @prhomelab_secondbrain_bot"
+          "id": null,
+          "name": "Select your Telegram credential"
         }
       }
     },
@@ -587,7 +587,7 @@
       "typeVersion": 1.3,
       "credentials": {
         "openAiApi": {
-          "id": "u0RTEr9Pum9EMs9x",
+          "id": null,
           "name": "OpenAi account"
         }
       }
@@ -697,7 +697,8 @@
         96
       ],
       "typeVersion": 2.2
-    },    {
+    },
+    {
       "parameters": {
         "content": "### 5. Notion Inbox\n\nPrepares a concise title, category, source URL, date and up to ten knowledge sections. The native Notion node creates the database entry and its page content in one operation.",
         "height": 688,
@@ -1000,11 +1001,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "58fd92db-2f4b-403a-8509-9cf415135a31",
-  "meta": {
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
   "nodeGroups": [],
-  "id": "IOvSvoaC0jTLAMmM",
   "tags": []
 }

@@ -168,7 +168,7 @@
       "webhookId": "1a4c2fa0-2b30-4c73-869b-5e950e618981",
       "credentials": {
         "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
+          "id": null,
           "name": "Gmail account"
         }
       }
@@ -433,7 +433,7 @@
       "name": "Generate a PDF document",
       "credentials": {
         "pdfGeneratorApi": {
-          "id": "qUCWxatdK0hM7EQZ",
+          "id": null,
           "name": "PDF Generator account"
         }
       }
@@ -559,24 +559,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "27c846c4-3476-4aaa-b81d-19c93a130da0",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "9d797abf871ff7776b72030f386aac63fbb09752ce3bb94854a66e7091951bfc"
-  },
-  "id": "lRXtQJqclgbWMSOn",
-  "tags": [
-    {
-      "updatedAt": "2025-11-23T13:34:14.752Z",
-      "createdAt": "2025-11-23T13:34:14.752Z",
-      "id": "DNVBijE9cEya3mqW",
-      "name": "PROD"
-    },
-    {
-      "updatedAt": "2025-11-23T13:36:13.729Z",
-      "createdAt": "2025-11-23T13:36:13.729Z",
-      "id": "T2GE36JapoXlWhjo",
-      "name": "creator-published"
-    }
-  ]
+  "tags": []
 }

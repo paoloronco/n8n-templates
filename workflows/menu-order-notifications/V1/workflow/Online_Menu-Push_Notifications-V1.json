@@ -9,7 +9,10 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-500, -470],
+      "position": [
+        -500,
+        -470
+      ],
       "id": "b1c2d3e4-f5a6-7890-bcde-f12345678901",
       "name": "Documentation"
     },
@@ -51,7 +54,7 @@
       "name": "ntfy notification",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "COXnwwmXry8A0lcT",
+          "id": null,
           "name": "HeaderAuth ntfy"
         }
       }
@@ -145,11 +148,5 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "ea2a027d-b399-4d78-aa55-e0f9155e7f48",
-  "meta": {
-    "templateCredsSetupCompleted": false,
-    "instanceId": ""
-  },
-  "id": "rXR1joSjCCaG3w8j",
   "tags": []
 }

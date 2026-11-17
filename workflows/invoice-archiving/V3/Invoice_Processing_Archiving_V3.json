@@ -2425,14 +2425,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "meta": {},
   "nodeGroups": [],
-  "tags": [
-    {
-      "updatedAt": "2026-02-10T09:30:38.515Z",
-      "createdAt": "2026-02-10T09:30:38.515Z",
-      "id": "IlGBG80fVMCanY1L",
-      "name": "TEMPLATE"
-    }
-  ]
+  "tags": []
 }

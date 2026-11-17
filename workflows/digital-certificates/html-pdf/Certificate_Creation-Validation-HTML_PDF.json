@@ -1,18 +1,6 @@
 {
-  "id": "o018cyB8genb6ONB",
-  "meta": {
-    "instanceId": "YOUR_ID",
-    "templateCredsSetupCompleted": true
-  },
   "name": "6-Utility-Certificate-Creator&Validation",
-  "tags": [
-    {
-      "id": "YOUR-ID",
-      "name": "YOUR-ID",
-      "createdAt": "2025-11-23T13:36:13.729Z",
-      "updatedAt": "2025-11-23T13:36:13.729Z"
-    }
-  ],
+  "tags": [],
   "nodes": [
     {
       "id": "613c5389-2f80-44c9-8ec1-043d02d720d7",
@@ -173,7 +161,7 @@
       },
       "credentials": {
         "pdfGeneratorApi": {
-          "id": "YOUR_ID",
+          "id": null,
           "name": "PDF Generator account"
         }
       },
@@ -204,7 +192,7 @@
       },
       "credentials": {
         "gmailOAuth2": {
-          "id": "454oo3lK2q6e5HzC",
+          "id": null,
           "name": "Gmail account"
         }
       },
@@ -454,7 +442,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "898197be-08ab-4488-85ee-a9a1b688cb1c",
   "connections": {
     "Generate_PDF": {
       "main": [

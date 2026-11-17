@@ -9,7 +9,10 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-784, -480],
+      "position": [
+        -784,
+        -480
+      ],
       "id": "aa72fc40-9b9b-43b7-8ca4-1cf3aa9b8f44",
       "name": "Documentation"
     },
@@ -21,7 +24,10 @@
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [0, -48],
+      "position": [
+        0,
+        -48
+      ],
       "id": "925fbd83-f32d-4b2d-849c-f8f0b81408e3",
       "name": "Webhook",
       "webhookId": "f967893c-ce62-4b03-95a7-8b456c86c6f7"
@@ -40,7 +46,10 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [208, -48],
+      "position": [
+        208,
+        -48
+      ],
       "id": "da7ce680-601a-4162-8566-f952f38860d3",
       "name": "ntfy notification",
       "credentials": {
@@ -95,7 +104,10 @@
       },
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
-      "position": [416, -48],
+      "position": [
+        416,
+        -48
+      ],
       "id": "4e6fb97b-d965-417e-88e9-718169df61cd",
       "name": "DB"
     },
@@ -116,7 +128,10 @@
       },
       "type": "n8n-nodes-base.homeAssistant",
       "typeVersion": 1,
-      "position": [624, -48],
+      "position": [
+        624,
+        -48
+      ],
       "id": "48b587e8-59a8-44d3-98de-cf8df811e4c6",
       "name": "Home Assistant TTS",
       "credentials": {
@@ -174,11 +189,5 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "0bfab03d-6428-4b5b-a5da-fd28a301b23c",
-  "meta": {
-    "templateCredsSetupCompleted": false,
-    "instanceId": ""
-  },
-  "id": "rXR1joSjCCaG3w8j",
   "tags": []
 }

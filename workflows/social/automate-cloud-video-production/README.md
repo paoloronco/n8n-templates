@@ -1,6 +1,8 @@
+# OrbitPage — Create and Publish Reels & Shorts with HeyGen and Dropbox
+
 ## Quick overview
 
-- Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optionally archive the MP4 in Dropbox, and publish on schedule. One n8n workflow handles validation and recovery, reducing manual work without installing a video renderer on your server.
+Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optionally archive the MP4 in Dropbox, and publish on schedule. One n8n workflow handles validation and recovery, reducing manual work without installing a video renderer on your server.
 
 ## How it works
 

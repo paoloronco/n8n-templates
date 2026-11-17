@@ -2,6 +2,8 @@
 
 **Technical revision, 17 November 2026.** This version adds native scheduled social delivery to the cloud pipeline. Validation distinguishes real local rendering, native n8n protocol-fixture tests and read-only provider checks. Managed HeyGen generation and real social uploads have not been certified. See [TEST-RESULTS.md](TEST-RESULTS.md) before enabling production. Creator Portal submission remains a manual owner action.
 
+Download the [complete ZIP](cloud-video-production-n8n.zip), [workflow JSON](automate-cloud-video-production.json) and [example brief](example-brief.json). The [extended Notion guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c?pvs=204) provides setup, customization, approval and recovery chapters. Use this cloud package as the primary edition; the optional local adapter is separate from its VM requirements.
+
 ## How it works
 
 One workflow handles a structured brief, narrated video, exact-file review, approved download, scheduled Instagram Reels / YouTube Shorts delivery and recovery. The distributed template defaults to **HeyGen Cloud**. It uses stock n8n nodes and needs no renderer, worker, Python, FFmpeg, Chromium or additional packages installed on the n8n VM.

@@ -30,4 +30,5 @@
 - Generation and publishing start disabled. HeyGen API usage may consume credits; website free generations do not fund the API wallet.
 - `maxCloudRenders` caps jobs, not currency. Technical checks passed; live managed rendering and cloud social delivery remain unverified.
 - [Full setup, examples and recovery guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/automate-cloud-video-production/automate-cloud-video-production.json).
+- Distribution: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the Creator Portal still lists the previous local title under review).
 - Support and customization: [Email support](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).

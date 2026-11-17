@@ -1,9 +1,0 @@
-config.local.json
-worker.local.json
-node_modules/
-data/
-jobs/
-models/
-.venv/
-*.log
-__pycache__/

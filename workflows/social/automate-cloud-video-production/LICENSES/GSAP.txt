@@ -1,3 +1,0 @@
-The embedded GSAP distribution retains its original copyright and license header.
-License: https://gsap.com/standard-license/
-Source: https://gsap.com/

@@ -1,34 +1,46 @@
 ## Quick overview
 
-- Create narrated Instagram Reels and YouTube Shorts from a brief, archive videos in Dropbox, and publish on schedule. HeyGen cloud rendering and error recovery reduce manual work, with no extra software required on your n8n server.
+- Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optionally archive the MP4 in Dropbox, and publish on schedule. One n8n workflow handles validation and recovery, reducing manual work without installing a video renderer on your server.
 
 ## How it works
 
-- Turn an English brief into a narrated vertical video with HeyGen Cloud and HyperFrames.
-- Validate the original MP4 and optionally archive it in Dropbox.
-- Publish selected Instagram Reels and YouTube Shorts on schedule, without per-video approval.
-- Save provider IDs and recover failed stages while preserving completed channel receipts.
+1. Receive an English video brief through the protected intake form or the included **Example brief**.
+2. Validate the brief, create a job in n8n Data Tables, and reserve the configured rendering allowance.
+3. Generate narration and render the vertical MP4 through HeyGen Cloud using the included HyperFrames composition.
+4. Check the original video's metadata and SHA-256, then optionally archive it in Dropbox.
+5. Authorize valid videos automatically. A private preview and manual approval remain available when explicitly enabled.
+6. Publish selected Instagram Reels and YouTube Shorts at the configured time through Meta's Graph API and the YouTube API.
+7. Save provider IDs and delivery receipts so interrupted jobs can resume without repeating completed channel uploads.
 
 ## Setup
 
-- Import the workflow into n8n with Data Tables and a public HTTPS URL.
-- Edit **Apply video configuration**: set your URL, jobs table, brand, destination accounts, timezone and publishing hours.
-- Connect HeyGen Header Auth, form Basic Auth and the selected social OAuth credentials. For Dropbox, connect OAuth2 and create the destination folder.
-- Keep `manualAction: "setup"` and run **Set up cloud storage** once.
-- Test configuration before enabling `allowExistingApiCredits`, `publishingEnabled` and workflow activation.
+1. Import the JSON into n8n. Keep the workflow inactive and generation and publishing disabled during configuration.
+2. Edit **Apply video configuration**: enter your public n8n URL, jobs table name, brand, destination account IDs, timezone and publishing hours.
+3. Connect HeyGen Header Auth and Basic Auth for the protected forms.
+4. Connect the selected social OAuth credentials. For Dropbox archiving, also connect Dropbox OAuth2 and create the destination folder.
+5. Keep `manualAction: "setup"` and run **Set up cloud storage** once to initialize the storage tables.
+6. Check the configuration before enabling `allowExistingApiCredits` and `publishingEnabled`. Select the intended destinations in your brief, then activate the workflow when ready.
+
+## Requirements
+
+- An n8n instance with Data Tables and a publicly reachable HTTPS URL.
+- A HeyGen API key with eligible API credits. Website free generations do not fund the API wallet; API usage may incur charges.
+- Publishing credentials and access to the Instagram and/or YouTube destination accounts.
+- A Basic Auth credential to protect intake and recovery forms.
+- A Dropbox account and OAuth2 credential only if archiving is enabled.
 
 ## Customization
 
-- Use **Example brief** or the protected intake form to supply narration, captions and two to five scenes.
-- Choose `explainer` or `slideshow`; slideshow requires a public HTTPS image for every scene.
-- Customize branding, composition, destinations, Dropbox folder and schedule. Match the Schedule nodes with `timezone` and `hours`.
-- Automatic authorization is the default; enable `requireVideoApproval` only for deployments needing manual review.
+- Write your own narration, caption and two to five scenes in **Example brief** or the intake form.
+- Choose `explainer` or `slideshow`; provide a public HTTPS image for every slideshow scene.
+- Adjust branding, accent color, destinations and Dropbox folder. Match the Schedule nodes with the configured `timezone` and `hours`.
+- Keep automatic authorization, or set `requireVideoApproval` to `true` if your deployment needs manual review.
 
 ## Additional info
 
-- Stock n8n nodes only; no renderer, worker or extra packages on the n8n host. Output targets 1080 × 1920, 30 fps, H.264/AAC MP4.
-- Generation and publishing start disabled. HeyGen API usage may consume credits; website free generations do not fund the API wallet.
-- `maxCloudRenders` caps jobs, not currency. Technical checks passed; live managed rendering and cloud social delivery remain unverified.
+- Stock n8n nodes only: no local worker, video renderer or extra packages on the n8n host. Output targets 1080 × 1920, 30 fps, H.264/AAC MP4.
+- `maxCloudRenders` limits jobs, not spending. Generation, social publishing and Dropbox archiving start disabled.
+- Technical checks passed; live managed HeyGen rendering and social delivery by this cloud copy remain unverified.
 - [Full setup, examples and recovery guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/automate-cloud-video-production/automate-cloud-video-production.json).
-- Distribution: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the Creator Portal still lists the previous local title under review).
+- Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the updated cloud version is not confirmed in review).
 - Support and customization: [Email support](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).

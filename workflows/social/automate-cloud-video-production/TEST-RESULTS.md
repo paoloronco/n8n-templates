@@ -1,50 +1,38 @@
-# Technical validation - 16 November 2026
+# Unified workflow correction — technical validation
 
-## What ran on the real n8n instance
+Date: 17 November 2026. Status: draft; native n8n integration is pending.
 
-- The actual protected intake form was loaded and submitted with its native form token and multipart fields. It returned HTTP 200 and its normal waiting-page URL.
-- n8n generated the self-contained project, computed its hash, uploaded its ZIP and completed the simulated cloud asset.
-- One render was submitted to an authenticated local API simulator. The simulator rendered the uploaded files with the installed HyperFrames 0.9.58 engine, using delivery quality.
-- n8n polled the same render across a durable wait. A deliberate first MP4 download returned 503.
-- The job retained its render ID and failed download stage. The actual protected recovery form resumed that same render and obtained the MP4. No second render or narration request occurred.
-- The real completion pages returned the controlled error receipt and the recovered draft-review link. Their normal completion POSTs were acknowledged; the recovery acknowledgement returned HTTP 200.
-- Chrome loaded and played the complete 19.3-second video to its ended state. Preview GET did not approve it.
-- A modified hash and an incorrect token each returned HTTP 403. A valid technical test approval was saved against the exact hash. Replaying it returned HTTP 409. Unauthenticated intake returned HTTP 401.
-- The final delivered generation guard was exercised on n8n: it returned a clear blocked receipt, and the provider HTTP nodes did not execute.
+## Previous submission
 
-The simulator recorded **1 render submission, 1 completed render, 1 recorded-narration fixture request, and 1 intentional download failure**. It used a separate test table and credential. The original local workflow's nodes, connections and settings matched its pre-existing English export exactly.
+The recorded submission for Creator Portal template 22950 used `automate-cloud-video-production.json`, 68 nodes, SHA-256 `3c80a20104aa72b412b984baa3dc29948f732669a583f1b1f208c97c4aa05d81`. That JSON contains neither the instruction to start a local worker nor SSH/Execute Command nodes. Its legacy portal title still refers to local video.
 
-## Output checks
+The previous cloud workflow did have a functional gap: it stopped at approved cloud delivery and left social publishing in the separate local workflow. The present correction adds native social delivery to the shared pipeline. No new Portal submission has been made.
 
-- 1080 × 1920, 30 fps, H.264 High / AAC, 19.3 seconds.
-- Complete FFmpeg decoding passed. Browser playback loaded all media successfully.
-- Earshot: -12.3 LUFS integrated, -1.2 dBTP true peak, 0 clipped samples.
-- The independent local reference and the MP4 rendered from n8n's uploaded ZIP were byte-identical.
-- SHA-256: `68cdff6f72174388f9095d0ae86f18266202f466a0a4a0ca2167172554c4d3ca`.
-- JavaScript checks passed for input validation, billing guards, WAV/MP4 parsing, graph integrity, binary handoff, state transitions, retry expiry, exact-file approval, token checks, expiry, rejection and replay.
+## Automated logic tests
 
-## Limits of this validation
+18 Node tests pass against the actual exported Code-node sources: graph/JavaScript validity; cloud default and absent VM runtime nodes; malformed webhook isolation; private YouTube target checks; exact-file/brief/identity/privacy/time approval; slot collision prevention; final processing poll; uncertain upload reconciliation; immutable provider IDs; visibility mismatch; MP4 hash mismatch; independent Instagram/YouTube receipts; expiring distinct media capabilities; renderer origin/profile binding; current spending policy; cap before speech; recoverable cap/MP4 errors; approval renewal preserving uncertain writes.
 
-The actual HeyGen API accepted account/voice/asset operations, including one explicitly free voice generation before the local simulation was requested. Render creation returned **HTTP 402 / insufficient_credit**, so no real managed-cloud video was generated. No plan or credit purchase was made. Subsequent technical provider calls used only the local simulator.
+Four HTTP adapter contract tests pass: credential/profile response, required idempotency keys, concurrent repeated mutation keys with unchanged IDs, changed-input conflicts, upload checksums/completion gates and ZIP traversal rejection. These unit tests stub only the render thread; the separate render below uses the real installed engine.
 
-This is a contract simulation, not proof that every HeyGen response, timing, billing rule or codec setting matches the simulator. Real-cloud rendering remains to be tested when suitable API access is available. The default generation guard remains disabled.
+## Real local rendering test
 
-The live complete production test used `wall_text`. The other three existing layouts are retained but were not individually run through this new API path. HyperFrames composition checks passed without errors; one TikTok-specific right safe-area warning remained in the example. The workflow targets the retained vertical composition and requires final visual review.
+The harness executed the exact exported planner and project-builder code against the authenticated local HTTP adapter. It synthesized a **new** English narration with offline Kokoro, built and uploaded the self-contained ZIP, completed the upload, submitted one real HyperFrames render, polled its existing ID, downloaded the result and bound a technical approval to its hash. No recorded narration fixture, HeyGen generation, social write, credit purchase or subscription was used.
 
-Form completion was tested through the same GET/POST sequence emitted by the native form frontend. Production successes were not retained under the instance defaults during that test; the delivered settings explicitly retain success and error executions. The durable job and approval records were verified separately.
+- Original MP4 SHA-256: `35b3f8b81e6445e3e7f985cade2299ed4fb991e14a8177ab9621aeb7af2de92d`.
+- Size: 704,392 bytes; duration 15.467 s; 1080 × 1920; H.264/AAC; 30 fps.
+- Full FFmpeg decode: passed. Three decoded frames were visually inspected.
+- HyperFrames check: browser ran; lint, runtime, layout, motion, contrast, craft and audio returned zero errors and zero warnings for the tested composition.
+- Earshot meter readings: -22.2 LUFS integrated, -5.8 dBTP true peak, zero clipped samples. This is a measurement, not a human editorial listening approval or a claim of broadcast loudness.
+- Technical approval in the harness does not approve a real social publication.
 
-Temporary test nodes and endpoints are excluded from this package. The live copy is restored to the real provider, inactive, with new generation blocked. No social posts or Creator Portal submission were performed for this copy.
+The first harness attempt stopped before ZIP upload because its PUT action was mistakenly sent as GET. The harness method was corrected and resumed from the saved checkpoint, reusing the same narration and asset. The exported n8n upload node was already configured as PUT. No extra render was created.
 
-## Canvas documentation update
+## What remains unverified
 
-The owner's latest manual node arrangement was retained. The saved export contains 59 operational nodes and nine sticky notes: one orange overview and eight gray functional sections. All operational node objects (including IDs, positions, parameters and credentials), connections and settings matched the owner's pre-change export exactly. The four existing sticky-note IDs were preserved. Browser layout checks found no note text overlapping operational nodes and no clipped note text. This documentation-only update did not execute the workflow or call a video provider.
+This new 132-node graph has not yet been imported/executed in n8n. Native Data Table operations, item linkage through loops, social OAuth node schemas, binary retention, media webhook responses, live scheduling and canvas appearance need staging verification. The current Chrome n8n session is expired and its extension command connection is timing out. Existing production was not replaced.
 
-## Structured overview and documentation
+Managed HeyGen rendering remains untested because the account previously returned HTTP 402 with no funded API render allowance. That older refusal does not prove successful cloud generation. The current test used no HeyGen requests. Stock n8n needs no additional VM packages, but the cloud API still requires valid credentials and rendering entitlement.
 
-The orange note now uses How it works, Setup, Customization and Additional info, with consulting contacts and an extended Notion guide. Comparing the saved export to the owner's latest version confirmed that all other 67 node objects, connections, settings and the owner's workflow title were unchanged. No workflow execution or provider generation was performed for this documentation update.
+The optional local adapter was tested on PC loopback only. Private network reachability from the n8n VM, persistent service operation, restart/cutover and migration of personal jobs/receipts remain pending. No auto-start was installed.
 
-## Final review — 17 November 2026
-
-Offline checks were rerun against the current saved workflow: input and URL validation, spending guards, PCM checks, graph integrity, state transitions, retry expiry, token/hash approval, rejection, replay, read-only preview, binary handoff and the actual self-contained project builder all passed. The six Notion guide pages were fetched and their content and parent location checked. The README credential instructions now refer to the format accepted for the issued credential, avoiding an ambiguous API-key-versus-OAuth distinction.
-
-The public workflow JSON remained byte-identical during this review. These were offline checks and documentation verification; no new provider generation or paid request was performed. The pending managed-cloud rendering test remains unchanged.
+GitHub draft preparation does not update the main release, Gumroad delivery or Creator Portal. Replace those only after native integration passes; Portal submission remains a manual owner action.

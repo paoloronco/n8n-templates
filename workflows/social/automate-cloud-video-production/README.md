@@ -1,77 +1,77 @@
-# Cloud video production with n8n
+# Video production and publishing with n8n
 
-A separate copy using standard n8n nodes for input, narration, project ZIP creation, cloud rendering, draft approval and recovery. No extra packages, video runtime, Python, FFmpeg or Chromium are needed on the n8n VM.
+**Draft correction, 17 November 2026.** This revision restores the missing social publishing stages to the cloud template. Code and rendering-adapter tests pass, including a real offline narration and local render. Importing and executing this new graph in n8n, native media responses, social OAuth branches and canvas appearance still need integration verification. This is not a production release or a new Creator Portal submission.
 
-**Current status:** the technical flow was tested on the real n8n instance against an authenticated local API simulator backed by the installed HyperFrames renderer. Actual HeyGen rendering returned HTTP 402 because its API wallet has no credits. The delivered workflow is inactive, with new generation disabled before any provider call. No subscriptions or wallet top-ups were made.
+## How it works
 
-This copy delivers to cloud storage. Social publishing remains in the separate original workflow, preserved unchanged.
+One workflow handles a structured brief, narrated video, exact-file review, approved download, scheduled Instagram Reels / YouTube Shorts delivery and recovery. The distributed template defaults to **HeyGen Cloud**. It uses stock n8n nodes and needs no renderer, worker, Python, FFmpeg, Chromium or additional packages installed on the n8n VM.
 
-## Files
+1. Submit a real brief through the protected form or run the English example.
+2. Validate the input, reserve an authorized cloud-render allowance, synthesize narration and package the self-contained project in n8n.
+3. Upload the ZIP, submit a high-quality render and poll the same render ID. Validate WAV/MP4 metadata and hash the original MP4.
+4. Review the complete video and audio. Approval binds the exact SHA-256, full brief, caption, destination accounts, visibility and earliest publishing time.
+5. At a configured publishing slot, reserve one due approved job. Verify account identities and deliver only its selected channels. Save every provider ID and processing receipt.
+6. Recover incomplete delivery without repeating completed channels. An uncertain write requires reconciliation against its existing provider ID before another upload is possible.
 
-- [Importable workflow](automate-cloud-video-production.json)
-- [Example brief](example-brief.json)
-- [Technical validation and known limits](TEST-RESULTS.md)
-- [Technical preview video](technical-preview.mp4) — rendered by the local simulator.
-
-The orange overview is divided into How it works, Setup, Customization and Additional info, with consulting links. Eight gray notes document the functional sections. The owner's operational node arrangement is preserved.
-
-## Documentation
-
-[Open the extended Notion guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c?pvs=204) for six chapters covering setup, workflow stages, brief customization, draft review, recovery and validation. Notion access follows the page permissions.
+The 09:00 schedule reports the approved queue. Publishing slots are 10:00, 12:00, 15:00, 18:00 and 21:00 in Europe/Rome. Empty queues do nothing. These schedules do not invent briefs or approve content.
 
 ## Setup
 
-1. Import `automate-cloud-video-production.json` into an n8n release supporting Data Tables with table creation and lookup by name, Forms, HTTP Request, Code, Crypto, Compression and Extract from File.
-2. Connect HeyGen Cloud Header Auth credentials to **Read HeyGen Cloud**, **Call HeyGen Cloud**, and **Refresh cloud video URL**. Use the exact header name and value format accepted for your issued credential. Store the key or token only in n8n credentials; do not paste it into the workflow JSON.
-3. Connect one dedicated Basic Auth credential to both intake and recovery forms.
-4. Replace `https://YOUR_N8N_HOST` in the Code nodes with your public HTTPS n8n base URL. Retain the webhook paths or update the review and decision links together.
-5. Run **Set up cloud storage** once. Repeating setup preserves the generation ledger.
-6. Run **Create one cloud example** to verify the default spending block.
-7. Publish in n8n only when provider access and billing authorization are intentionally configured. This does not submit anything to the Creator Portal.
+1. Import [automate-cloud-video-production.json](automate-cloud-video-production.json) into n8n with Data Tables, Forms, HTTP Request, Code, Crypto, Compression and Extract from File. Leave it inactive during setup.
+2. Edit **Apply video configuration** once. Set `publicN8nBaseUrl`, a dedicated `jobsTable`, brand, intended account identities and default targets. The cloud renderer is `heygen` at `https://api.heygen.com`.
+3. Connect the rendering Header Auth credential to every authenticated rendering request, including review, delivery and media-refresh nodes. Use the authentication format accepted for the issued credential; keep the value exclusively in n8n credentials.
+4. Connect one dedicated Basic Auth credential to the intake and recovery forms. Connect Instagram Facebook Graph OAuth and YouTube OAuth only if those targets will be used. Complete the platform permissions / app review required by the accounts.
+5. Run **Set up cloud storage** once. Setup preserves existing ledgers. Use a different table for a staging copy; two copies must not own the same table/webhook paths.
+6. Verify that the default generation block returns a receipt before any provider call. Only an operator who has explicitly authorized using already-funded API credits should set `allowExistingApiCredits: true`.
+7. Verify a rendered draft, its review page, exact-file approval and hash-checked download. For a private YouTube test use `privateTest: true`, `targets.youtube: true`, `targets.instagram: false`. The workflow refuses a private test that also selects Instagram.
+8. After the native integration checks pass, set `publishingEnabled: true` and activate the workflow. Publishing in n8n is separate from Creator Portal submission; the owner performs that submission manually.
 
-## Spending authorization
+The public HTTPS n8n endpoint must reach the configured renderer. Review and Instagram media are served through n8n using expiring capabilities; neither a review browser nor Meta needs direct access to a private local renderer. Protect the n8n editor and saved execution data through the instance's normal access controls.
 
-`USE_EXISTING_API_CREDITS` is **false** in **Plan next step**. New jobs stop before voice generation, uploads or rendering. Recovery of a known render ID can still read its status and download the existing file.
+## Cloud and personal parity
 
-If you later explicitly authorize using already-funded API credits, change this constant to `true`. The account must report an API wallet with automatic reload disabled and at least 0.20 API credits, the start threshold observed in the actual response. Speech selects `heygen-voice-1-turbo-free`, with no paid voice fallback. The workflow never buys credits, subscribes or changes billing settings.
+The cloud template and intended personal copy use the **same nodes, connections, approval rules, schedules, media validation and recovery logic**. The personal profile changes configuration and credential bindings; it does not replace social publishing with SSH scripts.
 
-A conditional Data Table update caps this workflow at three distinct render jobs. This is a render-count limit, not a currency budget. Uncertain submissions retain their permit. Upload and render retries preserve idempotency keys and stop before the provider's 24-hour replay window expires.
+| Setting | Distributed cloud template | Personal local profile |
+| --- | --- | --- |
+| `renderer` | `heygen` | `local` |
+| `rendererBaseUrl` | Official HeyGen API | Compatible HTTP adapter reachable from n8n |
+| Rendering credentials | Owner's HeyGen credential | Private adapter credential |
+| Brand/accounts/targets | Generic configuration | Owner's actual destinations |
+| Narration and rendering | HeyGen-managed | Existing offline Kokoro + HyperFrames runtime |
 
-HeyGen web-plan generations and API credits are separate. Reported free counters did not make the tested key eligible for rendering. HeyGen also documents that MCP OAuth sign-in is unavailable to automations such as n8n. See [authentication and MCP limitations](https://developers.heygen.com/llms.txt) and [API billing](https://www.heygen.com/api-pricing). The legacy quota endpoint is used only by the simulator profile; production wallet checks use v3.
+Changing an endpoint alone does not make an unrelated renderer compatible. The local adapter must implement the account/voice, speech, direct upload, completion, render and status response contract. The included optional adapter source has been tested beside an existing renderer on the operator PC. It is **not required by the cloud template** and does not belong on the n8n VM. Its test deployment binds to PC loopback; a private reachable deployment, restart handling and personal workflow cutover have not been completed. The existing personal production workflow remains in place.
 
-## Input and quality
+Existing jobs remain bound to their original rendering profile. Switching a job to another origin is refused before credential transmission. Changing social identities also invalidates delivery approval.
 
-Use `example-brief.json`. It supports two to five English scenes, title, brand, narration, caption, accent, and the existing `wall_text`, `hook_demo`, `custom_motion` and `slideshow` layouts. Slideshow needs public HTTPS PNG, JPEG or WebP images. Assets are downloaded and bundled.
+## Customization
 
-Output target: 1080 × 1920, 30 fps, H.264/AAC MP4, with the cloud high-quality preset. The project includes GSAP, Inter, narration and scene images. Limits: 700 narration characters, 60 seconds, 3 MiB per image, 12 MiB narration, 8 MiB ZIP and 40 MiB MP4.
+Use [example-brief.json](example-brief.json). Supported layouts are `wall_text`, `hook_demo`, `custom_motion` and `slideshow`. Customize two to five English scenes, title, narration, brand, caption and accent. Slideshow scenes require public HTTPS PNG, JPEG or WebP images; the workflow bundles downloaded assets with GSAP, Inter and narration.
 
-`technical-preview.mp4` is a local simulation result. The video rendered from n8n's uploaded ZIP was byte-identical to an independent local reference. This verifies the technical path, not identical output from the untested managed cloud renderer.
+Targets can be Instagram, YouTube, both, or download only. `privateTest` affects YouTube visibility and must skip Instagram. `publishAt` sets the earliest delivery time; publication waits for an available configured slot. Changing the approved brief, file, privacy or identities requires a fresh review.
 
-## Review and delivery
+The native Schedule node and the configuration's `hours` / `timezone` must agree if publishing times are changed. Keep the claim, exact-file approval and uncertain-write checks intact.
 
-Treat the private review link as a bearer secret. GET only previews and refreshes the expiring provider URL. Watch the complete MP4 and listen before approving or rejecting.
+## Approval and recovery
 
-POST approval must match the token and exact SHA-256. It is accepted once within seven days. Invalid input returns 400; a mismatched token or hash returns 403; a reused or expired decision returns 409. Rejection never creates a replacement render. This copy never posts to social accounts.
+Treat review URLs and recovery tokens as secrets. A GET previews and never approves. The review page requires a reviewer name and confirmation of complete video/audio review. Approval expires after seven days. Rejected drafts never publish.
 
-Reopen the approved review link for a fresh download URL. Cloud retention follows provider policy; download the master for permanent storage. Permanent archival is not guaranteed.
+The protected recovery form accepts the job ID, private token and existing provider IDs. Known renders are polled again. Uncertain speech needs its existing WAV URL. Instagram container creation, Instagram publication and YouTube upload are checkpointed before the write; a lost acknowledgement blocks a replacement write until reconciled. Do not invent an ID or delete a receipt to force a retry.
 
-## Recovery and retention
+Expired delivery approvals can return to review through recovery. Provider IDs, uncertain-write markers and completed receipts are retained. A renewed approval does not authorize uploading an uncertain item a second time.
 
-State and provider IDs live in `orbitpage_cloud_video_jobs`. The protected recovery form needs the job ID and private token. A worker lease and conditional checkpoint updates prevent concurrent advancement.
+Slot claims and job leases use conditional Data Table updates. Completed channel receipts are independent: an Instagram success followed by a YouTube failure resumes at YouTube. Failed downloads or invalid MP4 bytes become durable recoverable job errors.
 
-- Known render IDs are polled and downloaded again, without another submission.
-- A lost acknowledgement can replay the same key inside its retry window. After that, provide the existing render ID.
-- Uncertain speech requires its existing WAV URL; recovery never automatically regenerates it.
-- Failed and rejected jobs do not approve themselves.
+## Additional info
 
-The ZIP is removed from the checkpoint after the cloud asset completes. Data Tables and saved executions need normal retention management. Success and error execution saving are explicitly enabled.
+Output targets 1080 × 1920 at 30 fps, H.264/AAC MP4 using cloud `high` / local `delivery`. The local technical sample is 15.467 seconds and fully decodes. Local and cloud voice engines differ; identical spoken timbre or byte-identical managed-cloud output is not claimed.
 
-## Verification boundaries
+Limits: 700 narration characters, 60 seconds, 3 MiB per image, 12 MiB narration, 8 MiB project ZIP, 40 MiB MP4. n8n validates metadata and hashes; it does not fully decode the MP4 or measure final encoded loudness. Human editorial review remains required. Data Tables, execution history and provider media need normal retention management; permanent cloud archival is not guaranteed.
 
-The workflow measures PCM WAV duration and levels, hashes the MP4, and parses its codecs, dimensions and duration. It does not fully decode video or measure encoded loudness inside n8n. Human review remains required. Full decoding, browser playback and Earshot measurements were performed separately on the operator PC.
+`allowExistingApiCredits` and `publishingEnabled` default to **false**. `maxCloudRenders: 3` caps distinct submitted cloud jobs; it is a lifetime render-count limit for that ledger, not a promise of three free API renders or a currency budget. It is checked before speech. No subscription, top-up or automatic paid fallback is implemented. The voice model is explicitly `heygen-voice-1-turbo-free`; that promotion can expire, and the workflow fails rather than silently selecting a paid model. HeyGen web generations do not fund its API wallet.
 
-See [TEST-RESULTS.md](TEST-RESULTS.md). GSAP and Inter are embedded in the project builder; their licenses apply. The Inter license is included here and in generated project ZIPs. No npm installation is needed on the n8n VM.
+See [TEST-RESULTS.md](TEST-RESULTS.md) for measured results and remaining integration work. The packaged preview is a real local-adapter render of the exported project, not evidence of a successful managed HeyGen render. Third-party asset licenses apply; the existing Inter license is retained.
 
 ## Consulting & customization
 
-For implementation, account configuration or workflow adaptations, contact [info@paoloronco.it](mailto:info@paoloronco.it) or visit [paoloronco.it](https://paoloronco.it/).
+For implementation and account configuration, visit [paoloronco.it](https://paoloronco.it/) or contact [info@paoloronco.it](mailto:info@paoloronco.it).

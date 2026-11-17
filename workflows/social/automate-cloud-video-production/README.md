@@ -1,3 +1,7 @@
+## Quick overview
+
+- Create narrated Instagram Reels and YouTube Shorts from a brief, archive videos in Dropbox, and publish on schedule. HeyGen cloud rendering and error recovery reduce manual work, with no extra software required on your n8n server.
+
 ## How it works
 
 - Turn an English brief into a narrated vertical video with HeyGen Cloud and HyperFrames.
@@ -26,4 +30,4 @@
 - Generation and publishing start disabled. HeyGen API usage may consume credits; website free generations do not fund the API wallet.
 - `maxCloudRenders` caps jobs, not currency. Technical checks passed; live managed rendering and cloud social delivery remain unverified.
 - [Full setup, examples and recovery guide](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/automate-cloud-video-production/automate-cloud-video-production.json).
-- Support and customization: [info@paoloronco.it](mailto:info@paoloronco.it) · [paoloronco.it](https://paoloronco.it/).
+- Support and customization: [Email support](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).

@@ -1,4 +1,4 @@
-# Cloud Video Production and Publishing
+# Create and Publish Reels & Shorts with HeyGen and Dropbox
 
 Create narrated vertical videos with **HeyGen Cloud / HyperFrames**, optionally archive the original MP4 in **Dropbox**, and deliver it to **Instagram Reels** and **YouTube Shorts** from one n8n workflow.
 

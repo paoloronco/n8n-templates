@@ -1,51 +1,44 @@
-# Unified workflow correction — technical validation
+# Validation results
 
-Date: 17 November 2026. Native n8n 2.47.5 protocol integration passed with recorded media. Managed HeyGen rendering, real social writes and personal production cutover remain unverified.
+Revision: **17 November 2026**. This document separates technical validation from live provider certification.
 
-## Previous submission
+## Checks completed without generation costs
 
-The recorded submission for Creator Portal template 22950 used `automate-cloud-video-production.json`, 68 nodes, SHA-256 `3c80a20104aa72b412b984baa3dc29948f732669a583f1b1f208c97c4aa05d81`. That JSON contains neither the instruction to start a local worker nor SSH/Execute Command nodes. Its legacy portal title still refers to local video.
+| Check | Result |
+| --- | --- |
+| Personal source workflow regression and archive checks | 31 passed. |
+| Public workflow regression, automatic policy and Dropbox checks | 33 passed; all Code nodes compile and all connections resolve. |
+| No-credit dispatch gate | Every tested pre-render stage stops with a recoverable receipt while `allowExistingApiCredits` is false. No provider action is dispatched. |
+| Self-contained project | The actual builder emits the neutral English composition, narration, fonts and GSAP; no runtime download is needed by the composition. |
+| Offline HyperFrames composition audit | Passed with zero errors and warnings across lint, browser runtime, layout, motion, contrast, craft and audio. Scene midpoints at 3, 9 and 15 seconds were inspected. |
+| Byte integrity and delivery recovery | Changed originals are refused; uncertain Instagram/YouTube writes require provider-ID reconciliation; completed channels retain their receipts. |
+| Dropbox logic | Stable paths, preserved original binary, optional bypass, archive-before-delivery gate, automatic authorization and recoverable archive errors passed. |
+| Anonymization | Credential IDs, account bindings, instance metadata, source branding, campaign content and previous visual presets removed. |
+| Portable canvas | 139 nodes. Original node positions, IDs, connection graph and sticky geometry/colors preserved; public note text explains the distributed behavior. All production nodes are enabled; workflow activation is off. |
 
-The previous cloud workflow did have a functional gap: it stopped at approved cloud delivery and left social publishing in the separate local workflow. The present correction adds native social delivery to the shared pipeline. No new Portal submission has been made.
+The offline visual audit used synthetic audio solely to validate packaging and timing. The test media helper creates minimal MP4 metadata and a PCM test tone in memory; these are not a playable video showcase or evidence of managed-cloud rendering. No prerecorded production media is distributed.
 
-## Automated logic tests
+Earlier on the same date, the native n8n Dropbox integration was exercised with an existing MP4: upload, download and SHA-256 comparison passed. A repeat upload retained the same Dropbox file ID. That established the original-file archive behavior; it did not generate a HeyGen video or post to social accounts. The distributed template has that personal OAuth binding removed.
 
-24 Node tests pass against the actual exported Code-node sources: graph/JavaScript validity; cloud default and absent VM runtime nodes; malformed webhook isolation; protected HTML form GET/POST routing; private YouTube target checks; exact-file/brief/identity/privacy/time approval; slot collision prevention; final processing poll; uncertain upload reconciliation; immutable provider IDs; visibility mismatch; MP4 hash mismatch; independent Instagram/YouTube receipts; expiring distinct media capabilities; renderer origin/profile binding; current spending policy; cap before speech; recoverable cap/MP4 errors; approval renewal preserving uncertain writes; renewed media capabilities; recovery receipts; multiple managed Instagram accounts; and binary restoration after native Crypto hashing.
+The technical audit runs on the author's workstation, using existing tools. Those tools are **not deployment dependencies** of the cloud workflow and are not installed on the n8n host by this package.
 
-Four HTTP adapter contract tests pass: credential/profile response, required idempotency keys, concurrent repeated mutation keys with unchanged IDs, changed-input conflicts, upload checksums/completion gates and ZIP traversal rejection. These unit tests stub only the render thread; the separate render below uses the real installed engine.
+## Deliberate live-test exclusions
 
-## Real local rendering test
+- No HeyGen speech generation, asset upload or managed render was requested in this revision.
+- No credits, subscriptions or top-ups were purchased or consumed for generation tests.
+- No new Instagram or YouTube publication was made to validate this cloud copy.
+- A successful paid-provider end-to-end run, current credential entitlement and editorial quality are **not certified**.
 
-The harness executed the exact exported planner and project-builder code against the authenticated local HTTP adapter. It synthesized a **new** English narration with offline Kokoro, built and uploaded the self-contained ZIP, completed the upload, submitted one real HyperFrames render, polled its existing ID, downloaded the result and bound a technical approval to its hash. No recorded narration fixture, HeyGen generation, social write, credit purchase or subscription was used.
+The template intentionally starts inactive with `allowExistingApiCredits: false`, `publishingEnabled: false` and no selected social destinations. The operator must configure their own accounts and test the actual provider before production. API usage after enabling generation can incur costs.
 
-- Original MP4 SHA-256: `35b3f8b81e6445e3e7f985cade2299ed4fb991e14a8177ab9621aeb7af2de92d`.
-- Size: 704,392 bytes; duration 15.467 s; 1080 × 1920; H.264/AAC; 30 fps.
-- Full FFmpeg decode: passed. Three decoded frames were visually inspected.
-- HyperFrames check: browser ran; lint, runtime, layout, motion, contrast, craft and audio returned zero errors and zero warnings for the tested composition.
-- Earshot meter readings: -22.2 LUFS integrated, -5.8 dBTP true peak, zero clipped samples. This is a measurement, not a human editorial listening approval or a claim of broadcast loudness.
-- Technical approval in the harness does not approve a real social publication.
+## Reproduce the offline logic checks
 
-The first harness attempt stopped before ZIP upload because its PUT action was mistakenly sent as GET. The harness method was corrected and resumed from the saved checkpoint, reusing the same narration and asset. The exported n8n upload node was already configured as PUT. No extra render was created.
+From this package directory, with Node.js available on a development machine:
 
-## Native n8n integration
+```sh
+node --test tests/workflow.test.cjs tests/archive-and-production.test.cjs
+```
 
-The 133-node graph was installed in isolated staging, preserving node IDs and positions through n8n's built-in import CLI. No packages, firewall rules, API scopes or VM services were added. A temporary authenticated protocol fixture returned the existing recorded narration and real MP4. It did not synthesize speech or render video. These calls test native n8n orchestration and are not evidence of a successful HeyGen render.
+These tests execute the exported Code-node logic and mocked provider responses. They contain no network calls, credentials or generation requests. They do not require installing anything on the n8n host.
 
-- The cloud generation block stopped a native job before any provider request.
-- Read-only real-provider checks passed: HeyGen account HTTP 200, exact Instagram identity, Instagram publishing quota and exact YouTube channel. No provider generation or social writes were requested.
-- n8n downloaded the recorded WAV, built and hashed its self-contained project, compressed it and uploaded the actual 633,199-byte ZIP.
-- The same job recovered from an interrupted upload-completion stage. A deliberate one-time MP4 HTTP 503 then produced a durable failure receipt with private recovery details.
-- Recovery reused the same asset and render ID and reached review. Fixture totals remained one speech request, one ZIP upload and one render request; actual generation calls were zero.
-- Chrome played the native hash-checked media response at 1080 × 1920, duration 15.466667 seconds. A download-only technical approval was saved and read back. This is a test decision, not human editorial approval or permission to publish to social media.
-- The approved file was downloaded through n8n: 704,392 bytes and SHA-256 `35b3f8b81e6445e3e7f985cade2299ed4fb991e14a8177ab9621aeb7af2de92d`, matching the original exactly.
-- Manually invoking the native schedule entry with publishing disabled returned `publishing_disabled_or_outside_slot` and made no social calls. Clock-driven production delivery with publishing enabled has not been certified.
-
-Integration exposed and corrected two material issues: native Form Triggers reject reachable Respond to Webhook nodes, so stock Basic Auth Webhooks now serve the HTML forms and their POSTs; native Crypto removes a processed binary, so verified media and delivery explicitly restore the original download after hash validation. Webhook registration IDs and recoverable failure receipts were also corrected.
-
-## Remaining limits
-
-Managed HeyGen rendering remains untested because the account previously returned HTTP 402 with no funded API render allowance. Account authentication now passes; it does not establish rendering entitlement. Stock n8n needs no additional VM packages, but the cloud API still requires valid credentials and rendering credits. No purchase, subscription, paid fallback or new HeyGen generation was attempted.
-
-The optional local adapter was tested on PC loopback only. Private network reachability from the n8n VM, persistent service operation, restart/cutover and migration of personal jobs/receipts remain pending. Automatic approval review rejected starting the PC adapter on the private LAN; that action was not retried through another route. No auto-start was installed. The existing personal production workflow was not replaced and is not claimed to run this new graph.
-
-Real Instagram publication and YouTube upload/processing have not been executed for this revision. Their transition logic and independent recovery receipts pass automated tests, and the connected OAuth identities pass native read-only checks. Operators must verify a private YouTube upload and their actual destinations before enabling production delivery. Creator Portal submission remains a manual owner action; no new submission was made during this revision.
+The validated provider contracts were compared with the official [speech API](https://developers.heygen.com/docs/voices/heygen-voice-speech.md), [direct upload API](https://developers.heygen.com/reference/create-asset-upload) and [HyperFrames render API](https://developers.heygen.com/reference/create-hyperframes-render). Endpoint/schema review complements the checks; it does not substitute for a real authenticated provider run.

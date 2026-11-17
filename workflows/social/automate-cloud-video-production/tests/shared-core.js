@@ -14,11 +14,11 @@ function baseValidateBrief(input) {
   const b = typeof input === 'string' ? JSON.parse(input) : input;
   if (!b || typeof b !== 'object' || Array.isArray(b)) throw Error('Brief must be a JSON object');
   const text = (v, label, max) => { if (typeof v !== 'string' || !v.trim() || v.length > max) throw Error(label + ' is required (maximum ' + max + ' characters)'); return v.trim(); };
-  const format = b.format || 'wall_text';
-  if (!['wall_text','hook_demo','custom_motion','slideshow'].includes(format)) throw Error('Unsupported video format');
+  const format = b.format || 'explainer';
+  if (!['explainer','slideshow'].includes(format)) throw Error('Unsupported video format');
   const source = b.brief || b;
   if (!Array.isArray(source.scenes) || source.scenes.length < 2 || source.scenes.length > 5) throw Error('Use two to five scenes');
-  const accent = source.accent || '#64DBB4';
+  const accent = source.accent || '#2563EB';
   if (!/^#[0-9a-f]{6}$/i.test(accent)) throw Error('Accent must be a six-digit hex color');
   const scenes = source.scenes.map(s => ({ title:text(s.title,'Scene title',68), body:text(s.body,'Scene body',155), ...(s.imageUrl ? {imageUrl:httpsUrl(s.imageUrl,'image')} : {}) }));
   if (format === 'slideshow' && scenes.some(s => !s.imageUrl)) throw Error('Slideshow needs one image URL per scene');
@@ -105,9 +105,25 @@ function destinationSnapshot(request) {
     youtube: request.targets.youtube ? { channelId: cfg.youtubeChannelId, privacy: request.privateTest ? 'private' : 'public' } : null,
   };
 }
+function authorizeAutomaticVideo(row, cfg, now) {
+  if (cfg.requireVideoApproval !== false) return row;
+  const { request, context: c } = readJob(row);
+  assertRendererProfile(request, cfg);
+  if (!['review','approved'].includes(c.stage) || c.delivery?.state === 'published') return row;
+  const q=c.qc, a=c.approval;
+  if (!/^[a-f0-9]{64}$/.test(row.sha256 || '') || !row.renderId || row.renderId !== c.renderId || q?.width !== 1080 || q?.height !== 1920 || !Number.isFinite(q.duration) || q.duration < 3 || q.duration > 60 || !Number.isFinite(c.audioQc?.rmsDb) || c.audioQc.rmsDb < -55 || !Number.isFinite(c.audioQc?.peakDb) || c.audioQc.peakDb < -45) throw Error('Technical media checks must pass before automatic publishing');
+  const destinations=destinationSnapshot(request);
+  if (a && (a.sha256 !== row.sha256 || a.requestJson !== row.requestJson || JSON.stringify(a.destinations) !== JSON.stringify(destinations))) throw Error('The authorized file or destinations changed');
+  if (a?.mode === 'automatic') return row;
+  c.approval={mode:'automatic',sha256:row.sha256,requestJson:row.requestJson,destinations,reviewer:'automatic-publishing-policy',at:new Date(now).toISOString(),validUntil:Number.MAX_SAFE_INTEGER};
+  c.stage='approved';
+  assertDeliveryApproval({...row,contextJson:JSON.stringify(c)},cfg,Math.max(now,Date.parse(request.publishAt)));
+  return {...row,phase:'approved',contextJson:JSON.stringify(c),_previous:row.contextJson,_automaticAuthorizationPrevious:row.contextJson};
+}
 function assertDeliveryApproval(row, cfg, now) {
   const { request, context } = readJob(row), a = context.approval;
   assertRendererProfile(request,cfg);
+  if (a?.mode === 'automatic' && cfg.requireVideoApproval !== false) throw Error('Automatic publishing policy is disabled');
   if (!a || a.sha256 !== row.sha256 || a.requestJson !== row.requestJson || !/^[a-f0-9]{64}$/.test(row.sha256)) throw Error('The exact file, brief and destinations must be approved');
   if (!Number.isFinite(a.validUntil) || a.validUntil <= now) throw Error('Publishing approval has expired');
   const expected = destinationSnapshot(request);
@@ -132,6 +148,8 @@ function reserveSlot(ledger, jobId, key, now) {
   return { ...ledger, _previous: ledger.contextJson, contextJson: JSON.stringify({ claims }) };
 }
 function initDelivery(row, cfg, now, executionId, mediaToken) {
+  const automaticPrevious=row._automaticAuthorizationPrevious||row.contextJson;
+  row=authorizeAutomaticVideo(row,cfg,now);
   if (cfg.publishingEnabled !== true) throw Error('Publishing is disabled');
   const { request, context } = assertDeliveryApproval(row, cfg, now);
   if (!request.targets.instagram && !request.targets.youtube) throw Error('This job has no selected social destination');
@@ -151,7 +169,7 @@ function initDelivery(row, cfg, now, executionId, mediaToken) {
   }
   d.state = 'publishing'; delete d.error;
   context.delivery = d;
-  return { ...row, phase: 'publishing', contextJson: JSON.stringify(context), _previous: row.contextJson };
+  return { ...row, phase: 'publishing', contextJson: JSON.stringify(context), _previous: automaticPrevious };
 }
 function deliveryTransition(row, cfg, now, executionId, response) {
   const previous = row.contextJson, { request, context } = readJob(row), d = context.delivery;
@@ -269,6 +287,8 @@ function deliveryTransition(row, cfg, now, executionId, response) {
   return { ...row, phase, contextJson: JSON.stringify(context), error: d.error || '', _previous: previous, _deliveryAction: action };
 }
 function reconcileDelivery(row, values, cfg, now) {
+  const automaticPrevious=row.contextJson;
+  row=authorizeAutomaticVideo(row,cfg,now);
   const { request, context } = assertDeliveryApproval(row, cfg, now), d = context.delivery;
   if (!d || (d.owner && d.leaseUntil > now)) throw Error('The delivery is still owned by an active execution');
   const setId = (object, key, value, pattern) => {
@@ -287,17 +307,12 @@ function reconcileDelivery(row, values, cfg, now) {
     else throw Error('Inspect the provider and supply the existing ID; an uncertain write cannot be repeated');
   } else if (d.youtube.videoId && d.youtube.state !== 'published' && (!request.targets.instagram || d.instagram.state === 'published')) d.stage = 'yt_channel';
   d.state = 'approved'; d.owner = ''; d.leaseUntil = 0; delete d.error;
-  return { ...row, phase: 'approved', error: '', contextJson: JSON.stringify(context), _previous: row.contextJson };
+  return { ...row, phase: 'approved', error: '', contextJson: JSON.stringify(context), _previous: automaticPrevious };
 }
 
 function checkedRendererUrl(value, cfg, purpose) {
-  const url = String(value || ''), base = String(cfg.rendererBaseUrl || '').replace(/\/$/, '');
-  if (cfg.renderer === 'local') {
-    const origin = base.match(/^https?:\/\/[^/?#]+/)?.[0];
-    if (!origin || !url.startsWith(origin + '/') || url.includes('@') || url.length > 12000) throw Error('The local ' + purpose + ' URL must stay on the configured rendering service');
-    return url;
-  }
-  return httpsUrl(url, purpose);
+  if(cfg.renderer!=='heygen'||cfg.rendererBaseUrl!=='https://api.heygen.com')throw Error('Use the official HeyGen Cloud rendering profile');
+  return httpsUrl(value, purpose);
 }
 function assertRendererProfile(request, cfg) {
   if (request.config.renderer !== cfg.renderer || request.config.rendererBaseUrl !== cfg.rendererBaseUrl) throw Error('Select the rendering profile that owns this job before sending its credentials');
@@ -314,30 +329,26 @@ function validateWorkflowBrief(input, cfg, now) {
   if (!Number.isFinite(Date.parse(publishAt))) throw Error('Use an ISO publishing time');
   if (targets.instagram && (!/^\d{5,30}$/.test(cfg.instagramAccountId) || !/^[A-Za-z0-9_.]{1,30}$/.test(cfg.instagramUsername))) throw Error('Configure the intended Instagram account and username');
   if (targets.youtube && !/^UC[A-Za-z0-9_-]{22}$/.test(cfg.youtubeChannelId)) throw Error('Configure the intended YouTube channel');
-  if (!['heygen', 'local'].includes(cfg.renderer)) throw Error('Choose the HeyGen or local rendering adapter');
+  if (cfg.renderer !== 'heygen') throw Error('This template uses HeyGen Cloud rendering');
   if (cfg.renderer === 'heygen' && cfg.rendererBaseUrl !== 'https://api.heygen.com') throw Error('The cloud adapter must use the official HeyGen API');
   if (!/^https:\/\/[a-z0-9.-]+$/i.test(cfg.publicN8nBaseUrl) || /YOUR_N8N_HOST/i.test(cfg.publicN8nBaseUrl)) throw Error('Configure the public HTTPS n8n base URL');
   return { ...request, targets: { instagram: targets.instagram, youtube: targets.youtube }, privateTest, publishAt: new Date(publishAt).toISOString(), config: JSON.parse(JSON.stringify(cfg)) };
 }
 function rendererAccount(data, cfg) {
-  const a = data?.data || data;
-  if (cfg.renderer === 'local') {
-    if (a.provider !== 'local' || a.billing_type !== 'local' || a.no_external_calls !== true) throw Error('The local adapter did not confirm local processing');
-    return { billingType: 'local', paidApi: false };
-  }
   return accountGuard(data, false);
 }
-function workflowReviewHtml(row, base, now) {
+function workflowReviewHtml(row, base, now, cfg={}) {
   const r = JSON.parse(row.requestJson), c = JSON.parse(row.contextJson), e = escapeHtml;
   const expired = !c.approval || c.approval.validUntil <= now;
-  const canDecide = c.stage === 'review' || (c.stage === 'approved' && expired && c.delivery?.state !== 'published');
+  const canDecide = cfg.requireVideoApproval !== false && (c.stage === 'review' || (c.stage === 'approved' && expired && c.delivery?.state !== 'published'));
   const target = [r.targets.instagram ? 'Instagram Reels: ' + r.config.instagramUsername : '', r.targets.youtube ? 'YouTube: ' + (r.privateTest ? 'private test' : 'public') : '', !r.targets.instagram && !r.targets.youtube ? 'Approved master download only' : ''].filter(Boolean).join(' · ');
   const media = base + '/webhook/video-media?job=' + encodeURIComponent(row.jobId) + '&scope=review&token=' + encodeURIComponent(row.token) + '&expires=' + c.reviewExpires;
   const form = canDecide ? `<form method="post" action="${e(base)}/webhook/video-decision"><input type="hidden" name="job" value="${e(row.jobId)}"><input type="hidden" name="token" value="${e(row.token)}"><input type="hidden" name="sha256" value="${e(row.sha256)}"><label>Reviewer name <input name="reviewer" maxlength="100"></label><label><input type="checkbox" name="reviewed" value="yes"> I watched the complete MP4 and listened to its audio.</label><p><button name="decision" value="approve">Approve this file and these destinations</button> <button name="decision" value="reject" formnovalidate>Reject draft</button></p></form>` : '';
   const delivery = c.delivery ? `<h2>Delivery status</h2><pre>${e(JSON.stringify({ state: c.delivery.state, instagram: c.delivery.instagram, youtube: c.delivery.youtube, error: c.delivery.error }, null, 2))}</pre>` : '';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="referrer" content="no-referrer"><title>Review ${e(r.brief.title)}</title><style>body{background:#111820;color:#f4f6f8;font:17px system-ui;max-width:900px;margin:32px auto;padding:20px}video{max-height:65vh;max-width:100%}label{display:block;margin:16px 0}input,button{font:inherit;padding:10px}button,a{color:#76e0bd}button{background:#1e3540;border:1px solid #76e0bd;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}code{overflow-wrap:anywhere}</style></head><body><h1>${e(r.brief.title)}</h1><p>Status: ${e(c.stage)} · 1080 × 1920 · 30 fps</p><video controls preload="metadata" src="${e(media)}"></video><h2>Approved destinations</h2><p>${e(target)}</p><p>Earliest publishing time: ${e(r.publishAt)}</p><h2>Caption</h2><pre>${e(r.brief.caption)}</pre><p>SHA-256: <code>${e(row.sha256)}</code></p>${form}${c.approval ? `<p><a href="${e(media)}" download>Download the approved original</a></p>` : ''}${delivery}<p>Job: ${e(row.jobId)}</p></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="referrer" content="no-referrer"><title>Review ${e(r.brief.title)}</title><style>body{background:#111820;color:#f4f6f8;font:17px system-ui;max-width:900px;margin:32px auto;padding:20px}video{max-height:65vh;max-width:100%}label{display:block;margin:16px 0}input,button{font:inherit;padding:10px}button,a{color:#93c5fd}button{background:#1e3540;border:1px solid #93c5fd;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}code{overflow-wrap:anywhere}</style></head><body><h1>${e(r.brief.title)}</h1><p>Status: ${e(c.stage)} · 1080 × 1920 · 30 fps</p><video controls preload="metadata" src="${e(media)}"></video><h2>Destinations</h2><p>${e(target)}</p><p>Earliest publishing time: ${e(r.publishAt)}</p><h2>Caption</h2><pre>${e(r.brief.caption)}</pre><p>SHA-256: <code>${e(row.sha256)}</code></p>${form}${c.approval ? `<p><a href="${e(media)}" download>Download the original video</a></p>` : ''}${delivery}<p>Job: ${e(row.jobId)}</p></body></html>`;
 }
 function bindWorkflowDecision(row, values, cfg, now) {
+  if (cfg.requireVideoApproval === false) throw Error('Manual video decisions are disabled by the automatic publishing policy');
   if (!row.id || row.token !== values.token || row.sha256 !== values.sha256) throw Error('The private token or reviewed file does not match');
   const r = JSON.parse(row.requestJson), c = JSON.parse(row.contextJson);
   const renewal = c.stage === 'approved' && c.approval?.validUntil <= now && c.delivery?.state !== 'published';
@@ -366,3 +377,4 @@ function authorizeMedia(row, query, now, cfg) {
   } else throw Error('Unknown media purpose');
   return { request: r, context: c };
 }
+

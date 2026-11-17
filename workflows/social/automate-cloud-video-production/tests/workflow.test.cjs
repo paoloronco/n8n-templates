@@ -5,13 +5,14 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=__dirname;
 const w=JSON.parse(fs.readFileSync(path.join(root,'../automate-cloud-video-production.json'),'utf8'));
+for(const n of w.nodes)if(n.type==='n8n-nodes-base.webhook')n.parameters.httpMethod??=n.parameters.multipleMethods?['GET','POST']:'GET';
 const nodes=new Map(w.nodes.map(n=>[n.name,n]));
 const sandbox={Buffer,Date,JSON,Intl,module:{exports:{}}};
 vm.runInNewContext(fs.readFileSync(path.join(root,'shared-core.js'),'utf8')+'\nmodule.exports={validateWorkflowBrief,assertDeliveryApproval,destinationSnapshot,slotKey,reserveSlot,initDelivery,deliveryTransition,reconcileDelivery,bindWorkflowDecision,authorizeMedia,checkedRendererUrl};',sandbox);
 const f=sandbox.module.exports;
 const cfg={renderer:'heygen',rendererBaseUrl:'https://api.heygen.com',publicN8nBaseUrl:'https://automation.example.com',publishingEnabled:true,instagramAccountId:'123456789',instagramUsername:'studio_demo',youtubeChannelId:'UC'+'a'.repeat(22),defaultBrand:'Example Studio',defaultTargets:{instagram:false,youtube:true},timezone:'Europe/Rome',hours:[10,12,15,18,21]};
 const now=Date.parse('2026-11-17T09:00:00Z'),hash='a'.repeat(64);
-const brief={format:'wall_text',brief:{title:'One approved file',narration:'Review the complete video before publishing it.',caption:'A controlled publishing test.',scenes:[{title:'Review',body:'Watch the original.'},{title:'Approve',body:'Approve its exact version.'}]},targets:{instagram:false,youtube:true},privateTest:true};
+const brief={format:'explainer',brief:{title:'One approved file',narration:'Review the complete video before publishing it.',caption:'A controlled publishing test.',scenes:[{title:'Review',body:'Watch the original.'},{title:'Approve',body:'Approve its exact version.'}]},targets:{instagram:false,youtube:true},privateTest:true};
 function reviewed(options={}){
  const request=f.validateWorkflowBrief({...brief,...options},cfg,now-1000);
  const row={id:1,jobId:'video-100',phase:'review',requestJson:JSON.stringify(request),contextJson:JSON.stringify({jobId:'video-100',stage:'review',reviewExpires:now+86400000}),token:'b'.repeat(128),renderId:'hfr_example',sha256:hash,error:''};
@@ -25,12 +26,12 @@ const processed=id=>({items:[{id,snippet:{channelId:cfg.youtubeChannelId},status
 
 test('portable cloud workflow compiles, resolves its graph and has no VM runtime nodes',()=>{
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
- for(const n of w.nodes){assert.ok(!/ssh|executeCommand|readWriteFile/i.test(n.type),n.name);assert.ok(!n.disabled,n.name);if(n.parameters.jsCode)assert.doesNotThrow(()=>new AsyncFunction(n.parameters.jsCode),n.name);for(const credential of Object.values(n.credentials||{}))assert.equal(credential.id,null);}
+ for(const n of w.nodes){assert.ok(!/ssh|executeCommand|readWriteFile/i.test(n.type),n.name);assert.ok(!n.disabled,n.name);if(n.parameters.jsCode)assert.doesNotThrow(()=>new AsyncFunction(n.parameters.jsCode),n.name);for(const credential of Object.values(n.credentials||{})){assert.equal(credential.id,null);}}
  for(const [name,channels] of Object.entries(w.connections)){assert.ok(nodes.has(name));for(const groups of Object.values(channels))for(const group of groups)for(const t of group)assert.ok(nodes.has(t.node),name+' -> '+t.node);}
  const configRun=new Function('$input',nodes.get('Apply video configuration').parameters.jsCode);
  const value=configRun({first:()=>({json:{}})})[0].json.config;
  assert.equal(value.renderer,'heygen');assert.equal(value.rendererBaseUrl,'https://api.heygen.com');assert.equal(value.publishingEnabled,false);assert.equal(value.allowExistingApiCredits,false);
- assert.equal(w.active,false);assert.ok(!/Start the included local worker|127\.0\.0\.1:3850|n8n\.prhomelab|brand\\": \\"OrbitPage/.test(JSON.stringify(w)));
+ assert.equal(w.active,false);assert.deepEqual(w.pinData,{});
  assert.equal(w.nodes.filter(n=>n.type==='n8n-nodes-base.manualTrigger').length,1,'n8n drops additional Manual Triggers during import');
  assert.equal(nodes.get('Create one cloud example').type,'n8n-nodes-base.noOp');
  const hooks=w.nodes.filter(n=>['n8n-nodes-base.webhook','n8n-nodes-base.formTrigger','n8n-nodes-base.form'].includes(n.type));
@@ -111,10 +112,10 @@ test('publishing and private review capabilities are distinct and expire',()=>{
  assert.doesNotThrow(()=>f.authorizeMedia(row,{scope:'publish',token:ctx.delivery.mediaToken,expires:ctx.delivery.mediaExpires},now,cfg));
  assert.throws(()=>f.authorizeMedia(row,{scope:'publish',token:ctx.delivery.mediaToken,expires:ctx.delivery.mediaExpires},ctx.delivery.mediaExpires+1,cfg),/expired/);
 });
-test('local provider media stays on the configured adapter origin',()=>{
- const local={...cfg,renderer:'local',rendererBaseUrl:'http://127.0.0.1:3863'};
- assert.equal(f.checkedRendererUrl('http://127.0.0.1:3863/media/a.mp4',local,'video'),'http://127.0.0.1:3863/media/a.mp4');
- assert.throws(()=>f.checkedRendererUrl('http://127.0.0.1:9999/media/a.mp4',local,'video'),/must stay/);
+test('cloud-only profile rejects a local renderer and private media URLs',()=>{
+ assert.throws(()=>f.validateWorkflowBrief(brief,{...cfg,renderer:'local'},now),/HeyGen Cloud/);
+ assert.throws(()=>f.checkedRendererUrl('http://127.0.0.1/file.mp4',cfg,'video'),/HTTPS/);
+ assert.throws(()=>f.checkedRendererUrl('https://localhost/file.mp4',cfg,'video'),/Public HTTPS/);
 });
 
 test('both selected channels finish and preserve independent receipts',()=>{
@@ -144,7 +145,7 @@ test('cloud spending gate uses the current policy and reserves its cap before an
  const enabled={...cfg,allowExistingApiCredits:true};
  let row=renderPlan(enabled);assert.equal(row._action.kind,'permit');assert.equal(c(row).resumeAfterPermit,'account');
  row=renderPlan(enabled,{...enabled,allowExistingApiCredits:false});assert.equal(row.phase,'failed');assert.equal(row._action.kind,'receipt');
- row=renderPlan({...enabled,renderer:'local',rendererBaseUrl:'http://127.0.0.1:3863',allowExistingApiCredits:false});assert.equal(row._action.kind,'read');assert.match(row._action.url,/127\.0\.0\.1:3863/);
+ assert.throws(()=>renderPlan({...enabled,renderer:'local'}),/HeyGen Cloud/);
 });
 test('a renderer profile change stops credential transmission for existing jobs',()=>{
  const row=renderPlan({...cfg,allowExistingApiCredits:true},{...cfg,renderer:'local',rendererBaseUrl:'http://127.0.0.1:3863'});
@@ -200,7 +201,7 @@ test('render reconciliation preserves known IDs and requires a recorded submissi
 
 
 test('binary removed by native Crypto is restored from the hash-checked download',()=>{
- const bytes=fs.readFileSync(path.join(root,'../technical-preview.mp4'));
+ const bytes=require('./media-fixtures.cjs').syntheticMp4();
  const sha=require('node:crypto').createHash('sha256').update(bytes).digest('hex');
  const binary={data:{id:'filesystem-v2:existing-original',mimeType:'video/mp4'}};
  const row={...reviewed(),sha256:sha};

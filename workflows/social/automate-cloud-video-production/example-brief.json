@@ -1,23 +1,24 @@
 {
-  "format": "wall_text",
+  "format": "explainer",
   "brief": {
-    "title": "Create once. Review. Publish.",
+    "title": "Three steps to a clear message",
+    "brand": "Example Studio",
     "language": "en",
-    "accent": "#64DBB4",
-    "narration": "Start with a clear message. Create your video, watch every scene and listen to the narration. Approve the exact file and its destinations. The workflow delivers the original video and keeps each publishing receipt, so interrupted jobs can resume without uploading duplicates.",
-    "caption": "Video production with exact-file approval and durable publishing receipts.",
+    "accent": "#2563EB",
+    "narration": "Start with one useful idea. Explain why it matters in a short sentence. Give your audience a practical next step. Keep each scene focused so the message is easy to follow.",
+    "caption": "One idea. A clear explanation. A useful next step.",
     "scenes": [
       {
-        "title": "Start with a clear message",
-        "body": "Create a structured brief and choose the intended destinations."
+        "title": "Choose one idea",
+        "body": "Focus on one useful message for your audience."
       },
       {
-        "title": "Review the complete video",
-        "body": "Check every scene, the voiceover and the final caption."
+        "title": "Explain the benefit",
+        "body": "Use a short sentence and a concrete example."
       },
       {
-        "title": "Approve and deliver",
-        "body": "Keep the original file and recover incomplete channel delivery."
+        "title": "Offer a next step",
+        "body": "Finish with one action the viewer can take."
       }
     ]
   },

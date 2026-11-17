@@ -243,7 +243,7 @@
       "parameters": {},
       "id": "259b486b-f88e-40fe-a6d2-8238d3d09b43",
       "name": "Create one cloud example",
-      "type": "n8n-nodes-base.manualTrigger",
+      "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
         0,
@@ -2181,7 +2181,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "parameters": {
-        "jsCode": "const config={\"renderer\": \"heygen\", \"rendererBaseUrl\": \"https://api.heygen.com\", \"publicN8nBaseUrl\": \"https://YOUR_N8N_HOST\", \"jobsTable\": \"video_production_jobs\", \"allowExistingApiCredits\": false, \"maxCloudRenders\": 3, \"publishingEnabled\": false, \"instagramAccountId\": \"REPLACE_WITH_INSTAGRAM_ACCOUNT_ID\", \"instagramUsername\": \"REPLACE_WITH_INSTAGRAM_USERNAME\", \"youtubeChannelId\": \"REPLACE_WITH_YOUTUBE_CHANNEL_ID\", \"defaultBrand\": \"Your Brand\", \"defaultTargets\": {\"instagram\": false, \"youtube\": false}, \"timezone\": \"Europe/Rome\", \"hours\": [10, 12, 15, 18, 21]};const j=$input.first().json;const intent=j._intent||(j.brief||j['Brief JSON']?'create':j['Job ID']?'recover':j.body?.decision?'decision':j.query?.scope?'media':j.query?.job?'review':'setup');return [{json:{...j,config,_intent:intent}}];"
+        "jsCode": "const config={\"renderer\": \"heygen\", \"rendererBaseUrl\": \"https://api.heygen.com\", \"manualAction\": \"setup\", \"publicN8nBaseUrl\": \"https://YOUR_N8N_HOST\", \"jobsTable\": \"video_production_jobs\", \"allowExistingApiCredits\": false, \"maxCloudRenders\": 3, \"publishingEnabled\": false, \"instagramAccountId\": \"REPLACE_WITH_INSTAGRAM_ACCOUNT_ID\", \"instagramUsername\": \"REPLACE_WITH_INSTAGRAM_USERNAME\", \"youtubeChannelId\": \"REPLACE_WITH_YOUTUBE_CHANNEL_ID\", \"defaultBrand\": \"Your Brand\", \"defaultTargets\": {\"instagram\": false, \"youtube\": false}, \"timezone\": \"Europe/Rome\", \"hours\": [10, 12, 15, 18, 21]};const j=$input.first().json;const intent=j._intent||(j.brief||j['Brief JSON']?'create':j['Job ID']?'recover':j.body?.decision?'decision':j.query?.scope?'media':j.query?.job?'review':config.manualAction==='example'?'example':'setup');return [{json:{...j,config,_intent:intent}}];"
       },
       "position": [
         0,
@@ -2379,6 +2379,29 @@
               },
               "renameOutput": true,
               "outputKey": "media"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "example",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "example"
             }
           ]
         },
@@ -5040,6 +5063,13 @@
         [
           {
             "node": "Media request valid?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create one cloud example",
             "type": "main",
             "index": 0
           }

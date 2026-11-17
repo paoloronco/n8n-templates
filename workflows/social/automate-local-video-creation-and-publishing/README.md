@@ -6,7 +6,7 @@ The interface, examples and documentation are in English. New drafts default to 
 
 ## Included
 
-- `workflow.json`: portable n8n workflow, credentials removed and schedules inactive.
+- `workflow.json`: **Local Video Production (template)**, with generic, unbound credential selectors and schedules inactive (the source template file is named `automate-local-video-instagram-youtube.json`).
 - `runtime/`: working Python backend, Node.js render worker/gallery, pinned dependencies, examples and tests.
 - [Runtime installation and operations guide](runtime/README.md): configuration, first private test, approval, recovery and backups.
 
@@ -20,6 +20,16 @@ The interface, examples and documentation are in English. New drafts default to 
 6. Recover the incomplete stage from the gallery. Existing IDs are verified again; uncertain uploads require reconciliation before retry.
 
 The daily branch reports approved ready drafts and the publishing slots use the configured timezone. It never invents or approves content automatically. Manual publishing still requires a due approval. Keep the publishing gate closed until setup and the private YouTube test pass.
+
+The default schedule checks up to five approved ready drafts at **09:00** and publishes eligible, due drafts at **10:00, 12:00, 15:00, 18:00 and 21:00**, in `Europe/Rome`. An empty or ineligible queue produces a no-op; it does not fill the day with sample videos. Successful executions are retained for schedule monitoring.
+
+## Production and template editions
+
+This template is derived from the owner's live local production export. Its 74-node graph, node positions, sticky-note geometry, approval checks and recovery behavior match that production version. Installation paths, webhook paths, channel ID, file naming, branding and credential selectors are generalized. Private configuration, actual briefs, media, approval records, execution data and account bindings are excluded. Placeholder credential IDs are explicitly `null` so n8n does not silently bind a local account during import; select your own credentials during setup.
+
+Rendering, speech and media storage run on infrastructure you control. No HeyGen, cloud rendering, paid generative API or cloud media storage is used by this edition. Initial dependency/model installation requires downloads; publishing still requires the official Instagram and YouTube APIs and a reachable signed HTTPS media endpoint.
+
+The separate [cloud edition](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/automate-cloud-video-production) follows the same brief → render → exact-file approval → durable delivery/recovery approach using a different rendering adapter. Its genuine cloud generation remains unverified because the test API wallet had no credits. The local edition requires its companion runtime and does not satisfy the cloud edition's no-extra-installation constraint. Both target 1080×1920 H.264/AAC output; equal resolution does not imply identical visual rendering.
 
 ## Requirements and setup
 

@@ -33,13 +33,15 @@ Run `python3 -B backend_test.py` and `python3 production.py status`. A helper fa
 
 ## 2. n8n configuration
 
-Import the adjacent workflow JSON with schedules inactive. All individual production nodes should remain enabled.
+Import **Local Video Production (template)** with schedules inactive. All individual production nodes should remain enabled. Its credential selectors use generic names and `null` IDs; they are intentionally unbound and contain no account credentials. This also prevents n8n from automatically choosing an existing account during import.
 
 1. Select your dedicated SSH credential on every SSH node, including recovery and file transfer nodes.
 2. Search the workflow for `/opt/local-video-production` and `/var/lib/local-video-production`. Replace both consistently if you use other directories. Uploads, the original MP4 download and the signed media endpoint must use the same persistent state directory.
 3. Connect Meta OAuth and YouTube OAuth credentials. Replace `REPLACE_WITH_YOUTUBE_CHANNEL_ID` in the channel validation expression. The connected channel is checked before upload.
 4. Use unique production webhook paths. Put the bridge POST, upload POST and media GET production URLs into the corresponding runtime configurations. Publish the workflow inside your own n8n to register the production webhooks.
 5. Set the workflow timezone and match the backend hours. Keep the daily and publishing schedules disabled until the first test passes. The 09:00 branch reports approved drafts; it does not create or approve content automatically.
+
+The example configurations match the imported paths: bridge `local-video-worker`, upload `local-video-upload`, and media `local-video-media`. Change each URL and its corresponding n8n webhook together. The template uses `Europe/Rome`, a 09:00 approved-queue check and delivery slots at 10:00, 12:00, 15:00, 18:00 and 21:00. It retains successful executions; review instance-level retention and disk usage for the worker's regular bridge polls.
 
 Instagram delivery requires a supported professional account and appropriate Meta app access. YouTube requires an OAuth connection that can upload to, and read the processing/file metadata of, the configured channel. Check the current platform requirements for your own app. Platform errors are retained rather than converted into success.
 

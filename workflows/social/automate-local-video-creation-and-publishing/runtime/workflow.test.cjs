@@ -11,8 +11,23 @@ const run=(name,vars={})=>new Function(...Object.keys(vars),nodes.get(name).para
 test('all code compiles and graph targets exist',()=>{
   for(const n of w.nodes)if(n.parameters.jsCode)assert.doesNotThrow(()=>new Function(n.parameters.jsCode),n.name);
   for(const [name,connection]of Object.entries(w.connections))for(const group of connection.main)for(const target of group)assert.ok(nodes.has(target.node),name+' -> '+target.node);
-  assert.ok(w.nodes.every(n=>!n.credentials));assert.equal(w.active,false);assert.equal(w.settings.timezone,'Europe/Rome');
-  assert.ok(!JSON.stringify(w).includes('orbitpage_pr'));
+  for(const n of w.nodes)for(const c of Object.values(n.credentials||{})){
+    assert.equal(c.id,null,'Credential placeholders must not bind an account');
+    assert.match(c.name,/^Select your /);
+  }
+  assert.equal(w.active,false);assert.equal(w.settings.timezone,'Europe/Rome');
+  assert.ok(!/orbitpage|prhomelab/i.test(JSON.stringify(w)));
+});
+
+test('runtime example endpoints and publishing hours match the imported workflow',()=>{
+  const backend=JSON.parse(fs.readFileSync(path.join(__dirname,'config.example.json'),'utf8'));
+  const worker=JSON.parse(fs.readFileSync(path.join(__dirname,'worker.example.json'),'utf8'));
+  for(const [url,name] of [[worker.bridgeUrl,'PC pulls signed jobs'],[worker.uploadUrl,'Receive a rendered production video'],[backend.mediaBase,'Instagram fetches signed video']]){
+    assert.equal(url.split('/webhook/')[1],nodes.get(name).parameters.path);
+  }
+  assert.equal(backend.enabled,false);
+  assert.equal(backend.timezone,w.settings.timezone);
+  assert.equal(nodes.get('One reel at each time slot').parameters.rule.interval[0].expression,`0 ${backend.hours.join(',')} * * *`);
 });
 
 test('missing or invalid queue timestamps fail instead of bypassing timeout',()=>{

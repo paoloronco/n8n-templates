@@ -1,5 +1,17 @@
 # Version 2
 
+## 17 November 2026 — production/template parity review
+
+- Rebuilt **Local Video Production (template)** from the actual published local production workflow, preserving its 74-node graph and exact canvas arrangement.
+- Replaced private helper/state paths, webhooks, channel ID, branding, filenames, tags and credential bindings with portable configuration.
+- Used generic credential selectors with null IDs to prevent n8n's automatic account selection during import.
+- Corrected misleading daily-batch labels: 09:00 checks approved ready drafts; it does not generate or approve five videos.
+- Enabled successful-execution retention in production and the template; kept the reusable template inactive.
+- Matched example runtime URLs to the portable webhook paths and added configuration consistency checks.
+- Left the existing cloud submission unchanged; no Creator Portal submission was performed in this review.
+
+## Initial end-to-end runtime
+
 ## 2.0.1 — English interface and defaults
 
 - Translated the gallery, approval, rejection and recovery messages into English.

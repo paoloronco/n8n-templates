@@ -1,6 +1,6 @@
 # Video production and publishing with n8n
 
-**Draft correction, 17 November 2026.** This revision restores the missing social publishing stages to the cloud template. Code and rendering-adapter tests pass, including a real offline narration and local render. Importing and executing this new graph in n8n, native media responses, social OAuth branches and canvas appearance still need integration verification. This is not a production release or a new Creator Portal submission.
+**Technical revision, 17 November 2026.** This version adds native scheduled social delivery to the cloud pipeline. Validation distinguishes real local rendering, native n8n protocol-fixture tests and read-only provider checks. Managed HeyGen generation and real social uploads have not been certified. See [TEST-RESULTS.md](TEST-RESULTS.md) before enabling production. Creator Portal submission remains a manual owner action.
 
 ## How it works
 
@@ -17,14 +17,16 @@ The 09:00 schedule reports the approved queue. Publishing slots are 10:00, 12:00
 
 ## Setup
 
-1. Import [automate-cloud-video-production.json](automate-cloud-video-production.json) into n8n with Data Tables, Forms, HTTP Request, Code, Crypto, Compression and Extract from File. Leave it inactive during setup.
+1. Import [automate-cloud-video-production.json](automate-cloud-video-production.json) into n8n with Data Tables, Webhook, HTTP Request, Code, Crypto, Compression and Extract from File. Leave it inactive during setup.
 2. Edit **Apply video configuration** once. Set `publicN8nBaseUrl`, a dedicated `jobsTable`, brand, intended account identities and default targets. The cloud renderer is `heygen` at `https://api.heygen.com`.
 3. Connect the rendering Header Auth credential to every authenticated rendering request, including review, delivery and media-refresh nodes. Use the authentication format accepted for the issued credential; keep the value exclusively in n8n credentials.
 4. Connect one dedicated Basic Auth credential to the intake and recovery forms. Connect Instagram Facebook Graph OAuth and YouTube OAuth only if those targets will be used. Complete the platform permissions / app review required by the accounts.
-5. Run **Set up cloud storage** once. Setup preserves existing ledgers. Use a different table for a staging copy; two copies must not own the same table/webhook paths.
+5. Leave `manualAction: "setup"` and run **Set up cloud storage** once. To run the English sample, change `manualAction` to `"example"` and execute the same Manual Trigger; restore `"setup"` afterwards. Setup preserves existing ledgers. Use a different table for a staging copy; two copies must not own the same table/webhook paths.
 6. Verify that the default generation block returns a receipt before any provider call. Only an operator who has explicitly authorized using already-funded API credits should set `allowExistingApiCredits: true`.
 7. Verify a rendered draft, its review page, exact-file approval and hash-checked download. For a private YouTube test use `privateTest: true`, `targets.youtube: true`, `targets.instagram: false`. The workflow refuses a private test that also selects Instagram.
-8. After the native integration checks pass, set `publishingEnabled: true` and activate the workflow. Publishing in n8n is separate from Creator Portal submission; the owner performs that submission manually.
+8. After testing the actual configured provider and destinations privately, set `publishingEnabled: true` and publish the workflow in n8n. Publishing in n8n is separate from Creator Portal submission; the owner performs that submission manually.
+
+After publishing, open `/webhook/video-intake` for the brief form and `/webhook/video-recovery` for recovery, under your configured n8n base URL. Both are Basic Auth protected HTML forms served by stock Webhook nodes. GET only displays the form; POST processes the submission. They intentionally avoid the native Form Trigger restriction on reachable Respond to Webhook nodes. Review uses `/webhook/video-review`; media uses `/webhook/video-media`. Give each staging copy different paths.
 
 The public HTTPS n8n endpoint must reach the configured renderer. Review and Instagram media are served through n8n using expiring capabilities; neither a review browser nor Meta needs direct access to a private local renderer. Protect the n8n editor and saved execution data through the instance's normal access controls.
 

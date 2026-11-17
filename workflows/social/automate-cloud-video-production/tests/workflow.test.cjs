@@ -31,6 +31,12 @@ test('portable cloud workflow compiles, resolves its graph and has no VM runtime
  const value=configRun({first:()=>({json:{}})})[0].json.config;
  assert.equal(value.renderer,'heygen');assert.equal(value.rendererBaseUrl,'https://api.heygen.com');assert.equal(value.publishingEnabled,false);assert.equal(value.allowExistingApiCredits,false);
  assert.equal(w.active,false);assert.ok(!/Start the included local worker|127\.0\.0\.1:3850|n8n\.prhomelab|brand\\": \\"OrbitPage/.test(JSON.stringify(w)));
+ assert.equal(w.nodes.filter(n=>n.type==='n8n-nodes-base.manualTrigger').length,1,'n8n drops additional Manual Triggers during import');
+ assert.equal(nodes.get('Create one cloud example').type,'n8n-nodes-base.noOp');
+ const hooks=w.nodes.filter(n=>['n8n-nodes-base.webhook','n8n-nodes-base.formTrigger','n8n-nodes-base.form'].includes(n.type));
+ for(const n of hooks)assert.ok(typeof n.webhookId==='string'&&n.webhookId.length>0,n.name+' must register after CLI import');
+ assert.equal(new Set(hooks.map(n=>n.webhookId)).size,hooks.length);
+ assert.equal(nodes.get('Submit a video brief').parameters.path,'video-intake');assert.equal(nodes.get('Recover an existing job').parameters.path,'video-recovery');assert.equal(w.nodes.filter(n=>n.type==='n8n-nodes-base.formTrigger').length,0);
 });
 test('malformed public requests cannot enter storage setup',()=>{
  for(const [entry,validator,intent] of [['Review a cloud draft','Validate review link','review'],['Receive draft decision','Validate draft decision','decision'],['Serve reviewed video media','Validate media request','media']]){
@@ -39,6 +45,22 @@ test('malformed public requests cannot enter storage setup',()=>{
   assert.equal(result._intent,intent);assert.equal(result.valid,false);
   assert.equal(w.connections[validator].main[0][0].node,'Apply video configuration');
  }
+});
+
+test('protected native forms route GET to HTML and POST to the shared pipeline',()=>{
+ const prepare=nodes.get('Prepare protected video form').parameters.jsCode;
+ for(const [name,path] of [['Submit a video brief','video-intake'],['Recover an existing job','video-recovery']]){
+  const node=nodes.get(name);assert.equal(node.parameters.authentication,'basicAuth');assert.deepEqual(node.parameters.httpMethod,['GET','POST']);
+  assert.equal(w.connections[name].main[0][0].node,'Prepare protected video form');
+  const html=new Function('$input',prepare)({first:()=>({json:{webhookUrl:'https://automation.example.com/webhook/'+path}})})[0].json.html;
+  assert.match(html,/method="post"/);assert.ok(html.includes('action="https://automation.example.com/webhook/'+path+'"'));
+  assert.ok(html.includes(path==='video-intake'?'name="Brief JSON"':'name="Review token"'));
+ }
+ const json=new Function('$input',nodes.get('Apply video configuration').parameters.jsCode)({first:()=>({json:{webhookUrl:'https://automation.example.com/webhook/video-intake',body:{'Brief JSON':JSON.stringify(brief)}}})})[0].json;
+ assert.equal(json._intent,'create');assert.equal(json.fromForm,true);
+ const token='b'.repeat(64);
+ const recovery=new Function('$input',nodes.get('Validate recovery request').parameters.jsCode)({first:()=>({json:{body:{'Job ID':'video-100','Review token':token}}})})[0].json;
+ assert.equal(recovery.jobId,'video-100');assert.equal(recovery.token,token);
 });
 test('private YouTube tests reject Instagram selection',()=>{
  assert.throws(()=>f.validateWorkflowBrief({...brief,targets:{instagram:true,youtube:true}},cfg,now),/must select YouTube only/);
@@ -148,4 +170,43 @@ test('expired approval recovery retains uncertain uploads and requires a new dec
  const rctx=c(renewed);assert.equal(renewed.phase,'review');assert.ok(!rctx.approval);assert.ok(rctx.delivery.pendingWrite);assert.equal(rctx.delivery.pendingWrite.stage,'yt_upload');
  const approved=f.bindWorkflowDecision(renewed,{token,sha256:hash,decision:'approve',reviewed:'yes',reviewer:'Technical reviewer'},cfg,Date.now());
  assert.throws(()=>f.initDelivery(approved,cfg,Date.now(),'new-execution','c'.repeat(64)),/uncertain/);
+});
+
+test('a recoverable Instagram claim refreshes an expired media capability',()=>{
+ let row=f.initDelivery(reviewed({privateTest:false,targets:{instagram:true,youtube:false}}),cfg,now,'test-execution','c'.repeat(64));
+ const ctx=c(row);ctx.delivery.owner='';ctx.delivery.leaseUntil=0;ctx.delivery.mediaExpires=now-1;ctx.delivery.stage='ig_create';row.contextJson=JSON.stringify(ctx);
+ row=f.initDelivery(row,cfg,now,'new-execution','d'.repeat(64));assert.equal(c(row).delivery.mediaToken,'d'.repeat(64));assert.ok(c(row).delivery.mediaExpires>now);
+});
+
+test('a paused job returns recovery details before a render or review link exists',()=>{
+ const row={jobId:'video-123',contextJson:JSON.stringify({stage:'failed',error:'Download unavailable'}),token:'f'.repeat(64),sha256:''};
+ const receipt=new Function('$input','$',nodes.get('Cloud production receipt').parameters.jsCode)({first:()=>({json:row})},()=>({first:()=>({json:{config:cfg}})}))[0].json;
+ assert.equal(receipt.reviewUrl,null);assert.equal(receipt.recoveryToken,row.token);assert.match(receipt.html,/Open recovery form/);assert.ok(receipt.html.includes(row.token));
+});
+
+test('Instagram selects the approved identity among multiple managed accounts and requests quota fields',()=>{
+ let row=start(reviewed({privateTest:false,targets:{instagram:true,youtube:false}}));
+ row=step(row,{data:[{id:'987654321',username:'another_account'},{id:cfg.instagramAccountId,username:cfg.instagramUsername}]});
+ assert.equal(c(row).delivery.stage,'ig_quota');assert.equal(action(row).query.fields,'config,quota_usage');
+});
+
+test('render reconciliation preserves known IDs and requires a recorded submission',()=>{
+ const row=reviewed(),token=row.token,code=nodes.get('Resume without duplicate generation').parameters.jsCode;
+ const run=(context,renderId)=>new Function('$input','$',code)({first:()=>({json:{...row,renderId:context.renderId||'',contextJson:JSON.stringify({jobId:row.jobId,stage:'failed',failedStage:'submit',...context})}})},()=>({item:{json:{token,renderId}},first:()=>({json:{config:cfg}})}))[0].json;
+ assert.throws(()=>run({renderId:'hfr_known_123'},'hfr_other_456'),/immutable/);
+ assert.throws(()=>run({},'hfr_other_456'),/recorded submission/);
+ const recovered=run({renderRequestedAt:now,assetId:'asst_known',projectHash:hash,duration:18},'hfr_existing_123');assert.equal(c(recovered).renderId,'hfr_existing_123');assert.equal(recovered.phase,'poll');
+});
+
+
+test('binary removed by native Crypto is restored from the hash-checked download',()=>{
+ const bytes=fs.readFileSync(path.join(root,'../technical-preview.mp4'));
+ const sha=require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+ const binary={data:{id:'filesystem-v2:existing-original',mimeType:'video/mp4'}};
+ const row={...reviewed(),sha256:sha};
+ const json={fileBase64:bytes.toString('base64'),sha256:sha};
+ const result=new Function('$input','$',nodes.get('Verify approved media hash').parameters.jsCode)({first:()=>({json})},name=>({first:()=>name==='Read authorized original bytes'?{binary}:{json:row}}))[0];
+ assert.equal(result.json.verified,true);assert.equal(result.binary,binary);
+ const delivery=new Function('$input','$',nodes.get('Validate delivery MP4').parameters.jsCode)({first:()=>({json})},name=>({item:name==='Download approved original'?{binary}:{json:row}}))[0];
+ assert.equal(delivery.binary,binary);assert.equal(delivery.json._deliveryResponse.sha256,sha);
 });

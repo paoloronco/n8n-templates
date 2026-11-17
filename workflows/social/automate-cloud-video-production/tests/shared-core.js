@@ -145,7 +145,7 @@ function initDelivery(row, cfg, now, executionId, mediaToken) {
   if (d.state === 'reconciliation_required') throw Error('Reconcile the uncertain provider result before resuming');
   if (d.state === 'published') throw Error('The selected destinations already have publication receipts');
   d.owner = executionId; d.leaseUntil = now + 20 * 60000;
-  if (!d.mediaToken) {
+  if (!d.mediaToken || d.mediaExpires <= now) {
     if (!/^([a-f0-9]{64}|[a-f0-9]{128})$/.test(mediaToken || '')) throw Error('A separate media capability is required');
     d.mediaToken = mediaToken; d.mediaExpires = now + 2 * 3600000;
   }
@@ -168,7 +168,7 @@ function deliveryTransition(row, cfg, now, executionId, response) {
       if (response.error || body?.error || Number(response.statusCode) >= 400) throw Error(response.error?.message || body.error?.message || body.error || body.message || 'Provider request failed');
       switch (d.stage) {
         case 'ig_identity':
-          if (!Array.isArray(body.data) || body.data.length !== 1 || body.data[0].id !== cfg.instagramAccountId || body.data[0].username !== cfg.instagramUsername) throw Error('Instagram identity differs from the approved account');
+          if (!Array.isArray(body.data) || body.data.filter(a=>a.id===cfg.instagramAccountId&&a.username===cfg.instagramUsername).length !== 1) throw Error('Instagram identity differs from the approved account');
           d.stage = 'ig_quota'; break;
         case 'ig_quota': {
           const q = body.data?.[0];
@@ -230,7 +230,7 @@ function deliveryTransition(row, cfg, now, executionId, response) {
     }
     switch (d.stage) {
       case 'ig_identity': action = meta(d.stage, 'GET', 'me', 'assigned_instagram_accounts', { fields: 'id,username' }); break;
-      case 'ig_quota': action = meta(d.stage, 'GET', cfg.instagramAccountId, 'content_publishing_limit'); break;
+      case 'ig_quota': action = meta(d.stage, 'GET', cfg.instagramAccountId, 'content_publishing_limit', { fields: 'config,quota_usage' }); break;
       case 'ig_create':
         if (d.pendingWrite) throw Error('Instagram container creation is already in flight');
         if (d.mediaExpires <= now) throw Error('The media capability expired before Instagram container creation');

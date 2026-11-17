@@ -1,4 +1,4 @@
-# Create and Publish Reels & Shorts
+# Create and Publish Reels & Shorts with HeyGen or NextCut and Dropbox
 
 ## Quick overview
 
@@ -42,4 +42,6 @@ Choose HeyGen or NextCut to turn a brief into a vertical video, optionally archi
 - HeyGen passed offline technical checks; live managed rendering and social delivery remain unverified. The private NextCut equivalent passed live rendering, Dropbox integrity and recovery checks; live social delivery remains unverified.
 - Free-plan limits and API pricing can change. The workflow job cap is not a currency budget.
 - Provider credentials and scenes differ between these variants; read the selected package's setup instructions before importing.
+- Full setup and recovery guides: [HeyGen](https://app.notion.com/p/41af0ba27c3281f7b166e83346bbbb4c) · [NextCut](https://app.notion.com/p/41bf0ba27c3281b5a38fe146d963960f).
+- [Choose the HeyGen or NextCut download on Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction).
 - Support and customization: [Consulting website](https://paoloronco.it/).

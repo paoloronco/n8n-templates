@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "date": "2026-11-18",
+  "sanitized": true,
+  "active": false,
+  "providers": {
+    "HeyGen-HyperFrames": {
+      "documentation.md": {
+        "bytes": 16119,
+        "sha256": "e6daec148523c3479e232e41e6165e58dffb7b2544b4439c26b7d0b179a1d150"
+      },
+      "README.md": {
+        "bytes": 3400,
+        "sha256": "81c1d0987a1791e41cd04bf00629e99f706163693888fcad4930412596b9bf88"
+      },
+      "Runtime.json": {
+        "bytes": 13249127,
+        "sha256": "671e42f0f20da8a3ade9d0383bdc52850a08c937357dfe56eada0b2709417415"
+      },
+      "workflow.json": {
+        "bytes": 97368,
+        "sha256": "f1db8ac96e97f4dd17ed2d1444cb2f7610c3e5d83231c90f8027c13ea8eef31c"
+      }
+    },
+    "Shotstack": {
+      "documentation.md": {
+        "bytes": 16150,
+        "sha256": "cf1578004631936990bd28b00942c3715a98f1b1325c361f2e6130c353e9b219"
+      },
+      "README.md": {
+        "bytes": 3764,
+        "sha256": "2c45f24f9d8cc59b446828f6dab5d934c44bde3ef459c44f9d8b02c9ef052b75"
+      },
+      "Runtime.json": {
+        "bytes": 14310974,
+        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+      },
+      "workflow.json": {
+        "bytes": 97569,
+        "sha256": "5b6ea038a89972c7a838c1d7fcc259501ab82b5040b34da08f8185f0293c2944"
+      }
+    },
+    "JSON2Video": {
+      "documentation.md": {
+        "bytes": 16050,
+        "sha256": "0018c4590922fb5098a38c9bf90874f5c046a5e101273e562cdc75be250be716"
+      },
+      "README.md": {
+        "bytes": 3525,
+        "sha256": "33a3bcd857136e547e9a649a3f21f09a3a7d128a60d5992a15b9d204decd36e6"
+      },
+      "Runtime.json": {
+        "bytes": 14310974,
+        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+      },
+      "workflow.json": {
+        "bytes": 97554,
+        "sha256": "0a8b19e679ec02721777f53564e18a081ff861f2fc27704c9bf1dba30107e93f"
+      }
+    }
+  }
+}

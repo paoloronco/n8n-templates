@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "date": "2026-11-18",
+  "sanitized": true,
+  "active": false,
+  "providers": {
+    "Creatomate": {
+      "documentation.md": {
+        "bytes": 14856,
+        "sha256": "180b2b809e069961bd1024c5dc5a0693088a8122e4b0ce28a9c92f4f94e616fa"
+      },
+      "README.md": {
+        "bytes": 3258,
+        "sha256": "1fe8334a71a2cd909536a4b4f1e889d7a817f59289568f037768beee8b9798fb"
+      },
+      "Runtime.json": {
+        "bytes": 13249127,
+        "sha256": "671e42f0f20da8a3ade9d0383bdc52850a08c937357dfe56eada0b2709417415"
+      },
+      "workflow.json": {
+        "bytes": 68225,
+        "sha256": "a9708ca591cdee3ca09a9d348ba005007a5ab81e45061c5d4b038b927942a8ff"
+      }
+    },
+    "Shotstack": {
+      "documentation.md": {
+        "bytes": 15004,
+        "sha256": "c7baef7f35d7b06a34738a848cb601e3b0e0734ff01416a52e12e8d924be036f"
+      },
+      "README.md": {
+        "bytes": 3600,
+        "sha256": "63fd8dfd2fff7c0d348db86b3466b3b80db8a381c2e4eb110dcefcb5c4ebd520"
+      },
+      "Runtime.json": {
+        "bytes": 14310974,
+        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+      },
+      "workflow.json": {
+        "bytes": 68449,
+        "sha256": "37d6c88cba3b289610cc61640eb9351813dfaf8e61fe77a1b6441ec9ecdf6b7f"
+      }
+    },
+    "JSON2Video": {
+      "documentation.md": {
+        "bytes": 14904,
+        "sha256": "1abf085df55f89cfcd0ce89c21cb4082a3af77569172eadcfa34d3e93207daea"
+      },
+      "README.md": {
+        "bytes": 3500,
+        "sha256": "600b858d1e12d59101afce07671c348ec0dca2ec7b24560d9fbc90f3b80036f7"
+      },
+      "Runtime.json": {
+        "bytes": 14310974,
+        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+      },
+      "workflow.json": {
+        "bytes": 68434,
+        "sha256": "aa16d6c0e7876f415e06206202aa8ba527495c2f05accf4820b319a3d5741956"
+      }
+    }
+  }
+}

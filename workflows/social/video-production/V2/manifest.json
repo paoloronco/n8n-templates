@@ -32,20 +32,20 @@
         "sha256": "c4d0586e17ef9305fe408a094add8fd5c0b2f5903db215a48d29462e9a3bad4f"
       },
       "documentation.md": {
-        "bytes": 5778,
-        "sha256": "d2bfa11b446ac9eb1a34a1f63978c71d35aa7bb9e4c13af7fb81e1a96ce504f2"
+        "bytes": 5849,
+        "sha256": "b1eede119a3a0c545f154400f1f068f1113a206ea61f9d4305c92ab111fb5802"
       },
       "README.md": {
-        "bytes": 5796,
-        "sha256": "3d6b3f3b7508dfbde8cafeb7aa9a2c2810e2b689d3371b09f7afa2f0eda0594a"
+        "bytes": 5867,
+        "sha256": "7ea7c8c3ca1559d213690ad40e11a429c63c48797247c8d7b47cb0d7fe97b862"
       },
       "thumbnail.png": {
         "bytes": 27256,
         "sha256": "f504ec96ae103202d947b8d600fb9bf0294d4ae5166043d200201b6b5734db22"
       },
       "workflow.json": {
-        "bytes": 924490,
-        "sha256": "80a7d9764babb76a5669ea1af5a26dcfa70fdfc3a284fbcd42f632444ef00ab9"
+        "bytes": 927670,
+        "sha256": "e4767052ca94afe505aec4ec0f7318c076ab60915fdbb146866bee3baf139a55"
       }
     }
   }

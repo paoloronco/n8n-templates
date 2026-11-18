@@ -24,7 +24,7 @@ Create vertical Reels and Shorts from a structured brief and supplied narration 
 - Keep `manualAction: "setup"` and run **Set up cloud storage** once. Set `manualAction: "check"` to inspect the free account without rendering.
 - Supply your own public narration WAV URL. The included example uses an existing public audio sample for a technical demonstration; it does not generate speech.
 - Select `manualAction: "example"` to create the example. The initial local cap is one job; deliberate increases remain subject to the provider's verified free quota.
-- Match both Schedule nodes to `timezone` and `hours`. Defaults are **09:00 UTC**. Set intended targets in the brief, enable `publishingEnabled` and activate the workflow after configuration.
+- Match the Schedule nodes to the workflow timezone and configured delivery hours. Delivery defaults to **09:00 UTC**; the read-only daily queue check runs at **08:00 UTC**. Set intended targets in the brief, enable `publishingEnabled` and activate the workflow after configuration.
 
 ## Requirements
 
@@ -48,9 +48,9 @@ Create vertical Reels and Shorts from a structured brief and supplied narration 
 - NextCut currently advertises 25 Free renders per month. Native rendering uses one credit; other API actions can consume different amounts. Free limits may change. Check [NextCut pricing](https://nextcut.io/pricing) and [API documentation](https://nextcut.io/docs/api-reference).
 - `maxCloudRenders` is an atomic workflow job cap, not a currency budget. Rejected jobs remain in the ledger. `get_usage.totalCostUsd` also includes estimated AWS compute costs for free renders; it is not a paid-credit balance. No subscription, top-up or billing activation is implemented.
 - The private equivalent passed native rendering, Dropbox upload/download hash verification and recovery without a new render. This anonymized export passed offline validation; live social publishing with NextCut remains unverified.
-- [GitHub package](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/nextcut) · [Workflow JSON](./workflow.json) · [Compare both renderers](../README.md). [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) offers both provider downloads. No n8n Creators submission has been performed for NextCut.
+- [GitHub package](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/V2/NextCut) · [Workflow JSON](./workflow.json) · [Compare both renderers](../README.md). [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) offers both provider downloads. No n8n Creators submission has been performed for NextCut.
 - [Full setup, configuration and recovery guide](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f).
-- Support and customization: [Consulting website](https://paoloronco.it/) · [Author's n8n repository](https://github.com/paoloronco/n8n-templates).
+- Support and customization: [info@paoloronco.it](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).
 
 
 Read the linked provider guide for complete setup and recovery. No local renderer is required for V2. Set up your own brand, scenes and licensed media; templates contain no owner production videos or account credentials.

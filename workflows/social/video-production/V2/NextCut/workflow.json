@@ -1,5 +1,5 @@
 {
-  "name": "Video Production — V2 NextCut Free (Template)",
+  "name": "Create and Publish Reels & Shorts with NextCut and Dropbox",
   "nodes": [
     {
       "parameters": {},
@@ -8,8 +8,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -272,
-        1856
+        352,
+        16
       ]
     },
     {
@@ -54,8 +54,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1152,
-        2064
+        1776,
+        224
       ]
     },
     {
@@ -83,8 +83,8 @@
       "typeVersion": 1.1,
       "alwaysOutputData": true,
       "position": [
-        1376,
-        2064
+        2000,
+        224
       ]
     },
     {
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1584,
-        2064
+        2208,
+        224
       ]
     },
     {
@@ -222,8 +222,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1808,
-        2144
+        2496,
+        240
       ]
     },
     {
@@ -235,8 +235,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2016,
-        2048
+        2672,
+        160
       ]
     },
     {
@@ -246,8 +246,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1008,
-        4368
+        1760,
+        2624
       ]
     },
     {
@@ -259,8 +259,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1232,
-        4368
+        1984,
+        2624
       ]
     },
     {
@@ -276,10 +276,16 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        2048
+        128,
+        208
       ],
-      "webhookId": "18d56a8c-9f85-4394-b6a8-72a638011393"
+      "webhookId": "18d56a8c-9f85-4394-b6a8-72a638011393",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": null,
+          "name": "Select your protected form credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -293,8 +299,8 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 2,
       "position": [
-        1152,
-        2560
+        1776,
+        736
       ]
     },
     {
@@ -306,8 +312,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
-        2560
+        1984,
+        736
       ]
     },
     {
@@ -412,8 +418,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4016,
-        2576
+        4640,
+        736
       ]
     },
     {
@@ -425,8 +431,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4256,
-        2576
+        4880,
+        736
       ]
     },
     {
@@ -541,8 +547,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4480,
-        2576
+        5104,
+        736
       ]
     },
     {
@@ -742,8 +748,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        4720,
-        2464
+        5344,
+        624
       ]
     },
     {
@@ -771,10 +777,16 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        5168,
-        1648
+        5792,
+        -192
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -810,10 +822,16 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        5392,
-        1648
+        6016,
+        -192
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -833,8 +851,8 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        5168,
-        1824
+        5792,
+        -16
       ],
       "onError": "continueRegularOutput"
     },
@@ -848,8 +866,8 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 2,
       "position": [
-        5824,
-        1824
+        6448,
+        -16
       ],
       "onError": "continueRegularOutput"
     },
@@ -862,8 +880,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5168,
-        2032
+        5792,
+        192
       ],
       "onError": "continueRegularOutput"
     },
@@ -876,8 +894,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5168,
-        2368
+        5792,
+        528
       ],
       "webhookId": "f93f2cb3-d2d4-4f6b-9835-8034eac1d413"
     },
@@ -890,8 +908,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6064,
-        1824
+        6688,
+        -16
       ]
     },
     {
@@ -907,8 +925,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        5600,
-        1824
+        6224,
+        -16
       ],
       "onError": "continueRegularOutput"
     },
@@ -936,8 +954,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        5152,
-        2896
+        5776,
+        1120
       ],
       "alwaysOutputData": true
     },
@@ -950,8 +968,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5376,
-        2896
+        6000,
+        1120
       ]
     },
     {
@@ -1062,8 +1080,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        5856,
-        2880
+        6480,
+        1104
       ],
       "alwaysOutputData": true
     },
@@ -1076,8 +1094,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6096,
-        2880
+        6720,
+        1104
       ]
     },
     {
@@ -1089,8 +1107,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5152,
-        2704
+        5776,
+        864
       ]
     },
     {
@@ -1102,8 +1120,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5168,
-        2528
+        5792,
+        688
       ]
     },
     {
@@ -1134,8 +1152,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        5376,
-        2528
+        6000,
+        688
       ],
       "webhookId": "188627ec-11a7-5808-bf4c-a6e9d2f1c3af"
     },
@@ -1152,10 +1170,16 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        2256
+        128,
+        416
       ],
-      "webhookId": "f45b1f0d-42c7-4eaf-9a90-831b885264cd"
+      "webhookId": "f45b1f0d-42c7-4eaf-9a90-831b885264cd",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": null,
+          "name": "Select your protected form credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -1166,8 +1190,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        2256
+        352,
+        416
       ]
     },
     {
@@ -1194,8 +1218,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1152,
-        2352
+        1776,
+        592
       ]
     },
     {
@@ -1207,8 +1231,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
-        2352
+        1984,
+        592
       ]
     },
     {
@@ -1321,8 +1345,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1584,
-        2352
+        2208,
+        592
       ]
     },
     {
@@ -1336,8 +1360,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        2432
+        128,
+        592
       ],
       "webhookId": "8c3005f9-52f4-46d9-a2f7-0a9aec506c8b"
     },
@@ -1350,8 +1374,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        2432
+        352,
+        592
       ]
     },
     {
@@ -1379,8 +1403,8 @@
       "typeVersion": 1.1,
       "alwaysOutputData": true,
       "position": [
-        1360,
-        2800
+        1984,
+        1024
       ]
     },
     {
@@ -1392,8 +1416,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        2800
+        2208,
+        1024
       ]
     },
     {
@@ -1414,10 +1438,16 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2032,
-        2800
+        2656,
+        1008
       ],
-      "retryOnFail": false
+      "retryOnFail": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -1428,8 +1458,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2240,
-        2800
+        2864,
+        1008
       ]
     },
     {
@@ -1465,8 +1495,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        2464,
-        2800
+        3088,
+        1040
       ]
     },
     {
@@ -1481,8 +1511,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        2656
+        128,
+        816
       ],
       "webhookId": "d6d504b4-44e2-441b-8167-99e2cf3a042e"
     },
@@ -1495,8 +1525,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        2656
+        352,
+        816
       ]
     },
     {
@@ -1524,8 +1554,8 @@
       "typeVersion": 1.1,
       "alwaysOutputData": true,
       "position": [
-        1360,
-        3072
+        1984,
+        1328
       ]
     },
     {
@@ -1537,8 +1567,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        3072
+        2208,
+        1328
       ]
     },
     {
@@ -1651,8 +1681,8 @@
       "typeVersion": 1.1,
       "alwaysOutputData": true,
       "position": [
-        2032,
-        3072
+        2656,
+        1344
       ]
     },
     {
@@ -1664,8 +1694,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2240,
-        3072
+        2864,
+        1344
       ]
     },
     {
@@ -1701,29 +1731,28 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        2464,
-        3072
+        3088,
+        1344
       ]
     },
     {
       "parameters": {
-        "content": "# Create and Publish Reels & Shorts with NextCut and Dropbox\n\n### How it works\n- Brief + supplied audio → NextCut MP4 → checks → optional Dropbox/social delivery.\n\n### Setup\n- Add API/OAuth credentials and your public n8n URL. Run setup once.\n- Supply a public PCM WAV as `audioUrl`.\n\n### Customization\n- Brand, scenes, caption, channels and schedule. Default: 09:00 UTC.\n\n### Additional info\n- Free-only API; 396 × 704, up to 30 seconds. No built-in TTS or VM installs.\n- No manual video approval by default. Publishing and Dropbox start off.\n- [Setup and consulting](https://paoloronco.it/)",
-        "height": 480,
-        "width": 720,
-        "color": 2
+        "content": "\n## Create and Publish Reels & Shorts with NextCut and Dropbox\n\n### How it works\n- Submit a video brief through a protected form or example.\n- Validate narration, scenes, and publishing destinations.\n- Render videos with NextCut Free using supplied WAV narration.\n- Verify MP4 quality, duration, and SHA-256 integrity.\n- Optionally archive the original video in Dropbox.\n- Publish to Instagram Reels and YouTube Shorts automatically or after manual approval.\n- Track jobs, publishing status, and recovery checkpoints.\n\n### Setup\n- Import the workflow into n8n.\n- Configure credentials for NextCut, Basic Auth, and selected social platforms.\n- Optionally connect Dropbox OAuth.\n- Update **Apply video configuration** with your HTTPS URL, account IDs, timezone, and schedule.\n- Run **Set up cloud storage** to initialize Data Tables.\n- Run the read-only account check before testing the supplied-audio example.\n\n### Requirements\n- n8n instance with Data Tables and public HTTPS access.\n- NextCut Free quota, API key and public PCM WAV audioUrl.\n- Instagram and/or YouTube accounts with API publishing permissions.\n- Configured authentication and OAuth credentials.\n- Dropbox account (optional).\n\n### Customization\n- Customize narration, branding, colors, captions, and scenes.\n- Choose explainer or slideshow video formats.\n- Configure publishing schedules and target platforms.\n- Enable or disable manual video approval.\n- Adjust generation limits and Dropbox archiving.\n- Use private YouTube uploads for testing.\n\n### Additional info\n- Output: 396 × 704 MP4, 9:16, up to 30 seconds.\n- Supports 2–5 scenes per video.\n- Automatic authorization is enabled by default.\n- Publishing requires activation; rendering consumes verified Free quota.\n- NextCut Free quota and the job cap both apply.\n- Checkpoints and provider IDs help prevent duplicate uploads.\n- No local rendering server or GPU required.\n- [Setup, examples and recovery](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f).\n- Consulting, implementation and customization: [info@paoloronco.it](mailto:info@paoloronco.it).\n",
+        "height": 992,
+        "width": 720
       },
       "id": "8674ebd4-f74a-4a45-8a69-153c6e4c59df",
-      "name": "Cloud video production",
+      "name": "Workflow overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1376,
-        1680
+        -752,
+        -160
       ]
     },
     {
       "parameters": {
-        "content": "## NextCut rendering and account checks\n- Verify the Free plan and quota before rendering.\n- Download and inspect the supplied narration, then build native JSON scenes.\n- Resolve the renderer ID to NextCut's job UUID; resume that same job.\n- Verify the original H.264/AAC MP4 and SHA-256.\n- The live Free API caps the longest side at 720 pixels. This template uses exact 9:16 at 396 × 704.\n- NextCut does not generate speech. No local worker or project ZIP is required.",
+        "content": "### Call NextCut and verify provider bytes\n\nVerify the Free plan and quota, check the supplied WAV, then render native JSON scenes. Resume the saved render ID and job UUID. Use manualAction check for a read-only account check.",
         "height": 1296,
         "width": 1264,
         "color": 7
@@ -1733,15 +1762,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        5056,
-        1552
+        5680,
+        -288
       ]
     },
     {
       "parameters": {
-        "content": "### Private preview\n\nInspect the original video and audio. Preview links do not approve or publish a file. Activate the configured workflow to serve private media.",
-        "height": 240,
-        "width": 1840,
+        "content": "### Optionally preview the original video\n\nAuthorize the private review token, refresh the same NextCut render and show the video. Automatic authorization is the default; this preview does not pause delivery unless requireVideoApproval is enabled.",
+        "height": 288,
+        "width": 1680,
         "color": 7
       },
       "id": "16d5b555-4262-44a4-89e0-fdc77141efec",
@@ -1749,15 +1778,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        2752
+        1632,
+        928
       ]
     },
     {
       "parameters": {
-        "content": "### Recover the existing job\n\nUse its private token and saved provider IDs. Resolve the NextCut UUID and resume status checks. An uncertain submission is never regenerated automatically.",
-        "height": 384,
-        "width": 1120,
+        "content": "### Validate briefs or resume saved jobs\n\nValidate a new brief and create its private token, or claim an existing checkpoint. Recovery reuses saved provider identifiers.",
+        "height": 416,
+        "width": 960,
         "color": 7
       },
       "id": "52bca83a-5c44-4c1c-958b-dbd1b09541cb",
@@ -1765,8 +1794,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        2336
+        1632,
+        496
       ]
     },
     {
@@ -1798,8 +1827,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1152,
-        2800
+        1776,
+        1040
       ]
     },
     {
@@ -1831,8 +1860,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1808,
-        2800
+        2432,
+        1024
       ]
     },
     {
@@ -1864,8 +1893,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1152,
-        3072
+        1776,
+        1344
       ]
     },
     {
@@ -1897,8 +1926,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1808,
-        3072
+        2432,
+        1328
       ]
     },
     {
@@ -1930,15 +1959,15 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5392,
-        1824
+        6016,
+        -16
       ]
     },
     {
       "parameters": {
-        "content": "### Initialize isolated storage\n\nRun `manualAction: \"setup\"` once. Create the jobs table and both ledgers without resetting an existing budget or publishing-slot reservation. Choose a unique table name for each installation.",
-        "height": 368,
-        "width": 2240,
+        "content": "### Initialize storage and ledgers\n\nRun storage setup before creating jobs. Existing budget and publishing-slot records are retained. These tables store checkpoints, generation allowance and slot reservations used by later branches.",
+        "height": 432,
+        "width": 2080,
         "color": 7
       },
       "id": "079dfbdf-3433-4cae-993e-f56abb9cc742",
@@ -1946,13 +1975,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        1952
+        1632,
+        48
       ]
     },
     {
       "parameters": {
-        "content": "### Protected entry points\n\nGET displays the intake/recovery forms; POST submits them. Configure Basic Auth before activation. Include two to five scenes and a public narration WAV URL in the brief.",
+        "content": "### Receive and route requests\n\nProtected intake and recovery, optional preview and decisions, schedules and media access all use the shared configuration. Basic Auth protects intake and recovery. GET displays their forms; POST submits requests.",
         "height": 1952,
         "width": 608,
         "color": 7
@@ -1962,13 +1991,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -608,
-        1680
+        16,
+        -160
       ]
     },
     {
       "parameters": {
-        "content": "### Persist each transition\n\nSave the request, file hash and provider IDs before dispatching the next action. Conditional updates protect checkpoints from overlapping executions.",
+        "content": "### Advance one cloud operation\n\nCalculate the next operation, save its checkpoint, then dispatch it. Provider replies return to this state machine. Saved identifiers and checksums support retries and recovery.",
         "height": 592,
         "width": 1056,
         "color": 7
@@ -1978,13 +2007,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3952,
-        2256
+        4576,
+        416
       ]
     },
     {
       "parameters": {
-        "content": "### Free-plan render permit\n\nRequire a verified Free account and available quota. Reserve one job permit by default. Paid subscriptions, uncertain quotas and duplicate submissions stop the job.",
+        "content": "### Reserve the generation allowance\n\nReserve a permitted job atomically before rendering. maxCloudRenders limits jobs, not provider quota. NextCut Free must have verified capacity; paid plans and uncertain submissions stop this branch.",
         "height": 288,
         "width": 1264,
         "color": 7
@@ -1994,15 +2023,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        5056,
-        2864
+        5680,
+        1024
       ]
     },
     {
       "parameters": {
-        "content": "### Automatic authorization\n\nTechnical checks authorize the exact file and destinations automatically. Optional manual review requires `requireVideoApproval: true`. Default: false.",
-        "height": 208,
-        "width": 1840,
+        "content": "### Optionally bind an approval to this file\n\nWhen manual approval is enabled, validate the decision and bind approval to the verified original. Store it conditionally before returning a receipt. Leave requireVideoApproval false to retain automatic authorization.",
+        "height": 256,
+        "width": 1680,
         "color": 7
       },
       "id": "2b68042f-d251-4db5-9264-84ae144f8bcc",
@@ -2010,8 +2039,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        3024
+        1632,
+        1248
       ]
     },
     {
@@ -2023,8 +2052,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        3120
+        704,
+        1280
       ]
     },
     {
@@ -2293,8 +2322,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        368,
-        3008
+        992,
+        1168
       ]
     },
     {
@@ -2326,8 +2355,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5584,
-        2896
+        6208,
+        1120
       ]
     },
     {
@@ -2354,8 +2383,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2224,
-        2048
+        2880,
+        160
       ],
       "alwaysOutputData": true
     },
@@ -2388,8 +2417,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2448,
-        2048
+        3104,
+        160
       ]
     },
     {
@@ -2494,8 +2523,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2672,
-        2128
+        3328,
+        240
       ]
     },
     {
@@ -2507,8 +2536,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2880,
-        2032
+        3536,
+        144
       ]
     },
     {
@@ -2527,8 +2556,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -480,
-        3120
+        144,
+        1280
       ]
     },
     {
@@ -2540,8 +2569,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -256,
-        3120
+        368,
+        1280
       ]
     },
     {
@@ -2568,8 +2597,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1152,
-        3552
+        1792,
+        1840
       ],
       "alwaysOutputData": true
     },
@@ -2582,8 +2611,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
-        3552
+        2016,
+        1840
       ]
     },
     {
@@ -2615,8 +2644,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1600,
-        3552
+        2240,
+        1840
       ]
     },
     {
@@ -2643,8 +2672,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1808,
-        3552
+        2448,
+        1760
       ],
       "alwaysOutputData": true
     },
@@ -2657,8 +2686,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2032,
-        3552
+        2672,
+        1760
       ]
     },
     {
@@ -2690,8 +2719,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2256,
-        3552
+        2880,
+        1744
       ]
     },
     {
@@ -2802,8 +2831,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2480,
-        3552
+        3216,
+        1664
       ],
       "alwaysOutputData": true
     },
@@ -2816,8 +2845,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2720,
-        3552
+        3424,
+        1664
       ]
     },
     {
@@ -2849,8 +2878,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2928,
-        3552
+        3648,
+        1664
       ]
     },
     {
@@ -2865,8 +2894,8 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 2,
       "position": [
-        3232,
-        3536
+        3888,
+        1648
       ]
     },
     {
@@ -2878,8 +2907,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3456,
-        3536
+        4096,
+        1648
       ]
     },
     {
@@ -2991,8 +3020,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        3680,
-        3536
+        4320,
+        1648
       ],
       "alwaysOutputData": true
     },
@@ -3005,8 +3034,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3888,
-        3536
+        4512,
+        1648
       ]
     },
     {
@@ -3038,8 +3067,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4112,
-        3536
+        4736,
+        1648
       ]
     },
     {
@@ -3051,8 +3080,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4336,
-        3536
+        5008,
+        1824
       ]
     },
     {
@@ -3165,8 +3194,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4560,
-        3536
+        5200,
+        1824
       ]
     },
     {
@@ -3343,8 +3372,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        4832,
-        3456
+        5456,
+        1744
       ]
     },
     {
@@ -3363,10 +3392,16 @@
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
       "position": [
-        5168,
-        3344
+        6112,
+        1536
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "facebookGraphApiOAuth2Api": {
+          "id": null,
+          "name": "Select your Instagram OAuth credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -3388,10 +3423,16 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5168,
-        3568
+        6112,
+        1760
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": null,
+          "name": "Select your YouTube OAuth credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -3418,10 +3459,16 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        5168,
-        3792
+        6112,
+        1984
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -3441,8 +3488,8 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        5168,
-        4016
+        6112,
+        2208
       ],
       "onError": "continueRegularOutput"
     },
@@ -3475,8 +3522,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5392,
-        4016
+        6336,
+        2208
       ]
     },
     {
@@ -3492,8 +3539,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        5664,
-        4000
+        6608,
+        2192
       ],
       "onError": "continueRegularOutput"
     },
@@ -3507,8 +3554,8 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 2,
       "position": [
-        5872,
-        4000
+        6816,
+        2192
       ],
       "onError": "continueRegularOutput"
     },
@@ -3521,8 +3568,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6096,
-        4000
+        7040,
+        2192
       ]
     },
     {
@@ -3534,8 +3581,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5168,
-        4240
+        6112,
+        2432
       ]
     },
     {
@@ -3543,7 +3590,7 @@
         "resource": "video",
         "operation": "upload",
         "title": "={{ $json.title }}",
-        "regionCode": "IT",
+        "regionCode": "US",
         "categoryId": "=28",
         "options": {
           "defaultLanguage": "=en",
@@ -3560,10 +3607,16 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        5392,
-        4240
+        6336,
+        2432
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": null,
+          "name": "Select your YouTube OAuth credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -3574,8 +3627,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5168,
-        4464
+        6112,
+        2656
       ],
       "webhookId": "56a8bd1c-9afc-44c3-9d93-48de47d62aaf"
     },
@@ -3588,8 +3641,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6240,
-        4416
+        7168,
+        2672
       ]
     },
     {
@@ -3601,8 +3654,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3248,
-        3792
+        4048,
+        2096
       ]
     },
     {
@@ -3611,7 +3664,7 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 9 * * *"
+              "expression": "0 8 * * *"
             }
           ]
         }
@@ -3621,8 +3674,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -496,
-        2848
+        128,
+        1008
       ]
     },
     {
@@ -3634,8 +3687,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        2848
+        352,
+        1008
       ]
     },
     {
@@ -3662,8 +3715,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1008,
-        4176
+        1760,
+        2432
       ],
       "alwaysOutputData": true
     },
@@ -3676,8 +3729,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1232,
-        4176
+        1984,
+        2432
       ]
     },
     {
@@ -3691,8 +3744,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -512,
-        3424
+        112,
+        1584
       ],
       "webhookId": "a20eb1fb-fe97-444c-a087-fe58d383d683"
     },
@@ -3705,8 +3758,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        3424
+        384,
+        1584
       ]
     },
     {
@@ -3738,8 +3791,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        960,
-        4672
+        1744,
+        3168
       ]
     },
     {
@@ -3766,8 +3819,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1168,
-        4672
+        2080,
+        3088
       ],
       "alwaysOutputData": true
     },
@@ -3780,8 +3833,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1392,
-        4672
+        2304,
+        3088
       ]
     },
     {
@@ -3813,8 +3866,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1616,
-        4672
+        2528,
+        3088
       ]
     },
     {
@@ -3835,10 +3888,16 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1840,
-        4672
+        2800,
+        3008
       ],
-      "retryOnFail": false
+      "retryOnFail": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -3849,8 +3908,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2048,
-        4672
+        3008,
+        3008
       ]
     },
     {
@@ -3882,8 +3941,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2272,
-        4672
+        3232,
+        3008
       ]
     },
     {
@@ -3904,8 +3963,8 @@
       "typeVersion": 4.2,
       "retryOnFail": false,
       "position": [
-        2496,
-        4672
+        3472,
+        2992
       ],
       "onError": "continueRegularOutput"
     },
@@ -3938,8 +3997,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2720,
-        4672
+        3696,
+        2992
       ]
     },
     {
@@ -3955,8 +4014,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        2928,
-        4672
+        3920,
+        2976
       ],
       "onError": "continueRegularOutput"
     },
@@ -3970,8 +4029,8 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 2,
       "position": [
-        3152,
-        4672
+        4144,
+        2976
       ],
       "onError": "continueRegularOutput"
     },
@@ -3984,8 +4043,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3376,
-        4672
+        4368,
+        2976
       ]
     },
     {
@@ -4017,8 +4076,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3600,
-        4672
+        4592,
+        2976
       ]
     },
     {
@@ -4049,8 +4108,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        3808,
-        4672
+        4832,
+        2960
       ]
     },
     {
@@ -4066,13 +4125,13 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        2496,
-        4896
+        3504,
+        3312
       ]
     },
     {
       "parameters": {
-        "content": "### Configure your installation\n\nSet your public n8n URL, unique table, brand and intended account IDs. Choose a unique webhook prefix if importing multiple copies. Publishing and Dropbox start disabled.",
+        "content": "### Configure and route requests\n\nSet your public HTTPS URL, table name, credentials, destination identities and schedule here. Every entry point uses this configuration; the router sends each request to its matching operation.",
         "height": 624,
         "width": 512,
         "color": 7
@@ -4082,13 +4141,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        16,
-        2912
+        640,
+        1072
       ]
     },
     {
       "parameters": {
-        "content": "### Scheduled delivery\n\nSelect one due authorized video. Reserve its slot and delivery lease atomically. Publish through the configured platform credentials and retain receipts for completed channels.\n\nDefault: **09:00 UTC**. Match both Schedule nodes with the configured timezone and hours.",
+        "content": "### Select, reserve and checkpoint delivery\n\nChoose one due, technically authorized video. Reserve its publishing slot and job lease, then checkpoint each channel separately. Reconcile uncertain uploads before retrying. Match the Schedule nodes to the configured hours and timezone.",
         "height": 704,
         "width": 4224,
         "color": 7
@@ -4098,14 +4157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        3264
+        1632,
+        1552
       ]
     },
     {
       "parameters": {
-        "content": "### Publish and verify\n\nCheck account identity and quota before each selected channel. Verify the original MP4 hash before YouTube upload. Keep processing IDs and reconcile uncertain uploads before retrying. Live social publication by this NextCut copy has not been validated.",
-        "height": 1488,
+        "content": "### Publish and reconcile platform uploads\n\nUse the selected Instagram and YouTube OAuth credentials. Verify the original MP4 and SHA-256 before YouTube upload. Poll processing and capture platform responses. Private tests select YouTube only; public posting requires explicitly enabled publishing.",
+        "height": 1552,
         "width": 1248,
         "color": 7
       },
@@ -4114,15 +4173,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        5104,
-        3200
+        5872,
+        1408
       ]
     },
     {
       "parameters": {
-        "content": "### Serve the original MP4\n\nUse the saved NextCut job UUID, refresh its existing URL and verify the exact SHA-256. Keep private preview and expiring publishing capabilities separate. Never generate new video to refresh a URL.",
-        "height": 560,
-        "width": 3296,
+        "content": "### Authorize, verify and serve the original MP4\n\nCheck the private review token or expiring publishing capability. Refresh the recorded render, download its original MP4 and compare SHA-256 with the authorized file. Return verified media or a controlled error.",
+        "height": 608,
+        "width": 3392,
         "color": 7
       },
       "id": "facba3ca-1567-5a03-ae6a-ef6e02cfe4b4",
@@ -4130,8 +4189,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        4544
+        1632,
+        2896
       ]
     },
     {
@@ -4143,13 +4202,13 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -288,
-        2032
+        336,
+        192
       ]
     },
     {
       "parameters": {
-        "content": "### Example and read-only checks\n\n`setup`: initialize storage. `check`: inspect the free account. `example`: create one demonstration job. `recover`: resume saved IDs. The daily queue check does not render or publish.",
+        "content": "### Try the fictional brief and inspect the queue\n\nSet manualAction to example to submit the supplied English narration and scenes; neither social destination is selected. The daily queue check reports saved jobs without generating or publishing a video.",
         "height": 496,
         "width": 736,
         "color": 7
@@ -4159,8 +4218,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        848,
-        4016
+        1632,
+        2304
       ]
     },
     {
@@ -4192,8 +4251,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        6480,
-        1824
+        7104,
+        -16
       ]
     },
     {
@@ -4205,8 +4264,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6720,
-        1824
+        7344,
+        -16
       ]
     },
     {
@@ -4220,13 +4279,19 @@
       "type": "n8n-nodes-base.dropbox",
       "typeVersion": 1,
       "position": [
-        6960,
-        1824
+        7584,
+        -16
       ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "dropboxOAuth2Api": {
+          "id": null,
+          "name": "Select your Dropbox OAuth2 credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -4237,13 +4302,13 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7200,
-        1824
+        7824,
+        -16
       ]
     },
     {
       "parameters": {
-        "content": "### Optional Dropbox archive\n\nEnable `dropboxEnabled`, connect Dropbox OAuth and select a folder. Upload the verified original before delivery. Stable filenames and saved file IDs support safe retries.\n\nDefault folder: **/Video Archive**",
+        "content": "### Optionally archive the original MP4\n\nWhen dropboxEnabled is true, upload the verified MP4 to your configured Dropbox folder. Stable filenames support overwrite on retry. Save the resulting file ID or archive error in the job.",
         "height": 400,
         "width": 1120,
         "color": 7
@@ -4253,8 +4318,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        6368,
-        1648
+        6992,
+        -192
       ]
     },
     {
@@ -4281,9 +4346,15 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5168,
-        2192
-      ]
+        6016,
+        352
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Select your NextCut API credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -4294,8 +4365,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5392,
-        2192
+        6448,
+        352
       ]
     }
   ],
@@ -5834,12 +5905,6 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "saveDataSuccessExecution": "all",
-    "saveDataErrorExecution": "all",
-    "saveManualExecutions": true,
-    "executionTimeout": 7200,
-    "timezone": "UTC",
-    "saveExecutionProgress": true
+    "binaryMode": "separate"
   }
 }

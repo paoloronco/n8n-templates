@@ -1,0 +1,34 @@
+{
+  "idempotencyKey": "example-first-draft",
+  "format": "wall_text",
+  "channels": [
+    "youtube"
+  ],
+  "privateTest": true,
+  "brief": {
+    "title": "From your brief to approved publishing",
+    "brand": "Local Video",
+    "language": "en-US",
+    "accent": "#555555",
+    "narration": "Start with a concrete brief and create the video on your computer. Watch the complete draft, check the text and listen to the voiceover. Approve only the version you want to publish. Each channel keeps its own receipt, so errors can be resumed without uploading duplicate videos.",
+    "caption": "Private integration test: local rendering, draft approval and verified publishing.",
+    "scenes": [
+      {
+        "title": "A concrete brief",
+        "body": "Choose the text, voiceover and channels before you start."
+      },
+      {
+        "title": "Review the draft",
+        "body": "Watch the complete video and listen to the narration."
+      },
+      {
+        "title": "Approve this version",
+        "body": "Approval matches the exact file you reviewed."
+      },
+      {
+        "title": "Resume without duplicates",
+        "body": "Each channel retains its ID, status and receipt."
+      }
+    ]
+  }
+}

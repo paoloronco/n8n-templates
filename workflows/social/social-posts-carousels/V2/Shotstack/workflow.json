@@ -1,0 +1,2417 @@
+{
+  "name": "Social Posts & Carousels — V2 Shotstack Sandbox (Template)",
+  "nodes": [
+    {
+      "id": "8627d912-b8fd-4807-aaf1-19bb106032a4",
+      "name": "Run privately now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        288
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cc3713b7-d8bc-4553-a448-6ed9e8e7fa4c",
+      "name": "Twice-weekly private production",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        64
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10 * * 2,5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "08f54d24-1467-41eb-ac16-c4b049fc78ee",
+      "name": "Authenticated test trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        512
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "social-shotstack-posts-test",
+        "authentication": "headerAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "313a6745-8fd0-4109-ac4c-afec2d04e278",
+      "name": "Reserve brief and budget",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        288
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "reserve",
+            "request": "={{ ({body:$json.body||{},isTest:$json.isTest,executionToken:$json.executionToken}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "23ff8606-b0e8-4a2b-aa35-fa0935144a2e",
+      "name": "New production authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1472,
+        288
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b81eda69e2cd6e8852b",
+              "leftValue": "={{ $json.canGenerate === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "953ad6d3-e138-410f-a95f-76878c1621e3",
+      "name": "Write specific English copy",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "retryOnFail": false,
+      "position": [
+        1888,
+        192
+      ],
+      "parameters": {
+        "images": {
+          "values": [
+            {}
+          ]
+        },
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.writerRequest.model }}"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.writerRequest.messages.filter(m => m.role === 'system').map(m => m.content).join('\\n\\n') }}"
+            },
+            {
+              "content": "={{ $json.writerRequest.messages.filter(m => m.role === 'user').map(m => m.content).join('\\n\\n') }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "maxTokens": "={{ $json.writerRequest.max_completion_tokens }}",
+          "maxToolsIterations": 1,
+          "parallelToolCalls": false,
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "={{ $json.writerRequest.reasoning_effort }}",
+              "summary": "none"
+            }
+          },
+          "store": false,
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "={{ $json.writerRequest.response_format.json_schema.name }}",
+              "schema": "={{ JSON.stringify($json.writerRequest.response_format.json_schema.schema) }}",
+              "strict": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "20ea37df-4309-4a52-a0ea-65c15b1f7c53",
+      "name": "Validate facts, novelty and usage",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2176,
+        192
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "draft",
+            "request": "={{ ({jobId:$('Reserve brief and budget').first().json.id,response:$json}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "d2c561e4-f4ec-4f2f-a843-60234c72bb50",
+      "name": "Independent editorial review",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "retryOnFail": false,
+      "position": [
+        3040,
+        192
+      ],
+      "parameters": {
+        "images": {
+          "values": [
+            {}
+          ]
+        },
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.reviewerRequest.model }}"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.reviewerRequest.messages.filter(m => m.role === 'system').map(m => m.content).join('\\n\\n') }}"
+            },
+            {
+              "content": "={{ $json.reviewerRequest.messages.filter(m => m.role === 'user').map(m => m.content).join('\\n\\n') }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "maxTokens": "={{ $json.reviewerRequest.max_completion_tokens }}",
+          "maxToolsIterations": 1,
+          "parallelToolCalls": false,
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "={{ $json.reviewerRequest.reasoning_effort }}",
+              "summary": "none"
+            }
+          },
+          "store": false,
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "={{ $json.reviewerRequest.response_format.json_schema.name }}",
+              "schema": "={{ JSON.stringify($json.reviewerRequest.response_format.json_schema.schema) }}",
+              "strict": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "6f0cd3c8-67c6-4e12-aa97-8c7a83e9dc32",
+      "name": "Record review and queue render",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3328,
+        192
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "review",
+            "request": "={{ ({jobId:$('Reserve brief and budget').first().json.id,response:$json}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "0dbb0402-d515-4d4c-a2c9-d37988105030",
+      "name": "One correction requested?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca237bc5317acc2e2cc7",
+              "leftValue": "={{ $json.state === \"needs_revision\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "618b546a-a3fb-4ffe-ae73-582ff7077d12",
+      "name": "Editorial review needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2752,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8e40104ad4db56d0b962",
+              "leftValue": "={{ $json.state === \"drafted\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f7f40e9d-63d2-4549-a2aa-25d29c224c52",
+      "name": "Wait for cloud renderer",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3040,
+        448
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "11555973-ac7c-41b4-ad13-857771ff6360",
+      "name": "Read actual render status",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3328,
+        448
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "render-plan",
+            "request": "={{ ({jobId:$('Reserve brief and budget').first().json.id}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "52a2b2ba-2d3c-4a8b-a917-3429236f0dd6",
+      "name": "Private files ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3616,
+        448
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e82a7302f42d89b70b67",
+              "leftValue": "={{ $json.state === \"ready\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9ec80cec-fb2e-4b86-aa22-7305f3b2670d",
+      "name": "Production rejected or failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3904,
+        704
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da2378c7-bcdd-5024-af09-cdef096fa6f0",
+              "leftValue": "={{ ['failed','rejected'].includes($json.state) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d7690bc6-5617-4130-ae23-b3c43c9c98d9",
+      "name": "Private deliverables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3904,
+        448
+      ],
+      "parameters": {
+        "jsCode": "const j=$input.first().json,cfg=$('Apply cloud configuration').first().json.config;return [{json:{...j,message:'Private cloud draft ready.',apiCostUsd:j.costUsd,previewUrl:cfg.publicN8nBaseUrl+'/webhook/'+cfg.previewPath+'/'+j.jobId+'?token='+j.previewToken}}];"
+      }
+    },
+    {
+      "id": "0d349eaf-9168-4e96-a175-bb2278af7ba1",
+      "name": "Stop and retain evidence",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4192,
+        704
+      ],
+      "parameters": {
+        "errorMessage": "={{ $json.error || \"Private production failed. Inspect the job and usage before retrying.\" }}"
+      }
+    },
+    {
+      "id": "a7d15f59-b015-40e3-96b7-ecd6b805e120",
+      "name": "Validate publication input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5056,
+        448
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Private deliverables').first().json;\nconst jobId=source.jobId||source.id;\nif(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(jobId||''))throw new Error('A ready studio job ID is required');\nreturn [{json:{jobId,executionId:String($execution.id),dryRun:source.dryRun===true}}];"
+      }
+    },
+    {
+      "id": "68d55efd-ab10-4e54-a37b-67b01f7c96e8",
+      "name": "Claim durable publication",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        5344,
+        448
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "instagram-claim",
+            "request": "={{ ({jobId:$json.jobId,dryRun:$json.dryRun}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "255d3212-f9af-4fa4-a12d-82363591c55b",
+      "name": "Publication verified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5632,
+        448
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "done-condition",
+              "leftValue": "={{ $json.done === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b370ab29-cb66-41a5-813d-2f785217833f",
+      "name": "Wait for Meta processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5920,
+        704
+      ],
+      "parameters": {
+        "amount": "={{ Math.max(1,Number($json.action.delaySeconds)||1) }}"
+      }
+    },
+    {
+      "id": "332e4f6f-32b2-46e4-ac71-6ead48085c57",
+      "name": "Meta API with official OAuth",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput",
+      "position": [
+        6208,
+        704
+      ],
+      "parameters": {
+        "authType": "oAuth2",
+        "httpRequestMethod": "={{ $json.action.method }}",
+        "graphApiVersion": "v25.0",
+        "node": "={{ $json.action.node }}",
+        "edge": "={{ $json.action.edge }}",
+        "options": {
+          "queryParametersJson": "={{ JSON.stringify($json.action.query) }}"
+        }
+      }
+    },
+    {
+      "id": "e21972b9-1e93-4a2f-939d-61c8e57a91e0",
+      "name": "Persist result before next action",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        6496,
+        704
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "instagram-result",
+            "request": "={{ ({jobId:$('Validate publication input').first().json.jobId,stepId:$('Wait for Meta processing').item.json.action.stepId,response:$json}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "9ac9abac-8570-4dad-8f5d-935257b9baaa",
+      "name": "Instagram publication receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6784,
+        448
+      ],
+      "parameters": {
+        "jsCode": "if($json.dryRun!==true&&($json.state!=='published'||!$json.mediaId||!$json.permalink))throw new Error('A verified Instagram publication receipt is required');\nreturn [{json:{...$json,message:$json.dryRun?'Publication preflight passed; no post was sent.':'Published and verified on Instagram.'}}];"
+      }
+    },
+    {
+      "id": "c4229f26-1c7e-49ce-8a86-1446029f4716",
+      "name": "Read Instagram publication gate",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4480,
+        448
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "gate",
+            "request": "={{ ({jobId:$('Private deliverables').first().json.jobId}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "a9f5e566-e6c8-4e84-9bf5-abd570ecb519",
+      "name": "Instagram publication enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "retryOnFail": false,
+      "position": [
+        4768,
+        448
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "done-condition",
+              "leftValue": "={{ $json.publishingEnabled === true && $('Private deliverables').first().json.previewOnly !== true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4ed9f03d-b944-4cf9-8491-a2b7349794af",
+      "name": "Keep private preview",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "retryOnFail": false,
+      "position": [
+        5056,
+        1248
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{...$('Private deliverables').first().json,message:'Private draft ready. Instagram publication is paused or this is a preview-only job.'}}];"
+      }
+    },
+    {
+      "id": "1523d583-e5a3-4806-9f00-99a860b45ce1",
+      "name": "Fetch signed Instagram asset",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        736
+      ],
+      "parameters": {
+        "path": "social-shotstack-posts-media/:jobId/:fileName",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "8acb6adc-e878-4484-b659-c9cc46294de9",
+      "name": "Validate asset request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "onError": "continueErrorOutput",
+      "position": [
+        1184,
+        1312
+      ],
+      "parameters": {
+        "jsCode": "const {params={},query={}}=$json;if(!/^[a-f0-9-]{36}$/.test(params.jobId||'')||!/^(reel\\.mp4|cover\\.jpg|slide-\\d+\\.(jpg|mp4)|narration\\.(vtt|srt|json)|caption\\.txt)$/.test(params.fileName||''))throw Error('Media unavailable');if(query.token){if(!/^[a-f0-9]{64,128}$/.test(query.token))throw Error('Media unavailable');return [{json:{...params,token:query.token}}];}if(!/^[a-f0-9]{64}$/.test(query.sig||'')||!/^\\d{10}$/.test(String(query.expires||'')))throw Error('Media unavailable');return [{json:{...params,sig:query.sig,expires:String(query.expires)}}];"
+      }
+    },
+    {
+      "id": "c159d760-6798-432a-9d4b-20be3d597ee9",
+      "name": "Read authorized media bytes",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "onError": "continueErrorOutput",
+      "position": [
+        1472,
+        1312
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "media",
+            "request": "={{ ({...$json}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "fd31f08d-e1fd-40b4-a316-dae17e1a1f1c",
+      "name": "Deliver only the requested file",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1760,
+        1312
+      ],
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "={{ $binary.data.mimeType }}"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "be6ce8eb-afb6-44bb-a47c-57baf2601e6c",
+      "name": "Instagram media unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2048,
+        1984
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: \"Media unavailable or link expired\" } }}",
+        "options": {
+          "responseCode": 404,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "f8939834-a105-4410-9bd9-4f86306d20f3",
+      "name": "[TPA] 00 Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -128
+      ],
+      "parameters": {
+        "content": "# Social Posts — Shotstack Sandbox\n\n## Quick overview\n\nCreate reviewed Instagram media with optional gated publication.\n\n## How it works\n\n1. Reserve an idempotent brief and API budget.\n2. Write grounded copy and record provider usage.\n3. Review the copy; allow one bounded correction.\n4. Render and verify a musical MP4 or four-part video carousel.\n5. Check the publication gate; retain private output when disabled.\n6. Claim publication, persist Meta results and verify the receipt.\n\n## Setup\n\n1. Import Runtime.json; select OpenAI, renderer and platform credentials.\n2. Keep the renderer and private gallery reachable.\n3. Preserve budget limits and the signed-media ingress.\n\n## Requirements\n\n- Bundled demo assets and the imported native cloud Runtime.\n\n## Customization\n\n- Change verified facts and layouts in the studio.\n- Keep publishing decisions outside the AI writer.\n\n## Additional info\n\n- Use `dryRun` to validate without posting.\n- Reconcile uncertain mutations before replaying.",
+        "height": 784,
+        "width": 720,
+        "color": 2
+      }
+    },
+    {
+      "id": "1c4ad710-183d-4cb8-a068-d25bf53d0878",
+      "name": "[TPA] 01 Brief and budget",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -128
+      ],
+      "parameters": {
+        "content": "## 1. Reserve brief and budget\n\n- Join manual, scheduled and authenticated test inputs.\n- Reserve one idempotent job before paid calls.\n- Reuse an existing job instead of starting another.",
+        "height": 832,
+        "width": 640,
+        "color": 7
+      }
+    },
+    {
+      "id": "842c1b01-03f7-4da2-87ce-ac59590428f3",
+      "name": "[TPA] 02 Copy review and rendering",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        -128
+      ],
+      "parameters": {
+        "content": "## 2. Write, review and render\n\n- Validate copy, product facts and provider usage.\n- Allow one semantic correction; retain uncertain-call reservations.\n- Poll verified output, then read the publication gate.",
+        "height": 1088,
+        "width": 2528,
+        "color": 7
+      }
+    },
+    {
+      "id": "c7ee0a9c-891c-41e2-842e-8d5ff6f77724",
+      "name": "[TPA] 03 Gated Instagram publishing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4384,
+        -128
+      ],
+      "parameters": {
+        "content": "## 3. Publish through the gate\n\n- Disabled gate: keep the private preview.\n- Claim approved media; use official Meta OAuth.\n- Persist each action; return the verified receipt.\n- Reconcile uncertainty before retrying.",
+        "height": 1088,
+        "width": 2688,
+        "color": 7
+      }
+    },
+    {
+      "id": "86393892-d2d5-45d6-a447-bf4b484b9f60",
+      "name": "[TPA] 04 Signed asset delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        1056
+      ],
+      "parameters": {
+        "content": "## 4. Deliver the authorized asset\n\n- Validate the file-specific signature and expiry.\n- Serve approved ready-job bytes or return unavailable.\n- Keep the gallery and unrelated files private.",
+        "height": 1184,
+        "width": 1184,
+        "color": 7
+      }
+    },
+    {
+      "id": "bf6c1e6b-aa81-5dd9-8eed-7a5736ba6a58",
+      "name": "Apply cloud configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        288
+      ],
+      "parameters": {
+        "jsCode": "const config={\"kind\": \"post\", \"generationEnabled\": false, \"publishingEnabled\": false, \"publicN8nBaseUrl\": \"https://n8n.example.com\", \"jobsTable\": \"social_studio_shotstack_templates\", \"monthlyOpenAiUsd\": 3, \"maxCloudRenders\": 4, \"instagramAccountId\": \"\", \"instagramUsername\": \"\", \"youtubeChannelId\": \"\", \"mediaPath\": \"social-shotstack-posts-media\", \"assetPath\": \"social-shotstack-posts-assets\", \"previewPath\": \"social-shotstack-posts-preview\", \"manualAction\": \"setup\", \"renderer\": \"shotstack\", \"minimumRemainingCredits\": 120, \"allowPaidVoiceGeneration\": false, \"commercialUseConfirmed\": false};const j=$input.first().json,ran=name=>$(name).isExecuted;let intent='reserve';if(ran('Fetch signed Instagram asset'))intent='media';else if(ran('Read bundled cloud asset'))intent='asset';else if(ran('Open private cloud preview'))intent='preview';else if(ran('Run privately now'))intent=config.manualAction;return [{json:{...j,config,_intent:intent,isTest:ran('Authenticated test trigger')}}];"
+      }
+    },
+    {
+      "id": "1f6ef026-5d39-54a3-be54-a6b8840a78d7",
+      "name": "Create execution capability",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        320,
+        288
+      ],
+      "parameters": {
+        "action": "generate",
+        "dataPropertyName": "executionToken",
+        "encodingType": "hex",
+        "stringLength": 64
+      }
+    },
+    {
+      "id": "48ae591f-75de-5f88-b22f-104254bf2a21",
+      "name": "Route cloud entry",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        288
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "reserve",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reserve"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "media",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "media"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "asset",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "asset"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "preview",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "preview"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json._intent }}",
+                    "rightValue": "setup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "setup"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "03145ea7-6676-5ac5-9747-dcd8534c02ce",
+      "name": "Read bundled cloud asset",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        32,
+        960
+      ],
+      "parameters": {
+        "path": "social-shotstack-posts-assets/:jobId/:fileName",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "5295074d-e1cb-5efd-af36-1e0f384ccb1f",
+      "name": "Open private cloud preview",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        32,
+        1184
+      ],
+      "parameters": {
+        "path": "social-shotstack-posts-preview/:jobId",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "fd24f3bc-02b6-5289-ba54-1f2a3d6eabe0",
+      "name": "Show private cloud preview",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1472,
+        1760
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": "={{ $json.httpStatus }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "Referrer-Policy",
+                "value": "no-referrer"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "7cc6fd7a-ee63-53ee-bf96-552cceb06a1a",
+      "name": "Deliver requested bundled asset",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1472,
+        1536
+      ],
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "530c96e3-6050-5482-aa42-fd625ae16288",
+      "name": "Set up cloud storage",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        512
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "setup",
+            "request": "={{ ({executionToken:$json.executionToken}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "1916f540-facf-50b8-b828-fa9318e86a9c",
+      "name": "Authorize bundled asset",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "onError": "continueErrorOutput",
+      "position": [
+        1184,
+        1536
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "asset",
+            "request": "={{ ({params:$json.params,query:$json.query}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "073d23d1-8472-50ec-9881-a8ab7a666f8a",
+      "name": "Authorize private preview",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "onError": "continueErrorOutput",
+      "position": [
+        1184,
+        1760
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "preview",
+            "request": "={{ ({jobId:$json.params.jobId,token:$json.query.token}) }}",
+            "config": "={{ $('Apply cloud configuration').first().json.config }}",
+            "executionId": "={{ String($execution.id) }}",
+            "context": "={{ {} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "request",
+              "displayName": "request",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "config",
+              "displayName": "config",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "188db12d-65a5-5273-9a73-9d29fd557cb4",
+      "name": "Review correction requested?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3616,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2036478b-bc45-5591-ac25-bfded0e97dad",
+              "leftValue": "={{ $json.state==='needs_revision' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "849239da-1270-55c1-9dca-1f15e4218918",
+      "name": "Cloud entry and configuration",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -128
+      ],
+      "parameters": {
+        "content": "## Inputs and cloud configuration\n\nManual, schedule and authenticated test inputs share one configuration. Private file, asset and preview requests use separate delivery lanes.\n\n- Configure the named Cloud Runtime sub-workflow once.\n- Keep generation and publishing disabled until credentials and credits are ready.\n- Manual action `setup` initializes the shared table; `reserve` creates a job.\n- Render limits and account destinations remain in Apply cloud configuration.",
+        "height": 1568,
+        "width": 1120,
+        "color": 7
+      }
+    },
+    {
+      "id": "193d0d25-1743-5256-8326-3f336b3a63c6",
+      "name": "Private draft output",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4992,
+        1056
+      ],
+      "parameters": {
+        "content": "## Keep the draft private\n\nThe publishing gate retains the private preview when publishing is disabled. No social upload occurs on this branch.",
+        "height": 384,
+        "width": 640,
+        "color": 7
+      }
+    },
+    {
+      "id": "231a6bda-1ebb-56aa-a61e-ff4f8cd145e7",
+      "name": "Native cloud runtime guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        768
+      ],
+      "parameters": {
+        "content": "## Shotstack Sandbox template\n\nCloud rendering, 1080 × 1350 (4:5).\n\nSelect a Sandbox credential you configure in the shared provider runtime. Renders have a watermark. Speech generation consumes credits and remains blocked until explicitly enabled.\n\nKeep this template inactive. Generation and publishing are disabled. OpenAI uses its own billed account if later enabled. No VM worker is needed.",
+        "height": 640,
+        "width": 720,
+        "color": 7
+      }
+    }
+  ],
+  "connections": {
+    "Run privately now": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twice-weekly private production": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticated test trigger": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserve brief and budget": {
+      "main": [
+        [
+          {
+            "node": "New production authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New production authorized?": {
+      "main": [
+        [
+          {
+            "node": "Write specific English copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read actual render status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write specific English copy": {
+      "main": [
+        [
+          {
+            "node": "Validate facts, novelty and usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate facts, novelty and usage": {
+      "main": [
+        [
+          {
+            "node": "One correction requested?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Independent editorial review": {
+      "main": [
+        [
+          {
+            "node": "Record review and queue render",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record review and queue render": {
+      "main": [
+        [
+          {
+            "node": "Review correction requested?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for cloud renderer": {
+      "main": [
+        [
+          {
+            "node": "Read actual render status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read actual render status": {
+      "main": [
+        [
+          {
+            "node": "Private files ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Private files ready?": {
+      "main": [
+        [
+          {
+            "node": "Private deliverables",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Production rejected or failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Production rejected or failed?": {
+      "main": [
+        [
+          {
+            "node": "Stop and retain evidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for cloud renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One correction requested?": {
+      "main": [
+        [
+          {
+            "node": "Write specific English copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Editorial review needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editorial review needed?": {
+      "main": [
+        [
+          {
+            "node": "Independent editorial review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for cloud renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Private deliverables": {
+      "main": [
+        [
+          {
+            "node": "Read Instagram publication gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate publication input": {
+      "main": [
+        [
+          {
+            "node": "Claim durable publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim durable publication": {
+      "main": [
+        [
+          {
+            "node": "Publication verified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publication verified?": {
+      "main": [
+        [
+          {
+            "node": "Instagram publication receipt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for Meta processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Meta processing": {
+      "main": [
+        [
+          {
+            "node": "Meta API with official OAuth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meta API with official OAuth": {
+      "main": [
+        [
+          {
+            "node": "Persist result before next action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist result before next action": {
+      "main": [
+        [
+          {
+            "node": "Publication verified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Instagram publication gate": {
+      "main": [
+        [
+          {
+            "node": "Instagram publication enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram publication enabled?": {
+      "main": [
+        [
+          {
+            "node": "Validate publication input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Keep private preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch signed Instagram asset": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate asset request": {
+      "main": [
+        [
+          {
+            "node": "Read authorized media bytes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read authorized media bytes": {
+      "main": [
+        [
+          {
+            "node": "Deliver only the requested file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram publication receipt": {
+      "main": [
+        []
+      ]
+    },
+    "Read bundled cloud asset": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open private cloud preview": {
+      "main": [
+        [
+          {
+            "node": "Create execution capability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create execution capability": {
+      "main": [
+        [
+          {
+            "node": "Apply cloud configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply cloud configuration": {
+      "main": [
+        [
+          {
+            "node": "Route cloud entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route cloud entry": {
+      "main": [
+        [
+          {
+            "node": "Reserve brief and budget",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validate asset request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Authorize bundled asset",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Authorize private preview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set up cloud storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize bundled asset": {
+      "main": [
+        [
+          {
+            "node": "Deliver requested bundled asset",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize private preview": {
+      "main": [
+        [
+          {
+            "node": "Show private cloud preview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review correction requested?": {
+      "main": [
+        [
+          {
+            "node": "Write specific English copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for cloud renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "executionTimeout": 3600,
+    "timezone": "Europe/Rome",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "pinData": {}
+}

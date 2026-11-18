@@ -1,0 +1,17 @@
+{
+  "name": "local-video-production-runtime",
+  "version": "2.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node worker.mjs",
+    "test": "node --test worker.test.mjs workflow.test.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "hyperframes": "0.9.58",
+    "gsap": "3.15.1"
+  }
+}

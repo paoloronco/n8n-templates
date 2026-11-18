@@ -1,0 +1,86 @@
+{
+  "family": "social-reels-shorts",
+  "date": "2026-11-18",
+  "anonymous": true,
+  "active": false,
+  "providers": {
+    "HeyGen-HyperFrames": {
+      "cover.png": {
+        "bytes": 36671,
+        "sha256": "c0d0592904e3997ded06ceaaef18074d5955c871d6b9c75fe13aef1837f3ac34"
+      },
+      "documentation.md": {
+        "bytes": 18442,
+        "sha256": "8bcea91e922441ebb37e96c69ae1509d8c028f82b67e4b8eadbdb8d7ded96da7"
+      },
+      "README.md": {
+        "bytes": 4026,
+        "sha256": "a6cf01c09e121a5fd2def20733f20d0d6f9e4b0cd459fefc8afb147bd8ebf310"
+      },
+      "Runtime.json": {
+        "bytes": 2002278,
+        "sha256": "2689bf7114961cc95ed8aafb43d8255446592dc09e329080a877969265ad736f"
+      },
+      "thumbnail.png": {
+        "bytes": 32504,
+        "sha256": "7373194e0c419bb3af1122c347a1602606ab1c03ac345cce0dcfeffa30fa36d9"
+      },
+      "workflow.json": {
+        "bytes": 97355,
+        "sha256": "a11f978f456013cd8c8c19d48285ae5e6f94d07bd3d6e75c48679ae5fed64365"
+      }
+    },
+    "Shotstack": {
+      "cover.png": {
+        "bytes": 35990,
+        "sha256": "e204be0d6b3371aac5bf39084c66c6e02a103bf7fa827720f20c7d84589ed4cd"
+      },
+      "documentation.md": {
+        "bytes": 18454,
+        "sha256": "153a753535c92b2cb5a54f5da63c05466d4784ba24e23c91e82706bebb0567a1"
+      },
+      "README.md": {
+        "bytes": 4402,
+        "sha256": "6630e50fb5e50f71806ed647c80930183e8c5726fbb828a2be0bc0d601bba727"
+      },
+      "Runtime.json": {
+        "bytes": 1976943,
+        "sha256": "27eb6e420b77722e91002350889b4a9408fe3eaeb01754bebecbcd1131fc9d22"
+      },
+      "thumbnail.png": {
+        "bytes": 31933,
+        "sha256": "a36d2c3d73cbd2ad6f2e991f6483060a41436526a42d17512e01dc3ac2d5e670"
+      },
+      "workflow.json": {
+        "bytes": 97554,
+        "sha256": "688312e66d957eb4559c538938b6ea93f4a0cfd0506b0ed50a6f8fe6ffa5a442"
+      }
+    },
+    "JSON2Video": {
+      "cover.png": {
+        "bytes": 35764,
+        "sha256": "2d35e772e3126d0517cccdb043bf6a6603e9247d8cfd383b63bbf980fe113799"
+      },
+      "documentation.md": {
+        "bytes": 18474,
+        "sha256": "537fdd133628afa43084591cad355059005013bfbe8974291fab4d38d26b8354"
+      },
+      "README.md": {
+        "bytes": 4183,
+        "sha256": "6ae8fd18c829c345ea03cfbc0893bcd78830c9d4da0d464ce692e9dca288b2fc"
+      },
+      "Runtime.json": {
+        "bytes": 1976943,
+        "sha256": "27eb6e420b77722e91002350889b4a9408fe3eaeb01754bebecbcd1131fc9d22"
+      },
+      "thumbnail.png": {
+        "bytes": 31692,
+        "sha256": "ed2dadb111e491e1e603ffd613f888e34d8cc38888fb639837cbfa745b021194"
+      },
+      "workflow.json": {
+        "bytes": 97539,
+        "sha256": "920413c0f97387b98866b44025cb5959341b723212cbe978930963ba777d606e"
+      }
+    }
+  }
+}

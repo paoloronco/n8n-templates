@@ -1,0 +1,1179 @@
+{
+  "name": "Social Posts & Carousels — V1 Local Worker (Template)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "32dd6a5a-5d61-4a08-a3c8-d095673a3b77",
+      "name": "Run privately now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10 * * 2,5"
+            }
+          ]
+        }
+      },
+      "id": "c6db7c57-9b26-426e-88c8-bddb3c87a50e",
+      "name": "Twice-weekly private production",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-instagram-post-test",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "0c4f8768-249c-497a-ba36-8a211ed454c6",
+      "name": "Authenticated test trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://social-studio:3848/v1/jobs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { kind: 'post', requestKey: 'post:' + $execution.id } }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "3555e9a3-a41a-4d72-8ec9-49be2d3dcbf5",
+      "name": "Reserve brief and budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        0
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b81eda69e2cd6e8852b",
+              "leftValue": "={{ $json.canGenerate === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "32f5e1a2-73e3-44d1-b875-2973ac5993c5",
+      "name": "New production authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.writerRequest }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "3d18afda-1ed2-4781-b8ad-8be00d88e1f4",
+      "name": "Write specific English copy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        576,
+        -192
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://social-studio:3848/v1/jobs/\" + $(\"Reserve brief and budget\").first().json.id + \"/draft\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "69eca822-477c-4b6e-b139-0c85add27958",
+      "name": "Validate facts, novelty and usage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        800,
+        -192
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.reviewerRequest }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "6c35947f-3f86-4cb6-bf50-2bc67be93f5e",
+      "name": "Independent editorial review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1520,
+        -192
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://social-studio:3848/v1/jobs/\" + $(\"Reserve brief and budget\").first().json.id + \"/review\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "77c344be-ae5d-4d6f-9ee7-42f678880c73",
+      "name": "Record review and queue render",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1744,
+        -192
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca237bc5317acc2e2cc7",
+              "leftValue": "={{ $json.state === \"needs_revision\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "239e3a5d-4c34-4013-baa9-55ee0cfd8ed6",
+      "name": "One correction requested?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1024,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8e40104ad4db56d0b962",
+              "leftValue": "={{ $json.state === \"drafted\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4c3b79c8-9d6e-4d32-b2d5-e6189bcfedec",
+      "name": "Editorial review needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1280,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "333e7749-da8c-43ea-a1db-9aae08cb3956",
+      "name": "Wait for local renderer",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ \"http://social-studio:3848/v1/jobs/\" + $(\"Reserve brief and budget\").first().json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "be8f6984-d787-440c-98f4-9b9e388ba4cc",
+      "name": "Read actual render status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1760,
+        16
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e82a7302f42d89b70b67",
+              "leftValue": "={{ $json.state === \"ready\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a4d9081e-1ee2-4e82-89ef-e90a11d20331",
+      "name": "Private files ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2685b2f77ae58b1aedf3",
+              "leftValue": "={{ [\"failed\", \"rejected\"].includes($json.state) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a6bf29e9-4740-459c-9746-33d7de311299",
+      "name": "Production rejected or failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2272,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{...$json, message:\"Private Social Studio draft ready. No social publishing was performed.\", apiCostUsd:$json.costUsd}}];"
+      },
+      "id": "40fbe439-6c4b-4dfb-8f2d-5c89f1bb3841",
+      "name": "Private deliverables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error || \"Private production failed. Inspect the job and usage before retrying.\" }}"
+      },
+      "id": "5f3f975c-f03c-4992-98c2-140ff4be04b4",
+      "name": "Stop and retain evidence",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source=$('Private deliverables').first().json;\nconst jobId=source.jobId||source.id;\nif(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(jobId||''))throw new Error('A ready studio job ID is required');\nreturn [{json:{jobId,executionId:String($execution.id),dryRun:source.dryRun===true}}];"
+      },
+      "id": "ebf97656-31d3-429f-bdc4-3b167ed91dea",
+      "name": "Validate publication input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3248,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'http://social-studio:3848/v1/jobs/' + $json.jobId + '/instagram/claim' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {executionId:$json.executionId,dryRun:$json.dryRun} }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "b24cde15-d177-4dc4-bbd6-b607b620909e",
+      "name": "Claim durable publication",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3488,
+        -16
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "done-condition",
+              "leftValue": "={{ $json.done === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4c3ebd56-4171-430f-b334-369b8a462d34",
+      "name": "Publication verified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3712,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(1,Number($json.action.delaySeconds)||1) }}"
+      },
+      "id": "73116ff2-9467-4082-8382-3447a286edee",
+      "name": "Wait for Meta processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3936,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "authType": "oAuth2",
+        "httpRequestMethod": "={{ $json.action.method }}",
+        "graphApiVersion": "v25.0",
+        "node": "={{ $json.action.node }}",
+        "edge": "={{ $json.action.edge }}",
+        "options": {
+          "queryParametersJson": "={{ JSON.stringify($json.action.query) }}"
+        }
+      },
+      "id": "c74f2bde-3b91-4373-b51f-4652510caa51",
+      "name": "Instagram Graph API (configure OAuth)",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        4176,
+        96
+      ],
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'http://social-studio:3848/v1/jobs/' + $('Validate publication input').first().json.jobId + '/instagram/result' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {executionId:$('Validate publication input').first().json.executionId,stepId:$('Wait for Meta processing').item.json.action.stepId,response:(function clean(v){\nconst out={};for(const key of ['id','username','caption','permalink','timestamp','media_type','media_product_type','status_code','status','quota_usage'])if(v[key]!==undefined)out[key]=v[key];\nif(Array.isArray(v.data))out.data=v.data.map(clean);\nif(v.config)out.config={quota_total:v.config.quota_total};\nif(v.error)out.error={code:Number(v.error.code)||0};\nreturn out;\n  })($json)} }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "13673c86-a349-4577-88d4-2c710b17cac7",
+      "name": "Persist result before next action",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4416,
+        96
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "if($json.dryRun!==true&&($json.state!=='published'||!$json.mediaId||!$json.permalink))throw new Error('A verified Instagram publication receipt is required');\nreturn [{json:{...$json,message:$json.dryRun?'Publication preflight passed; no post was sent.':'Published and verified on Instagram.'}}];"
+      },
+      "id": "f7a76745-0fb3-4a98-a2b9-9e583be1d236",
+      "name": "Instagram publication receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3936,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://social-studio:3848/health",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "05b0283f-1c75-497b-a282-46ac8b9bc75b",
+      "name": "Read Instagram publication gate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2512,
+        0
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "done-condition",
+              "leftValue": "={{ $json.publishingEnabled === true && $('Private deliverables').first().json.previewOnly !== true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d0c0d033-f993-4cec-a97a-0d149c750709",
+      "name": "Instagram publication enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2768,
+        0
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{...$('Private deliverables').first().json,message:'Private draft ready. Instagram publication is paused or this is a preview-only job.'}}];"
+      },
+      "id": "416ca540-ead7-40af-af30-890e7230ded0",
+      "name": "Keep private preview",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        240
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "path": "ai-instagram-media/:jobId/:fileName",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e83e46cd-be73-490b-afe0-a26fb31914c4",
+      "name": "Fetch signed Instagram asset",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const {params={},query={}}=$json;\nif(!/^[a-f0-9-]{36}$/.test(params.jobId||'')||!/^(reel\\.mp4|cover\\.jpg|slide-\\d+\\.(?:jpg|mp4))$/.test(params.fileName||'')||!/^[a-f0-9]{64}$/.test(query.sig||'')||!/^\\d{10}$/.test(String(query.expires||'')))throw new Error('Invalid temporary media link');\nreturn [{json:{jobId:params.jobId,fileName:params.fileName,sig:query.sig,expires:String(query.expires)}}];"
+      },
+      "id": "d214c157-d693-4252-880a-7019f85a8ea2",
+      "name": "Validate asset request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        688
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'http://social-studio:3848/v1/instagram/media/' + $json.jobId + '/' + $json.fileName }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "expires",
+              "value": "={{ $json.expires }}"
+            },
+            {
+              "name": "sig",
+              "value": "={{ $json.sig }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "70b7b367-1800-4052-9753-4cb4e119bc78",
+      "name": "Read authorized media bytes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        592
+      ],
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "={{ $('Validate asset request').first().json.fileName.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg' }}"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      },
+      "id": "313891f9-7f2e-45ed-82ff-0f277db90b10",
+      "name": "Deliver only the requested file",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: \"Media unavailable or link expired\" } }}",
+        "options": {
+          "responseCode": 404,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "private, no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      },
+      "id": "21e47334-98aa-4059-825e-38e874b428e4",
+      "name": "Instagram media unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Automate AI Social Media Content Creation and Publishing to Instagram\n\n## Quick overview\nCreate AI-assisted English copy and single-image/carousel assets with a companion studio, then optionally publish to Instagram. This workflow does not create narrated Reels or publish to YouTube.\n\n## How it works\nReserve a job/budget, write and validate copy, request independent review, poll rendering, then evaluate the external publishing gate. Persist Meta action results and publication receipts.\n\n## Setup\n1. Keep this template inactive while configuring it.\n2. Assign your own credentials; remove inherited account associations before sharing.\n3. Install the matching external runtime and persistent storage. The JSON does not include these services.\n4. Configure service URLs, helper paths, HTTPS media routes and target accounts.\n5. Use fictional sample content, neutral colors and assets you own; inspect the rendered output for unwanted branding.\n6. Prove preview/no-publishing behavior before authorizing any live platform test.\n\n## Customization\nChange content, layouts, schedules and timezone in their actual configuration locations. Keep authorization, validation and receipts intact.\n\n## Publishing safety\nManual execution can reach real platform writes. Do not rely on a trigger name, dryRun flag or YouTube privateTest without validating its actual branch/backend behavior. This note does not certify runtime readiness.\n\n## Documentation\n[Setup, testing and operations](https://paoloronco.notion.site/Automate-AI-Social-Media-Content-Creation-and-Publishing-to-Instagram-41af0ba27c3281e7a8c3c9434b6efbbe)",
+        "height": 1008,
+        "width": 672,
+        "color": 2
+      },
+      "id": "3cd78259-ae93-4653-b8d4-39ea172b01d3",
+      "name": "[TPA] 00 Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Reserve brief and budget\nManual, scheduled and authenticated test inputs share the production path. Reserve before paid calls and inspect canGenerate plus the service response.\n\nThe backend enforces budgets and job reuse. Execution-derived keys alone do not deduplicate separate executions. A test trigger name does not prevent posting.",
+        "height": 816,
+        "width": 800,
+        "color": 7
+      },
+      "id": "448b2661-304e-4dca-9227-676c70ba3c10",
+      "name": "[TPA] 01 Brief and budget",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Write, review and render\nValidate writer output, facts, novelty and provider usage. The companion service must enforce the intended correction limit and reviewer decision.\n\nPoll until ready; stop on failed/rejected states. Inspect output and licensing manually. AI review is not proof of factual accuracy; previews can incur API costs.",
+        "height": 816,
+        "width": 2480,
+        "color": 7
+      },
+      "id": "ec8c4fb7-2453-49ef-905f-f92042be1c78",
+      "name": "[TPA] 02 Copy review and rendering",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Gated Instagram publication\nKeep previews when publishing is disabled or previewOnly is true. Otherwise claim an action, use your Meta OAuth account and persist the sanitized result before continuing.\n\nReal success needs a persisted media ID/permalink. Verify dry-run behavior in the backend. Reconcile uncertain writes before retrying; do not assume claims guarantee exactly-once delivery.",
+        "height": 816,
+        "width": 1648,
+        "color": 7
+      },
+      "id": "7fe823c5-c868-4f45-892d-f2ade7b679ef",
+      "name": "[TPA] 03 Gated Instagram publishing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Authorized asset delivery\nValidate job/file and envelope shape, then let the studio verify signature, expiry and exact asset authorization. Return only the requested bytes or unavailable.\n\nExpose the required HTTPS media route, not internal job/admin APIs. Test expired/tampered links; keep secrets and live signed URLs out of screenshots and exports.",
+        "height": 544,
+        "width": 1008,
+        "color": 7
+      },
+      "id": "c79cdf8b-ea4b-48ab-8960-7b28977b6581",
+      "name": "[TPA] 04 Signed asset delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        464
+      ]
+    }
+  ],
+  "connections": {
+    "Run privately now": {
+      "main": [
+        [
+          {
+            "node": "Reserve brief and budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twice-weekly private production": {
+      "main": [
+        [
+          {
+            "node": "Reserve brief and budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticated test trigger": {
+      "main": [
+        [
+          {
+            "node": "Reserve brief and budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserve brief and budget": {
+      "main": [
+        [
+          {
+            "node": "New production authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New production authorized?": {
+      "main": [
+        [
+          {
+            "node": "Write specific English copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read actual render status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write specific English copy": {
+      "main": [
+        [
+          {
+            "node": "Validate facts, novelty and usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate facts, novelty and usage": {
+      "main": [
+        [
+          {
+            "node": "One correction requested?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Independent editorial review": {
+      "main": [
+        [
+          {
+            "node": "Record review and queue render",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record review and queue render": {
+      "main": [
+        [
+          {
+            "node": "One correction requested?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for local renderer": {
+      "main": [
+        [
+          {
+            "node": "Read actual render status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read actual render status": {
+      "main": [
+        [
+          {
+            "node": "Private files ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Private files ready?": {
+      "main": [
+        [
+          {
+            "node": "Private deliverables",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Production rejected or failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Production rejected or failed?": {
+      "main": [
+        [
+          {
+            "node": "Stop and retain evidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for local renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One correction requested?": {
+      "main": [
+        [
+          {
+            "node": "Write specific English copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Editorial review needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editorial review needed?": {
+      "main": [
+        [
+          {
+            "node": "Independent editorial review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for local renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Private deliverables": {
+      "main": [
+        [
+          {
+            "node": "Read Instagram publication gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate publication input": {
+      "main": [
+        [
+          {
+            "node": "Claim durable publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim durable publication": {
+      "main": [
+        [
+          {
+            "node": "Publication verified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publication verified?": {
+      "main": [
+        [
+          {
+            "node": "Instagram publication receipt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for Meta processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Meta processing": {
+      "main": [
+        [
+          {
+            "node": "Instagram Graph API (configure OAuth)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist result before next action": {
+      "main": [
+        [
+          {
+            "node": "Publication verified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Instagram publication gate": {
+      "main": [
+        [
+          {
+            "node": "Instagram publication enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram publication enabled?": {
+      "main": [
+        [
+          {
+            "node": "Validate publication input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Keep private preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch signed Instagram asset": {
+      "main": [
+        [
+          {
+            "node": "Validate asset request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate asset request": {
+      "main": [
+        [
+          {
+            "node": "Read authorized media bytes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read authorized media bytes": {
+      "main": [
+        [
+          {
+            "node": "Deliver only the requested file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram media unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Graph API (configure OAuth)": {
+      "main": [
+        [
+          {
+            "node": "Persist result before next action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "active": false,
+  "pinData": {}
+}

@@ -1,0 +1,52 @@
+{
+  "family": "video-production",
+  "date": "2026-11-18",
+  "anonymous": true,
+  "active": false,
+  "providers": {
+    "HeyGen-HyperFrames": {
+      "cover.png": {
+        "bytes": 32935,
+        "sha256": "25c31ca6280055ab8f578337252f6ae2962ca4e213711b1b19593e317b696b37"
+      },
+      "documentation.md": {
+        "bytes": 4128,
+        "sha256": "accac88ea29d2c88fb0115d3633988e7bb0a171ef8911d7ed70eafd13750f3ba"
+      },
+      "README.md": {
+        "bytes": 4154,
+        "sha256": "ec01e3491c8a445a9e0ee29e2abbcb70934e309b076e69cb8a51315653254642"
+      },
+      "thumbnail.png": {
+        "bytes": 29340,
+        "sha256": "e0cda65bbd756aaff2b4f53ca6e6c2aa6b45740a5b25a6c334f43742b84155d0"
+      },
+      "workflow.json": {
+        "bytes": 978935,
+        "sha256": "488cbc7d76d64abf3452464f6c9cea4694708faba34a6621ad952f0e611aa46c"
+      }
+    },
+    "NextCut": {
+      "cover.png": {
+        "bytes": 30740,
+        "sha256": "c4d0586e17ef9305fe408a094add8fd5c0b2f5903db215a48d29462e9a3bad4f"
+      },
+      "documentation.md": {
+        "bytes": 5772,
+        "sha256": "f0fe3e1c4b24b2ff438d4cf17dde10168d292bf042f63a08022ab5555098d366"
+      },
+      "README.md": {
+        "bytes": 5784,
+        "sha256": "56b652fc42269ee2233f7c0568d00f68bdb7a15b5d687377ba03d0e69eff4ede"
+      },
+      "thumbnail.png": {
+        "bytes": 27256,
+        "sha256": "f504ec96ae103202d947b8d600fb9bf0294d4ae5166043d200201b6b5734db22"
+      },
+      "workflow.json": {
+        "bytes": 924490,
+        "sha256": "80a7d9764babb76a5669ea1af5a26dcfa70fdfc3a284fbcd42f632444ef00ab9"
+      }
+    }
+  }
+}

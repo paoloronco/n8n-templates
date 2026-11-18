@@ -1,0 +1,12 @@
+{
+  "voicePython": "/absolute/path/to/runtime/.venv/bin/python",
+  "modelsDir": "/absolute/path/to/runtime/models",
+  "secret": "REPLACE_WITH_THE_SAME_RANDOM_SECRET_ON_BOTH_MACHINES",
+  "bridgeUrl": "https://YOUR_N8N_HOST/webhook/local-video-worker",
+  "uploadUrl": "https://YOUR_N8N_HOST/webhook/local-video-upload",
+  "workDir": "REPLACE_WITH_AN_ABSOLUTE_LOCAL_WORK_DIRECTORY",
+  "port": 3850,
+  "pollMs": 30000,
+  "ffmpeg": "ffmpeg",
+  "ffprobe": "ffprobe"
+}

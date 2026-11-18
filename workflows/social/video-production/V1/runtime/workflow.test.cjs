@@ -16,7 +16,7 @@ test('all code compiles and graph targets exist',()=>{
     assert.match(c.name,/^Select your /);
   }
   assert.equal(w.active,false);assert.equal(w.settings.timezone,'Europe/Rome');
-  assert.ok(w.nodes.every(n=>!n.credentials||Object.values(n.credentials).every(c=>c.id===null))); 
+  assert.ok(w.nodes.every(n=>!n.credentials||Object.values(n.credentials).every(c=>c.id===null)));
 });
 
 test('runtime example endpoints and publishing hours match the imported workflow',()=>{

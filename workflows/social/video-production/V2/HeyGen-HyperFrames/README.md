@@ -1,4 +1,4 @@
-# Video Production — Local Worker or Cloud
+# Create and Publish Reels & Shorts with HeyGen and Dropbox
 
 ## Quick overview
 
@@ -16,7 +16,7 @@ Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optio
 
 ## Setup
 
-1. Import the JSON into n8n. Keep the workflow inactive and generation and publishing disabled during configuration.
+1. Import `workflow.json` into n8n. The imported name is **Create and Publish Reels & Shorts with HeyGen and Dropbox**. Keep the workflow inactive and generation and publishing disabled during configuration.
 2. Edit **Apply video configuration**: enter your public n8n URL, jobs table name, brand, destination account IDs, timezone and publishing hours.
 3. Connect HeyGen Header Auth and Basic Auth for the protected forms.
 4. Connect the selected social OAuth credentials. For Dropbox archiving, also connect Dropbox OAuth2 and create the destination folder.
@@ -45,9 +45,13 @@ Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optio
 - `maxCloudRenders` limits jobs, not spending. Generation, social publishing and Dropbox archiving start disabled.
 - Technical checks passed; live managed HeyGen rendering and social delivery by this cloud copy remain unverified.
 - [Full setup, examples and recovery guide](https://paoloronco.notion.site/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/HeyGen-HyperFrames/workflow.json).
-- Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/heygen) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) · [n8n submission](https://n8n.io/workflows/22950) (not yet public; the updated cloud version is not confirmed in review).
+- Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/V2/HeyGen-HyperFrames) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction).
 - Support and customization: [Consulting and support](https://paoloronco.it/).
 
+
+## Template privacy
+
+The workflow export contains no owner branding, credential bindings, instance identifier, execution data or configured destination accounts. The bundled example is fictional. Configure your own credentials and destinations after import.
 
 ## Version selection
 

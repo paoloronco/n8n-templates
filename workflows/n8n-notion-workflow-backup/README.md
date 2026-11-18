@@ -1,48 +1,60 @@
-# n8n → Notion | Workflow Backup & Sync
+# n8n Workflow Backup to Notion
+
 ## Quick overview
-This workflow synchronizes n8n workflows with their corresponding Notion database pages, backing up workflow JSON data as markdown in Notion subpages titled "Workflow".
+
+Maintain a Notion catalog of active, inactive and archived n8n workflows. Each page contains an English README and one complete JSON attachment. The sync verifies saved content, preserves personal notes and reports incomplete backups as failures.
+
 ## How it works
-1. Triggered every hour by schedule (manual execution is also possible from the n8n editor).
-2. Reads recent sync executions of this workflow to prevent overlapping runs.
-3. Retrieves n8n workflows and matches non-archived workflows against the Notion catalog.
-4. Reads a Notion database catalog containing pages linked to n8n workflows.
-5. Searches Notion for existing "Workflow" subpages under catalog pages.
-6. Plans synchronization by matching workflows to catalog pages and their subpages.
-7. Processes each workflow one at a time.
-8. Checks if a "Workflow" subpage exists; if yes, reads its JSON markdown content.
-9. Compares the stored JSON with the current workflow snapshot.
-10. If JSON differs, updates the Notion subpage with new workflow JSON markdown.
-11. If no subpage exists, creates a new "Workflow" subpage with current workflow JSON markdown.
-12. Reads back and verifies the updated or created JSON content for consistency.
-13. Generates a sync report summarizing created, updated, unchanged, skipped workflows and errors.
+
+- Start manually or hourly at minute 37. The imported template is inactive until you configure and publish it.
+- Read workflow definitions through the n8n public API, following pagination and checking for overlapping executions.
+- Match each workflow to one stable Notion page using its source ID.
+- Generate **Quick overview**, **How it works**, **Setup**, **Customization** and **Additional info** as native headings and lists, with an overview below 50 words.
+- Reuse suitable English sticky-note documentation. When notes are missing or unsuitable, describe the workflow graph in English without an AI service.
+- Attach one complete, formatted `.json` file directly to its page. No JSON subpages, split code blocks, technical captions or visible checksums are created.
+- Download the attachment and check its original bytes and workflow identity before accepting a replacement. Retain the previous copy if verification fails.
+- Preserve personal notes and recognized edits to managed documentation. Mark missing sources **Unavailable** while keeping their last README and attachment.
+- Process one definition at a time, pace Notion requests and use bounded retries. Unchanged definitions reuse recent checks; full verification occurs at least every 24 hours.
+- Return an execution report that treats incomplete coverage as a failure.
+
 ## Setup
-1. Configure the `Every hour1` node with a cron expression for periodic syncs (default is minute 17 each hour).
-2. Set up n8n API credentials for nodes `Read sync executions1` and `Read n8n workflows1`.
-3. Set up Notion API credentials for all Notion nodes including `Read catalog1`, `Find Workflow subpages1`, `Read workflow JSON1`, `Update workflow JSON1`, `Create Workflow page1`, `Read back JSON1`, and `Read created JSON1`.
-4. In the `Read catalog` node, set `dataSourceId` to your Notion database ID containing workflow catalog pages.
-5. Verify the catalog pages have a property named "Apri n8n" containing URLs linking to n8n workflows.
-6. Confirm the workflow IDs in Notion links match active workflows in your n8n instance.
-7. In the `Plan sync1` and `Sync report1` code nodes, replace `YOUR_NOTION_DATA_SOURCE_ID` with the catalog's actual Notion data source ID and `n8n\\.example\\.com` with your instance domain (keep the regex escaping).\n8. Test using **Execute workflow** in n8n before enabling the schedule.
-## Requirements
-- n8n instance with API access enabled.
-- Notion account with API integration and access to the target database.
-- Notion database with pages linking to n8n workflows via URLs.
-- Properly configured n8n and Notion API credentials.
-- Catalog pages must have a property named "Apri n8n" with valid n8n workflow URLs.
+
+- Import `workflow.json` into an n8n instance with public API access. No community nodes or companion workflows are required.
+- For self-hosted regular execution mode, configure filesystem-backed binary storage to keep large state and attachments out of execution JSON. Queue deployments must use a binary backend supported by their n8n configuration. Review execution pruning and storage capacity before enabling unattended runs.
+- Create an n8n API credential with workflow-read and execution-read access, then select it in **n8n API · read only**. Its scope determines which workflows the catalog can discover.
+- Create a dedicated Notion page and a database inside it. Share both with a Notion integration that can read, insert and update content and upload files. Select its credential in **Notion API · snapshots & audit** and **Upload complete JSON file**.
+- Create the database properties shown below, with these exact English names and types. Keep **ID** for stable matching; you can hide it from the view. Create a **Current workflows** view filtering out `Status = Unavailable` if desired.
+- In **Configuration**, replace `documentationDataSourceId` with the database's **data source ID**, `documentationRootPageId` with its parent page ID, `n8nOrigin` with your HTTPS instance URL and `n8nApiBase` with its HTTPS `/api/v1` URL. The data source ID can differ from the database ID; retrieve it from the Notion database API response. For a local self-hosted API in the same n8n container, `http://127.0.0.1:5678/api/v1` is also supported.
+- Leave notification flags disabled unless you configure **Send backup email** with SMTP and replace `emailTo` and `emailFrom`. An optional independent error workflow can be selected in n8n settings; set `externalErrorHandler` accordingly to avoid duplicate error emails.
+- Execute **Run manually** with no pinned data. Check an active and an inactive workflow page, confirm all five README sections and download/import-check their JSON attachments in an inactive copy.
+- Review the default `Europe/Rome` time zone and **Hourly backup** schedule, then publish or activate the configured workflow.
+
+| Property | Notion type | Purpose |
+| --- | --- | --- |
+| Name | Title | Workflow name |
+| ID | Text | Stable source workflow identity |
+| Status | Select | Active, Active · scheduled, Scheduled · inactive, Inactive, Archived, Unavailable |
+| Trigger | Multi-select | Manual, Schedule, Webhook, Chat, Error, Sub-workflow, App trigger |
+| Workflow link | URL | Link to the source in n8n |
+| Updated at | Date | Source definition's modification timestamp |
+| Notes | Text | Your personal notes, preserved by the sync |
+
 ## Customization
-- Adjust the `Every hour` node cron expression to change sync frequency.
-- Modify the Notion database ID in the `Read catalog` node to target a different catalog.
-- Adapt the search term in `Find Workflow subpages` node if subpage titles differ.
-- Extend or modify the JavaScript code in `Plan sync1` or `Compare JSON1` nodes for custom sync logic.
-- Change the naming or content format of the Notion subpages by editing the markdown generation code.
 
-## Additional Details
+- Change the cron expression and time zone in **Hourly backup** and workflow settings.
+- Adjust `includeArchived`, `includeWorkflowIds` and `excludeWorkflowIds` in **Configuration**. Inactive workflows are always included; workflows named `Temporary - …` are excluded as maintenance helpers.
+- Improve English sticky notes in source workflows to provide more useful generated documentation. Workflow names and quoted node labels retain their original source spelling.
+- Keep personal commentary in **Notes** or outside the five managed README sections. If a managed README section has been edited manually, the sync preserves the edit and reports it instead of silently overwriting it.
+- Adjust the default 5 MiB `notionMaxFileBytes` only to match your Notion account's actual upload allowance. Single-part uploads are limited to 20 MiB by this implementation.
+- Adjust the 45-minute run budget and request pacing to suit catalog size. Keep Notion requests at least 0.35 seconds apart; the default is one second.
+- Keep the orange overview note and gray section notes around their existing nodes when extending the canvas.
 
-This workflow synchronizes your active n8n workflows into a Notion database as JSON markdown snapshots, updating existing pages or creating new ones as needed. It requires your Notion database to have pages linked to workflows via URLs and enforces a single sync execution at a time to avoid conflicts. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
+## Additional info
 
-Full technical documentation: https://app.notion.com/p/n8n-Backup-Notion-DB-Sync-41af0ba27c32814d800cc4582aa68c04
-## Public template notes
-- The exported workflow has credential bindings and instance identifiers removed. Reassign n8n and Notion credentials after import.
-- Sync is one-way (n8n to Notion), not historical versioning or a full disaster-recovery backup.
-- The catalog property `Apri n8n` and the Notion subpage title `Workflow` are required unless the code is customized.
-- This export contains an hourly schedule trigger; run it manually through the n8n editor during setup.
+- The package contains `workflow.json`, this `README.md`, `cover.png` and `thumbnail.png`. The workflow has no personal account links, database IDs, credential associations, pinned data, execution history or instance metadata. Configure the placeholders before running it.
+- Notion stores readable documentation and the current saved workflow definition. It is not a Git repository or an n8n execution environment; the saved definition may differ from a published version.
+- Source backups intentionally retain source node settings, identifiers, URLs and credential references so they remain useful for recovery. They are private operational backups, not anonymized templates for redistribution. Recognized secret literals are redacted, but arbitrary secrets embedded in custom code cannot be guaranteed to be detected.
+- Encrypted credential values and pinned data are excluded. Back up the n8n database, encryption key, credentials and runtime files separately.
+- Files over the configured upload limit fail explicitly and leave the previous backup intact. The workflow does not split exports or require Google Cloud Storage or another external file store.
+- Successful production runs persist the verification cache. n8n manual executions do not persist workflow static data, so manual runs may repeat checks.
+- This template uses native n8n nodes, the public n8n API and Notion API version `2026-03-11`, including the file-upload API. No AI API or paid documentation generator is required.

@@ -44,9 +44,9 @@ Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optio
 - Stock n8n nodes only: no local worker, video renderer or extra packages on the n8n host. Output targets 1080 × 1920, 30 fps, H.264/AAC MP4.
 - `maxCloudRenders` limits jobs, not spending. Generation, social publishing and Dropbox archiving start disabled.
 - Technical checks passed; live managed HeyGen rendering and social delivery by this cloud copy remain unverified.
-- [Full setup, examples and recovery guide](https://paoloronco.notion.site/41af0ba27c3281f7b166e83346bbbb4c) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/HeyGen-HyperFrames/workflow.json).
+- [Full setup, examples and recovery guide](https://paoloronco.notion.site/41cf0ba27c3281129b90cecd2134fc53) · [Workflow JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/HeyGen-HyperFrames/workflow.json).
 - Availability: [GitHub](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/V2/HeyGen-HyperFrames) · [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction).
-- Support and customization: [Consulting and support](https://paoloronco.it/).
+- Support and customization: [info@paoloronco.it](mailto:info@paoloronco.it) · [Consulting website](https://paoloronco.it/).
 
 
 Read the linked provider guide for complete setup and recovery. No local renderer is required for V2. Set up your own brand, scenes and licensed media; templates contain no owner production videos or account credentials.

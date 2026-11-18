@@ -28,3 +28,8 @@ Change branding, facts, topics, schedules, prompts and layouts in the matching w
 Local rendering does not make OpenAI free. The V1 JSON bytes are preserved from the previous public release; the full clean-machine worker installation was not tested here. For cloud rendering without that worker, choose [V2](../V2/README.md).
 
 **Documentation:** [Notion version guides](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe) · [Complete local setup](./documentation.md)
+
+
+## Neutral branding and generated media
+
+Use [worker-branding-overlay.zip](./worker-branding-overlay.zip) with the matching v10 local worker in a separate deployment. It includes the neutral source, new fictional phone illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This overlay is not a complete worker/model/SSH installer or a production deployment.

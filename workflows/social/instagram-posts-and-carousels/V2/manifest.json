@@ -6,57 +6,59 @@
   "providers": {
     "Creatomate": {
       "documentation.md": {
-        "bytes": 14856,
-        "sha256": "180b2b809e069961bd1024c5dc5a0693088a8122e4b0ce28a9c92f4f94e616fa"
+        "bytes": 16697,
+        "sha256": "468dad9b7c10343e5002230d8b74a43ba05cd418e07225a5b04bcf952968dc19"
       },
       "README.md": {
-        "bytes": 3258,
-        "sha256": "1fe8334a71a2cd909536a4b4f1e889d7a817f59289568f037768beee8b9798fb"
+        "bytes": 3337,
+        "sha256": "3fa2912d10298b3a0672206d2ce5b89c720455dcdfdafa72fcc3b0dd6c6ed222"
       },
       "Runtime.json": {
-        "bytes": 13249141,
-        "sha256": "dfe11f66c9d754be06a69330ac08eb8849a836be856325c8a53f4da23bc63f58"
+        "bytes": 3106371,
+        "sha256": "8ee24138ff7ad4c93d3c26c51c4a33ae6191380ccfe75ab05cf62403e9f1fd48"
       },
       "workflow.json": {
-        "bytes": 68225,
-        "sha256": "a9708ca591cdee3ca09a9d348ba005007a5ab81e45061c5d4b038b927942a8ff"
+        "bytes": 68202,
+        "sha256": "3d95569ba8f58e7709118cfd69ebee340176fc1bd0697c4b385a20a6ea0ae9f0"
       }
     },
     "Shotstack": {
       "documentation.md": {
-        "bytes": 15004,
-        "sha256": "c7baef7f35d7b06a34738a848cb601e3b0e0734ff01416a52e12e8d924be036f"
+        "bytes": 16697,
+        "sha256": "468dad9b7c10343e5002230d8b74a43ba05cd418e07225a5b04bcf952968dc19"
       },
       "README.md": {
-        "bytes": 3600,
-        "sha256": "63fd8dfd2fff7c0d348db86b3466b3b80db8a381c2e4eb110dcefcb5c4ebd520"
+        "bytes": 3679,
+        "sha256": "95deaa769585a4e1f65a16b07211fc2e811801aa961a4624a78e7e188e3823dd"
       },
       "Runtime.json": {
-        "bytes": 14310974,
-        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+        "bytes": 3376410,
+        "sha256": "975032fefb9496a5297e14a8430382ba74f8a5a472d2c49de5c453d60bd70700"
       },
       "workflow.json": {
-        "bytes": 68449,
-        "sha256": "37d6c88cba3b289610cc61640eb9351813dfaf8e61fe77a1b6441ec9ecdf6b7f"
+        "bytes": 68426,
+        "sha256": "cb31aeaf76a29f6c8a791fa337b8242adaf5ce2574750bbddaf7b178a4591544"
       }
     },
     "JSON2Video": {
       "documentation.md": {
-        "bytes": 14904,
-        "sha256": "1abf085df55f89cfcd0ce89c21cb4082a3af77569172eadcfa34d3e93207daea"
+        "bytes": 16697,
+        "sha256": "468dad9b7c10343e5002230d8b74a43ba05cd418e07225a5b04bcf952968dc19"
       },
       "README.md": {
-        "bytes": 3500,
-        "sha256": "600b858d1e12d59101afce07671c348ec0dca2ec7b24560d9fbc90f3b80036f7"
+        "bytes": 3579,
+        "sha256": "cb88e8ce137cf97aec28e084f5f24b1c71dc09a6d1149becabdf32041049e5d1"
       },
       "Runtime.json": {
-        "bytes": 14310974,
-        "sha256": "30b9973f32699e9a4aad0b2cfd91f6e9a938a380c5ac6fab9bcb1ad7d844bc06"
+        "bytes": 3376410,
+        "sha256": "975032fefb9496a5297e14a8430382ba74f8a5a472d2c49de5c453d60bd70700"
       },
       "workflow.json": {
-        "bytes": 68434,
-        "sha256": "aa16d6c0e7876f415e06206202aa8ba527495c2f05accf4820b319a3d5741956"
+        "bytes": 68411,
+        "sha256": "9bdb640d1366fa7a034efad5aa1473bcd6bd0979ea3ffa9dc9546a39e8512082"
       }
     }
-  }
+  },
+  "anonymized": true,
+  "brandingRevision": "2026-11-18-neutral"
 }

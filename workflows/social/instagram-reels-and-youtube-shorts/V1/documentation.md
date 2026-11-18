@@ -143,3 +143,8 @@ V1 `privateTest` affects YouTube visibility; the earlier Instagram branch may st
 [Notion V1/V2 documentation](https://app.notion.com/p/41af0ba27c32817490eeff675e958ce2).
 
 The worker installation and live social paths were not re-executed for this release.
+
+
+## Neutral branding and generated media
+
+Use [worker-branding-overlay.zip](./worker-branding-overlay.zip) with the matching v10 local worker in a separate deployment. It includes the neutral source, new fictional phone illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This overlay is not a complete worker/model/SSH installer or a production deployment.

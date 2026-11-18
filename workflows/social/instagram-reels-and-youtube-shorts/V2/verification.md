@@ -5,7 +5,7 @@ The six retained n8n parent drafts and both supporting runtimes were read direct
 ## Completed checks
 
 - 56 migration, graph and provider checks passed: native OpenAI usage mapping, bounded review, idempotency, budget reservation, conditional journal commits, signatures, exact original hashes, uncertain requests and publication ownership.
-- All 30 campaigns passed Shotstack payload/embedded-asset checks. Original imagery, bundled font and music are preserved; Shotstack uses prepared WebP/font derivatives because its HTML5 blocks external resources.
+- All 30 campaigns passed Shotstack payload/embedded-asset checks. These earlier tests used the previous demo artwork; the neutral-artwork revision is checked separately below. Bundled font and instrumental music are retained; Shotstack uses prepared WebP/font derivatives because its HTML5 blocks external resources.
 - Native n8n journal initialization, secure tokens, object sub-workflow inputs, disabled-generation guard and ZIP/unpack/inline edit construction passed on n8n 2.47.5.
 - Actual Shotstack Sandbox output: one Post at 1080 × 1350, 5.5 s, and one Reel at 1080 × 1920, 34.792 s; H.264/AAC, 24 fps. Full decoding and visual frame inspection passed. The Reel used existing audio in place of paid TTS.
 - Public release checks cover JSON/JavaScript compilation, graph references, retained canvas geometry, credential/account sanitization, conservative defaults, bundled archive integrity and the actual saved runtime cores. File hashes are in each manifest.
@@ -19,4 +19,9 @@ The original-media parsers validate metadata and hashes; they cannot certify pla
 
 ## Release packaging
 
-V1 workflow JSON bytes are preserved from the previous public repository release. V2 comes from the saved inactive drafts, with credentials, owner metadata, account destinations and runtime IDs removed. Public sticky-note setup wording is corrected for cloud operation; IDs, connections and all canvas geometry are retained. The workflow/runtime implementations and bundled source assets are retained. No n8n Creator Portal submission is included.
+V1 retains the local-worker workflow. Its matching neutral branding overlay is now included; this revision intentionally differs from earlier exports. V2 comes from the saved inactive drafts, with credentials, owner metadata, account destinations and runtime IDs removed. Public sticky-note setup wording is corrected for cloud operation; IDs, connections and all canvas geometry are retained. Workflow/runtime logic and canvas geometry are retained. Bundled logos, phone illustrations, brand text, narration CTA, tags and table names are now neutral. No n8n Creator Portal submission is included.
+
+
+## Neutral branding revision — 18 November 2026
+
+All six cloud templates, both runtime families and the local-worker overlay use fictional Example content and example.com. Eleven new illustrations/logos replace all original branded pixels in both PNG and WebP forms. Source, generated payload/narration/HTML strings, archive contents, graph references and SHA-256 manifests are checked without provider API calls. Historical Sandbox render results above predate the new artwork; no new full video render, paid call or social publication was performed for this revision. Existing database jobs or previously generated videos are not template assets and are not distributed. Configure a fresh journal for a new brand.

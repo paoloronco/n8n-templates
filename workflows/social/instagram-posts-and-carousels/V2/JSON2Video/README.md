@@ -28,7 +28,7 @@ n8n with Data Tables, Code, Compression, Crypto, Execute Sub-workflow and native
 
 ### Customization
 
-Set destination accounts, topics, copy/review rules, budgets and schedule. Bundled graphics/facts are OrbitPage demos: adapting the product/brand requires updating the catalog, composition and matching asset hashes. Preserve idempotency, conditional checkpoints and signed-file checks; never erase uncertain receipts to retry.
+Set destination accounts, topics, copy/review rules, budgets and schedule. Bundled graphics and facts describe a fictional Example brand at example.com. All logos and phone illustrations are neutral. Set your own verified facts, catalog, copy rules, narration and composition assets before use. Preserve idempotency, conditional checkpoints and signed-file checks; never erase uncertain receipts to retry.
 
 ### Additional Info
 

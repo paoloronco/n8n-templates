@@ -997,7 +997,8 @@
       "retryOnFail": false
     },
     {
-      "parameters": {        "command": "={{ \"python3 ~/social-video-youtube/youtube.py record \" + JSON.stringify({...$('Read YouTube preparation').first().json, videoId:$json.uploadId || $json.id}).base64Encode() }}"
+      "parameters": {
+        "command": "={{ \"python3 ~/social-video-youtube/youtube.py record \" + JSON.stringify({...$('Read YouTube preparation').first().json, videoId:$json.uploadId || $json.id}).base64Encode() }}"
       },
       "id": "c8c12525-0d60-45ba-aaf8-80a357e52099",
       "name": "Persist YouTube video ID",

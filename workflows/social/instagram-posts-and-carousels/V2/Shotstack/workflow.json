@@ -1,5 +1,5 @@
 {
-  "name": "OrbitPage Social Posts — Shotstack Sandbox (Template)",
+  "name": "Social Posts — Shotstack Sandbox (Template)",
   "nodes": [
     {
       "id": "8627d912-b8fd-4807-aaf1-19bb106032a4",
@@ -1252,7 +1252,7 @@
         -128
       ],
       "parameters": {
-        "content": "# OrbitPage Social Posts — Shotstack Sandbox\n\n## Quick overview\n\nCreate reviewed Instagram media with optional gated publication.\n\n## How it works\n\n1. Reserve an idempotent brief and API budget.\n2. Write grounded copy and record provider usage.\n3. Review the copy; allow one bounded correction.\n4. Render and verify a musical MP4 or four-part video carousel.\n5. Check the publication gate; retain private output when disabled.\n6. Claim publication, persist Meta results and verify the receipt.\n\n## Setup\n\n1. Import Runtime.json; select OpenAI, renderer and platform credentials.\n2. Keep the renderer and private gallery reachable.\n3. Preserve budget limits and the signed-media ingress.\n\n## Requirements\n\n- Bundled demo assets and the imported native cloud Runtime.\n\n## Customization\n\n- Change verified facts and layouts in the studio.\n- Keep publishing decisions outside the AI writer.\n\n## Additional info\n\n- Use `dryRun` to validate without posting.\n- Reconcile uncertain mutations before replaying.",
+        "content": "# Social Posts — Shotstack Sandbox\n\n## Quick overview\n\nCreate reviewed Instagram media with optional gated publication.\n\n## How it works\n\n1. Reserve an idempotent brief and API budget.\n2. Write grounded copy and record provider usage.\n3. Review the copy; allow one bounded correction.\n4. Render and verify a musical MP4 or four-part video carousel.\n5. Check the publication gate; retain private output when disabled.\n6. Claim publication, persist Meta results and verify the receipt.\n\n## Setup\n\n1. Import Runtime.json; select OpenAI, renderer and platform credentials.\n2. Keep the renderer and private gallery reachable.\n3. Preserve budget limits and the signed-media ingress.\n\n## Requirements\n\n- Bundled demo assets and the imported native cloud Runtime.\n\n## Customization\n\n- Change verified facts and layouts in the studio.\n- Keep publishing decisions outside the AI writer.\n\n## Additional info\n\n- Use `dryRun` to validate without posting.\n- Reconcile uncertain mutations before replaying.",
         "height": 784,
         "width": 720,
         "color": 2
@@ -1332,7 +1332,7 @@
         288
       ],
       "parameters": {
-        "jsCode": "const config={\"kind\": \"post\", \"generationEnabled\": false, \"publishingEnabled\": false, \"publicN8nBaseUrl\": \"https://n8n.example.com\", \"jobsTable\": \"orbitpage_social_shotstack_templates\", \"monthlyOpenAiUsd\": 3, \"maxCloudRenders\": 4, \"instagramAccountId\": \"\", \"instagramUsername\": \"\", \"youtubeChannelId\": \"\", \"mediaPath\": \"social-shotstack-posts-media\", \"assetPath\": \"social-shotstack-posts-assets\", \"previewPath\": \"social-shotstack-posts-preview\", \"manualAction\": \"setup\", \"renderer\": \"shotstack\", \"minimumRemainingCredits\": 120, \"allowPaidVoiceGeneration\": false, \"commercialUseConfirmed\": false};const j=$input.first().json,ran=name=>$(name).isExecuted;let intent='reserve';if(ran('Fetch signed Instagram asset'))intent='media';else if(ran('Read bundled cloud asset'))intent='asset';else if(ran('Open private cloud preview'))intent='preview';else if(ran('Run privately now'))intent=config.manualAction;return [{json:{...j,config,_intent:intent,isTest:ran('Authenticated test trigger')}}];"
+        "jsCode": "const config={\"kind\": \"post\", \"generationEnabled\": false, \"publishingEnabled\": false, \"publicN8nBaseUrl\": \"https://n8n.example.com\", \"jobsTable\": \"social_studio_shotstack_templates\", \"monthlyOpenAiUsd\": 3, \"maxCloudRenders\": 4, \"instagramAccountId\": \"\", \"instagramUsername\": \"\", \"youtubeChannelId\": \"\", \"mediaPath\": \"social-shotstack-posts-media\", \"assetPath\": \"social-shotstack-posts-assets\", \"previewPath\": \"social-shotstack-posts-preview\", \"manualAction\": \"setup\", \"renderer\": \"shotstack\", \"minimumRemainingCredits\": 120, \"allowPaidVoiceGeneration\": false, \"commercialUseConfirmed\": false};const j=$input.first().json,ran=name=>$(name).isExecuted;let intent='reserve';if(ran('Fetch signed Instagram asset'))intent='media';else if(ran('Read bundled cloud asset'))intent='asset';else if(ran('Open private cloud preview'))intent='preview';else if(ran('Run privately now'))intent=config.manualAction;return [{json:{...j,config,_intent:intent,isTest:ran('Authenticated test trigger')}}];"
       }
     },
     {

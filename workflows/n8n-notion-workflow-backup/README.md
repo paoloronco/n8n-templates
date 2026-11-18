@@ -1,5 +1,7 @@
 # n8n Workflow Backup to Notion
 
+Maintain a Notion catalog of active, inactive and archived n8n workflows. Each page contains an English README and one complete JSON attachment. The sync verifies saved content, preserves personal notes and reports incomplete backups as failures.
+
 ## How it works
 
 - Discover active, inactive and archived workflows through the n8n API.
@@ -30,6 +32,14 @@
 - Add personal commentary to the **Notes** property or outside the managed documentation sections.
 - Configure email notifications or an independent n8n error workflow to suit your monitoring preferences.
 
+## Requirements
+
+- An n8n instance with public API access and permission to read the workflows and executions being documented.
+- A Notion workspace with a dedicated catalog database and an integration that can read, insert and update its content and upload files.
+- A Notion upload allowance large enough for the workflow exports being backed up.
+- Binary storage supported by your n8n deployment and sufficient capacity for attachments and execution data.
+- An SMTP account only if you enable email notifications.
+
 ## Additional info
 
 - Synchronization runs from n8n to Notion. Restore an exported workflow by importing its JSON into n8n.
@@ -38,11 +48,3 @@
 - Operational exports can retain source URLs, identifiers and credential references. Review them before sharing outside your organization.
 - Files that exceed the configured upload allowance produce an error and leave the previous backup intact.
 - The workflow uses native n8n nodes and does not require an AI service, community node package or companion workflow.
-
-## Requirements
-
-- An n8n instance with public API access and permission to read the workflows and executions being documented.
-- A Notion workspace with a dedicated catalog database and an integration that can read, insert and update its content and upload files.
-- A Notion upload allowance large enough for the workflow exports being backed up.
-- Binary storage supported by your n8n deployment and sufficient capacity for attachments and execution data.
-- An SMTP account only if you enable email notifications.

@@ -32,7 +32,7 @@ Local rendering does not make OpenAI free. The local-worker graph and canvas geo
 
 ## Neutral branding and generated media
 
-Use [worker-source.zip](./worker-source.zip) with the included compatible local worker in a separate deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This overlay is not a complete worker/model/SSH installer or a production deployment.
+Use [worker-source.zip](./worker-source.zip) as the source for a separate compatible local worker deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This source bundle is not a prebuilt worker/model/SSH environment or a configured production deployment.
 
 
 ## Current neutral package

@@ -12,7 +12,7 @@ Reels additionally run a Python Kokoro narration stack with native phoneme timin
 
 ## 2. Obtain the matching source package first
 
-The public V1 GitHub folder contains the workflow and README, not a complete worker installer. Importing its JSON cannot install the backend or its assets.
+The V1 folder includes the workflow, setup guides and worker-source.zip with the application source, neutral composition and matching assets. Extract the source ZIP into a separate worker directory. Importing the workflow JSON does not install or start that service.
 
 Before installation, obtain:
 
@@ -21,9 +21,9 @@ Before installation, obtain:
 - Matching Python voice environment, timed Kokoro model and voices; the requirements in section 4 are mandatory.
 - The matching `~/social-video-youtube/youtube.py` helper and its real dependency/configuration files if using the YouTube-enabled export.
 
-Obtain the matching v10 application/assets from the package maintainer. This repository does not distribute a complete worker installer, portable container image or model environment.
+Use the application and asset bytes supplied in worker-source.zip. It is source code, not a prebuilt container or one-click installer. Model weights, the timed-voice environment and the YouTube SSH helper are separate prerequisites for the Reels/Shorts route; they are not needed for musical Posts rendering.
 
-**Installation boundary:** do not start a new V1 installation from only the public JSON. The missing companion artifacts must be supplied by the package maintainer. The procedure below documents the recovered source contract; a clean-machine installation was not executed during this documentation update.
+**Installation boundary:** install the bundled worker source and its documented system dependencies separately. For Reels/Shorts, obtain and verify the timed Kokoro environment and matching SSH helper before enabling those routes. A complete clean-machine installation was not executed during this catalog revision.
 
 ## 3. Install the Node renderer dependencies
 
@@ -72,7 +72,7 @@ Rendering uses continuous narration, derives scene cuts from native timestamps a
 | `FFMPEG_PATH`, `FFPROBE_PATH` | Optional executable paths; defaults `ffmpeg` and `ffprobe`. |
 | `VOICE_PYTHON`, `KOKORO_MODEL_DIR` | Compatible narration Python interpreter and model directory; model default is `/opt/kokoro`. |
 
-The included neutral overlay implements `STUDIO_INSTAGRAM_ACCOUNT_ID` and `STUDIO_INSTAGRAM_USERNAME` in `service.mjs`, without owner defaults. Set both and `STUDIO_INSTAGRAM_MEDIA_BASE` before startup. The older recovered entry point used hard-coded destinations; do not reuse it for this anonymous template. Missing or invalid destination settings stop the neutral worker before it can serve jobs.
+The included worker source implements `STUDIO_INSTAGRAM_ACCOUNT_ID` and `STUDIO_INSTAGRAM_USERNAME` in `service.mjs`, without owner defaults. Set both and `STUDIO_INSTAGRAM_MEDIA_BASE` before startup. The older recovered entry point used hard-coded destinations; do not reuse it for this anonymous template. Missing or invalid destination settings stop the neutral worker before it can serve jobs.
 
 Publication policy is persisted in SQLite through `/v1/instagram/settings`. A new database defaults to disabled, but an existing database can already have publishing enabled. Do not rely on an unimplemented environment flag.
 
@@ -147,7 +147,7 @@ The worker installation and live social paths were not re-executed for this rele
 
 ## Neutral branding and generated media
 
-Use [worker-source.zip](./worker-source.zip) with the included compatible local worker in a separate deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This overlay is not a complete worker/model/SSH installer or a production deployment.
+Use [worker-source.zip](./worker-source.zip) as the source for a separate compatible local worker deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This source bundle is not a prebuilt worker/model/SSH environment or a configured production deployment.
 
 
 ## Current neutral package

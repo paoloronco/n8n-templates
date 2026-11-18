@@ -1,4 +1,4 @@
-← [Automate AI Social Media Content Creation and Publishing to Instagram](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe)
+← [Social Posts & Carousels — Local Worker or Cloud](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe)
 
 V2 uses cloud rendering and a required native n8n sub-workflow. These are inactive templates: generation and publication are disabled. The retained copies are not production deployments.
 
@@ -14,16 +14,16 @@ Posts remain musical MP4 assets: a single post is 16.5 seconds; a carousel is fo
 
 ## 2. Files and import order
 
-Local archive for the owner: <code>E:\Projects\Automations\n8n\WORKFLOWS\Social-video\Social Posts\V2</code>. Choose <code>Creatomate</code>, <code>Shotstack</code> or <code>JSON2Video</code>. Each folder contains the main workflow JSON, <code>Runtime.json</code> and <code>README.md</code>; the V2-level <code>manifest.json</code> records source files, IDs and SHA-256 hashes.
+Package location: open the V2 directory inside the downloaded family ZIP. Choose <code>Creatomate</code>, <code>Shotstack</code> or <code>JSON2Video</code>. Each folder contains the main workflow JSON, <code>Runtime.json</code> and <code>README.md</code>; the V2-level <code>manifest.json</code> records the distributed file sizes and SHA-256 hashes.
 
 The local template archive and GitHub now use the same anonymous distribution without owner credentials, destination account IDs or runtime bindings. Public sanitized copies are now available in [the GitHub V2 provider folders](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/social-posts-carousels/V2): each contains workflow.json, Runtime.json, `README.md` and `documentation.md`. Owner credentials, destination IDs and runtime bindings are removed; configure them before execution. V1 remains available under [V1](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/social-posts-carousels/V1), with its local-worker JSON and neutral worker source and a complete local-worker setup guide.
 
 1. Import <code>Runtime.json</code> first, keeping it inactive.
 2. Import the selected Instagram Posts JSON, also inactive.
 3. Open every native <code>Execute Sub-workflow</code> node in the main workflow and select the imported runtime. A new installation may assign a different ID; do not leave references to an unavailable owner workflow.
-4. Import each shared runtime once. Creatomate and HeyGen share one runtime; Shotstack and JSON2Video share another. Byte-identical runtime copies can be reused when they have the same ID.
+4. Import each required runtime once. Creatomate and HeyGen share a runtime implementation; Shotstack and JSON2Video share another. Compare SHA-256 hashes before reusing a byte-identical copy, then explicitly select its new installation ID in each caller.
 5. The runtime uses native n8n Data Tables and bundled assets. No Social Studio worker, SSH helper, Python, FFmpeg, local Kokoro or local HyperFrames installation is required.
-6. Install <code>@shotstack/n8n-nodes-shotstack</code> if the selected shared runtime has unknown Shotstack nodes. It is already present in the owner's instance. On a clean installation resolve unknown-node errors before testing any branch.
+6. Install <code>@shotstack/n8n-nodes-shotstack</code> if the selected shared runtime has unknown Shotstack nodes. Resolve unknown-node errors in your own installation before testing any branch.
 7. Configure credentials, then follow journal setup and preview below. Do not execute the complete graph merely to check imports.
 
 ## 3. Credentials and public URLs
@@ -59,7 +59,7 @@ These are existing fields to edit in the node's config object, not a replacement
 2. Set <code>jobsTable</code> to the intended journal. Creatomate/HeyGen default: <code>social_studio_cloud</code>; Shotstack: <code>social_studio_shotstack_templates</code>; JSON2Video: <code>social_studio_json2video_templates</code>.
 3. Run only the main workflow's manual setup action once. It initializes or reuses the journal and generates signing material; it does not call OpenAI or render a video.
 4. Verify the setup receipt before selecting <code>manualAction: "reserve"</code>. Keep generation and publication off until the future preview test is deliberately authorized.
-5. On the owner's instance the Shotstack and JSON2Video journals have already been initialized. Do not reset a journal to clear errors or render counters.
+5. Initialize your own journal once. Do not reset a journal to clear errors or render counters.
 
 The sub-workflow setup was tested while inactive on n8n 2.47.5. If another n8n version requires publication for sub-workflow invocation, configure a separate working installation according to that version's rules. Rendering also needs the parent asset/media webhook routes to be registered; a manual editor test alone does not make those routes continuously available.
 
@@ -68,7 +68,7 @@ The sub-workflow setup was tested while inactive on n8n 2.47.5. If another n8n v
 1. Open Creatomate's developer/API settings and obtain a project API key with render credit.
 2. Create Header Auth: header <code>Authorization</code>, value <code>Bearer <your API key></code>; select it on the Creatomate nodes in the Creatomate/HeyGen runtime.
 3. This variant sends a complete RenderScript composition to the render API. It does not require a manually created Creatomate template ID.
-4. It reconstructs the original scenes in Creatomate, retaining campaigns, branding, music and 4:5 dimensions. It is not certified pixel-identical to the local HyperFrames output.
+4. It builds the neutral sample scenes in Creatomate, using the selected campaign, demo branding, music and 4:5 dimensions. It is not certified pixel-identical to the local HyperFrames output.
 5. Keep signed n8n asset URLs reachable. The bundled font/music derivatives are already prepared; a local converter is not needed after import.
 6. The default <code>maxCloudRenders</code> is 4: one four-part carousel, or up to four single rendering requests. This counter is not a monthly allowance.
 
@@ -76,10 +76,10 @@ Official references: [Create a render](https://creatomate.com/docs/api/reference
 
 ## 6. Shotstack Sandbox configuration
 
-1. Install the native Shotstack node if needed; create/select a Shotstack credential with environment <b>Sandbox</b>. The owner's existing Sandbox credential is selected in the saved runtime. Do not select Production as a substitute.
+1. Install the native Shotstack node if needed; create/select a Shotstack credential with environment <b>Sandbox</b>. The distribution has no selected credentials: choose your own Sandbox credential. Do not select Production as a substitute.
 2. Keep <code>renderer: "shotstack"</code> and the provider-specific journal/routes. The API node selects the Sandbox endpoint from the credential.
 3. Sandbox rendering is free with a watermark but requires at least one credit available. The advertised 10 initial credits expire after 30 days; account offers and terms must be checked when signing up.
-4. The workflow renders the original musical 4:5 scenes. It does not call a voice-generation API.
+4. The workflow renders the neutral musical 4:5 sample scenes. It does not call a voice-generation API.
 5. Shotstack HTML5 blocks external images and fonts. The runtime unpacks ready-made WebP/font derivatives and embeds them as data URIs via deduplicated merge fields, enforcing a 450 kB request cap. Do not change these back to remote image URLs: that produced videos with missing images.
 6. Sandbox variants block social publication even when the generic publishing flag is changed. They are evaluation templates; changing to a paid production credential alone is not a supported publishing conversion.
 
@@ -88,7 +88,7 @@ Official references: [pricing](https://shotstack.io/pricing/), [API keys and San
 ## 7. JSON2Video configuration
 
 1. Create a JSON2Video API account and obtain its API key.
-2. Create Header Auth with header name <code>x-api-key</code>; select it on <b>Read JSON2Video movie</b>, <b>Render with JSON2Video</b> and <b>Refresh JSON2Video original</b> in the provider runtime. No JSON2Video credential was available in the owner's instance.
+2. Create Header Auth with header name <code>x-api-key</code>; select it on <b>Read JSON2Video movie</b>, <b>Render with JSON2Video</b> and <b>Refresh JSON2Video original</b> in the provider runtime. The distribution has no selected JSON2Video credential.
 3. Keep <code>renderer: "json2video"</code>, its dedicated table and routes. The runtime checks actual remaining quota before the first render.
 4. The free allowance is 600 initial, non-renewing credits (about ten minutes), not 600 monthly credits. Free use is for personal, educational and non-commercial evaluation; a watermark may apply. It allows up to 1080p and 60 seconds.
 5. Keep <code>minimumRemainingCredits: 120</code>. The preflight also reserves an estimated 17 seconds for a single post or 24 for a carousel; it stops before POST if the verified remaining quota is insufficient. These checks do not cover separate OpenAI billing.

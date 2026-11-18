@@ -1,6 +1,6 @@
 # V1 — Instagram Posts and Carousels with a local worker
 
-← [Instagram Posts — V1 / V2](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe)
+← [Instagram Posts — V1 / V2](https://paoloronco.notion.site/41af0ba27c3281e7a8c3c9434b6efbbe)
 
 V1 only — install the compatible local Social Studio worker. V2 cloud templates use their native n8n Runtime sub-workflow instead and do not follow these installation steps.
 
@@ -118,7 +118,7 @@ A lost n8n response does not cancel the worker job. Retain its ID, inspect the j
 
 ## Detailed version documentation
 
-[Notion V1/V2 documentation](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe).
+[Notion V1/V2 documentation](https://paoloronco.notion.site/41af0ba27c3281e7a8c3c9434b6efbbe).
 
 The worker installation and live social paths were not re-executed for this release.
 

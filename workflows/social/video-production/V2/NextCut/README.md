@@ -49,10 +49,10 @@ Create vertical Reels and Shorts from a structured brief and supplied narration 
 - `maxCloudRenders` is an atomic workflow job cap, not a currency budget. Rejected jobs remain in the ledger. `get_usage.totalCostUsd` also includes estimated AWS compute costs for free renders; it is not a paid-credit balance. No subscription, top-up or billing activation is implemented.
 - The private equivalent passed native rendering, Dropbox upload/download hash verification and recovery without a new render. This anonymized export passed offline validation; live social publishing with NextCut remains unverified.
 - [GitHub package](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/nextcut) · [Workflow JSON](./workflow.json) · [Compare both renderers](../README.md). [Gumroad](https://paoloronco.gumroad.com/l/social-local-videoproduction) offers both provider downloads. No n8n Creators submission has been performed for NextCut.
-- [Full setup, configuration and recovery guide](https://app.notion.com/p/41bf0ba27c3281b5a38fe146d963960f).
+- [Full setup, configuration and recovery guide](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f).
 - Support and customization: [Consulting website](https://paoloronco.it/) · [Author's n8n repository](https://github.com/paoloronco/n8n-templates).
 
 
 ## Version selection
 
-This is V2 NextCut Free. V1 uses a local worker and has a separate installation. One product download includes both versions. [Provider documentation](https://app.notion.com/p/41bf0ba27c3281b5a38fe146d963960f).
+This is V2 NextCut Free. V1 uses a local worker and has a separate installation. One product download includes both versions. [Provider documentation](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f).

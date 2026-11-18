@@ -36,11 +36,11 @@ Free renderer offers do not include OpenAI costs. Runtime render counters are cu
 
 See [verified scope and remaining acceptance tests](../verification.md). Paid rendering/voice, live AI and social publication were not exhaustively exercised; these files are not a universal production certification. No Creator Portal submission was made.
 
-**Documentation:** [Notion V2 guide](https://app.notion.com/p/41cf0ba27c3281dcb532fbca12406c6a) · [Complete setup](./documentation.md) · [V1 local worker](../../V1/README.md)
+**Documentation:** [Notion V2 guide](https://paoloronco.notion.site/41cf0ba27c3281dcb532fbca12406c6a) · [Complete setup](./documentation.md) · [V1 local worker](../../V1/README.md)
 
 
 ## This provider and current sample
 
 Selected provider: **HeyGen Voice + HyperFrames**. Cloud narration and vertical HyperFrames rendering. API credits required. Import only this provider folder. The sample uses newly authored grayscale cards, generic font and new procedural audio, without owner production screenshots, media or palette. Replace the fictional facts and sample branding with your own verified content.
 
-[Provider documentation](https://app.notion.com/p/41cf0ba27c32819ea2a5d70400693892) · [Version selection](../../README.md)
+[Provider documentation](https://paoloronco.notion.site/41cf0ba27c32819ea2a5d70400693892) · [Version selection](../../README.md)

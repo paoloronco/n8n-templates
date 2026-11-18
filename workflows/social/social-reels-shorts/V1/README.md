@@ -27,7 +27,7 @@ Change branding, facts, topics, schedules, prompts and layouts in the matching w
 
 Local rendering does not make OpenAI free. The local-worker graph and canvas geometry are retained; the full clean-machine worker installation was not tested here. For cloud rendering without that worker, choose [V2](../V2/README.md).
 
-**Documentation:** [Notion version guides](https://app.notion.com/p/41af0ba27c32817490eeff675e958ce2) · [Complete local setup](./documentation.md)
+**Documentation:** [Notion version guides](https://paoloronco.notion.site/41af0ba27c32817490eeff675e958ce2) · [Complete local setup](./documentation.md)
 
 
 ## Neutral branding and generated media

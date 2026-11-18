@@ -36,11 +36,11 @@ Free renderer offers do not include OpenAI costs. Runtime render counters are cu
 
 See [verified scope and remaining acceptance tests](../verification.md). Paid rendering/voice, live AI and social publication were not exhaustively exercised; these files are not a universal production certification. No Creator Portal submission was made.
 
-**Documentation:** [Notion V2 guide](https://app.notion.com/p/41cf0ba27c32812bbc05f0267444ebfc) · [Complete setup](./documentation.md) · [V1 local worker](../../V1/README.md)
+**Documentation:** [Notion V2 guide](https://paoloronco.notion.site/41cf0ba27c32812bbc05f0267444ebfc) · [Complete setup](./documentation.md) · [V1 local worker](../../V1/README.md)
 
 
 ## This provider and current sample
 
 Selected provider: **Creatomate Cloud**. 4:5 musical posts and video carousels, 24 fps. API credits required. Import only this provider folder. The sample uses newly authored grayscale cards, generic font and new procedural audio, without owner production screenshots, media or palette. Replace the fictional facts and sample branding with your own verified content.
 
-[Provider documentation](https://app.notion.com/p/41cf0ba27c32815db0d0e288e8c50416) · [Version selection](../../README.md)
+[Provider documentation](https://paoloronco.notion.site/41cf0ba27c32815db0d0e288e8c50416) · [Version selection](../../README.md)

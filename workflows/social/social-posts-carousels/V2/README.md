@@ -28,4 +28,4 @@ Replace neutral samples with your own content. Keep generation, publication and 
 
 ### Additional Info
 
-[Family overview](../README.md) · [Notion V2 guide](https://app.notion.com/p/41cf0ba27c32812bbc05f0267444ebfc)
+[Family overview](../README.md) · [Notion V2 guide](https://paoloronco.notion.site/41cf0ba27c32812bbc05f0267444ebfc)

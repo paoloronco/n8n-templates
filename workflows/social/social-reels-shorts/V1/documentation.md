@@ -1,6 +1,6 @@
 # V1 — Instagram Reels and YouTube Shorts with a local worker
 
-← [Reels & Shorts — V1 / V2](https://app.notion.com/p/41af0ba27c32817490eeff675e958ce2)
+← [Reels & Shorts — V1 / V2](https://paoloronco.notion.site/41af0ba27c32817490eeff675e958ce2)
 
 V1 only — install the compatible local Social Studio worker. V2 cloud templates use their native n8n Runtime sub-workflow instead and do not follow these installation steps.
 
@@ -140,7 +140,7 @@ V1 `privateTest` affects YouTube visibility; the earlier Instagram branch may st
 
 ## Detailed version documentation
 
-[Notion V1/V2 documentation](https://app.notion.com/p/41af0ba27c32817490eeff675e958ce2).
+[Notion V1/V2 documentation](https://paoloronco.notion.site/41af0ba27c32817490eeff675e958ce2).
 
 The worker installation and live social paths were not re-executed for this release.
 

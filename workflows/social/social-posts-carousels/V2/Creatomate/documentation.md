@@ -1,4 +1,4 @@
-← [Social Posts & Carousels — Local Worker or Cloud](https://app.notion.com/p/41af0ba27c3281e7a8c3c9434b6efbbe)
+← [Social Posts & Carousels — Local Worker or Cloud](https://paoloronco.notion.site/41af0ba27c3281e7a8c3c9434b6efbbe)
 
 V2 uses cloud rendering and a required native n8n sub-workflow. These are inactive templates: generation and publication are disabled. The retained copies are not production deployments.
 
@@ -152,4 +152,4 @@ Use a fresh journal/database and output directory for a new brand. Previously st
 
 Selected provider: **Creatomate Cloud**. 4:5 musical posts and video carousels, 24 fps. API credits required. Import only this provider folder. The sample uses newly authored grayscale cards, generic font and new procedural audio, without owner production screenshots, media or palette. Replace the fictional facts and sample branding with your own verified content.
 
-[Provider documentation](https://app.notion.com/p/41cf0ba27c32815db0d0e288e8c50416) · [Version selection](../../README.md)
+[Provider documentation](https://paoloronco.notion.site/41cf0ba27c32815db0d0e288e8c50416) · [Version selection](../../README.md)

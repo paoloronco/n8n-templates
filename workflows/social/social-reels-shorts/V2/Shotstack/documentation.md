@@ -1,4 +1,4 @@
-← [Social Reels & Shorts — Local Worker or Cloud](https://app.notion.com/p/41af0ba27c32817490eeff675e958ce2)
+← [Social Reels & Shorts — Local Worker or Cloud](https://paoloronco.notion.site/41af0ba27c32817490eeff675e958ce2)
 
 V2 uses cloud rendering and a required native n8n sub-workflow. These are inactive templates: generation and publication are disabled. The retained copies are not production deployments.
 
@@ -10,7 +10,7 @@ V2 uses cloud rendering and a required native n8n sub-workflow. These are inacti
 | Shotstack | Native n8n Shotstack node; Sandbox, watermark, 24 fps; 1080 × 1920 (9:16) | Six native timed speech scenes; TTS consumes credits even in Sandbox |
 | JSON2Video | HTML scenes, 25 fps; 1080 × 1920 (9:16) | Native Azure voice, timed per scene; 600 initial non-renewing credits, non-commercial evaluation |
 
-These are variants of the Social Studio content-generation workflow. [Create and Publish Reels & Shorts with NextCut and Dropbox](https://app.notion.com/p/41bf0ba27c3281b5a38fe146d963960f) is a separate workflow with different inputs, storage and setup; it is not a fourth interchangeable provider in this package.
+These are variants of the Social Studio content-generation workflow. [Create and Publish Reels & Shorts with NextCut and Dropbox](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f) is a separate workflow with different inputs, storage and setup; it is not a fourth interchangeable provider in this package.
 
 ## 2. Files and import order
 
@@ -153,4 +153,4 @@ Use a fresh journal/database and output directory for a new brand. Previously st
 
 Selected provider: **Shotstack Sandbox**. 24 fps, watermark; evaluation publication blocked. Speech can consume credits even in Sandbox. Import only this provider folder. The sample uses newly authored grayscale cards, generic font and new procedural audio, without owner production screenshots, media or palette. Replace the fictional facts and sample branding with your own verified content.
 
-[Provider documentation](https://app.notion.com/p/41cf0ba27c328157b625de8de20ed542) · [Version selection](../../README.md)
+[Provider documentation](https://paoloronco.notion.site/41cf0ba27c328157b625de8de20ed542) · [Version selection](../../README.md)

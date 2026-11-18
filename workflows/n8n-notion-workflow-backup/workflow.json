@@ -40,7 +40,7 @@
       "typeVersion": 2,
       "position": [
         784,
-        1264
+        -368
       ]
     },
     {
@@ -73,8 +73,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1408,
-        1264
+        1440,
+        -384
       ]
     },
     {
@@ -92,7 +92,7 @@
       "typeVersion": 2.1,
       "position": [
         1664,
-        1152
+        -592
       ],
       "onError": "continueRegularOutput"
     },
@@ -108,7 +108,7 @@
       "typeVersion": 2,
       "position": [
         1920,
-        1152
+        -592
       ],
       "onError": "continueErrorOutput"
     },
@@ -124,7 +124,7 @@
       "typeVersion": 2,
       "position": [
         2176,
-        1264
+        -368
       ]
     },
     {
@@ -139,7 +139,7 @@
       "typeVersion": 2,
       "position": [
         512,
-        160
+        144
       ],
       "onError": "continueErrorOutput"
     },
@@ -174,7 +174,7 @@
       "typeVersion": 2.2,
       "position": [
         784,
-        160
+        128
       ]
     },
     {
@@ -188,8 +188,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1152,
-        1264
+        1168,
+        -368
       ],
       "onError": "continueErrorOutput"
     },
@@ -204,8 +204,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1152,
-        160
+        1280,
+        320
       ]
     },
     {
@@ -217,8 +217,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1408,
-        160
+        1472,
+        -48
       ],
       "onError": "continueErrorOutput"
     },
@@ -252,8 +252,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1664,
-        160
+        1808,
+        -64
       ]
     },
     {
@@ -288,8 +288,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2320,
-        80
+        2384,
+        0
       ],
       "onError": "continueRegularOutput"
     },
@@ -300,8 +300,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2832,
-        240
+        2800,
+        160
       ]
     },
     {
@@ -340,8 +340,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2320,
-        272
+        2384,
+        160
       ],
       "onError": "continueRegularOutput"
     },
@@ -367,8 +367,8 @@
     },
     {
       "parameters": {
-        "content": "# n8n → Notion · Workflow catalog\n\n### How it works\nMaintain one stable page for each active, inactive or archived workflow. Each page contains a five-section README and one complete .json attachment. Download and verify the file before replacing any previous copy.\n\n### Setup\n1. Connect read-only n8n API and Notion credentials.\n2. Share the catalog page and database with the integration.\n3. Review destinations and limits in Configuration.\n4. Run a manual sync and inspect the Notion attachments.\n\n### Customization\nAdjust exclusions, frequency and time zone. The Notes property and personal content are preserved. Notion stores documentation and the current definition; credentials and instance data require separate backups.",
-        "height": 752,
+        "content": "# n8n Workflow Backup to Notion\n\nAutomatically back up and document your n8n workflows in Notion, with structured documentation, verified JSON exports, and change tracking.\n\n### How it works\n- Retrieves active, inactive, and archived workflows via the n8n API.\n- Creates or updates dedicated Notion pages with generated documentation.\n- Uploads and verifies complete JSON workflow backups.\n- Preserves personal notes and previous backups on failure.\n- Tracks changes, handles API limits, and reports errors.\n\n### Setup\n- Import the workflow into n8n.\n- Connect your n8n API and Notion credentials.\n- Create a Notion catalog database with the required properties.\n- Update database IDs, URLs, and settings in **Configuration**.\n- Run a manual test, verify backups, and enable the schedule.\n\n### Requirements\n- n8n instance with API access.\n- Notion database and integration with read/write permissions.\n- Sufficient Notion file-upload allowance.\n- SMTP credentials (optional).\n- No AI services or community nodes required.\n\n### Customization\n- Adjust backup frequency and time zone.\n- Include or exclude specific workflows.\n- Customize documentation through workflow sticky notes.\n- Configure API limits, file sizes, and email notifications.\n\n### Additional Info\n- One-way backup: n8n → Notion.\n- Restore workflows by importing their JSON files.\n- Credentials, database, and encryption keys require separate backups.\n- Failed backups are reported without deleting previous copies.\n\n**Full Documentation:** [n8n Workflow Backup to Notion](https://paoloronco.notion.site/n8n-Workflow-Backup-to-Notion-41af0ba27c32814d800cc4582aa68c04?source=copy_link)",
+        "height": 848,
         "width": 688,
         "color": 2
       },
@@ -377,8 +377,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -784,
-        -144
+        -848,
+        -704
       ]
     },
     {
@@ -401,7 +401,7 @@
       "parameters": {
         "content": "## 02 · Controlled API requests\n\nPrepare the state and attachments, respect Notion limits and send one request at a time. Bounded retries and explicit waits keep service failures visible.",
         "height": 848,
-        "width": 1104,
+        "width": 1120,
         "color": 7
       },
       "id": "3168e41d-8fd9-4f6b-9771-5942a9d4efc7",
@@ -416,8 +416,8 @@
     {
       "parameters": {
         "content": "## 03 · Catalog, README and JSON attachment\n\nRead one source at a time, update its stable page and attach the complete .json file directly. Verify the downloaded bytes before retiring the previous copy or legacy JSON subpage. Preserve personal notes. If a file exceeds the Notion account limit, report an error and retain the previous backup.",
-        "height": 848,
-        "width": 1808,
+        "height": 960,
+        "width": 2080,
         "color": 7
       },
       "id": "16c75bf7-13cb-4ff7-9575-5e0f3993e0e8",
@@ -441,14 +441,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1104,
-        976
+        1120,
+        -672
       ]
     },
     {
       "parameters": {
         "content": "## 05 · Execution failures\n\nSend technical failures to the final report without claiming a successful sync. Preserve personal content and existing copies when verification fails.",
-        "height": 448,
+        "height": 496,
         "width": 352,
         "color": 7
       },
@@ -458,7 +458,7 @@
       "typeVersion": 1,
       "position": [
         704,
-        976
+        -672
       ]
     },
     {
@@ -480,8 +480,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3088,
-        240
+        3056,
+        592
       ],
       "onError": "continueErrorOutput"
     },
@@ -514,8 +514,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3344,
-        240
+        3408,
+        576
       ]
     },
     {
@@ -529,8 +529,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3600,
-        80
+        3840,
+        384
       ],
       "onError": "continueErrorOutput"
     },
@@ -545,8 +545,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3856,
-        240
+        4144,
+        592
       ],
       "onError": "continueErrorOutput"
     },
@@ -580,8 +580,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1920,
-        528
+        2064,
+        176
       ]
     },
     {
@@ -627,8 +627,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2320,
-        448
+        2384,
+        320
       ],
       "onError": "continueRegularOutput"
     },
@@ -652,8 +652,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3472,
-        448
+        3600,
+        384
       ],
       "onError": "continueRegularOutput"
     }

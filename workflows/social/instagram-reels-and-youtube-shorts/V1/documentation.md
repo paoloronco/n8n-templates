@@ -72,7 +72,7 @@ Rendering uses continuous narration, derives scene cuts from native timestamps a
 | `FFMPEG_PATH`, `FFPROBE_PATH` | Optional executable paths; defaults `ffmpeg` and `ffprobe`. |
 | `VOICE_PYTHON`, `KOKORO_MODEL_DIR` | Compatible narration Python interpreter and model directory; model default is `/opt/kokoro`. |
 
-The recovered source contains owner-specific Instagram account/username values in `service.mjs` and product facts/assets in the catalog. Replace every destination consistently for a new installation. There is no verified `INSTAGRAM_ACCOUNT_ID` environment variable in that entry point; simply inventing one does not change the target.
+The included neutral overlay implements `STUDIO_INSTAGRAM_ACCOUNT_ID` and `STUDIO_INSTAGRAM_USERNAME` in `service.mjs`, without owner defaults. Set both and `STUDIO_INSTAGRAM_MEDIA_BASE` before startup. The older recovered entry point used hard-coded destinations; do not reuse it for this anonymous template. Missing or invalid destination settings stop the neutral worker before it can serve jobs.
 
 Publication policy is persisted in SQLite through `/v1/instagram/settings`. A new database defaults to disabled, but an existing database can already have publishing enabled. Do not rely on an unimplemented environment flag.
 

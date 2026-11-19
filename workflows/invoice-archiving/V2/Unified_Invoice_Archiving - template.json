@@ -1,5 +1,5 @@
 {
-  "name": "Archive and log invoices from Gmail with SFTP and Google Sheets",
+  "name": "Archive and log invoices from Gmail with SFTP and Google Sheets — V2",
   "nodes": [
     {
       "parameters": {

@@ -1,4 +1,6 @@
-# Archive and log invoices from Gmail with SFTP and Google Sheets
+# Archive and log invoices from Gmail with SFTP and Google Sheets — V2
+
+This V2 is maintained on GitHub. V1 is the original published Creator template; V3 is the separate Google Drive version being prepared for the revised Creator submission.
 
 Collect text-based invoice PDFs from Gmail, extract invoice details with configurable rules, archive each PDF over SFTP, and insert or update a shared Google Sheets register. Four example categories cover utilities, internet, cloud and hosting. No AI API or OCR service is required.
 

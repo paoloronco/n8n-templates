@@ -1,0 +1,2 @@
+# Template sources are tracked directly; distribution ZIPs are not committed.
+*.zip

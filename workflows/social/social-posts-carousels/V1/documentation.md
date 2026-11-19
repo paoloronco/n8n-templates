@@ -10,16 +10,16 @@ The worker is a Node.js HTTP service (`service.mjs`) which owns briefs, validati
 
 The recovered v10 Posts renderer produces musical MP4s at 1080 × 1350, 24 fps: one 16.5-second single or four 5.5-second carousel parts. Older JSON/README descriptions also refer to JPEG outputs. The installed renderer version determines the files; do not document all V1 deployments as JPEG-only.
 
-## 2. Obtain the matching source package first
+## 2. Obtain the matching worker source first
 
-The V1 folder includes the workflow, setup guides and worker-source.zip with the application source, neutral composition and matching assets. Extract the source ZIP into a separate worker directory. Importing the workflow JSON does not install or start that service.
+The V1 folder includes the workflow and setup guides. The [shared worker source](../../shared/social-studio-worker/) contains the application source, neutral composition and matching assets for both local Social V1 templates. Copy the complete `social-studio-worker/` directory to your separate worker host. Importing the workflow JSON does not install or start that service.
 
 Before installation, obtain:
 
 - Matching `service.mjs`, `render.mjs`, publication/storage/catalog modules, composition files, `package.json` and `package-lock.json`.
 - The full `assets/` directory and its manifests, including the current `sample-*.png`, logos, font and `demo-music.wav`. Keep the manifests and matching file bytes together.
 
-Use the application and asset bytes supplied in worker-source.zip. It is source code, not a prebuilt container or one-click installer. Model weights, the timed-voice environment and the YouTube SSH helper are separate prerequisites for the Reels/Shorts route; they are not needed for musical Posts rendering.
+Use the application and asset bytes in the [shared worker source](../../shared/social-studio-worker/). It is source code, not a prebuilt container or one-click installer. Model weights, the timed-voice environment and the YouTube SSH helper are separate prerequisites for the Reels/Shorts route; they are not needed for musical Posts rendering.
 
 **Installation boundary:** install the bundled worker source and its documented system dependencies separately. For Reels/Shorts, obtain and verify the timed Kokoro environment and matching SSH helper before enabling those routes. A complete clean-machine installation was not executed during this catalog revision.
 
@@ -125,9 +125,9 @@ The worker installation and live social paths were not re-executed for this rele
 
 ## Neutral branding and generated media
 
-Use [worker-source.zip](./worker-source.zip) as the source for a separate compatible local worker deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This source bundle is not a prebuilt worker/model/SSH environment or a configured production deployment.
+Use [shared worker source](../../shared/social-studio-worker/) as the source for a separate compatible local worker deployment. It includes the neutral source, new fictional sample illustrations/logos, music and regenerated asset checksums. Read [ANONYMIZATION.md](./ANONYMIZATION.md) before applying it. The n8n JSON delegates copy/rendering to the worker: replacing only the workflow title cannot change server-generated media. Start with a new database/output directory; old jobs and previously rendered videos retain their original content. This source bundle is not a prebuilt worker/model/SSH environment or a configured production deployment.
 
 
 ## Current neutral package
 
-Use `worker-source.zip`: application modules, newly authored monochrome compositions, fictional sample images, generic DejaVu Sans and new procedural demonstration audio. These are independent of the owner's production templates and media. No model weights or prebuilt container are included. For Reels, the documented timed-voice environment remains a prerequisite. Keep publication off until a private preview has passed. The previous dated Sandbox tests used older artwork; no full render of this revision is claimed.
+Use the [shared worker source](../../shared/social-studio-worker/): application modules, newly authored monochrome compositions, fictional sample images, generic DejaVu Sans and new procedural demonstration audio. These are independent of the owner's production templates and media. No model weights or prebuilt container are included. For Reels, the documented timed-voice environment remains a prerequisite. Keep publication off until a private preview has passed. The previous dated Sandbox tests used older artwork; no full render of this revision is claimed.

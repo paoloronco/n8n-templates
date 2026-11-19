@@ -14,7 +14,7 @@ These are variants of the Social Studio content-generation workflow. [Create and
 
 ## 2. Files and import order
 
-Package location: open the V2 directory inside the downloaded family ZIP. Choose <code>HeyGen-HyperFrames</code>, <code>Shotstack</code> or <code>JSON2Video</code>. Each folder contains the main workflow JSON, <code>Runtime.json</code> and <code>README.md</code>; the V2-level <code>manifest.json</code> records the distributed file sizes and SHA-256 hashes.
+Source location: open the V2 directory in this workflow family and download the files for your selected provider. Choose <code>HeyGen-HyperFrames</code>, <code>Shotstack</code> or <code>JSON2Video</code>. Each folder contains the main workflow JSON, <code>Runtime.json</code> and <code>README.md</code>; the V2-level <code>manifest.json</code> records the distributed file sizes and SHA-256 hashes.
 
 The local template archive and GitHub now use the same anonymous distribution without owner credentials, destination account IDs or runtime bindings. Public sanitized copies are now available in [the GitHub V2 provider folders](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/social-reels-shorts/V2): each contains workflow.json, Runtime.json, `README.md` and `documentation.md`. Owner credentials, destination IDs and runtime bindings are removed; configure them before execution. V1 remains available under [V1](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/social-reels-shorts/V1), with its local-worker JSON and neutral worker source and a complete local-worker setup guide.
 

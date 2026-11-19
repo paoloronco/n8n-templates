@@ -1,0 +1,57 @@
+{
+  "demo-logo-dark.png": {
+    "sha256": "dbdae4d635f150a7722afa855037d962a5b230e7daf1a59a6a0b7070de83d1b2",
+    "bytes": 4920,
+    "provenance": "New fictional sample artwork"
+  },
+  "demo-logo-light.png": {
+    "sha256": "b777f48b96097547166598c5397241e68ba4c8020f4569eb2ec09c7774f2a530",
+    "bytes": 4809,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-cocktail-menu.png": {
+    "sha256": "2554f18d3e6a3fbe616cb503f6b0a034c15704c52d6b15b0f0931154f9cd7505",
+    "bytes": 23187,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-cocktail.png": {
+    "sha256": "1f6c0c27da8546d22e7eff274c937c8e539640175ceaf1d0e10bc2adf13fda1a",
+    "bytes": 23467,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-creator-1.png": {
+    "sha256": "82f97cdfe2dd4247fdb1a5c6d38abfd550f9725266fa365183c3c59d9624c02e",
+    "bytes": 24274,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-creator-2.png": {
+    "sha256": "6d4c8ee2934b7632b32ee3cfe9f879d02ab5b85eea3beb073fb960db258d032e",
+    "bytes": 23611,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-events.png": {
+    "sha256": "a511531a68e1b843c6b06d38f0204ee7b4f941baac1bb981e3c2728bfab5a6a2",
+    "bytes": 22417,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-property.png": {
+    "sha256": "a8708126642b4d84fc308c1fd9e54ac7846a5d89e026bf9d1df0e74d3adc67e5",
+    "bytes": 25347,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-qr-restaurant.png": {
+    "sha256": "e019a37c12d2910cc89651d4dc5e080a406d1a7570939ddf8519d21d49e64b0e",
+    "bytes": 24748,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-restaurant.png": {
+    "sha256": "03c5463fd6ef6a72c585678dceeb64f45efafd1c2aec19516ac7a70d1a7dac00",
+    "bytes": 23261,
+    "provenance": "New fictional sample artwork"
+  },
+  "sample-studio.png": {
+    "sha256": "1a6877ce376dbe4fc03584fb86fba575c86ba67d7c8383abe924b58c0f4218cd",
+    "bytes": 25960,
+    "provenance": "New fictional sample artwork"
+  }
+}

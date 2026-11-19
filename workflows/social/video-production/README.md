@@ -2,7 +2,7 @@
 
 ### Quick Overview
 
-One package includes **V1 with a local worker** and **V2 with a choice of cloud provider**. Import one option. All exports are inactive templates; configure your own credentials, facts, media and destinations.
+This directory contains source files for **V1 with a local worker** and **V2 with a choice of cloud provider**. Import one option. All exports are inactive templates; configure your own credentials, facts, media and destinations.
 
 | Version / provider | What to choose |
 | --- | --- |

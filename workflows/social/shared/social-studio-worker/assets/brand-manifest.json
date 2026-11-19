@@ -1,0 +1,12 @@
+{
+  "demo-logo-dark.png": {
+    "sha256": "dbdae4d635f150a7722afa855037d962a5b230e7daf1a59a6a0b7070de83d1b2",
+    "bytes": 4920,
+    "provenance": "New fictional sample artwork"
+  },
+  "demo-logo-light.png": {
+    "sha256": "b777f48b96097547166598c5397241e68ba4c8020f4569eb2ec09c7774f2a530",
+    "bytes": 4809,
+    "provenance": "New fictional sample artwork"
+  }
+}

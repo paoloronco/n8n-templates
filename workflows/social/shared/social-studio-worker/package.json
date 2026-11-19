@@ -1,0 +1,19 @@
+{
+  "name": "social-studio-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.9.30 preview",
+    "check": "npx --yes hyperframes@0.9.30 check",
+    "render": "npx --yes hyperframes@0.9.30 render",
+    "start": "node service.mjs"
+  },
+  "dependencies": {
+    "gsap": "3.15.0",
+    "hyperframes": "0.9.30",
+    "playwright": "1.64.1"
+  },
+  "overrides": {
+    "undici": "7.30.1"
+  }
+}

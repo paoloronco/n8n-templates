@@ -1,12 +1,12 @@
 {
-  "name": "Invoice Archiving & Processing",
+  "name": "Archive and log invoices from Gmail with SFTP and Google Sheets",
   "nodes": [
     {
       "parameters": {
-        "content": "# Invoice Archiving & Processing\n\n**Automated Invoice Collection, PDF Processing & Cloud Archiving**\n\nAutomatically collect PDF invoices from Gmail, identify providers, extract key billing information, organize documents, and track invoices in Google Sheets.\n\nA configurable, rule-based workflow designed to reduce repetitive administrative work without requiring AI services.\n\n**Support & Customization:** [Request Consultation](mailto:info@paoloronco.it)\n\n---\n\n## How It Works\n\n1. **Trigger** — Run manually or automatically every 6 hours.\n2. **Gmail Intake** — Search for invoice emails and retrieve PDF attachments.\n3. **PDF Processing** — Extract text and identify the invoice provider.\n4. **Data Extraction** — Parse invoice number, date, total amount, and category.\n5. **Validation** — Reject unsupported documents or invoices with missing required fields.\n6. **Document Archiving** — Organize and upload invoices to category-specific SFTP folders.\n7. **Google Sheets Tracking** — Insert or update invoice records using a unique invoice identifier.\n\n## Setup\n\n1. Connect your **Gmail**, **SFTP**, and **Google Sheets** credentials.\n2. Configure the Gmail search query and invoice lookback period.\n3. Replace the example provider detection patterns with your own.\n4. Configure the SFTP destination folders.\n5. Create a Google Sheets worksheet named `Invoices` with the required columns.\n6. Replace `REPLACE_WITH_GOOGLE_SHEET_ID` with your spreadsheet ID.\n7. Test each invoice category before activating the schedule.\n\n## Customization\n\n- **Providers:** Add or modify invoice provider detection rules.\n- **Categories:** Customize invoice classification and destination folders.\n- **Extraction:** Adapt regex patterns to different invoice layouts.\n- **File Naming:** Modify the standardized PDF filename format.\n- **Tracking:** Extend Google Sheets with additional billing fields.\n- **Scheduling:** Adjust execution frequency and Gmail filters.\n\n## Requirements\n\n- n8n instance\n- Gmail account with OAuth2 access\n- SFTP server with writable directories\n- Google Sheets spreadsheet\n- Text-based PDF invoices\n\n**No AI API keys or paid AI services required.**\n\n\n",
+        "content": "### How it works\nFor small teams that archive supplier invoices and maintain an invoice register. Run manually or every six hours: Gmail retrieves matching messages, each PDF becomes one item, and text extraction feeds a configurable parser. Four example provider categories route validated invoices to SFTP, then insert or update one Google Sheets row using `Provider:Invoice Number` as the Unique Key. Source emails are retained.\n\nText-based PDFs only; OCR and AI are not included. Unknown providers, missing fields and invalid dates or amounts stop processing. Repeated runs upload the same filename again; Sheets upserts do not prevent SFTP overwrites.\n\n### Setup\n1. Connect Gmail OAuth2 in the Gmail node; narrow its query to your invoice senders and review the 30-day lookback.\n2. In **Parse invoice and canonical name**, adapt provider patterns, field regexes and destination paths to your PDFs. Dates accept ISO or day/month/year; amounts accept decimal and grouped European/US formats.\n3. Connect all four SFTP nodes. Create writable `/invoices/utilities`, `/invoices/internet`, `/invoices/cloud` and `/invoices/hosting` folders, or change the parser paths.\n4. Create an `Invoices` worksheet with headers: `Provider`, `Category`, `Invoice Number`, `Date`, `Amount`, `File`, `Unique Key`. Replace `REPLACE_WITH_GOOGLE_SHEET_ID` in all four Sheets nodes, connect a Google service account and share the spreadsheet with it as Editor.\n5. Test each provider and a multi-PDF email; compare files and rows, then rerun an invoice before enabling the schedule.\n\n### Customization\nAdjust the schedule, Gmail query, provider rules and column mappings. Keep provider names aligned with the four routing filters.",
         "height": 1016,
         "width": 636,
-        "color": 3
+        "color": 1
       },
       "id": "cf62e776-c0a6-40f4-9db8-3565cf02e0ab",
       "name": "00 — WORKFLOW OVERVIEW",
@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "content": "## 01 · Start\nManual testing and a six-hour schedule. Keep inactive until setup is complete.",
+        "content": "## 01 · Start a controlled run\nUse Manual Trigger for setup checks. The schedule repeats every six hours once the workflow is published; leave it inactive until all credentials, folders and parsing rules are configured.",
         "height": 578,
         "width": 362,
         "color": 7
@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "content": "## 02 · Gmail intake\nSearch invoice-related messages, retain PDF attachments, split attachments into items. Configure Gmail query and credentials.",
+        "content": "## 02 · Collect individual invoice PDFs\nSearch matching mail from the last 30 days and download attachments. Keep PDFs as separate linked items, skip other attachments and reject PDFs larger than 20 MiB.",
         "height": 578,
         "width": 904,
         "color": 7
@@ -51,7 +51,7 @@
     },
     {
       "parameters": {
-        "content": "## 03 · Extract and validate\nExtract text from PDFs. Generic example patterns require customization to your invoice formats. Unrecognized documents stop execution.",
+        "content": "## 03 · Turn PDF text into invoice records\nCustomize the four provider patterns and field regexes in the parser. Unsupported, ambiguous or incomplete invoices stop execution before upload; scanned PDFs need an OCR step.",
         "height": 578,
         "width": 638,
         "color": 7
@@ -67,7 +67,7 @@
     },
     {
       "parameters": {
-        "content": "## 04 · Storage and logging\nFour example categories each upload to SFTP and upsert into the same Invoices worksheet. Create destination folders, configure Google Sheet ID and credentials, and test. No pre-upload duplicate check or centralized error handling.",
+        "content": "## 04 · Archive first, then update the register\nEach category uploads its PDF, restores the matching invoice and upserts the same Invoices worksheet. SFTP/Sheets retry up to three attempts; repeat uploads may overwrite files. Emails stay in Gmail; failures stop without a notification branch.",
         "height": 1088,
         "width": 1266,
         "color": 7
@@ -122,7 +122,8 @@
         },
         "options": {
           "downloadAttachments": true
-        }
+        },
+        "returnAll": true
       },
       "id": "baab2d06-9525-412c-add0-e53d9f80052c",
       "name": "Gmail - Get invoice messages",
@@ -152,7 +153,7 @@
                 "rightType": "number"
               },
               "leftValue": "={{ Object.keys($binary ?? {}) }}",
-              "rightValue": "0"
+              "rightValue": 0
             }
           ]
         },
@@ -169,7 +170,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const out=[];\nfor (let i=0;i<items.length;i++) {\n const it=items[i]; const from=String(it.json.from?.text||it.json.from||it.json.sender||'').toLowerCase();\n const subject=String(it.json.subject||'').toLowerCase();\n for (const [key,b] of Object.entries(it.binary||{})) {\n  const name=String(b.fileName||b.filename||'');\n  const mime=String(b.mimeType||'').toLowerCase();\n  if (!(name.toLowerCase().endsWith('.pdf')||mime==='application/pdf')) continue;\n  if (b.fileSize && Number(String(b.fileSize).replace(/[^0-9.]/g,''))>20*1024*1024) throw new Error('PDF exceeds 20MB: '+name);\n  out.push({json:{...it.json,attachmentKey:key,originalFileName:name},binary:{data:{...b,fileName:name||'invoice.pdf'}},pairedItem:{item:i}});\n }\n}\nreturn out;"
+        "jsCode": "// Split PDF attachments and retain n8n item links and binary storage references.\nconst items = $input.all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  for (const [key, binary] of Object.entries(item.binary || {})) {\n    const fileName = String(binary.fileName || binary.filename || 'invoice.pdf');\n    if (!fileName.toLowerCase().endsWith('.pdf') && String(binary.mimeType || '').toLowerCase() !== 'application/pdf') continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    if (buffer.length > 20 * 1024 * 1024) throw new Error(`PDF exceeds 20 MiB: ${fileName}`);\n    out.push({\n      json: { ...item.json, attachmentKey: key, originalFileName: fileName },\n      binary: { data: { ...binary, fileName } },\n      pairedItem: { item: i },\n    });\n  }\n}\nreturn out;\n",
+        "mode": "runOnceForAllItems"
       },
       "id": "2a81381f-5345-4152-b9e2-9917fbdf897e",
       "name": "Normalize PDF binary",
@@ -197,7 +199,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Generic example parser. Customize patterns for your invoice layouts before production use.\nconst source = $('Normalize PDF binary').item;\nif (!source?.json || !source?.binary?.data) throw new Error('Missing source PDF');\nconst text = String(item.json.text || item.json.data || '').replace(/\\\\r/g, '');\nif (text.trim().length < 30) throw new Error('No extractable PDF text; OCR may be required');\nconst patterns = [\n  {provider:'UtilityProvider', category:'utilities', match:/utility provider|electricity|gas bill/i},\n  {provider:'InternetProvider', category:'internet', match:/internet provider|broadband|connectivity/i},\n  {provider:'CloudProvider', category:'cloud', match:/cloud provider|cloud services/i},\n  {provider:'HostingProvider', category:'hosting', match:/hosting provider|hosting services/i},\n];\nconst matches=patterns.filter(p=>p.match.test(text));\nif(matches.length!==1) throw new Error('Unknown or ambiguous provider; configure patterns for your invoices');\nconst {provider,category}=matches[0];\nconst invoiceNumber=(text.match(/(?:Invoice\\\\s*(?:number|no\\\\.?|#)|Fattura\\\\s*(?:n\\\\.?|numero))\\\\s*[:#-]?\\\\s*([A-Z0-9\\\\/-]{4,})/i)||[])[1];\nconst dateMatch=text.match(/(?:Invoice date|Data fattura)\\\\s*[:#-]?\\\\s*(\\\\d{4}-\\\\d{2}-\\\\d{2}|\\\\d{2}[\\\\/.\\\\-]\\\\d{2}[\\\\/.\\\\-]\\\\d{4})/i);\nconst amountMatch=text.match(/(?:Total due|Total amount|Totale da pagare|Importo totale)\\\\s*[:€ ]*([0-9.,]+)/i);\nif(!invoiceNumber||!dateMatch||!amountMatch) throw new Error('Required invoice fields not found; customize extraction rules');\nconst rawDate=dateMatch[1];\nconst date=/^\\\\d{4}-/.test(rawDate)?rawDate:rawDate.split(/[\\\\/.\\\\-]/).reverse().join('-');\nconst raw=amountMatch[1];\nconst normalized=raw.includes(',')&&raw.includes('.')?raw.replace(/\\\\./g,'').replace(',','.'):raw.replace(',','.');\nconst amount=Number(normalized);\nif(!Number.isFinite(amount)||amount<0) throw new Error('Invalid total amount');\nconst safeInvoice=invoiceNumber.replace(/[^A-Za-z0-9_-]/g,'_');\nconst fileName=`${date}_${provider}_${safeInvoice}.pdf`;\nconst targetPath=`/invoices/${category}/${fileName}`;\nreturn {json:{provider,type:category,invoiceNumber,uniqueKey:`${provider}:${invoiceNumber}`,date,amount,account:'',service:'',netAmount:null,vatAmount:null,tab:category,fileName,targetPath,sourceMessageId:source.json.id||source.json.messageId||'',sourceAttachmentKey:source.json.attachmentKey||'',subject:source.json.subject||''},binary:{data:{...source.binary.data,fileName}}};"
+        "jsCode": "// Replace these example provider rules with patterns from your text-based PDFs.\nconst source = $('Normalize PDF binary').item;\nif (!source?.json || !source?.binary?.data) throw new Error('Missing source PDF');\nconst sourceMessageId = source.json.id || source.json.messageId;\nif (!sourceMessageId) throw new Error('Missing source Gmail message ID');\nconst text = String($input.item.json.text || $input.item.json.data || '').replace(/\\r/g, '');\nif (text.trim().length < 30) throw new Error('No extractable PDF text; OCR may be required');\nconst patterns = [\n  { provider: 'UtilityProvider', category: 'utilities', match: /utility provider|electricity|gas bill/i },\n  { provider: 'InternetProvider', category: 'internet', match: /internet provider|broadband|connectivity/i },\n  { provider: 'CloudProvider', category: 'cloud', match: /cloud provider|cloud services/i },\n  { provider: 'HostingProvider', category: 'hosting', match: /hosting provider|hosting services/i },\n];\nconst matches = patterns.filter(p => p.match.test(text));\nif (matches.length !== 1) throw new Error('Unknown or ambiguous provider; configure patterns for your invoices');\nconst { provider, category } = matches[0];\nconst invoiceNumber = (text.match(/(?:Invoice\\s*(?:number|no\\.?|#)|Fattura\\s*(?:n\\.?|numero))\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/_-]*)/i) || [])[1];\nconst dateMatch = text.match(/(?:Invoice date|Data fattura)\\s*[:#-]?\\s*(\\d{4}-\\d{2}-\\d{2}|\\d{2}[/.\\-]\\d{2}[/.\\-]\\d{4})(?!\\d)/i);\nconst amountMatch = text.match(/(?:Total due|Total amount|Totale da pagare|Importo totale)\\s*[:]?\\s*(?:(?:EUR|USD|GBP|[€$£])\\s*)?(-?[0-9][0-9.,]*)/i);\nif (!invoiceNumber || !dateMatch || !amountMatch) throw new Error('Required invoice fields not found; customize extraction rules');\nconst rawDate = dateMatch[1];\nconst date = /^\\d{4}-/.test(rawDate) ? rawDate : rawDate.split(/[/.\\-]/).reverse().join('-');\nconst parsedDate = new Date(`${date}T00:00:00.000Z`);\nif (!Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) throw new Error('Invalid invoice date');\nconst rawAmount = amountMatch[1];\nlet normalized;\nif (rawAmount.includes(',') && rawAmount.includes('.')) {\n  const decimal = rawAmount.lastIndexOf(',') > rawAmount.lastIndexOf('.') ? ',' : '.';\n  const grouping = decimal === ',' ? '.' : ',';\n  const escapedGrouping = grouping === '.' ? '\\\\.' : ',';\n  const escapedDecimal = decimal === '.' ? '\\\\.' : ',';\n  if (!new RegExp(`^-?\\\\d{1,3}(?:${escapedGrouping}\\\\d{3})+${escapedDecimal}\\\\d{1,2}$`).test(rawAmount)) throw new Error('Invalid total amount');\n  normalized = rawAmount.split(grouping).join('').replace(decimal, '.');\n} else {\n  // A lone separator is decimal; more than two fractional digits is ambiguous.\n  if (!/^-?\\d+(?:[.,]\\d{1,2})?$/.test(rawAmount)) throw new Error('Invalid or ambiguous total amount');\n  normalized = rawAmount.replace(',', '.');\n}\nconst amount = Number(normalized);\nif (!Number.isFinite(amount) || amount < 0) throw new Error('Invalid total amount');\nconst safeInvoice = encodeURIComponent(invoiceNumber);\nconst fileName = `${date}_${provider}_${safeInvoice}.pdf`;\nconst targetPath = `/invoices/${category}/${fileName}`;\nreturn {\n  json: { provider, type: category, invoiceNumber, uniqueKey: `${provider}:${invoiceNumber}`, date, amount,\n    account: '', service: '', netAmount: null, vatAmount: null, tab: category, fileName, targetPath,\n    sourceMessageId, sourceAttachmentKey: source.json.attachmentKey || '', subject: source.json.subject || '' },\n  binary: { data: { ...source.binary.data, fileName } },\n};\n"
       },
       "id": "3888ca64-d271-450b-ba9e-53a576b2309e",
       "name": "Parse invoice and canonical name",
@@ -690,7 +692,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn [{json:src.json,binary:src.binary}];"
+        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
+        "mode": "runOnceForEachItem"
       },
       "id": "ad166be6-1630-4717-ade8-0076167fb1fe",
       "name": "Restore parsed item Utility",
@@ -714,7 +717,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn [{json:src.json,binary:src.binary}];"
+        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
+        "mode": "runOnceForEachItem"
       },
       "id": "15c3ca0a-735a-461e-8fbc-5a115e230184",
       "name": "Restore parsed item InternetProvider",
@@ -738,7 +742,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn [{json:src.json,binary:src.binary}];"
+        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
+        "mode": "runOnceForEachItem"
       },
       "id": "f0ffd963-3526-4306-97f5-0c51c2ba3c3e",
       "name": "Restore parsed item CloudProvider",
@@ -889,7 +894,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn [{json:src.json,binary:src.binary}];"
+        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
+        "mode": "runOnceForEachItem"
       },
       "id": "d350c08d-95c3-4a41-a19a-84fa28fb590c",
       "name": "Restore parsed item HostingProvider",

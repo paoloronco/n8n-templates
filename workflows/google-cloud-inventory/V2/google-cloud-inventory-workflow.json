@@ -8,8 +8,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        14432,
-        4128
+        33088,
+        4624
       ]
     },
     {
@@ -28,14 +28,14 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        14432,
-        3936
+        33088,
+        4432
       ]
     },
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"scopes\": [\n    \"projects/your-first-project-id\",\n    \"projects/your-second-project-id\"\n  ],\n  \"billingProject\": \"your-gcp-project-id\",\n  \"dataset\": \"cloud_inventory\",\n  \"location\": \"EU\",\n  \"pageSize\": 500,\n  \"maxPages\": 1000,\n  \"maxAssets\": 20000,\n  \"maxPayloadMiB\": 30,\n  \"batchBytes\": 3000000,\n  \"requiredLabels\": [\n    \"owner\",\n    \"environment\"\n  ],\n  \"allowedLocations\": [],\n  \"ignoreMetadataFields\": [\n    \"updateTime\"\n  ],\n  \"sheetId\": \"YOUR_SPREADSHEET_ID\",\n  \"emailTo\": \"recipient@example.com\",\n  \"emailFrom\": \"n8n@example.com\",\n  \"notifyEveryRun\": false,\n  \"maxBytesBilled\": \"10000000000\",\n  \"reportChangeLimit\": 5000,\n  \"labelAssetTypes\": [\n    \"artifactregistry.googleapis.com/Repository\",\n    \"bigquery.googleapis.com/Dataset\",\n    \"bigquery.googleapis.com/Table\",\n    \"cloudresourcemanager.googleapis.com/Project\",\n    \"compute.googleapis.com/Instance\",\n    \"compute.googleapis.com/Disk\",\n    \"storage.googleapis.com/Bucket\",\n    \"sqladmin.googleapis.com/Instance\",\n    \"run.googleapis.com/Service\",\n    \"pubsub.googleapis.com/Topic\"\n  ],\n  \"sendEmail\": true\n}",
+        "jsonOutput": "{\n  \"scopes\": [\n    \"projects/your-first-project-id\",\n    \"projects/your-second-project-id\"\n  ],\n  \"billingProject\": \"your-gcp-project-id\",\n  \"dataset\": \"cloud_inventory\",\n  \"location\": \"EU\",\n  \"pageSize\": 500,\n  \"maxPages\": 1000,\n  \"maxAssets\": 20000,\n  \"maxPayloadMiB\": 30,\n  \"batchBytes\": 3000000,\n  \"requiredLabels\": [\n    \"owner\",\n    \"environment\"\n  ],\n  \"allowedLocations\": [],\n  \"ignoreMetadataFields\": [\n    \"updateTime\"\n  ],\n  \"sheetId\": \"YOUR_SPREADSHEET_ID\",\n  \"emailTo\": \"recipient@example.com\",\n  \"emailFrom\": \"n8n@example.com\",\n  \"notifyEveryRun\": false,\n  \"maxBytesBilled\": \"10000000000\",\n  \"reportChangeLimit\": 5000,\n  \"labelAssetTypes\": [\n    \"artifactregistry.googleapis.com/Repository\",\n    \"bigquery.googleapis.com/Dataset\",\n    \"bigquery.googleapis.com/Table\",\n    \"cloudresourcemanager.googleapis.com/Project\",\n    \"compute.googleapis.com/Instance\",\n    \"compute.googleapis.com/Disk\",\n    \"storage.googleapis.com/Bucket\",\n    \"sqladmin.googleapis.com/Instance\",\n    \"run.googleapis.com/Service\",\n    \"pubsub.googleapis.com/Topic\"\n  ],\n  \"sendEmail\": false,\n  \"n8nBaseUrl\": \"https://YOUR_N8N_HOST\"\n}",
         "options": {}
       },
       "id": "90e4de9b-94f5-4d8f-987e-06db441c4ed7",
@@ -43,21 +43,21 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        14672,
-        4016
+        33408,
+        4528
       ]
     },
     {
       "parameters": {
-        "jsCode": "const c={...$input.first().json};\nconst requested=c.scopes===undefined?[c.scope]:c.scopes;\nif(!Array.isArray(requested)||!requested.length||requested.length>100||requested.some(s=>typeof s!=='string'||!/^(projects\\/[A-Za-z0-9_-]+|folders\\/\\d+|organizations\\/\\d+)$/.test(s)))throw Error('Invalid Google Cloud scopes: use 1-100 project scopes or one folder/organization');\nconst scopes=[...new Set(requested)].sort();\nif(scopes.length>1&&scopes.some(s=>!s.startsWith('projects/')))throw Error('Multiple scopes must be distinct projects; use a folder or organization only as a single scope');\nc.scopes=scopes;\nc.scope=scopes.length===1?scopes[0]:'multi-project:'+scopes.length+'-projects';\nif(c.sendEmail!==undefined&&typeof c.sendEmail!=='boolean')throw Error('Invalid sendEmail');\nif(!/^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(c.billingProject))throw Error('Invalid billingProject');\nif(!/^[A-Za-z_][A-Za-z0-9_]{0,1023}$/.test(c.dataset))throw Error('Invalid dataset');\nif(!/^[A-Za-z0-9-]+$/.test(c.location))throw Error('Invalid BigQuery location');\nfor(const k of ['pageSize','maxPages','maxAssets','maxPayloadMiB','batchBytes','reportChangeLimit'])if(!Number.isSafeInteger(c[k])||c[k]<1)throw Error('Invalid '+k);\nif(c.pageSize>500||c.maxAssets>100000||c.batchBytes>4000000||c.reportChangeLimit>10000)throw Error('Configured limits exceed supported bounds');\nif(!/^\\d+$/.test(c.maxBytesBilled)||!/^[A-Za-z0-9_-]+$/.test(c.sheetId))throw Error('Invalid integration configuration');\nfor(const k of ['requiredLabels','labelAssetTypes','allowedLocations','ignoreMetadataFields'])if(!Array.isArray(c[k])||c[k].some(v=>typeof v!=='string'))throw Error('Invalid '+k);\nfor(const k of ['emailTo','emailFrom'])if(!/^[^\\s<>@]+@[^\\s<>@]+\\.[^\\s<>@]+$/.test(c[k]))throw Error('Invalid '+k);\nconst runId=String(Date.now())+'_'+String($execution.id).replace(/[^A-Za-z0-9_]/g,'_');\nconst startedAt=new Date().toISOString();\nconst sheetUrl='https://docs.google.com/spreadsheets/d/'+c.sheetId+'/edit';\nconst executionUrl='https://n8n.example.com/workflow/'+$workflow.id+'/executions/'+$execution.id;\nconst registry={run_id:runId,scope:c.scope,status:'RUNNING',started_at:startedAt,finished_at:'',assets:0,added:0,modified:0,removed:0,high:0,medium:0,iam_status:'PENDING',delivery_status:'PENDING',summary:'Scan started',sheet_url:sheetUrl,execution_url:executionUrl};\nreturn [{json:{...c,runId,startedAt,sheetUrl,executionUrl,profile:'canonical_v3_live_services_'+JSON.stringify(scopes)+'_'+JSON.stringify([...c.ignoreMetadataFields].sort()),registry}}];\n"
+        "jsCode": "const c={...$input.first().json};\nconst requested=c.scopes===undefined?[c.scope]:c.scopes;\nif(!Array.isArray(requested)||!requested.length||requested.length>100||requested.some(s=>typeof s!=='string'||!/^(projects\\/[A-Za-z0-9_-]+|folders\\/\\d+|organizations\\/\\d+)$/.test(s)))throw Error('Invalid Google Cloud scopes: use 1-100 project scopes or one folder/organization');\nconst scopes=[...new Set(requested)].sort();\nif(scopes.length>1&&scopes.some(s=>!s.startsWith('projects/')))throw Error('Multiple scopes must be distinct projects; use a folder or organization only as a single scope');\nc.scopes=scopes;\nc.scope=scopes.length===1?scopes[0]:'multi-project:'+scopes.length+'-projects';\nif(c.sendEmail!==undefined&&typeof c.sendEmail!=='boolean')throw Error('Invalid sendEmail');\nif(!/^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(c.billingProject))throw Error('Invalid billingProject');\nif(!/^[A-Za-z_][A-Za-z0-9_]{0,1023}$/.test(c.dataset))throw Error('Invalid dataset');\nif(!/^[A-Za-z0-9-]+$/.test(c.location))throw Error('Invalid BigQuery location');\nfor(const k of ['pageSize','maxPages','maxAssets','maxPayloadMiB','batchBytes','reportChangeLimit'])if(!Number.isSafeInteger(c[k])||c[k]<1)throw Error('Invalid '+k);\nif(c.pageSize>500||c.maxAssets>100000||c.batchBytes>4000000||c.reportChangeLimit>10000)throw Error('Configured limits exceed supported bounds');\nif(!/^\\d+$/.test(c.maxBytesBilled)||!/^[A-Za-z0-9_-]+$/.test(c.sheetId))throw Error('Invalid integration configuration');\nfor(const k of ['requiredLabels','labelAssetTypes','allowedLocations','ignoreMetadataFields'])if(!Array.isArray(c[k])||c[k].some(v=>typeof v!=='string'))throw Error('Invalid '+k);\nfor(const k of ['emailTo','emailFrom'])if(!/^[^\\s<>@]+@[^\\s<>@]+\\.[^\\s<>@]+$/.test(c[k]))throw Error('Invalid '+k);\nconst runId=String(Date.now())+'_'+String($execution.id).replace(/[^A-Za-z0-9_]/g,'_');\nconst startedAt=new Date().toISOString();\nconst sheetUrl='https://docs.google.com/spreadsheets/d/'+c.sheetId+'/edit';\nif(typeof c.n8nBaseUrl!=='string'||!/^https?:\\/\\/[^\\s/?#]+(?::[0-9]+)?(?:\\/[^?#\\s]*)?$/.test(c.n8nBaseUrl))throw Error('Invalid n8nBaseUrl');\nconst executionUrl=c.n8nBaseUrl.replace(/\\/$/,'')+'/workflow/'+$workflow.id+'/executions/'+$execution.id;\nconst registry={run_id:runId,scope:c.scope,status:'RUNNING',started_at:startedAt,finished_at:'',assets:0,added:0,modified:0,removed:0,high:0,medium:0,iam_status:'PENDING',delivery_status:'PENDING',summary:'Scan started',sheet_url:sheetUrl,execution_url:executionUrl};\nreturn [{json:{...c,runId,startedAt,sheetUrl,executionUrl,profile:'canonical_v3_live_services_'+JSON.stringify(scopes)+'_'+JSON.stringify([...c.ignoreMetadataFields].sort()),registry}}];\n"
       },
       "id": "10127939-9f4c-4f56-8977-1779dba6c720",
       "name": "Initialize run",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        14912,
-        4016
+        34048,
+        4528
       ]
     },
     {
@@ -132,8 +132,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        15152,
-        4016
+        34368,
+        4528
       ]
     },
     {
@@ -327,8 +327,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        15392,
-        4016
+        34688,
+        4528
       ]
     },
     {
@@ -355,8 +355,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        15632,
-        4016
+        35008,
+        4528
       ],
       "onError": "continueErrorOutput"
     },
@@ -369,8 +369,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        15872,
-        4000
+        35328,
+        4528
       ],
       "onError": "continueErrorOutput"
     },
@@ -397,8 +397,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        16192,
-        4672
+        36176,
+        4400
       ],
       "onError": "continueErrorOutput"
     },
@@ -411,8 +411,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16432,
-        4656
+        36496,
+        4384
       ],
       "onError": "continueErrorOutput"
     },
@@ -425,8 +425,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        16672,
-        4656
+        36816,
+        4368
       ]
     },
     {
@@ -452,8 +452,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        16912,
-        4656
+        37072,
+        4368
       ],
       "onError": "continueErrorOutput"
     },
@@ -466,8 +466,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        17152,
-        4640
+        37344,
+        4352
       ],
       "onError": "continueErrorOutput"
     },
@@ -501,8 +501,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        17392,
-        4640
+        37632,
+        4336
       ]
     },
     {
@@ -535,8 +535,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        17632,
-        4624
+        37936,
+        4320
       ]
     },
     {
@@ -569,8 +569,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        17872,
-        4816
+        38288,
+        4400
       ]
     },
     {
@@ -621,8 +621,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        16224,
-        4048
+        39088,
+        4304
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -638,8 +638,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16464,
-        4032
+        42016,
+        4304
       ],
       "onError": "continueErrorOutput"
     },
@@ -701,8 +701,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        16704,
-        4016
+        42624,
+        4288
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -718,8 +718,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16944,
-        4000
+        43216,
+        4288
       ],
       "onError": "continueErrorOutput"
     },
@@ -732,8 +732,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        17184,
-        4000
+        43456,
+        4272
       ],
       "onError": "continueErrorOutput"
     },
@@ -746,8 +746,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        17424,
-        3984
+        44688,
+        4256
       ]
     },
     {
@@ -759,22 +759,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        17856,
-        4176
+        45392,
+        4272
       ],
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "const c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,t=n=>'`'+c.billingProject+'.'+c.dataset+'.'+n+'`';\nconst query=`DECLARE previous STRING;\nSET previous=(SELECT run_id FROM ${t('inventory_runs_v2')} WHERE scope=@scope AND profile=@profile AND status='COMPLETE' AND run_id!=@run AND finished_at<=TIMESTAMP(@started) ORDER BY finished_at DESC,run_id DESC LIMIT 1);\nBEGIN TRANSACTION;\nASSERT (SELECT COUNT(*) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Snapshot row count does not match discovered assets';\nASSERT (SELECT COUNT(DISTINCT asset_name) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Duplicate asset names in snapshot';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_findings_v2')} WHERE run_id=@run)=@findings AS 'Finding count mismatch';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_runs_v2')} WHERE run_id=@run AND status='RUNNING')=1 AS 'Run already finalized or missing';\nINSERT INTO ${t('inventory_changes_v2')} (run_id,scope,asset_name,asset_type,project,change_type,before_json,after_json,detected_at)\nWITH cur AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=@run), prev AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=previous)\nSELECT @run,@scope,COALESCE(c.asset_name,p.asset_name),COALESCE(c.asset_type,p.asset_type),COALESCE(c.project,p.project),CASE WHEN p.asset_name IS NULL THEN 'ADDED' WHEN c.asset_name IS NULL THEN 'REMOVED' ELSE 'MODIFIED' END,p.metadata_json,c.metadata_json,CURRENT_TIMESTAMP()\nFROM cur c FULL OUTER JOIN prev p USING(asset_name) WHERE previous IS NOT NULL AND (c.asset_name IS NULL OR p.asset_name IS NULL OR c.metadata_json!=p.metadata_json);\nUPDATE ${t('inventory_runs_v2')} SET status='COMPLETE',finished_at=CURRENT_TIMESTAMP(),asset_count=@expected,previous_run=previous,iam_status=@iam WHERE run_id=@run;\nCOMMIT TRANSACTION;\nSELECT TO_JSON_STRING(STRUCT(previous AS previous_run,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.finding_id=f.finding_id)) AS new_actionable,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.finding_id=p.finding_id)) AS resolved_actionable,\n(SELECT COUNTIF(change_type='ADDED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS added,(SELECT COUNTIF(change_type='MODIFIED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS modified,(SELECT COUNTIF(change_type='REMOVED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS removed,ARRAY(SELECT AS STRUCT asset_name,asset_type,project,change_type FROM ${t('inventory_changes_v2')} WHERE run_id=@run ORDER BY change_type,asset_name LIMIT ${c.reportChangeLimit}) AS changes)) AS report;`;\nconst params={run:['STRING',c.runId],scope:['STRING',c.scope],profile:['STRING',c.profile],started:['STRING',c.startedAt],expected:['INT64',String(d.assetCount)],findings:['INT64',String(d.findings.length)],iam:['STRING',d.iamStatus]};\nreturn [{json:{job:{jobReference:{projectId:c.billingProject,location:c.location,jobId:'inv_'+c.runId+'_audit'},configuration:{query:{query,useLegacySql:false,maximumBytesBilled:c.maxBytesBilled,parameterMode:'NAMED',queryParameters:Object.entries(params).map(([name,[type,value]])=>({name,parameterType:{type},parameterValue:{value}}))}}}}}];\n"
+        "jsCode": "const c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,t=n=>'`'+c.billingProject+'.'+c.dataset+'.'+n+'`';\nconst query=`DECLARE previous STRING;\nSET previous=(SELECT run_id FROM ${t('inventory_runs_v2')} WHERE scope=@scope AND profile=@profile AND status='COMPLETE' AND run_id!=@run AND finished_at<=TIMESTAMP(@started) ORDER BY finished_at DESC,run_id DESC LIMIT 1);\nBEGIN TRANSACTION;\nASSERT (SELECT COUNT(*) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Snapshot row count does not match discovered assets';\nASSERT (SELECT COUNT(DISTINCT asset_name) FROM ${t('inventory_resources_v2')} WHERE run_id=@run)=@expected AS 'Duplicate asset names in snapshot';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_findings_v2')} WHERE run_id=@run)=@findings AS 'Finding count mismatch';\nASSERT (SELECT COUNT(*) FROM ${t('inventory_runs_v2')} WHERE run_id=@run AND status='RUNNING')=1 AS 'Run already finalized or missing';\nINSERT INTO ${t('inventory_changes_v2')} (run_id,scope,asset_name,asset_type,project,change_type,before_json,after_json,detected_at)\nWITH cur AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=@run), prev AS (SELECT * FROM ${t('inventory_resources_v2')} WHERE run_id=previous)\nSELECT @run,@scope,COALESCE(c.asset_name,p.asset_name),COALESCE(c.asset_type,p.asset_type),COALESCE(c.project,p.project),CASE WHEN p.asset_name IS NULL THEN 'ADDED' WHEN c.asset_name IS NULL THEN 'REMOVED' ELSE 'MODIFIED' END,p.metadata_json,c.metadata_json,CURRENT_TIMESTAMP()\nFROM cur c FULL OUTER JOIN prev p USING(asset_name) WHERE previous IS NOT NULL AND (c.asset_name IS NULL OR p.asset_name IS NULL OR c.metadata_json!=p.metadata_json);\nUPDATE ${t('inventory_runs_v2')} SET status='COMPLETE',finished_at=CURRENT_TIMESTAMP(),asset_count=@expected,previous_run=previous,iam_status=@iam WHERE run_id=@run;\nCOMMIT TRANSACTION;\nSELECT TO_JSON_STRING(STRUCT(previous AS previous_run,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.finding_id=f.finding_id)) AS new_actionable,\n(SELECT COUNT(*) FROM ${t('inventory_findings_v2')} p WHERE p.run_id=previous AND p.severity IN ('HIGH','MEDIUM') AND NOT EXISTS (SELECT 1 FROM ${t('inventory_findings_v2')} f WHERE f.run_id=@run AND f.finding_id=p.finding_id)) AS resolved_actionable,\n(SELECT COUNTIF(change_type='ADDED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS added,(SELECT COUNTIF(change_type='MODIFIED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS modified,(SELECT COUNTIF(change_type='REMOVED') FROM ${t('inventory_changes_v2')} WHERE run_id=@run) AS removed,ARRAY(SELECT AS STRUCT asset_name,asset_type,project,change_type,before_json,after_json FROM ${t('inventory_changes_v2')} WHERE run_id=@run ORDER BY change_type,asset_name LIMIT ${c.reportChangeLimit}) AS changes)) AS report;`;\nconst params={run:['STRING',c.runId],scope:['STRING',c.scope],profile:['STRING',c.profile],started:['STRING',c.startedAt],expected:['INT64',String(d.assetCount)],findings:['INT64',String(d.findings.length)],iam:['STRING',d.iamStatus]};\nreturn [{json:{job:{jobReference:{projectId:c.billingProject,location:c.location,jobId:'inv_'+c.runId+'_audit'},configuration:{query:{query,useLegacySql:false,maximumBytesBilled:c.maxBytesBilled,parameterMode:'NAMED',queryParameters:Object.entries(params).map(([name,[type,value]])=>({name,parameterType:{type},parameterValue:{value}}))}}}}}];\n"
       },
       "id": "0da1de62-b444-44a7-9a78-2ed99da7cd6f",
       "name": "Prepare audit job",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        17872,
-        3968
+        45024,
+        4240
       ],
       "onError": "continueErrorOutput"
     },
@@ -805,22 +805,22 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        18112,
-        4832
+        43152,
+        5088
       ],
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "// Classify presentation only: raw metadata, asset IDs and BigQuery change hashes stay unchanged.\nfunction assetCategory(assetType) {\n  const [service, type] = assetType.split('/');\n  if (service === 'serviceusage.googleapis.com' && type === 'Service') return 'Enabled APIs';\n  if (/^(Revision|Execution|Backup|SecretVersion|DockerImage|ReportDetail)$/.test(type)) return 'History & versions';\n  if (service === 'compute.googleapis.com' && /^(Network|Subnetwork|Route|Firewall|FirewallPolicy|Router|Address|ForwardingRule|VpnGateway|TargetVpnGateway|VpnTunnel|Interconnect|InterconnectAttachment|BackendService|UrlMap|Target.*Proxy|HealthCheck|NetworkEndpointGroup|ServiceAttachment|PacketMirroring)$/.test(type)\n      || /^(vpcaccess|servicenetworking|networkconnectivity|networkservices|dns)\\.googleapis\\.com$/.test(service)) return 'Networking';\n  if (/^(iam|apikeys|identitytoolkit|secretmanager|recaptchaenterprise|firebaserules|cloudkms)\\.googleapis\\.com$/.test(service)) return 'Identity & security';\n  if (service === 'run.googleapis.com' && /^(Service|Job|WorkerPool)$/.test(type)\n      || service === 'cloudfunctions.googleapis.com' && type === 'Function'\n      || service === 'compute.googleapis.com' && /^(Instance|Disk|Image|Snapshot|InstanceGroup|InstanceGroupManager)$/.test(type)\n      || service === 'storage.googleapis.com' && type === 'Bucket'\n      || service === 'artifactregistry.googleapis.com' && type === 'Repository'\n      || service === 'eventarc.googleapis.com' && type === 'Trigger'\n      || /^(bigquery|firestore|sqladmin|redis|memcache|file|alloydb|bigtableadmin|spanner|container|pubsub)\\.googleapis\\.com$/.test(service)\n      || service === 'aiplatform.googleapis.com' && /^(Endpoint|Model|ReasoningEngine)$/.test(type)\n      || service === 'cloudscheduler.googleapis.com' && type === 'Job') return 'Workloads & data';\n  if (/^(cloudresourcemanager|cloudbilling|firebase|logging|monitoring|dataplex|cloudquotas|osconfig|discoveryengine|storageinsights)\\.googleapis\\.com$/.test(service)\n      || service === 'compute.googleapis.com' && /^(Project|InstanceSettings|InstanceTemplate)$/.test(type)) return 'Configuration & metadata';\n  return 'Other / review';\n}\nconst categoryOrder=['Workloads & data','Networking','Enabled APIs','Identity & security','History & versions','Configuration & metadata','Other / review'];\n\nconst c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,r=$input.first().json;\nif(r.jobComplete!==true||r.pageToken||r.error||r.errors?.length||r.rows?.length!==1)throw Error('Audit result is missing, incomplete or paginated');\nconst audit=JSON.parse(r.rows[0].f[0].v);\nfor(const k of ['added','modified','removed'])if(!Number.isSafeInteger(audit[k])||audit[k]<0)throw Error('Invalid audit totals');\nconst changes=audit.changes||[],totalChanges=audit.added+audit.modified+audit.removed;\nconst high=d.findings.filter(f=>f.severity==='HIGH').length,medium=d.findings.filter(f=>f.severity==='MEDIUM').length;\nconst finishedAt=new Date().toISOString(),baseline=!audit.previous_run;\nconst newActionable=audit.new_actionable||0,resolvedActionable=audit.resolved_actionable||0;\nconst summary=baseline?'Initial v2 baseline created':`${audit.added} added, ${audit.modified} modified, ${audit.removed} removed`;\nconst registry={...c.registry,status:'COMPLETE',finished_at:finishedAt,assets:d.assetCount,added:audit.added,modified:audit.modified,removed:audit.removed,high,medium,iam_status:d.iamStatus,delivery_status:'PENDING',summary,sheet_url:c.sheetUrl};\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));\nconst assetCategories=Object.fromEntries(d.assets.map(a=>[a.asset_name,assetCategory(a.asset_type)]));\nconst categoryCounts=Object.fromEntries(categoryOrder.map(k=>[k,d.assets.filter(a=>assetCategories[a.asset_name]===k).length]));\nconst invHeaders=['Resource','Category','Type','Project','Location','Name','Labels','Status'];\nconst invRows=d.assets.map(a=>{const m=JSON.parse(a.metadata_json);return [a.asset_name,assetCategories[a.asset_name],a.asset_type,a.project,a.location,a.display_name,JSON.stringify(m.labels||{}),m.state||''];});\nconst changeHeaders=['Change','Resource','Type','Project'];\nconst changeRows=changes.map(a=>[a.change_type,a.asset_name,a.asset_type,a.project]);\nconst findingHeaders=['Severity','Rule','Resource','Title','Evidence','Recommended action'];\nconst findingRows=d.findings.map(f=>[f.severity,f.rule_id,f.asset_name,f.title,f.evidence,f.recommendation]);\nconst summaryRows=[['Scan',c.runId],['Scope',c.scope],['Configured scopes',c.scopes.join(', ')],['Inventory status','COMPLETE'],['Started (UTC)',c.startedAt],['Finished (UTC)',finishedAt],['Total inventory assets',d.assetCount],['Workloads & data',categoryCounts['Workloads & data']],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium],['Assessment IAM',d.iamStatus],['IAM coverage',d.iamMessage],['Comparison',summary],['Previous baseline',audit.previous_run||'None'],['Changes displayed',changes.length],['Total changes',totalChanges],['Google Sheet',c.sheetUrl],['n8n execution',c.executionUrl],['Coverage','Cloud Asset: searchable resource metadata and IAM policies. Service Usage: enabled APIs per visible project. Effective permissions limit coverage.'],['Finding LOW',d.findings.filter(f=>f.severity==='LOW').length],['View limit',changes.length<totalChanges?'Changes truncated: full details in BigQuery inventory_changes_v2':'No truncation'],['Required labels',c.requiredLabels.join(', ')||'Not configured'],['Allowed locations',c.allowedLocations.join(', ')||'Unrestricted'],['Change details','before_json and after_json in BigQuery inventory_changes_v2'],['Delivery','PENDING - check Scans and the n8n registry']];\nsummaryRows.push(...Object.entries(categoryCounts).map(([k,v])=>['Category: '+k,v]));\nsummaryRows.push(['Classification','Purpose of each asset, not proof of ownership, activity or cost. Functions and their Cloud Run services are separate asset records.']);\nsummaryRows.push(['New HIGH/MEDIUM findings',newActionable],['Resolved HIGH/MEDIUM findings',resolvedActionable],['Resources checked for labels',d.assets.filter(a=>c.labelAssetTypes.includes(a.asset_type)).length]);\nconst table=(title,headers,rows)=>`<section><h2>${title} <small>${rows.length}</small></h2><div class=\"scroll\"><table><thead><tr>${headers.map(h=>'<th>'+esc(h)+'</th>').join('')}</tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></div></section>`;\nconst emailHtml=`<h2>Google Cloud Inventory</h2><p><strong>${esc(c.scope)}</strong></p><p>${categoryCounts['Workloads & data']} workload/data assets; ${d.assetCount} total inventory records. ${esc(summary)}.</p><p>Finding: ${high} HIGH, ${medium} MEDIUM. Assessment IAM: ${esc(d.iamStatus)}.</p><p><a href=\"${esc(c.sheetUrl)}\">Open inventory and findings</a> · <a href=\"${esc(c.executionUrl)}\">Open execution and download reports</a></p><p>Run ${esc(c.runId)}. Findings require review; no automatic remediation.</p>`;\nconst html=`<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Google Cloud Inventory</title><style>body{font:15px system-ui;margin:0;background:#f3f6fa;color:#14283f}header{background:#14283f;color:white;padding:32px}main{padding:24px;max-width:1500px;margin:auto}h1{margin:0 0 8px}h2{font-size:21px}small{color:#64748b}a{color:#1672c4}header a{color:#9ddcff}.cards{display:flex;gap:16px;flex-wrap:wrap}.card,section{background:white;border:1px solid #d7e0eb;border-radius:10px;padding:20px;margin-bottom:20px}.card{min-width:140px}.card strong{display:block;font-size:30px}.scroll{overflow:auto;max-height:650px}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#e8f0f8;text-align:left;position:sticky;top:0}td,th{padding:10px;border-bottom:1px solid #e1e7ef;vertical-align:top}td{max-width:540px;overflow-wrap:anywhere}input{padding:12px;width:min(600px,90%);margin:0 0 20px;border:1px solid #64748b;border-radius:6px}.warning{padding:15px;background:#fff0cb;border-radius:6px}</style><header><h1>Google Cloud Inventory</h1><p>${esc(c.scope)} · ${esc(finishedAt)}</p><a href=\"${esc(c.sheetUrl)}\">Google Sheet</a> · <a href=\"${esc(c.executionUrl)}\">n8n execution</a></header><main><div class=\"cards\">${[['Workloads & data',categoryCounts['Workloads & data']],['Total inventory',d.assetCount],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium]].map(([k,v])=>'<div class=\"card\">'+esc(k)+'<strong>'+v+'</strong></div>').join('')}</div><p>${esc(summary)}. IAM: ${esc(d.iamStatus)}.</p>${d.iamStatus!=='COMPLETE'?'<p class=\"warning\">IAM assessment unavailable: '+esc(d.iamMessage)+'</p>':''}${changes.length<totalChanges?'<p class=\"warning\">Views limited to '+changes.length+' of '+totalChanges+' changes. Full details in BigQuery.</p>':''}<label for=\"filter\">Filter resources, changes and findings</label><br><input id=\"filter\" type=\"search\" placeholder=\"Name, type, project, severity…\">${table('Asset categories',['Category','Assets'],Object.entries(categoryCounts))}${table('Findings',findingHeaders,findingRows)}${table('Changes',changeHeaders,changeRows)}${table('Inventory',invHeaders,invRows)}${table('Scan details',['Field','Value'],summaryRows)}<p>Searchable metadata and policies from Cloud Asset Inventory, limited by effective permissions. No vulnerability, traffic or cost scan. Required labels may not apply to every resource type.</p></main><script>document.getElementById('filter').addEventListener('input',function(){const q=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.hidden=!r.textContent.toLowerCase().includes(q));});</script></html>`;\nconst csvCell=v=>{let s=String(v??'');if(/^[=+@\\-\\t\\r]/.test(s))s=\"'\"+s;return '\"'+s.replace(/\"/g,'\"\"')+'\"';};\nconst csv=(headers,rows)=>'\\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\\r\\n');\nconst files={report:[html,'text/html','report.html'],inventory:[csv(invHeaders,invRows),'text/csv','inventory.csv'],changes:[csv(changeHeaders,changeRows),'text/csv','changes.csv'],findings:[csv(findingHeaders,findingRows),'text/csv','findings.csv']};\nconst binary=Object.fromEntries(Object.entries(files).map(([key,[text,mimeType,fileName]])=>[key,{data:Buffer.from(text).toString('base64'),mimeType,fileName}]));\nreturn [{json:{registry,assetCategories,categoryCounts,categoryOrder,summaryRows,invHeaders,invRows,changeHeaders,changeRows,findingHeaders,findingRows,baseline,totalChanges,newActionable,resolvedActionable,changesTruncated:changes.length<totalChanges,emailHtml:emailHtml+`<p>New HIGH/MEDIUM findings: ${newActionable}. Resolved: ${resolvedActionable}.</p>`,emailSubject:`[GCP ${high?'HIGH':d.iamStatus!=='COMPLETE'?'WARNING':'Inventory'}] ${c.scope} · ${summary}`,shouldNotify:c.sendEmail!==false&&(c.notifyEveryRun||baseline||totalChanges>0||high>0||newActionable>0||resolvedActionable>0||d.iamStatus!=='COMPLETE')},binary}];\n"
+        "jsCode": "// Classify presentation only: raw metadata, asset IDs and BigQuery change hashes stay unchanged.\nfunction assetCategory(assetType) {\n  const [service, type] = assetType.split('/');\n  if (service === 'serviceusage.googleapis.com' && type === 'Service') return 'Enabled APIs';\n  if (/^(Revision|Execution|Build|Backup|SecretVersion|DockerImage|ReportDetail)$/.test(type)) return 'History & versions';\n  if (service === 'compute.googleapis.com' && /^(Network|Subnetwork|Route|Firewall|FirewallPolicy|Router|Address|ForwardingRule|VpnGateway|TargetVpnGateway|VpnTunnel|Interconnect|InterconnectAttachment|BackendService|UrlMap|Target.*Proxy|HealthCheck|NetworkEndpointGroup|ServiceAttachment|PacketMirroring)$/.test(type)\n      || /^(vpcaccess|servicenetworking|networkconnectivity|networkservices|dns)\\.googleapis\\.com$/.test(service)) return 'Networking';\n  if (/^(iam|apikeys|identitytoolkit|secretmanager|recaptchaenterprise|firebaserules|cloudkms)\\.googleapis\\.com$/.test(service)) return 'Identity & security';\n  if (service === 'run.googleapis.com' && /^(Service|Job|WorkerPool)$/.test(type)\n      || service === 'cloudfunctions.googleapis.com' && type === 'Function'\n      || service === 'compute.googleapis.com' && /^(Instance|Disk|Image|Snapshot|InstanceGroup|InstanceGroupManager)$/.test(type)\n      || service === 'storage.googleapis.com' && type === 'Bucket'\n      || service === 'artifactregistry.googleapis.com' && type === 'Repository'\n      || service === 'eventarc.googleapis.com' && type === 'Trigger'\n      || /^(bigquery|firestore|sqladmin|redis|memcache|file|alloydb|bigtableadmin|spanner|container|pubsub)\\.googleapis\\.com$/.test(service)\n      || service === 'aiplatform.googleapis.com' && /^(Endpoint|Model|ReasoningEngine)$/.test(type)\n      || service === 'cloudscheduler.googleapis.com' && type === 'Job') return 'Workloads & data';\n  if (/^(cloudresourcemanager|cloudbilling|firebase|logging|monitoring|dataplex|cloudquotas|osconfig|discoveryengine|storageinsights)\\.googleapis\\.com$/.test(service)\n      || service === 'compute.googleapis.com' && /^(Project|InstanceSettings|InstanceTemplate)$/.test(type)) return 'Configuration & metadata';\n  return 'Other / review';\n}\nconst categoryOrder=['Workloads & data','Networking','Enabled APIs','Identity & security','History & versions','Configuration & metadata','Other / review'];\n\nconst c=$('Initialize run').first().json,d=$('Assess inventory and IAM').first().json,r=$input.first().json;\nif(r.jobComplete!==true||r.pageToken||r.error||r.errors?.length||r.rows?.length!==1)throw Error('Audit result is missing, incomplete or paginated');\nconst audit=JSON.parse(r.rows[0].f[0].v);\nfor(const k of ['added','modified','removed'])if(!Number.isSafeInteger(audit[k])||audit[k]<0)throw Error('Invalid audit totals');\nconst changes=audit.changes||[],totalChanges=audit.added+audit.modified+audit.removed;\n// Select notification rows only. Full inventory, history and Sheets retain every event.\nconst allResourceChanges=changes.filter(a=>a.change_type==='ADDED'||a.change_type==='REMOVED');\nif(audit.previous_run&&(allResourceChanges.filter(a=>a.change_type==='ADDED').length!==audit.added||allResourceChanges.filter(a=>a.change_type==='REMOVED').length!==audit.removed))throw Error('Added/removed details are incomplete; refusing to filter a partial digest');\nfunction isRoutineLifecycleChange(a){\n  if(assetCategory(a.asset_type)==='History & versions'||a.asset_type==='firebaserules.googleapis.com/Ruleset')return true;\n  if(a.asset_type!=='iam.googleapis.com/ServiceAccountKey')return false;\n  try{return JSON.parse(a.change_type==='REMOVED'?a.before_json:a.after_json)?.keyType==='SYSTEM_MANAGED';}catch{return false;}\n}\nconst changeDetails=allResourceChanges.filter(a=>!isRoutineLifecycleChange(a));\nconst notificationAdded=changeDetails.filter(a=>a.change_type==='ADDED').length;\nconst notificationRemoved=changeDetails.filter(a=>a.change_type==='REMOVED').length;\nconst resourceChanges=changeDetails.length,suppressedResourceChanges=allResourceChanges.length-resourceChanges;\nconst shouldNotify=c.sendEmail!==false&&Boolean(audit.previous_run)&&resourceChanges>0;\nconst high=d.findings.filter(f=>f.severity==='HIGH').length,medium=d.findings.filter(f=>f.severity==='MEDIUM').length;\nconst finishedAt=new Date().toISOString(),baseline=!audit.previous_run;\nconst newActionable=audit.new_actionable||0,resolvedActionable=audit.resolved_actionable||0;\nconst summary=baseline?'Initial inventory baseline created':`${audit.added} added, ${audit.modified} modified, ${audit.removed} removed`;\nconst registry={...c.registry,status:'COMPLETE',finished_at:finishedAt,assets:d.assetCount,added:audit.added,modified:audit.modified,removed:audit.removed,high,medium,iam_status:d.iamStatus,delivery_status:'PENDING',summary,sheet_url:c.sheetUrl};\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));\nconst assetCategories=Object.fromEntries(d.assets.map(a=>[a.asset_name,assetCategory(a.asset_type)]));\nconst categoryCounts=Object.fromEntries(categoryOrder.map(k=>[k,d.assets.filter(a=>assetCategories[a.asset_name]===k).length]));\nconst invHeaders=['Resource','Category','Type','Project','Location','Name','Labels','Status'];\nconst invRows=d.assets.map(a=>{const m=JSON.parse(a.metadata_json);return [a.asset_name,assetCategories[a.asset_name],a.asset_type,a.project,a.location,a.display_name,JSON.stringify(m.labels||{}),m.state||''];});\nconst changeHeaders=['Change','Resource','Type','Project'];\nconst changeRows=changes.map(a=>[a.change_type,a.asset_name,a.asset_type,a.project]);\nconst findingHeaders=['Severity','Rule','Resource','Title','Evidence','Recommended action'];\nconst findingRows=d.findings.map(f=>[f.severity,f.rule_id,f.asset_name,f.title,f.evidence,f.recommendation]);\nconst summaryRows=[['Scan',c.runId],['Scope',c.scope],['Configured scopes',c.scopes.join(', ')],['Inventory status','COMPLETE'],['Started (UTC)',c.startedAt],['Finished (UTC)',finishedAt],['Total inventory assets',d.assetCount],['Workloads & data',categoryCounts['Workloads & data']],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium],['Assessment IAM',d.iamStatus],['IAM coverage',d.iamMessage],['Comparison',summary],['Previous baseline',audit.previous_run||'None'],['Changes displayed',changes.length],['Total changes',totalChanges],['Google Sheet',c.sheetUrl],['n8n execution',c.executionUrl],['Coverage','Cloud Asset: searchable resource metadata and IAM policies. Service Usage: enabled APIs per visible project. Effective permissions limit coverage.'],['Finding LOW',d.findings.filter(f=>f.severity==='LOW').length],['View limit',changes.length<totalChanges?'Changes truncated: full details in BigQuery inventory_changes_v2':'No truncation'],['Required labels',c.requiredLabels.join(', ')||'Not configured'],['Allowed locations',c.allowedLocations.join(', ')||'Unrestricted'],['Change details','before_json and after_json in BigQuery inventory_changes_v2'],['Delivery','PENDING - check Scans and the n8n registry']];\nsummaryRows.push(...Object.entries(categoryCounts).map(([k,v])=>['Category: '+k,v]));\nsummaryRows.push(['Classification','Purpose of each asset, not proof of ownership, activity or cost. Functions and their Cloud Run services are separate asset records.']);\nsummaryRows.push(['New HIGH/MEDIUM findings',newActionable],['Resolved HIGH/MEDIUM findings',resolvedActionable],['Resources checked for labels',d.assets.filter(a=>c.labelAssetTypes.includes(a.asset_type)).length]);\nconst table=(title,headers,rows)=>`<section><h2>${title} <small>${rows.length}</small></h2><div class=\"scroll\"><table><thead><tr>${headers.map(h=>'<th>'+esc(h)+'</th>').join('')}</tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></div></section>`;\nconst emailHtml=`<h2>Google Cloud resource changes</h2><p>${esc(c.scope)}: <strong>+${notificationAdded} added / -${notificationRemoved} removed</strong>.</p><p>Full inventory: ${d.assetCount} assets. Routine history and confirmed Google-managed key rotations remain in BigQuery and Sheets without triggering email.</p>${table('Resource changes',changeHeaders,changeDetails.map(a=>[a.change_type,a.asset_name,a.asset_type,a.project]))}<p><a href=\"${esc(c.sheetUrl)}\">Open inventory</a> · <a href=\"${esc(c.executionUrl)}\">Execution and reports</a></p>`;\nconst html=`<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Google Cloud Inventory</title><style>body{font:15px system-ui;margin:0;background:#f3f6fa;color:#14283f}header{background:#14283f;color:white;padding:32px}main{padding:24px;max-width:1500px;margin:auto}h1{margin:0 0 8px}h2{font-size:21px}small{color:#64748b}a{color:#1672c4}header a{color:#9ddcff}.cards{display:flex;gap:16px;flex-wrap:wrap}.card,section{background:white;border:1px solid #d7e0eb;border-radius:10px;padding:20px;margin-bottom:20px}.card{min-width:140px}.card strong{display:block;font-size:30px}.scroll{overflow:auto;max-height:650px}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#e8f0f8;text-align:left;position:sticky;top:0}td,th{padding:10px;border-bottom:1px solid #e1e7ef;vertical-align:top}td{max-width:540px;overflow-wrap:anywhere}input{padding:12px;width:min(600px,90%);margin:0 0 20px;border:1px solid #64748b;border-radius:6px}.warning{padding:15px;background:#fff0cb;border-radius:6px}</style><header><h1>Google Cloud Inventory</h1><p>${esc(c.scope)} · ${esc(finishedAt)}</p><a href=\"${esc(c.sheetUrl)}\">Google Sheet</a> · <a href=\"${esc(c.executionUrl)}\">n8n execution</a></header><main><div class=\"cards\">${[['Workloads & data',categoryCounts['Workloads & data']],['Total inventory',d.assetCount],['Added',audit.added],['Modified',audit.modified],['Removed',audit.removed],['Finding HIGH',high],['Finding MEDIUM',medium]].map(([k,v])=>'<div class=\"card\">'+esc(k)+'<strong>'+v+'</strong></div>').join('')}</div><p>${esc(summary)}. IAM: ${esc(d.iamStatus)}.</p>${d.iamStatus!=='COMPLETE'?'<p class=\"warning\">IAM assessment unavailable: '+esc(d.iamMessage)+'</p>':''}${changes.length<totalChanges?'<p class=\"warning\">Views limited to '+changes.length+' of '+totalChanges+' changes. Full details in BigQuery.</p>':''}<label for=\"filter\">Filter resources, changes and findings</label><br><input id=\"filter\" type=\"search\" placeholder=\"Name, type, project, severity…\">${table('Asset categories',['Category','Assets'],Object.entries(categoryCounts))}${table('Findings',findingHeaders,findingRows)}${table('Changes',changeHeaders,changeRows)}${table('Inventory',invHeaders,invRows)}${table('Scan details',['Field','Value'],summaryRows)}<p>Searchable metadata and policies from Cloud Asset Inventory, limited by effective permissions. No vulnerability, traffic or cost scan. Required labels may not apply to every resource type.</p></main><script>document.getElementById('filter').addEventListener('input',function(){const q=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.hidden=!r.textContent.toLowerCase().includes(q));});</script></html>`;\nconst csvCell=v=>{let s=String(v??'');if(/^[=+@\\-\\t\\r]/.test(s))s=\"'\"+s;return '\"'+s.replace(/\"/g,'\"\"')+'\"';};\nconst csv=(headers,rows)=>'\\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\\r\\n');\nconst files={resourceChanges:[csv(changeHeaders,changeDetails.map(a=>[a.change_type,a.asset_name,a.asset_type,a.project])),'text/csv','resource-changes.csv'],report:[html,'text/html','report.html'],inventory:[csv(invHeaders,invRows),'text/csv','inventory.csv'],changes:[csv(changeHeaders,changeRows),'text/csv','changes.csv'],findings:[csv(findingHeaders,findingRows),'text/csv','findings.csv']};\nconst binary=Object.fromEntries(Object.entries(files).map(([key,[text,mimeType,fileName]])=>[key,{data:Buffer.from(text).toString('base64'),mimeType,fileName}]));\nreturn [{json:{registry,assetCategories,categoryCounts,categoryOrder,summaryRows,invHeaders,invRows,changeHeaders,changeRows,findingHeaders,findingRows,baseline,totalChanges,newActionable,resolvedActionable,changesTruncated:changes.length<totalChanges,resourceChanges,notificationAdded,notificationRemoved,suppressedResourceChanges,emailHtml,emailSubject:`[GCP] ${c.scope}: +${notificationAdded} / -${notificationRemoved} resources`,shouldNotify},binary}];\n"
       },
       "id": "dce33d40-eb92-43e0-ac81-b75432c6e43c",
       "name": "Build report and exports",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        18400,
-        4768
+        43456,
+        5072
       ],
       "onError": "continueErrorOutput"
     },
@@ -1015,8 +1015,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        18640,
-        4752
+        43776,
+        5056
       ]
     },
     {
@@ -1042,8 +1042,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        18880,
-        4752
+        44080,
+        5056
       ],
       "onError": "continueErrorOutput"
     },
@@ -1056,8 +1056,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        19312,
-        4720
+        44656,
+        5024
       ],
       "onError": "continueErrorOutput"
     },
@@ -1079,8 +1079,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        19536,
-        4704
+        44976,
+        5008
       ],
       "onError": "continueErrorOutput"
     },
@@ -1093,8 +1093,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        19776,
-        4688
+        45248,
+        4992
       ],
       "onError": "continueErrorOutput"
     },
@@ -1128,8 +1128,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        20016,
-        4672
+        45520,
+        4976
       ]
     },
     {
@@ -1139,7 +1139,8 @@
         "subject": "={{ $('Build report and exports').first().json.emailSubject }}",
         "html": "={{ $('Build report and exports').first().json.emailHtml }}",
         "options": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "attachments": "inventory,resourceChanges"
         }
       },
       "id": "08a20e41-b86b-43f1-8669-8f981dfb69e3",
@@ -1147,8 +1148,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        20256,
-        4656
+        45824,
+        4880
       ],
       "onError": "continueErrorOutput"
     },
@@ -1161,8 +1162,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20496,
-        4640
+        46192,
+        5152
       ],
       "onError": "continueErrorOutput"
     },
@@ -1184,8 +1185,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        20720,
-        4624
+        46448,
+        5136
       ],
       "onError": "continueErrorOutput"
     },
@@ -1380,8 +1381,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        20928,
-        4608
+        46736,
+        5120
       ]
     },
     {
@@ -1393,8 +1394,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        21168,
-        4608
+        46992,
+        5120
       ]
     },
     {
@@ -1406,8 +1407,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        21424,
-        5280
+        36096,
+        4928
       ]
     },
     {
@@ -1601,8 +1602,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        21664,
-        5280
+        36416,
+        4928
       ]
     },
     {
@@ -1614,31 +1615,30 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        22144,
-        5280
+        36736,
+        4928
       ]
     },
     {
       "parameters": {
-        "content": "# Audit Google Cloud inventory and IAM changes with BigQuery and Sheets\n\n**Template revision:** v2.2.0 · 2026-11-02\n\n**Full setup guide:** [Read the complete documentation](https://paoloronco.notion.site/Google-Cloud-Inventory-Change-Audit-408f0ba27c3281aea226fecadfab05f8?pvs=73)\n\n**Support & customization:** [info@paoloronco.it](mailto:info@paoloronco.it) · [paoloronco.it](https://paoloronco.it).\n\n### How it works\nFor cloud operations teams: run manually or daily at 03:15 in the workflow timezone. Search every configured project for resources and visible IAM policies through Cloud Asset Inventory, assess governance rules, and compare completed BigQuery snapshots. The first scan establishes a baseline. Google Sheets provides five review tabs, four charts, filters and checkboxes; HTML/CSV exports and conditional email digests complete delivery. The n8n data table tracks scan and delivery status. Coverage depends on API visibility; this is not a complete security or compliance audit.\n\n### Setup\n1. [Open Google Sheets dashboard/model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy). Create your own copy and share it as Editor with your Sheets service account.\n2. Create the service account, enable APIs, grant Cloud Asset read access on every listed project and API consumer access on billingProject. Connect Google API credentials to all HTTP nodes: inventory/IAM read access, BigQuery jobs and dataset/table write access, plus Sheets edit access.\n3. In Configuration, set scopes (explicit project list), billingProject, dataset, location, sheetId, emailTo and emailFrom; review limits and governance rules. Connect SMTP to Email digest, or set sendEmail=false. Review the execution URL in Initialize run.\n4. Select your Error Workflow in Settings. Check timezone, run manually, verify Sheets/BigQuery/reports and a second scan, then publish to enable scheduling. BigQuery storage and queries may incur charges.\n\n### Created automatically\nThe first run creates the central BigQuery dataset and four v2 tables, plus the n8n registry. It updates your existing Sheets copy. It does not create accounts/keys, grant IAM, enable APIs, discover new projects or deploy Cloud Run/Scheduler.\n\n### Customization\nAdjust requiredLabels, labelAssetTypes, allowedLocations, retention, reportChangeLimit and notifyEveryRun. Keep sheet headers and hidden identifiers intact.\n\n### API state and categories\nService Usage supplies the enabled API list directly; Cloud Asset supplies other resource metadata and IAM policies. Enable Service Usage API and grant serviceusage.services.list on every scanned project. Assign the Google credential to Read enabled APIs and permit serviceusage.googleapis.com.\n\nThe dashboard distinguishes Workloads & data, Networking, Enabled APIs, Identity & security, History & versions, Configuration & metadata, and Other / review. Categories describe purpose, not proven usage or cost. Inventory has 12 columns; existing review fields are restored by header and stable ID.\n\nUpgrading starts a new canonical_v3_live_services baseline while preserving BigQuery history. Test twice before scheduling.",
-        "height": 1150,
-        "width": 650,
-        "color": 1
+        "content": "# Google Cloud Inventory and IAM Audit\n\n### How it works\nFor cloud operations teams: collect resource metadata and visible IAM policies, assess governance rules, and compare complete snapshots in BigQuery. Scan an explicit list of project scopes. Review inventory, findings, changes and scans in a five-tab Google Sheets dashboard. HTML/CSV files are available from Report files. The first scan establishes a baseline. Optional email reports substantive resource additions and removals while keeping all records in history. Access and API visibility determine coverage; findings require review.\n\n### Setup\n1. Enable the required Google APIs. Select Google credentials in every HTTP Request node and grant inventory read, BigQuery job/table write and spreadsheet edit access.\n2. Set the reporting project and dataset; setup creates missing dataset/tables. Copy the five-tab dashboard model.\n3. Fill Configuration: project access, dataset/location, spreadsheet ID, n8nBaseUrl and limits. Configure SMTP and sender/recipient addresses only when sendEmail is enabled.\n4. Run twice manually. Check BigQuery, Sheets and downloads, then configure the workflow timezone and an Error Workflow before enabling the daily schedule.\n\n**Guide:** see this version's README and SETUP.md in the GitHub package. Google Cloud storage and query charges follow your configuration.",
+        "height": 880,
+        "width": 760
       },
       "id": "4c6a63e6-0429-499f-971e-450dfcd28605",
       "name": "00 Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        13712,
-        3744
+        32128,
+        4208
       ]
     },
     {
       "parameters": {
-        "content": "## 01 · Configure and track runs\n\nValidate scopes, destinations and resource limits before discovery. The data table records RUNNING, COMPLETE or FAILED independently from delivery status. List projects explicitly; legacy single scope remains supported. Configure credentials and destinations before the first run.",
-        "height": 620,
-        "width": 1696,
+        "content": "## 01 · Configuration and run tracking\n\nSet credentials, destinations and limits. Validate the configuration and register the run before reading cloud resources. Run and delivery status are tracked separately.",
+        "height": 688,
+        "width": 2960,
         "color": 7
       },
       "id": "ca012ee2-0834-409e-acac-8aa6ca2ccd88",
@@ -1646,15 +1646,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        14400,
-        3744
+        33008,
+        4208
       ]
     },
     {
       "parameters": {
-        "content": "## 02 · Discover and assess\n\nPaginated resource and IAM searches feed canonical inventory and governance checks. Review public access, broad roles, labels and locations. Unavailable IAM coverage is reported explicitly; zero findings does not establish security.\n\nThe two scope preparation nodes fan out resource and IAM searches over the same validated list. Every project must finish resource pagination; partial IAM coverage is reported as UNAVAILABLE. A single folder/organization scope is also supported. Adding or removing projects starts a new baseline.\n\nRead enabled APIs uses Service Usage per project, replacing potentially stale Cloud Asset API-enablement records. Any API-list error or incomplete pagination stops the scan. Folder/organization mode derives visible project scopes from Cloud Asset results; explicit projects give the clearest coverage.",
-        "height": 1000,
-        "width": 1904,
+        "content": "## 02 · Resource and IAM discovery\n\nCollect paginated inventory, enabled APIs and visible IAM policies. Native API collectors extend Cloud Asset metadata. Incomplete resource discovery stops the scan; unavailable IAM coverage is reported explicitly.",
+        "height": 496,
+        "width": 4496,
         "color": 7
       },
       "id": "305cce66-2709-4a91-bd71-a70571a70b41",
@@ -1662,15 +1662,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        16144,
-        3760
+        38592,
+        4144
       ]
     },
     {
       "parameters": {
-        "content": "## 03 · Persist and compare snapshots\n\nBatched BigQuery jobs wait for completion and validate errors. Only complete snapshots become baselines. The first scan establishes a baseline; later scans identify added, modified and removed assets. Set retention and billed-byte limits for your environment.",
-        "height": 650,
-        "width": 2124,
+        "content": "## 04 · Snapshots and change history\n\nWrite bounded batches, verify row counts and compare complete compatible snapshots. Keep all additions, modifications and removals in BigQuery. The first successful run establishes a baseline.",
+        "height": 496,
+        "width": 2560,
         "color": 7
       },
       "id": "d3c962ec-ec12-43d0-b775-5eff22556834",
@@ -1678,15 +1678,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        16128,
-        4400
+        43104,
+        4144
       ]
     },
     {
       "parameters": {
-        "content": "## 04 · Review and deliver results\n\nUpdate the dashboard, inventory, findings, changes and scan history. Preserve review checkboxes and notes by stable identifiers. Conditional email digests summarize actionable changes. Keep headers and hidden IDs intact; download HTML and CSV from Report files.\n\nCategory separates workloads/data from APIs, networking, identities, versions and configuration. Inventory grows from 11 to 12 columns automatically; keep existing headers and hidden IDs until the upgrade run restores reviews.",
-        "height": 478,
-        "width": 3084,
+        "content": "## 05 · Dashboard, exports and notifications\n\nPreserve review notes and finding status. Update Google Sheets and generate HTML/CSV downloads. Email only substantive additions or removals; routine history and confirmed Google-managed key rotations remain in the full history.",
+        "height": 608,
+        "width": 4080,
         "color": 7
       },
       "id": "247a1b90-ede8-4668-ae10-82415d645b2b",
@@ -1694,15 +1694,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        18288,
-        4576
+        43120,
+        4832
       ]
     },
     {
       "parameters": {
-        "content": "## 05 · Record failures\n\nPersist failure details and stop the execution so n8n can invoke the Error Workflow selected in Settings. Automatic runs use the native error handler; inspect manual failures in Executions. No duplicate error email is sent here.",
-        "height": 500,
-        "width": 980,
+        "content": "## Failure handling\n\nRecord the failure and stop the execution. Configure an Error Workflow for scheduled-run alerts. Inspect manual failures in Executions. Delivery status remains distinct from inventory completion.",
+        "height": 320,
+        "width": 1120,
         "color": 7
       },
       "id": "ca1d18a3-62c0-4f5d-92f5-2cd1f3904b29",
@@ -1710,8 +1710,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        21376,
-        5072
+        36048,
+        4800
       ]
     },
     {
@@ -1738,8 +1738,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        19088,
-        4736
+        44384,
+        5040
       ],
       "onError": "continueErrorOutput"
     },
@@ -1752,8 +1752,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16224,
-        4240
+        38768,
+        4304
       ]
     },
     {
@@ -1765,8 +1765,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16704,
-        4240
+        42304,
+        4288
       ]
     },
     {
@@ -1778,8 +1778,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        35136,
-        4816
+        39424,
+        4288
       ]
     },
     {
@@ -1832,14 +1832,29 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        35520,
-        4816
+        39728,
+        4288
       ],
       "onError": "continueErrorOutput",
       "notes": "Authoritative enabled API list. Cloud Asset may retain stale service enablements after API disable."
+    },
+    {
+      "parameters": {
+        "content": "## 03 · Shared BigQuery worker\n\nSubmit and poll setup, batch and comparison jobs. Validate completion and route the result to the correct phase. Errors enter the failure band below.",
+        "height": 416,
+        "width": 2512,
+        "color": 7
+      },
+      "id": "ce81bfbc-8852-5d44-a396-c39d2810201d",
+      "name": "03a BigQuery worker",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        36032,
+        4224
+      ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Manual start": {
       "main": [
@@ -2518,7 +2533,6 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -2527,5 +2541,7 @@
     "executionTimeout": 3600,
     "availableInMCP": false,
     "timezone": "Europe/Rome"
-  }
+  },
+  "active": false,
+  "pinData": {}
 }

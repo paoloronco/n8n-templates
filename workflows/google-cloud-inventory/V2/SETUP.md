@@ -1,92 +1,58 @@
-# Set up Google Cloud Inventory & Change Audit
+# Configure Google Cloud inventory
 
-This guide covers the v2.2.0 multiproject template. For the illustrated walkthrough, use the [full setup guide](https://paoloronco.notion.site/Setup-Configuration-408f0ba27c3281159afbf589df96e399).
+## Google access
 
-## 1. Prepare the projects and Google identity
+Create or select the identities and credentials you want to use. Store authentication material in n8n credentials. The workflow JSON contains no credential bindings.
 
-Choose one central reporting project for the service account, API quota, BigQuery dataset and jobs. Record its project ID as `billingProject`, then choose the project IDs to inventory in `scopes`. The workflow does not discover every project belonging to your personal Google account.
+For the Google service-account credential, enable HTTP Request use and configure the OAuth scopes `https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets`. Select the credential in every Google HTTP Request node. Different Google identities may be used for inventory, BigQuery and Sheets if their access covers the relevant operations.
 
-Create a dedicated service account and approved authentication material, then store it in n8n's Google service-account credential. Do not paste keys into workflow nodes or commit them to source control.
+Enable the APIs in the appropriate target and quota projects before running. OAuth scopes do not grant IAM permissions or share spreadsheet files.
 
-Enable the APIs before running:
-
-- Cloud Asset API in `billingProject` and the inventory credential project as applicable.
-- Service Usage API in the credential project used by **Read enabled APIs**.
-- BigQuery API in the reporting/credential projects as applicable.
-- Google Sheets API in the Sheets credential project.
-
-Grant access to the service account:
-
-| Destination | Required access |
+| Integration | Access and setup |
 | --- | --- |
-| Every scanned project | `cloudasset.assets.searchAllResources`, `cloudasset.assets.searchAllIamPolicies` and `serviceusage.services.list`. A predefined-role setup uses `roles/cloudasset.viewer` plus `roles/serviceusage.serviceUsageViewer`; an approved custom role can be narrower. |
-| `billingProject` | `serviceusage.services.use`, for example Service Usage Consumer. The Cloud Asset requests explicitly use this quota project. |
-| Central BigQuery project | Job creation, dataset creation and table read/write access. BigQuery Job User plus project-level BigQuery Data Editor supports the supplied create-if-missing setup. Dataset-only grants cannot create a missing dataset. |
-| Your spreadsheet copy | File-level Editor share with the Sheets identity. Google Cloud IAM does not share a spreadsheet. |
+| Cloud Asset Inventory | Enable Cloud Asset API. Grant resource and visible IAM-policy search permissions on every scanned project. V3 also lists resource assets. |
+| Service Usage | Enable Service Usage API. Grant enabled-service list access on scanned projects and service-use access on quota projects. |
+| BigQuery | Enable BigQuery API. Grant jobs creation in `billingProject` and read/write/create-table access in the reporting dataset. Match the configured dataset location. |
+| Google Sheets | Enable Sheets API. Copy the dashboard model into your own Drive and share your copy as Editor with the credential identity. Service accounts may edit shared sheets even when they cannot create spreadsheet files. |
 
-No Project Owner or basic Editor role is required for the workflow identity. An administrator can provision access without granting the workflow permission to administer IAM or enable APIs.
+## Dashboard
 
-## 2. Copy the dashboard
+[Make your own copy of the public synthetic dashboard model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy). The link is a public setup asset, not the author's operational inventory. Set `sheetId` to your copy.
 
-[Make an editable copy of the public Google Sheets model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy), share that copy with the Sheets service account as Editor and record its spreadsheet ID. Keep Dashboard, Inventory, Findings, Changes and Scans.
+Keep the five base tabs: Dashboard, Inventory, Findings, Changes and Scans. Keep row-one headers and hidden identifiers unchanged on populated sheets. Review state is matched by stable resource/finding identifiers. V3 adds Enabled APIs, Technical resources and Coverage if missing. Importing the workflow does not create or share a spreadsheet.
 
-The model contains synthetic examples. The first successful run replaces the managed data, rebuilds charts/formatting and writes the 12-column Inventory layout. It does not create a spreadsheet or missing tabs. Preserve existing headers and hidden identifiers when upgrading a populated sheet; the workflow needs them to restore review checkboxes and notes.
+## Configuration
 
-## 3. Import and select credentials
+| Setting | Meaning |
+| --- | --- |
+| `billingProject`, `dataset`, `location` | Central BigQuery reporting project, dataset ID and location. |
+| `scope`, `scopes` | Project access configuration; see the version-specific section. |
+| `sheetId` | Spreadsheet ID of your editable dashboard copy. |
+| `n8nBaseUrl` | Your n8n instance base URL, including `https://` or `http://`. Execution links are built from this setting. |
+| `sendEmail` | Defaults to `false`. Set to `true` only after configuring SMTP and destinations. |
+| `emailTo`, `emailFrom` | Valid destination/sender addresses; required by validation even while email is off. The exported examples use `example.com`. |
+| `requiredLabels`, `labelAssetTypes`, `allowedLocations` | Governance checks to apply to the inventory. |
+| `pageSize`, `maxPages`, `maxAssets`, `maxPayloadMiB`, `batchBytes` | Pagination, inventory and payload bounds. Incomplete discovery stops the run. |
+| `maxBytesBilled`, `reportChangeLimit` | BigQuery billed-byte limit as a digits-only string, and report history view limit. |
+| `ignoreMetadataFields` | Fields excluded recursively when comparing metadata. Changing this setting changes the compatible baseline profile. |
+| `runRegistryTable` | n8n Data Table name for run and delivery tracking. |
 
-Import [the JSON](./google-cloud-inventory-workflow.json) into a new, inactive workflow and confirm **51 nodes**, including six documentation notes. Use n8n with Data Table support and the supplied node versions. Importing into an existing populated canvas can append nodes.
+Connect SMTP to Email digest if used. Email contains the full inventory CSV plus a filtered `resource-changes.csv`. The subject, body counts and filtered CSV use the same event selection. Full BigQuery/Sheets history and `changes.csv` retain all events.
 
-Enable HTTP Request use on the Google service-account credential. For one account handling all Google requests, configure these OAuth scopes as one comma-separated value:
+Routine backup, execution, build and version records and confirmed `SYSTEM_MANAGED` service-account key rotations do not trigger email. User-managed keys, unknown key metadata and unknown resource types remain alertable. Baselines and metadata-only changes stay silent. `notifyEveryRun` is retained for compatibility but does not override this delivery policy.
 
-```text
-https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets
-```
+## Manual validation and scheduling
 
-Select the credential in all **eleven** Google HTTP Request nodes. In particular, configure **Read enabled APIs**, which is new in this version. With separate identities, use `cloud-platform` for Cloud Asset, Service Usage and BigQuery, and `spreadsheets` for the four Sheets nodes.
+Import into an empty workflow. Select credentials, fill Configuration, and run manually twice. Confirm the first complete snapshot becomes the baseline, the next scan compares it, Sheets updates, review notes persist, and Report files contains HTML and all CSV exports. Configure your workflow timezone and an Error Workflow before enabling the schedule. Keep one scheduled writer per dataset/profile/spreadsheet combination.
 
-If your credential has an Allowed HTTP Request Domains list, permit the relevant endpoints: `cloudasset.googleapis.com`, `serviceusage.googleapis.com`, `bigquery.googleapis.com` and `sheets.googleapis.com`. OAuth scopes do not replace IAM grants or spreadsheet sharing.
+Only complete compatible snapshots are compared. IAM visibility is reported separately from resource coverage. Findings require review and do not establish a complete security assessment. Existing table schemas are not automatically migrated. The workflow reads resource metadata and IAM policies, writes inventory/reporting data, and does not remediate IAM or delete resources.
 
-## 4. Fill the Configuration node
+To upgrade, back up your configured workflow and dashboard. Preserve your own configuration, credential selections, registry, dataset and schedule, and apply the revised operational nodes and canvas deliberately. The templates are inactive and contain configuration examples that must be replaced before execution.
 
-Edit the existing JSON and keep its other defaults and limits. Set:
+## V2: explicit project scopes
 
-- `scopes`: 1–100 entries such as `projects/your-project-id`; multiple entries must be distinct projects. Duplicates are removed and the list is sorted.
-- `billingProject`, `dataset` and `location`: the central reporting project, dataset ID and BigQuery location. Existing datasets must have the expected schema/location.
-- `sheetId`: your own copied spreadsheet ID.
-- `emailTo`, `emailFrom` and `sendEmail`: valid addresses remain required; set `sendEmail=false` for testing without digests.
-- Governance rules and limits appropriate to your environment.
+Set `scopes` to 1–100 project entries such as `projects/your-project-id`. V2 does not automatically discover all projects accessible to your Google identity. Its five-tab dashboard uses Cloud Asset Inventory and live Service Usage data.
 
-Replace `https://n8n.example.com` in **Initialize run** with your own instance URL. Configure SMTP in **Email digest** if used. Select an Error Workflow in n8n Settings, confirm the timezone and schedule, and keep the one-hour timeout or adjust it deliberately. The portable default is 03:15 Europe/Rome.
+Setup sends a create-if-missing dataset request and creates `inventory_resources_v2`, `inventory_runs_v2`, `inventory_changes_v2` and `inventory_findings_v2`. Dataset creation requires project-level dataset-create permission; dataset-only access is insufficient for this setup path. Use an identity with that access for setup or provision/check the dataset separately when adapting a restricted runtime.
 
-A single folder/organization scope remains supported. Service Usage is queried per descendant project inferred from Cloud Asset results; grant list access on those projects too. No visible descendant project stops the run. Explicit project scopes are preferable when you need a fixed list.
-
-## 5. Understand the automatic setup
-
-On the first execution, the supplied template creates the central dataset and these tables if missing:
-
-- `inventory_resources_v2`
-- `inventory_runs_v2`
-- `inventory_changes_v2`
-- `inventory_findings_v2`
-
-It also creates the `gcp_inventory_template_runs` n8n Data Table and updates your existing spreadsheet. No manual SQL is required for a fresh installation. Existing BigQuery schemas are not migrated automatically.
-
-You prepare service accounts, credentials, API enablement, IAM grants, the spreadsheet copy and optional SMTP. The workflow does not create those items or deploy a Cloud Run service, VM, Cloud Scheduler job or separate collector.
-
-## 6. Run twice before scheduling
-
-Run **Manual start**. Confirm resource and Service Usage pagination completed, IAM status is `COMPLETE`, all configured projects appear, BigQuery tables exist, and the five Sheets tabs and report files update.
-
-The dashboard separates **Workloads & data** from **Total inventory**. APIs, networks, identities, versions and configuration remain visible in their own categories. This classification describes record purpose; it does not prove activity, cost or whether a resource can be deleted.
-
-Mark an unchanged resource Verified, add a note and run again with the same scopes. Confirm those fields persist and the comparison uses the previous completed run. Natural cloud changes can still appear. Publish only after checking delivery and the error handler.
-
-## Upgrade an existing installation
-
-Export a backup of your existing workflow. Add Service Usage API access, `serviceusage.services.list` on every scanned project and the credential domain above. Import into an inactive workflow, retain your own configuration, dataset/location, registry, spreadsheet and execution-link host, and reselect credentials in all eleven HTTP nodes. Keep only one scheduled writer for each destination.
-
-Keep the sheet's old headers and identifiers until the first successful upgrade run; do not manually insert Category. Review fields are matched by header and stable ID and rewritten into the new 12-column layout. The changed API source starts a `canonical_v3_live_services` baseline, with earlier BigQuery history retained. Run a second time to validate comparison and review preservation before scheduling.
-
-For HTTP 403 in **Read enabled APIs**, check the API enablement in the credential project, `serviceusage.services.list` on the target project and the credential domain allowlist. Do not bypass pagination or permission errors to publish a partial inventory. BigQuery queries/storage can incur charges; review configured limits, quotas and retention.
-
-References: [Service Usage list](https://docs.cloud.google.com/service-usage/docs/reference/rest/v1/services/list), [Cloud Asset permissions](https://docs.cloud.google.com/asset-inventory/docs/roles-permissions), [n8n service-account setup](https://docs.n8n.io/integrations/builtin/credentials/google/service-account/).
+Credential HTTP domain allowlist: `cloudasset.googleapis.com`, `serviceusage.googleapis.com`, `bigquery.googleapis.com`, `sheets.googleapis.com`.

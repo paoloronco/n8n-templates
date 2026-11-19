@@ -1,17 +1,6 @@
 {
-  "name": "Invoice Processing & Archiving — V3 (Test Required)",
+  "name": "Invoice Processing & Archiving — V3",
   "nodes": [
-    {
-      "parameters": {},
-      "id": "e6cfc6d8-3939-4fb5-ba29-f9d626b2b15e",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        240
-      ]
-    },
     {
       "parameters": {
         "rule": {
@@ -23,13 +12,13 @@
           ]
         }
       },
-      "id": "47ce3294-80ec-40c1-8046-4d6b6fdb7ad7",
+      "id": "6b0e9b70-cd78-424c-a45d-4cedf52df9dc",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
         0,
-        430
+        112
       ]
     },
     {
@@ -42,43 +31,44 @@
         },
         "options": {
           "downloadAttachments": true
-        }
+        },
+        "returnAll": true
       },
-      "id": "b24f2000-8302-47c5-95c6-a9cbc0b8de61",
+      "id": "44e2716e-261a-4700-b63a-62e91a3298b2",
       "name": "Gmail — Find invoice PDFs",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        300,
-        430
+        288,
+        112
       ],
       "webhookId": "538ec2fa-f420-4964-9a87-ed5e328e3f37"
     },
     {
       "parameters": {
-        "jsCode": "const result=[];\nfor(let i=0;i<items.length;i++){\n const mail=items[i];\n for(const [key,b] of Object.entries(mail.binary||{})){\n  const name=String(b.fileName||'attachment.pdf');\n  if(!name.toLowerCase().endsWith('.pdf') && b.mimeType!=='application/pdf') continue;\n  result.push({json:{messageId:mail.json.id||mail.json.messageId||'',subject:mail.json.subject||'',sender:typeof mail.json.from==='string'?mail.json.from:(mail.json.from?.text||''),attachmentKey:key,originalFileName:name},binary:{data:b},pairedItem:{item:i}});\n }\n}\nreturn result;"
+        "jsCode": "const items=$input.all();\nconst result=[];\nfor(let i=0;i<items.length;i++){\n const mail=items[i];\n for(const [key,b] of Object.entries(mail.binary||{})){\n  const name=String(b.fileName||'attachment.pdf');\n  if(!name.toLowerCase().endsWith('.pdf') && b.mimeType!=='application/pdf') continue;\n  const bytes=await this.helpers.getBinaryDataBuffer(i,key);\n  if(bytes.length>20*1024*1024)throw new Error('PDF exceeds 20 MiB: '+name);\n  if(!(mail.json.id||mail.json.messageId))throw new Error('Missing Gmail message ID');\n  result.push({json:{messageId:mail.json.id||mail.json.messageId||'',subject:mail.json.subject||'',sender:typeof mail.json.from==='string'?mail.json.from:(mail.json.from?.text||''),attachmentKey:key,originalFileName:name},binary:{data:b},pairedItem:{item:i}});\n }\n}\nreturn result;"
       },
-      "id": "4f4f8e96-9328-4ee6-8be5-4d77dd6370a0",
+      "id": "c1777c61-8f3f-4879-b83e-8814ecacb3fa",
       "name": "Split PDF attachments",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        430
+        576,
+        112
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// EDIT THIS NODE: set the Google Drive folder ID and classification rules.\nconst config={\n  driveFolderId:'REPLACE_WITH_DRIVE_FOLDER_ID',\n  defaultCurrency:'EUR',\n  maxPdfTextChars:100000,\n  enableOCR:false, // Optional: connect an OCR endpoint before enabling\n  enableAI:false, // Optional: connect an OpenAI-compatible endpoint before enabling\n  ocrEndpoint:'https://example.invalid/ocr',\n  aiEndpoint:'https://example.invalid/v1/chat/completions',\n  reportEmail:'', // Optional: one digest per completed execution\n  labelProcessed:'', // Optional Gmail label ID\n  labelReview:'', // Optional Gmail label ID\n  folderPrefix:'Invoices',\n  categories:[\n    {name:'Utilities',keywords:['electricity','gas bill','energy invoice','utility']},\n    {name:'Internet',keywords:['broadband','internet service','telecom']},\n    {name:'Cloud',keywords:['cloud computing','cloud services','hosting','server']}\n  ]\n};\nreturn {...$input.item,json:{...$input.item.json,config}};"
+        "jsCode": "// EDIT THIS NODE: set the Google Drive folder ID and classification rules.\nconst config={\n  driveFolderId:'REPLACE_WITH_DRIVE_FOLDER_ID',\n  defaultCurrency:'EUR',\n  maxPdfTextChars:100000,\n  enableOCR:false, // Optional: connect an OCR endpoint before enabling\n  enableAI:false, // Optional: connect an OpenAI-compatible endpoint before enabling\n  ocrEndpoint:'https://example.invalid/ocr',\n  aiModel:'REPLACE_WITH_MODEL',\n  aiEndpoint:'https://example.invalid/v1/chat/completions',\n  reportEmail:'', // Optional: one digest per completed execution\n  labelProcessed:'', // Optional Gmail label ID\n  labelReview:'', // Optional Gmail label ID\n  categories:[\n    {name:'Utilities',keywords:['electricity','gas bill','energy invoice','utility']},\n    {name:'Internet',keywords:['broadband','internet service','telecom']},\n    {name:'Cloud',keywords:['cloud computing','cloud services','hosting','server']}\n  ]\n};\nif(!config.driveFolderId || config.driveFolderId.startsWith('REPLACE_'))throw new Error('Set driveFolderId in Configuration');\nfor(const [enabled,endpoint] of [[config.enableOCR,config.ocrEndpoint],[config.enableAI,config.aiEndpoint]]){if(enabled){const match=/^https:\\/\\/([^\\/?#\\s]+)(?:[\\/?#]|$)/i.exec(String(endpoint));if(!match||/(?:^|\\.)invalid(?::\\d+)?$/i.test(match[1]))throw new Error('Configure a real HTTPS endpoint before enabling OCR/AI');}}\nif(config.enableAI&&(!config.aiModel||config.aiModel.startsWith('REPLACE_')))throw new Error('Configure aiModel before enabling AI');\nreturn {...$input.item,json:{...$input.item.json,config}};"
       },
-      "id": "bb85a834-cf7c-4b90-abba-7bb5604727b9",
+      "id": "24e76e18-e768-49fa-9f5a-744515bec67b",
       "name": "Configuration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        860,
-        430
+        848,
+        112
       ]
     },
     {
@@ -86,27 +76,28 @@
         "operation": "pdf",
         "options": {}
       },
-      "id": "0df6b5f6-180a-4b58-aac3-808c9c233800",
+      "id": "7a8cb2f5-78e4-4452-95c1-6fe4fae1fd0a",
       "name": "Extract PDF text",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        1420,
-        430
-      ]
+        1424,
+        208
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const source=$('Configuration').item;\nconst cfg=source.json.config;\nconst raw=String($input.item.json.text||$input.item.json.data||'').slice(0,cfg.maxPdfTextChars||100000).replace(/\\r/g,'');\nconst subject=source.json.subject||'';\nconst fail=(reason)=>({json:{...source.json,status:'rejected',reason,processedAt:new Date().toISOString()},binary:source.binary});\nif(raw.trim().length<40) return fail('PDF has no extractable text (OCR required)');\nconst lines=raw.split('\\n').map(x=>x.trim()).filter(Boolean);\nconst find=(patterns)=>{for(const p of patterns){const m=raw.match(p);if(m)return m[1].trim();}return '';};\nconst invoiceNumber=find([/(?:invoice\\s*(?:number|no\\.?|#)|fattura\\s*(?:n\\.?|numero)|rechnungsnummer)\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/-]{2,35})/i]);\nconst dateString=find([/(?:invoice\\s*date|data\\s*fattura|rechnungsdatum|date\\s*of\\s*issue)\\s*[:\\s]*([0-9]{1,4}[.\\/-][0-9]{1,2}[.\\/-][0-9]{2,4})/i]);\nfunction parseDate(s){\n const p=s.split(/[.\\/-]/).map(Number);if(p.length!==3)return '';\n let [a,b,c]=p;let y,m,d;\n if(a>1900){y=a;m=b;d=c}else{d=a;m=b;y=c<100?2000+c:c}\n const dt=new Date(Date.UTC(y,m-1,d));\n return dt.getUTCFullYear()===y&&dt.getUTCMonth()===m-1&&dt.getUTCDate()===d?`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`:'';\n}\nconst invoiceDate=parseDate(dateString);\nconst dueDate=parseDate(find([/(?:due\\s*date|payment\\s*due|scadenza(?:\\s*pagamento)?|zahlbar\\s*bis)\\s*[:\\s]*([0-9]{1,4}[.\\/-][0-9]{1,2}[.\\/-][0-9]{2,4})/i]));\nfunction money(s){s=String(s).replace(/[^0-9,.-]/g,'');const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');\n if(comma>dot)s=s.replace(/\\./g,'').replace(',','.');else if(dot>comma)s=s.replace(/,/g,'');\n const v=Number(s);return Number.isFinite(v)?Math.round(v*100)/100:null;\n}\nconst total=find([/(?:grand\\s*total|total\\s*(?:due|amount|invoice)|amount\\s*due|totale\\s*(?:fattura|da\\s*pagare|complessivo)|gesamtbetrag)\\s*[:\\s€$]*([0-9][0-9.,]*[.,][0-9]{2})/i]);\nconst amount=total?money(total):null;\nconst currency=/\\bUSD\\b|\\$/.test(raw)?'USD':/\\bGBP\\b|£/.test(raw)?'GBP':/\\bEUR\\b|€/.test(raw)?'EUR':cfg.defaultCurrency;\nconst vendorLine=lines.find(x=>/^(?:supplier|vendor|fornitore|seller)\\s*:/i.test(x));\nconst vendor=(vendorLine?vendorLine.replace(/^[^:]+:\\s*/,''):lines.find(x=>/[A-Za-z]{3,}/.test(x)&&!/(invoice|fattura|date|data|bill to)/i.test(x))||'').slice(0,80).trim();\nconst lower=(raw.slice(0,3500)+' '+subject).toLowerCase();\nconst category=(cfg.categories.find(c=>c.keywords.some(k=>lower.includes(k.toLowerCase())))||{}).name||'Other';\nif(!invoiceNumber||!invoiceDate||amount===null||!vendor) return fail('Missing or invalid invoice number, date, total or vendor');\nif(amount<0) return fail('Negative total requires manual review');\nif(amount>100000000) return fail('Unusually large total requires manual review');\nif(dueDate && dueDate < invoiceDate) return fail('Due date precedes invoice date');\nconst clean=s=>String(s).normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,65);\nconst uniqueKey=[clean(vendor).toLowerCase(),clean(invoiceNumber).toLowerCase(),invoiceDate].join(':');\nconst fileName=`${invoiceDate}_${clean(vendor)}_${clean(invoiceNumber)}.pdf`;\nreturn {json:{...source.json,status:'validated',invoiceNumber,invoiceDate,dueDate,amount,currency,vendor,category,uniqueKey,fileName,processedAt:new Date().toISOString()},binary:source.binary};"
+        "jsCode": "function validISODate(value) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;\n  const date = new Date(`${value}T00:00:00.000Z`);\n  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;\n}\nfunction parseDate(value) {\n  const parts = value.split(/[./-]/).map(Number);\n  if (parts.length !== 3) return '';\n  const [a,b,c] = parts;\n  const [year,month,day] = a > 1900 ? [a,b,c] : [c < 100 ? 2000+c : c,b,a];\n  const date = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;\n  return validISODate(date) ? date : '';\n}\nfunction money(value) {\n  if (!/^-?\\d[\\d.,]*$/.test(value)) return null;\n  let normalized;\n  if (value.includes(',') && value.includes('.')) {\n    const decimal = value.lastIndexOf(',') > value.lastIndexOf('.') ? ',' : '.';\n    const grouping = decimal === ',' ? '.' : ',';\n    const pattern = decimal === ',' ? /^-?\\d{1,3}(?:\\.\\d{3})+,\\d{2}$/ : /^-?\\d{1,3}(?:,\\d{3})+\\.\\d{2}$/;\n    if (!pattern.test(value)) return null;\n    normalized = value.split(grouping).join('').replace(decimal,'.');\n  } else {\n    if (!/^-?\\d+(?:[.,]\\d{1,2})?$/.test(value)) return null;\n    normalized = value.replace(',','.');\n  }\n  const result = Number(normalized);\n  return Number.isFinite(result) ? result : null;\n}\nfunction classify(text, subject, config) {\n  const lower = `${text.slice(0,3500)} ${subject || ''}`.toLowerCase();\n  return (config.categories.find(c => c.keywords.some(k => lower.includes(k.toLowerCase()))) || {}).name || 'Other';\n}\nfunction identity(vendor, invoiceNumber, invoiceDate) {\n  const uniqueKey = [vendor,invoiceNumber,invoiceDate].map(s => encodeURIComponent(s.normalize('NFKC').trim().toLowerCase())).join(':');\n  // Keep readable names while distinguishing punctuation and long identifiers.\n  let hash = 0xcbf29ce484222325n;\n  for (let i=0;i<uniqueKey.length;i++) hash = BigInt.asUintN(64,(hash ^ BigInt(uniqueKey.charCodeAt(i))) * 0x100000001b3n);\n  const clean = (s,fallback) => s.normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,55) || fallback;\n  return {uniqueKey,fileName:`${invoiceDate}_${clean(vendor,'vendor')}_${clean(invoiceNumber,'invoice')}_${hash.toString(16).padStart(16,'0')}.pdf`};\n}\n\nconst source = $input.item;\nconst cfg = source.json.config;\nconst raw = String(source.json.text || source.json.data || '').slice(0,cfg.maxPdfTextChars || 100000).replace(/\\r/g,'');\nconst fail = reason => ({json:{...source.json,extractionText:raw,status:'rejected',reason,processedAt:new Date().toISOString()},binary:source.binary});\nif (raw.trim().length < 40) return fail('PDF has no extractable text; configure OCR or review the document');\nconst lines = raw.split('\\n').map(x=>x.trim()).filter(Boolean);\nconst find = patterns => {for (const p of patterns) {const m=raw.match(p);if(m)return m[1].trim();}return '';};\nconst invoiceNumber = find([/(?:invoice\\s*(?:number|no\\.?|#)|fattura\\s*(?:n\\.?|numero)|rechnungsnummer)\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/_-]{2,79})(?![A-Z0-9\\/_-])/i]);\nconst invoiceDate = parseDate(find([/(?:invoice\\s*date|data\\s*fattura|rechnungsdatum|date\\s*of\\s*issue)\\s*[:\\s]*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{2,4})(?!\\d)/i]));\nconst dueDateText = find([/(?:due\\s*date|payment\\s*due|scadenza(?:\\s*pagamento)?|zahlbar\\s*bis)\\s*[:\\s]*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{2,4})(?!\\d)/i]);\nconst dueDate = dueDateText ? parseDate(dueDateText) : '';\nconst total = find([/(?:grand\\s*total|total\\s*(?:due|amount|invoice)|amount\\s*due|totale\\s*(?:fattura|da\\s*pagare|complessivo)|gesamtbetrag)\\s*:?\\s*(?:(?:EUR|USD|GBP|[€$£])\\s*)?(-?\\d[\\d.,]*)(?![\\d.,])/i]);\nconst amount = total ? money(total) : null;\nconst currency = /\\bUSD\\b|\\$/.test(raw) ? 'USD' : /\\bGBP\\b|£/.test(raw) ? 'GBP' : /\\bEUR\\b|€/.test(raw) ? 'EUR' : cfg.defaultCurrency;\nconst vendorLine = lines.find(x=>/^(?:supplier|vendor|fornitore|seller)\\s*:/i.test(x));\nconst vendor = (vendorLine ? vendorLine.replace(/^[^:]+:\\s*/,'') : lines.find(x=>/[A-Za-z]{3,}/.test(x) && !/(invoice|fattura|date|data|bill to|total due)/i.test(x)) || '').trim();\nif (!invoiceNumber || !invoiceDate || amount === null || !vendor || vendor.length > 80) return fail('Missing or invalid invoice number, date, total or vendor');\nif (!/^[A-Z]{3}$/.test(currency)) return fail('Invalid currency');\nif (amount < 0 || amount > 100000000) return fail('Negative or unusually large total requires manual review');\nif (dueDateText && !dueDate) return fail('Invalid due date');\nif (dueDate && dueDate < invoiceDate) return fail('Due date precedes invoice date');\nreturn {json:{...source.json,status:'validated',reason:'',extractionText:raw,extractionMethod:source.json.extractionMethod || 'rules',invoiceNumber,invoiceDate,dueDate,amount,currency,vendor,category:classify(raw,source.json.subject,cfg),...identity(vendor,invoiceNumber,invoiceDate),processedAt:new Date().toISOString()},binary:source.binary};\n"
       },
-      "id": "4d101383-bbd9-4e01-927b-1308b8a67a03",
+      "id": "aa65a09e-32e2-4efe-ba3d-d938a2189c13",
       "name": "Parse & validate invoice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2820,
-        430
+        2816,
+        224
       ]
     },
     {
@@ -133,24 +124,24 @@
         },
         "options": {}
       },
-      "id": "bdd3f6d4-915a-440a-8feb-4e4fd18659ac",
+      "id": "15fc671f-2b00-4cd9-a4d7-179cc061014d",
       "name": "Valid invoice?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3100,
-        430
+        3088,
+        224
       ]
     },
     {
       "parameters": {},
-      "id": "3405f616-6c28-43a1-8962-eee325b32dcf",
+      "id": "af513cdd-e54d-40aa-b9a9-accc7cf69967",
       "name": "Rejected — review PDF",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        5620,
-        950
+        5552,
+        848
       ]
     },
     {
@@ -175,13 +166,13 @@
         },
         "options": {}
       },
-      "id": "16bb4103-3948-4d63-a658-a2d801a77390",
+      "id": "d678915a-e6c9-4d43-920e-07772b1dc3ab",
       "name": "Sheets — Find existing invoice",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        4500,
-        430
+        4528,
+        208
       ],
       "alwaysOutputData": true
     },
@@ -209,38 +200,38 @@
         },
         "options": {}
       },
-      "id": "9bbf56cb-e69d-4342-8dc0-9d417e153343",
+      "id": "ed7fce02-0470-4e1f-bf34-0e921c72f058",
       "name": "Already registered?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4780,
-        430
+        4752,
+        208
       ]
     },
     {
       "parameters": {},
-      "id": "2d7bfd09-acfd-418f-acd2-b781723b9185",
+      "id": "38b4605c-977d-4c9a-8d90-bd09e78cc7c9",
       "name": "Duplicate — skipped",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        5060,
-        190
+        5008,
+        16
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const src=$('Parse & validate invoice').item;\nif(src.json.status!=='validated'||!src.binary?.data)throw new Error('Missing validated PDF binary');\nif(src.json.config.driveFolderId.startsWith('REPLACE_'))throw new Error('Set driveFolderId in Configuration');\nreturn {json:src.json,binary:src.binary};"
+        "jsCode": "const src=$('Carry validated invoice').item;if(src.json.status!=='validated'||!src.binary?.data)throw new Error('Missing validated PDF binary');return {json:src.json,binary:src.binary};"
       },
-      "id": "d2a8557c-00f5-472e-958f-bde042790d1e",
+      "id": "72cf5d80-2ec4-4d73-83f0-84f1b346ad46",
       "name": "Restore validated PDF",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5060,
-        520
+        5008,
+        224
       ]
     },
     {
@@ -258,13 +249,13 @@
         },
         "options": {}
       },
-      "id": "12159743-c1b2-43dd-902f-a4aaa74474b3",
+      "id": "78494485-3294-42b5-a2e8-70428506dba5",
       "name": "Drive — Upload PDF",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        10660,
-        710
+        10496,
+        256
       ]
     },
     {
@@ -272,13 +263,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Restore validated PDF').item.json;\nconst id=$input.item.json.id||$input.item.json.fileId||'';\nif(!id)throw new Error('Drive upload returned no file ID');\nreturn {json:{uniqueKey:src.uniqueKey,invoiceNumber:src.invoiceNumber,vendor:src.vendor,invoiceDate:src.invoiceDate,dueDate:src.dueDate||\"\",amount:src.amount,currency:src.currency,category:src.category,fileName:src.fileName,driveFileId:id,status:'archived',sourceMessageId:src.messageId,processedAt:new Date().toISOString()}};"
       },
-      "id": "6cc028b1-00a5-4d15-97a3-ce1a327a2787",
+      "id": "6bfee26f-f20a-47e8-8e0e-9cf6f623bc9f",
       "name": "Prepare invoice register row",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        10940,
-        520
+        10944,
+        256
       ]
     },
     {
@@ -436,24 +427,24 @@
         },
         "options": {}
       },
-      "id": "a6463807-4319-4afe-8aa9-86613e98146b",
+      "id": "74c5ca0e-64f1-4685-b59a-c679d4af284e",
       "name": "Sheets — Register invoice",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        11220,
-        520
+        11216,
+        256
       ]
     },
     {
       "parameters": {},
-      "id": "f7c82cd1-2930-47a6-b107-65ab496eac09",
+      "id": "e054f028-17cc-4a1b-b322-c6ed037f35cf",
       "name": "Archived — completed",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        12060,
-        520
+        12064,
+        272
       ]
     },
     {
@@ -461,13 +452,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Configuration').item; const text=String($json.text||$json.data||'');return {json:{...src.json,extractedText:text,needsOCR:text.trim().length<40},binary:src.binary};"
       },
-      "id": "7523c4b4-5f96-4993-bbe5-c838a95badb4",
+      "id": "9778828d-e032-4efa-88be-f8e0cff052a4",
       "name": "Assess extracted text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1700,
-        430
+        1712,
+        208
       ]
     },
     {
@@ -494,13 +485,13 @@
         },
         "options": {}
       },
-      "id": "d84ddbc5-41e0-43d1-982d-c50a6676c8ee",
+      "id": "f8e13700-1891-4600-a613-65cb573639d5",
       "name": "OCR enabled and needed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1980,
-        430
+        1984,
+        208
       ]
     },
     {
@@ -522,28 +513,28 @@
           "timeout": 120000
         }
       },
-      "id": "956109f1-dea9-4073-9b03-4a7d50629b34",
+      "id": "a2e8b921-d13f-4fc2-a83a-b57ed1eaa173",
       "name": "OCR — Optional HTTP endpoint",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2260,
-        250
+        2256,
+        0
       ],
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const src=$('Assess extracted text').item; const text=String($json.text||$json.result?.text||'');return {json:{...src.json,text},binary:src.binary};"
+        "jsCode": "const src=$('Assess extracted text').item;const text=String($json.text||$json.result?.text||'');return {json:{...src.json,text,extractionMethod:'OCR'},binary:src.binary};"
       },
-      "id": "46f26430-d925-4a44-afe8-4e9fa539b661",
+      "id": "78ee624b-f129-4a73-ade3-4a6459837ba1",
       "name": "Normalize OCR result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2540,
-        250
+        2528,
+        0
       ]
     },
     {
@@ -551,13 +542,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "return {json:{...$json,text:$json.extractedText},binary:$binary};"
       },
-      "id": "1aaa165e-ead7-40ad-b53d-f1ba69580c79",
+      "id": "8f2edf25-6e46-4266-b0c2-48c73deaaacc",
       "name": "Use extracted PDF text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2260,
-        630
+        2272,
+        224
       ]
     },
     {
@@ -573,7 +564,7 @@
           "conditions": [
             {
               "id": "1de235ee-e0eb-418b-80d2-0a3846989693",
-              "leftValue": "={{ $json.config.enableAI }}",
+              "leftValue": "={{ $json.config.enableAI && String($json.extractionText || '').trim().length >= 40 }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -584,13 +575,13 @@
         },
         "options": {}
       },
-      "id": "11122734-a93d-4af4-a1e1-0fcf8a9da31a",
+      "id": "cadbd8d8-156e-4131-9745-263256f0f142",
       "name": "AI fallback enabled?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3380,
-        630
+        3392,
+        320
       ]
     },
     {
@@ -599,32 +590,33 @@
         "url": "={{ $json.config.aiEndpoint }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({model:\"REPLACE_WITH_MODEL\",messages:[{role:\"system\",content:\"Extract invoiceNumber, invoiceDate (YYYY-MM-DD), dueDate (YYYY-MM-DD or empty), vendor, amount, currency as JSON. Never invent missing fields.\"},{role:\"user\",content:String($(\"Assess extracted text\").item.json.extractedText||\"\").slice(0,20000)}],temperature:0,response_format:{type:\"json_object\"}}) }}",
+        "jsonBody": "={{ JSON.stringify({model:$json.config.aiModel,messages:[{role:\"system\",content:\"Extract invoiceNumber, invoiceDate (YYYY-MM-DD), dueDate (YYYY-MM-DD or empty), vendor, amount (JSON number), currency as JSON. Never invent missing fields.\"},{role:\"user\",content:String($json.extractionText||\"\").slice(0,20000)}],temperature:0,response_format:{type:\"json_object\"}}) }}",
         "options": {
           "timeout": 120000
         }
       },
-      "id": "79f09c98-7da7-4edb-b8f4-67f05956ff27",
+      "id": "70350c70-ebb3-4df3-b373-3d1e3027457b",
       "name": "AI — Optional extraction",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3660,
-        630
-      ]
+        3696,
+        256
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const src=$('Parse & validate invoice').item;let obj={};try{obj=JSON.parse($json.choices?.[0]?.message?.content||'{}')}catch(e){};const amount=Number(obj.amount);const date=String(obj.invoiceDate||'');const vendor=String(obj.vendor||'').trim();const num=String(obj.invoiceNumber||'').trim();if(!vendor||!num||!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!Number.isFinite(amount)||amount<0)return {json:{...src.json,reason:'AI could not validate required fields'},binary:src.binary};const clean=s=>String(s).normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,65);return {json:{...src.json,status:'validated',vendor,invoiceNumber:num,invoiceDate:date,dueDate:String(obj.dueDate||''),amount,currency:String(obj.currency||src.json.config.defaultCurrency),uniqueKey:[clean(vendor).toLowerCase(),clean(num).toLowerCase(),date].join(':'),fileName:`${date}_${clean(vendor)}_${clean(num)}.pdf`,extractionMethod:'AI'},binary:src.binary};"
+        "jsCode": "function validISODate(value) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;\n  const date = new Date(`${value}T00:00:00.000Z`);\n  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;\n}\nfunction parseDate(value) {\n  const parts = value.split(/[./-]/).map(Number);\n  if (parts.length !== 3) return '';\n  const [a,b,c] = parts;\n  const [year,month,day] = a > 1900 ? [a,b,c] : [c < 100 ? 2000+c : c,b,a];\n  const date = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;\n  return validISODate(date) ? date : '';\n}\nfunction money(value) {\n  if (!/^-?\\d[\\d.,]*$/.test(value)) return null;\n  let normalized;\n  if (value.includes(',') && value.includes('.')) {\n    const decimal = value.lastIndexOf(',') > value.lastIndexOf('.') ? ',' : '.';\n    const grouping = decimal === ',' ? '.' : ',';\n    const pattern = decimal === ',' ? /^-?\\d{1,3}(?:\\.\\d{3})+,\\d{2}$/ : /^-?\\d{1,3}(?:,\\d{3})+\\.\\d{2}$/;\n    if (!pattern.test(value)) return null;\n    normalized = value.split(grouping).join('').replace(decimal,'.');\n  } else {\n    if (!/^-?\\d+(?:[.,]\\d{1,2})?$/.test(value)) return null;\n    normalized = value.replace(',','.');\n  }\n  const result = Number(normalized);\n  return Number.isFinite(result) ? result : null;\n}\nfunction classify(text, subject, config) {\n  const lower = `${text.slice(0,3500)} ${subject || ''}`.toLowerCase();\n  return (config.categories.find(c => c.keywords.some(k => lower.includes(k.toLowerCase()))) || {}).name || 'Other';\n}\nfunction identity(vendor, invoiceNumber, invoiceDate) {\n  const uniqueKey = [vendor,invoiceNumber,invoiceDate].map(s => encodeURIComponent(s.normalize('NFKC').trim().toLowerCase())).join(':');\n  // Keep readable names while distinguishing punctuation and long identifiers.\n  let hash = 0xcbf29ce484222325n;\n  for (let i=0;i<uniqueKey.length;i++) hash = BigInt.asUintN(64,(hash ^ BigInt(uniqueKey.charCodeAt(i))) * 0x100000001b3n);\n  const clean = (s,fallback) => s.normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,55) || fallback;\n  return {uniqueKey,fileName:`${invoiceDate}_${clean(vendor,'vendor')}_${clean(invoiceNumber,'invoice')}_${hash.toString(16).padStart(16,'0')}.pdf`};\n}\n\nconst src = $('Parse & validate invoice').item;\nconst fail = reason => ({json:{...src.json,status:'rejected',reason},binary:src.binary});\nlet obj;\ntry {obj = JSON.parse($json.choices?.[0]?.message?.content || '{}');}\ncatch {return fail('AI response is not valid JSON');}\nif (!obj || typeof obj !== 'object' || Array.isArray(obj)) return fail('AI response is not an invoice object');\nconst vendor = typeof obj.vendor === 'string' ? obj.vendor.trim() : '';\nconst invoiceNumber = typeof obj.invoiceNumber === 'string' ? obj.invoiceNumber.trim() : '';\nconst invoiceDate = String(obj.invoiceDate || '');\nconst dueDate = String(obj.dueDate || '');\nconst currency = String(obj.currency || src.json.config.defaultCurrency).toUpperCase();\nconst amount = obj.amount;\nif (!vendor || vendor.length > 80 || !invoiceNumber || invoiceNumber.length > 80 || !validISODate(invoiceDate) || typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0 || amount > 100000000 || !/^[A-Z]{3}$/.test(currency)) return fail('AI could not validate required fields');\nif (dueDate && (!validISODate(dueDate) || dueDate < invoiceDate)) return fail('AI returned an invalid due date');\nreturn {json:{...src.json,status:'validated',reason:'',vendor,invoiceNumber,invoiceDate,dueDate,amount,currency,category:classify(src.json.extractionText || '',src.json.subject,src.json.config),...identity(vendor,invoiceNumber,invoiceDate),extractionMethod:'AI'},binary:src.binary};\n"
       },
-      "id": "8325920f-0fdf-4b13-a8a5-bb2f49275eaa",
+      "id": "7db49a97-bdd5-40af-825b-b4fb3dfe5f33",
       "name": "Validate AI result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3940,
-        630
+        3952,
+        256
       ]
     },
     {
@@ -651,13 +643,13 @@
         },
         "options": {}
       },
-      "id": "28c2e520-0e1f-4b20-8818-1aca72092318",
+      "id": "3b53ea47-3c69-4e58-8bd2-f6b573fc48d3",
       "name": "AI result valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4220,
-        630
+        4192,
+        256
       ]
     },
     {
@@ -665,13 +657,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const x=$json;return {json:{uniqueKey:[x.messageId||'unknown',x.attachmentKey||'file'].join(':'),invoiceNumber:x.invoiceNumber||'',vendor:x.vendor||'',invoiceDate:x.invoiceDate||'',dueDate:x.dueDate||'',amount:x.amount??'',currency:x.currency||'',category:x.category||'',fileName:x.originalFileName||'',driveFileId:'',status:'review',sourceMessageId:x.messageId||'',processedAt:new Date().toISOString(),reason:x.reason||'Unable to validate'}};"
       },
-      "id": "6a69dd96-3dcf-48c7-a40f-d024aad27c7d",
+      "id": "af15025b-e541-4620-b593-950797e03854",
       "name": "Prepare review row",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4500,
-        950
+        4512,
+        640
       ]
     },
     {
@@ -839,13 +831,13 @@
         },
         "options": {}
       },
-      "id": "7b2c519a-351e-40c7-b031-5d591235e605",
+      "id": "efc36e27-3d71-48b5-889b-af489e782464",
       "name": "Sheets — Review Queue",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        4780,
-        950
+        4784,
+        640
       ],
       "retryOnFail": true,
       "maxTries": 2,
@@ -853,15 +845,28 @@
     },
     {
       "parameters": {
-        "operation": "list"
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "={{ $json.driveQuery }}",
+        "returnAll": false,
+        "limit": 1,
+        "filter": {},
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
+          ]
+        }
       },
-      "id": "4b92b93d-cacd-4269-ae5b-af8778bcb03c",
+      "id": "dbb4fb76-c800-4648-ae80-80a17c3d3eef",
       "name": "Drive — Find Year folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        5620,
-        520
+        5520,
+        224
       ],
       "alwaysOutputData": true
     },
@@ -889,13 +894,13 @@
         },
         "options": {}
       },
-      "id": "33c0f9ff-9a1a-4bc2-8e23-308c17b777cd",
+      "id": "cde061bb-2403-4778-b764-aab1a2815a18",
       "name": "Year folder exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5900,
-        520
+        5728,
+        224
       ]
     },
     {
@@ -909,33 +914,33 @@
         },
         "folderId": {
           "__rl": true,
-          "mode": "list",
-          "value": "root",
-          "cachedResultName": "/ (Root folder)"
+          "mode": "id",
+          "value": "={{ $('Prepare Year folder').item.json.parentId }}"
         },
-        "options": {}
+        "options": {},
+        "operation": "create"
       },
-      "id": "b8253612-8300-4e29-9cb9-4640658f0570",
+      "id": "d9f7b25e-578c-4140-a698-5aefc7273d4d",
       "name": "Drive — Create Year folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        6180,
-        710
+        5968,
+        240
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:s.json.config.driveFolderId,folderName:s.json.invoiceDate.slice(0,4)},binary:s.binary};"
+        "jsCode": "const s=$('Restore validated PDF').item;const quote=s=>String(s).replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");const parentId=s.json.config.driveFolderId;const folderName=s.json.invoiceDate.slice(0,4);const driveQuery=`'${quote(parentId)}' in parents and name = '${quote(folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;return {json:{...s.json,parentId,folderName,driveQuery},binary:s.binary};"
       },
-      "id": "9622fa1b-03b7-4d6b-9f53-733988a24028",
+      "id": "ba88cb43-8697-492c-bc6b-fef07a0febdf",
       "name": "Prepare Year folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5340,
-        520
+        5280,
+        224
       ]
     },
     {
@@ -943,13 +948,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Year folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "0e38315d-a44d-4d67-a800-b5650c6f7d97",
+      "id": "98837948-0d3c-4367-8f6b-47864b2caec9",
       "name": "Use existing Year folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6180,
-        330
+        6080,
+        48
       ]
     },
     {
@@ -957,26 +962,39 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Year folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "7db8f342-44e3-4db6-ba0a-711e89fa9103",
+      "id": "070de009-e5f8-4f0a-a2f2-6da38b7fd236",
       "name": "Use created Year folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6460,
-        710
+        6240,
+        240
       ]
     },
     {
       "parameters": {
-        "operation": "list"
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "={{ $json.driveQuery }}",
+        "returnAll": false,
+        "limit": 1,
+        "filter": {},
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
+          ]
+        }
       },
-      "id": "0ac42252-4d02-41c9-ab43-18c52d20b8c5",
+      "id": "330c8b0d-b834-485c-876f-c03247708556",
       "name": "Drive — Find Month folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        7020,
-        520
+        6720,
+        240
       ],
       "alwaysOutputData": true
     },
@@ -1004,13 +1022,13 @@
         },
         "options": {}
       },
-      "id": "e9a5d88b-8078-4033-9f82-064230abd759",
+      "id": "058d33d1-610c-4648-92e1-233d564519d8",
       "name": "Month folder exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        7300,
-        520
+        6960,
+        240
       ]
     },
     {
@@ -1024,33 +1042,33 @@
         },
         "folderId": {
           "__rl": true,
-          "mode": "list",
-          "value": "root",
-          "cachedResultName": "/ (Root folder)"
+          "mode": "id",
+          "value": "={{ $('Prepare Month folder').item.json.parentId }}"
         },
-        "options": {}
+        "options": {},
+        "operation": "create"
       },
-      "id": "89645977-5e95-4fdf-898e-1e2b66ee6be7",
+      "id": "7297053d-4b8f-4837-9e98-16da8b4f4469",
       "name": "Drive — Create Month folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        7580,
-        710
+        7280,
+        256
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:$json.folderId,folderName:s.json.invoiceDate.slice(5,7)},binary:s.binary};"
+        "jsCode": "const s=$('Restore validated PDF').item;const quote=s=>String(s).replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");const parentId=$json.folderId;const folderName=s.json.invoiceDate.slice(5,7);const driveQuery=`'${quote(parentId)}' in parents and name = '${quote(folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;return {json:{...s.json,parentId,folderName,driveQuery},binary:s.binary};"
       },
-      "id": "fc135a99-9924-425b-96da-1c9ef1b69b60",
+      "id": "50f65757-b995-4bf4-8847-f57290706b9d",
       "name": "Prepare Month folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6740,
-        520
+        6496,
+        240
       ]
     },
     {
@@ -1058,13 +1076,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Month folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "19546335-66f0-4039-9ade-8d90097023f7",
+      "id": "acfdf38a-4f02-4afb-8ff4-ab6e4202008c",
       "name": "Use existing Month folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7580,
-        330
+        7392,
+        64
       ]
     },
     {
@@ -1072,26 +1090,39 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Month folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "36109268-c36e-4c5b-9a7c-727b455c5447",
+      "id": "83f5b444-6ad4-4888-bbe8-02a5498c35ab",
       "name": "Use created Month folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7860,
-        710
+        7536,
+        256
       ]
     },
     {
       "parameters": {
-        "operation": "list"
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "={{ $json.driveQuery }}",
+        "returnAll": false,
+        "limit": 1,
+        "filter": {},
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
+          ]
+        }
       },
-      "id": "80784bef-a073-4afe-b7a7-55037b6db087",
+      "id": "e4c08179-9fd5-4b25-942a-a9292258dae8",
       "name": "Drive — Find Category folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        8420,
-        520
+        8144,
+        256
       ],
       "alwaysOutputData": true
     },
@@ -1119,13 +1150,13 @@
         },
         "options": {}
       },
-      "id": "31748413-2eb3-4b81-b1ed-07eb423fa1f6",
+      "id": "6f66633f-b1cf-4a7c-a353-16f5ad79e7b4",
       "name": "Category folder exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        8700,
-        520
+        8432,
+        224
       ]
     },
     {
@@ -1139,33 +1170,33 @@
         },
         "folderId": {
           "__rl": true,
-          "mode": "list",
-          "value": "root",
-          "cachedResultName": "/ (Root folder)"
+          "mode": "id",
+          "value": "={{ $('Prepare Category folder').item.json.parentId }}"
         },
-        "options": {}
+        "options": {},
+        "operation": "create"
       },
-      "id": "8b43ac49-be62-4eb2-984f-4074321e1ad0",
+      "id": "59f0b9bf-6157-4265-b8b3-09d919c5338d",
       "name": "Drive — Create Category folder",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        8980,
-        710
+        8736,
+        240
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,parentId:$json.folderId,folderName:s.json.category.replace(/[^a-zA-Z0-9_-]/g,'-')},binary:s.binary};"
+        "jsCode": "const s=$('Restore validated PDF').item;const quote=s=>String(s).replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");const parentId=$json.folderId;const folderName=s.json.category.replace(/[^a-zA-Z0-9_-]/g,'-');const driveQuery=`'${quote(parentId)}' in parents and name = '${quote(folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;return {json:{...s.json,parentId,folderName,driveQuery},binary:s.binary};"
       },
-      "id": "31cd31e0-2240-438c-a8b6-e624112c6bde",
+      "id": "b381d468-d4d4-4e68-aaf4-4d3d601410ba",
       "name": "Prepare Category folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8140,
-        520
+        7840,
+        256
       ]
     },
     {
@@ -1173,13 +1204,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Category folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "bc129801-3c0c-4686-b1ed-3fa7dfe838fb",
+      "id": "b6358128-0a98-41b2-8d7a-26e263037f2f",
       "name": "Use existing Category folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8980,
-        330
+        8832,
+        32
       ]
     },
     {
@@ -1187,40 +1218,53 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const src=$('Prepare Category folder').item;return {json:{...src.json,folderId:$json.id},binary:src.binary};"
       },
-      "id": "ba1e38e5-47d7-4bc4-b412-16e416997844",
+      "id": "b0c47cf0-238f-4403-8467-e3fcbe3b035b",
       "name": "Use created Category folder",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        9260,
-        710
+        9008,
+        240
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Restore validated PDF').item;return {json:{...s.json,folderId:$json.folderId},binary:s.binary};"
+        "jsCode": "const s=$('Restore validated PDF').item;const quote=s=>String(s).replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");const folderId=$json.folderId;const driveQuery=`'${quote(folderId)}' in parents and name = '${quote(s.json.fileName)}' and mimeType = 'application/pdf' and trashed = false`;return {json:{...s.json,folderId,driveQuery},binary:s.binary};"
       },
-      "id": "a91ed102-e620-4ef4-b961-5d8b19cd1df2",
+      "id": "8b9f5a6f-4e18-4c57-9646-feb4a5f51e61",
       "name": "Prepare Drive recovery",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        9540,
-        520
+        9328,
+        240
       ]
     },
     {
       "parameters": {
-        "operation": "list"
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "={{ $json.driveQuery }}",
+        "returnAll": false,
+        "limit": 1,
+        "filter": {},
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
+          ]
+        }
       },
-      "id": "07109d22-96d6-4c14-8506-3cea2543a19a",
+      "id": "d8d2025f-d792-4fd5-bd91-1980cdbbb009",
       "name": "Drive — Find existing PDF",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        9820,
-        520
+        9664,
+        240
       ],
       "alwaysOutputData": true
     },
@@ -1248,13 +1292,13 @@
         },
         "options": {}
       },
-      "id": "cc13ffab-fea3-4bd2-8d03-0b2749e90fe3",
+      "id": "28f5f7de-48b8-4bd8-979b-c13cc61e5469",
       "name": "PDF already on Drive?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10100,
-        520
+        9968,
+        240
       ]
     },
     {
@@ -1262,13 +1306,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const s=$('Prepare Drive recovery').item.json;return {json:{...s,id:$json.id,recovered:true}};"
       },
-      "id": "49aa2e24-a47b-496e-b57c-cedb99b62e1b",
+      "id": "df23fba9-7fcb-485d-aa9a-5a35819ddaa2",
       "name": "Recover existing Drive file",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        10380,
-        330
+        10240,
+        48
       ]
     },
     {
@@ -1276,13 +1320,13 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const s=$('Prepare Drive recovery').item;return {json:s.json,binary:s.binary};"
       },
-      "id": "df6613b4-02c2-4c57-82f7-2a673d4b3a14",
+      "id": "6af9ee60-11de-478b-9939-4c91da461751",
       "name": "Restore PDF for upload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        10380,
-        710
+        10240,
+        256
       ]
     },
     {
@@ -1309,28 +1353,28 @@
         },
         "options": {}
       },
-      "id": "9fe8d815-fadb-4c30-9866-39e5ed179a78",
+      "id": "c0942d7e-e4ac-467f-a89e-4a7947877776",
       "name": "Processed label configured?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        11500,
-        520
+        11472,
+        256
       ]
     },
     {
       "parameters": {
         "operation": "addLabels",
         "messageId": "={{ $(\"Prepare invoice register row\").item.json.sourceMessageId }}",
-        "labelIds": "={{ $(\"Restore validated PDF\").item.json.config.labelProcessed }}"
+        "labelIds": "={{ [ $('Restore validated PDF').item.json.config.labelProcessed ] }}"
       },
-      "id": "d9de8224-338a-4a27-9945-dc8bcc148a84",
+      "id": "2fab4730-92d6-473a-89b6-ced54681126e",
       "name": "Gmail — Label processed",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        11780,
-        330
+        11792,
+        80
       ],
       "webhookId": "1ab9041f-677b-4755-a180-3b8f491f6651"
     },
@@ -1358,55 +1402,56 @@
         },
         "options": {}
       },
-      "id": "8783ec94-ee6d-4f63-82f4-484705326083",
+      "id": "804ba7a9-cacb-4e20-ac98-06b1420ab04a",
       "name": "Review label configured?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5060,
-        950
+        5072,
+        640
       ]
     },
     {
       "parameters": {
         "operation": "addLabels",
         "messageId": "={{ $(\"Prepare review row\").item.json.sourceMessageId }}",
-        "labelIds": "={{ $(\"Parse & validate invoice\").item.json.config.labelReview }}"
+        "labelIds": "={{ [ $('Parse & validate invoice').item.json.config.labelReview ] }}"
       },
-      "id": "bc2265ef-fc29-4a62-b309-3765e8a51558",
+      "id": "4ba96fdd-d666-478c-83a1-cc0daa02a365",
       "name": "Gmail — Label review",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        5340,
-        950
+        5392,
+        624
       ],
       "webhookId": "f1e6a528-86f5-43b0-95d1-2bbf2b41a4a5"
     },
     {
       "parameters": {
-        "options": {}
+        "options": {},
+        "batchSize": 1
       },
-      "id": "1ddeb239-3370-45c9-82de-33682640088e",
+      "id": "0b6e0b72-4217-405e-b1ad-ec4669cd8bf0",
       "name": "Process invoices one by one",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1140,
-        430
+        1136,
+        112
       ]
     },
     {
       "parameters": {
         "jsCode": "const items=$input.all();const counts={archived:0,duplicate:0,review:0};const totals={};for(const it of items){const x=it.json||{};if(Object.hasOwn(counts,x.status))counts[x.status]++;if(x.status==='archived'&&Number.isFinite(Number(x.amount))){const c=x.currency||'UNKNOWN';totals[c]=(totals[c]||0)+Number(x.amount)}}const reportEmail=items[0]?.json?.config?.reportEmail||'';return [{json:{...counts,totals,reportEmail,summary:`Invoice processing complete. Archived: ${counts.archived}; duplicate: ${counts.duplicate}; review: ${counts.review}. Totals by currency: ${JSON.stringify(totals)}.`}}];"
       },
-      "id": "4ba46cd5-ed79-4ca3-9629-c92316111378",
+      "id": "f74a30a1-3b97-4018-bdf6-a4433b81c1c1",
       "name": "Build execution summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1420,
-        -120
+        1424,
+        -336
       ]
     },
     {
@@ -1433,13 +1478,13 @@
         },
         "options": {}
       },
-      "id": "189cddfe-2a98-4f44-afa2-4eb6a02f6411",
+      "id": "0e23a2f8-47f7-404f-a0ba-1707d5329648",
       "name": "Send summary?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1700,
-        -120
+        1712,
+        -336
       ]
     },
     {
@@ -1449,42 +1494,42 @@
         "message": "={{ $json.summary }}",
         "options": {}
       },
-      "id": "74150bda-0481-44ff-b20c-4a3b6c8c38df",
+      "id": "cc4ad908-6ed5-4e65-a1be-4c7f1f048690",
       "name": "Gmail — Send summary",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1980,
-        -120
+        1984,
+        -352
       ],
       "webhookId": "98995176-39a9-4f25-a455-2b04b6028036"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'archived',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
+        "jsCode": "const s=$('Prepare invoice register row').item.json;const cfg=$('Carry validated invoice').item.json.config;return {json:{status:'archived',amount:s.amount??0,currency:s.currency||'',config:cfg}};"
       },
-      "id": "64c77e59-0d1e-4a6e-9d15-4f10b59c26f7",
+      "id": "c0787060-b6dc-45f3-930f-750d9f6de3a7",
       "name": "Outcome — archived",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        12340,
-        520
+        12352,
+        272
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'duplicate',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
+        "jsCode": "const s=$('Carry validated invoice').item.json;const cfg=$('Carry validated invoice').item.json.config;return {json:{status:'duplicate',amount:s.amount??0,currency:s.currency||'',config:cfg}};"
       },
-      "id": "4af30ae6-1de0-4074-91e1-a8724f5cc2f3",
+      "id": "874d1374-efaa-463c-994c-9fa3a83903f6",
       "name": "Outcome — duplicate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5340,
-        190
+        5232,
+        16
       ]
     },
     {
@@ -1492,189 +1537,176 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const s=$('Parse & validate invoice').item.json;return {json:{status:'review',amount:s.amount??0,currency:s.currency||'',config:s.config}};"
       },
-      "id": "a7ffec27-a5c7-4a5d-8e51-efb4821f18ca",
+      "id": "3d99e8e0-9c04-4411-a040-0966d194211d",
       "name": "Outcome — review",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5900,
-        950
+        5824,
+        848
       ]
     },
     {
       "parameters": {
-        "content": "# Invoice Processing & Archiving\nAutomate invoice intake from Gmail to Google Drive and Google Sheets, with duplicate checks, review routing and optional enrichment.\n\n### How it works\nPDF attachments are extracted and validated, then checked against the invoice register. New files are organized into Drive folders by year, month and category. Invalid invoices enter a Review Queue. Existing Drive files can be recovered after partial failures. Optional OCR and AI endpoints support difficult PDFs.\n\n### Setup\n1. Connect Gmail, Google Drive and Google Sheets.\n2. Set the Drive folder ID and optional settings in **Configuration**.\n3. Create **Invoices** and **Review Queue** tabs; configure the Sheet ID in all Sheets nodes.\n4. Set optional Gmail label IDs and report recipient.\n5. For OCR/AI, configure endpoint authentication, enable the HTTP nodes and switch on the flags.\n6. Test with sample invoices before activating the schedule.\n\n### Notes\nText-based PDFs work without OCR. Extraction is heuristic; verify amounts and dates. Folder creation and Sheets writes are not transactional. Avoid concurrent runs. No emails are deleted.",
-        "height": 850,
+        "content": "### How it works\nFor teams that archive invoice PDFs and maintain a spreadsheet register. Run from the editor or every six hours. Gmail downloads matching PDFs; a loop processes one attachment at a time. Rules extract and validate invoice fields. Valid invoices are checked against Google Sheets, then archived in Google Drive under year/month/category folders. Missing files are uploaded; existing filenames can be recovered. Invalid documents enter a Review Queue. Source emails are retained.\n\nOCR and AI are optional external integrations, disabled by configuration until you provide endpoints and authentication. They are not bundled services. Rule-based extraction supports text PDFs; supplier layouts may need custom patterns. Drive and Sheets are not transactional: avoid overlapping runs.\n\n### Setup\n1. Connect Gmail, Drive and Sheets OAuth2 credentials. Narrow the Gmail query and review its 90-day lookback.\n2. In **Configuration**, set the Drive root folder ID, currency and categories. Edit parsing rules for your invoices.\n3. Create `Invoices` and `Review Queue` worksheet tabs. Use the exact headers shown in each Sheets write node's column mapping; replace `REPLACE_WITH_SPREADSHEET_ID` in all three Sheets nodes.\n4. Optional: configure Gmail label IDs and a report recipient. For OCR/AI, set HTTPS endpoints, HTTP credentials and `aiModel`, then enable their configuration flags.\n5. Test valid, rejected, duplicate and multi-attachment PDFs. Verify existing/new folders, Drive-file recovery and summary counts before publishing the schedule.\n\n### Customization\nAdjust query, schedule, keyword categories and field patterns. Scanned PDFs need OCR. Unsupported or negative totals require review. Optional reports count completed outcomes; service failures may stop an execution.",
+        "height": 1058,
         "width": 660,
-        "color": 3
+        "color": 1
       },
-      "id": "ecaf055b-b219-472b-8a74-f998c3fa6464",
+      "id": "c98301fd-70cb-4384-9b32-eec7ab03897b",
       "name": "00 — OVERVIEW",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -790,
-        80
+        -864,
+        -496
       ]
     },
     {
       "parameters": {
-        "content": "## Email intake\nRun manually or every six hours. Gmail fetches PDF attachments and processes them individually.",
+        "content": "## Collect PDF attachments\nFetch matching Gmail messages from the last 90 days. Split attachments into linked PDF items; skip other files and reject PDFs over 20 MiB. Configure credentials and narrow the search query.",
         "height": 340,
         "width": 1070,
-        "color": 0
+        "color": 7
       },
-      "id": "d86b2ae2-6408-4ea6-b4a4-3cefb192b2ed",
+      "id": "a11f671f-6604-4006-850d-19ac72a8328b",
       "name": "01 — INTAKE",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -60,
-        300
+        -64,
+        -16
       ]
     },
     {
       "parameters": {
-        "content": "## Extract PDF text\nConfigure categories and limits. OCR is optional and requires an authenticated endpoint.",
-        "height": 760,
+        "content": "## Read each PDF once\nProcess one attachment at a time. Use embedded PDF text, or an optional authenticated OCR endpoint when text is missing. OCR stays off until configured; unreadable documents can enter review.",
+        "height": 600,
         "width": 1710,
-        "color": 0
+        "color": 7
       },
-      "id": "ad8dece3-6098-4800-ba72-2589d5e3e192",
+      "id": "093e0ece-e22a-456f-a16e-29eba3cc4a52",
       "name": "02 — EXTRACTION",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1050,
-        130
+        1040,
+        -96
       ]
     },
     {
       "parameters": {
-        "content": "## Validate invoices\nExtract vendor, invoice number, amount, date and optional due date. AI fallback is opt-in.",
-        "height": 680,
+        "content": "## Validate before archiving\nExtract vendor, invoice number, dates, amount and category. Optional AI can recover missing fields from available text. Both extraction paths use the same date, amount and identity rules.",
+        "height": 600,
         "width": 1690,
-        "color": 0
+        "color": 7
       },
-      "id": "69c85d4a-56d7-4b74-b721-db90b0652798",
+      "id": "84aa1027-e2bf-43d8-b635-eab603e03bd7",
       "name": "03 — VALIDATION",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2770,
-        300
+        2768,
+        -96
       ]
     },
     {
       "parameters": {
-        "content": "## Review queue\nUnrecognized invoices are logged in Sheets. Optional Gmail labels highlight messages needing attention.",
-        "height": 330,
-        "width": 1690,
-        "color": 0
+        "content": "## Keep rejected documents visible\nUpsert invalid documents into Review Queue with a reason and source message ID. Optional Gmail labels mark messages for attention. Source emails are retained.",
+        "height": 538,
+        "width": 1546,
+        "color": 7
       },
-      "id": "b9907d4b-e994-4ed3-8ddd-b7d64a67b8cc",
+      "id": "00843c4f-8143-49c4-a292-5593030c4da7",
       "name": "04 — REVIEW",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4460,
-        1020
+        4480,
+        528
       ]
     },
     {
       "parameters": {
-        "content": "## Duplicate checks\nCheck the invoice register first. Existing records are skipped before uploading.",
-        "height": 650,
-        "width": 850,
-        "color": 0
+        "content": "## Skip registered invoices\nSearch Invoices by vendor/invoice/date key. Preserve the validated record from either rules or AI before the lookup. Registered keys skip Drive operations; unregistered records continue.",
+        "height": 602,
+        "width": 930,
+        "color": 7
       },
-      "id": "8203b502-4575-415e-8153-c17304cebef1",
+      "id": "cfc2c7d2-8372-481f-98cf-a76d1cb4281e",
       "name": "05 — DEDUPLICATION",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4460,
-        60
+        4480,
+        -96
       ]
     },
     {
       "parameters": {
-        "content": "## Organize Drive files\nFind or create year, month and category folders. Existing PDF filenames can be recovered.",
-        "height": 750,
-        "width": 5050,
-        "color": 0
+        "content": "## Resolve the archive destination\nFind exact year, month and category names inside the configured parent; create only missing folders. Searches exclude trash. In the final category folder, look for the exact canonical PDF filename.",
+        "height": 606,
+        "width": 4474,
+        "color": 7
       },
-      "id": "d5bbfb39-5782-44e0-bc79-f931d490873a",
+      "id": "051073e1-bc25-4c91-98ab-06465e4b7960",
       "name": "06 — FOLDERS",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        5330,
-        150
+        5424,
+        -96
       ]
     },
     {
       "parameters": {
-        "content": "## Archive and register\nUpload only missing PDFs, then write metadata to Sheets. Optional Gmail labels mark processed messages.",
-        "height": 750,
-        "width": 2320,
-        "color": 0
+        "content": "## Upload or recover, then register\nReuse an existing PDF or upload the missing binary. Upsert metadata into Invoices, optionally label the Gmail message and record the archived outcome. Drive/Sheets failures can require a rerun.",
+        "height": 606,
+        "width": 2592,
+        "color": 7
       },
-      "id": "8540b9d6-2f2e-4731-bb42-108ece8dc522",
+      "id": "7c3a099b-43ad-47ae-8a7b-cbc05e6fb095",
       "name": "07 — ARCHIVE",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        10400,
-        150
+        9920,
+        -96
       ]
     },
     {
       "parameters": {
-        "content": "## Execution report\nOptional email reports how many PDFs entered the run. Check Sheets for final processing outcomes.",
+        "content": "## Report completed outcomes\nThe loop collects archived, duplicate and review results. One optional email reports these counts and archived totals per currency. Set reportEmail in Configuration; hard service failures can stop the run before reporting.",
         "height": 350,
-        "width": 920,
-        "color": 0
+        "width": 808,
+        "color": 7
       },
-      "id": "bee8f5fd-ebc5-4cde-a98c-f271ba8156e0",
+      "id": "9a00c95b-3cb9-46fb-a03f-cea4fd2145a5",
       "name": "08 — SUMMARY",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1360,
-        -250
+        1376,
+        -464
       ]
     },
     {
       "parameters": {
-        "content": "## Recovery limitation\nDrive and Sheets are not atomic. Filename recovery reduces repeat uploads but does not guarantee exactly-once processing.",
-        "height": 220,
-        "width": 1000,
-        "color": 0
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item=$input.item;if(item.json.status!=='validated'||!item.binary?.data)throw new Error('Missing validated invoice or PDF');return {json:item.json,binary:item.binary};"
       },
-      "id": "ed2f4693-5e7c-492b-bddc-693b0e81ed71",
-      "name": "09 — SAFETY",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "id": "0979ca41-873e-4181-b73e-21a51479ce30",
+      "name": "Carry validated invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        10600,
-        990
+        4336,
+        80
       ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Manual Trigger": {
-      "main": [
-        [
-          {
-            "node": "Gmail — Find invoice PDFs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Schedule Trigger": {
       "main": [
         [
@@ -1825,7 +1857,7 @@
       "main": [
         [
           {
-            "node": "Sheets — Find existing invoice",
+            "node": "Carry validated invoice",
             "type": "main",
             "index": 0
           }
@@ -1883,7 +1915,7 @@
       "main": [
         [
           {
-            "node": "Sheets — Find existing invoice",
+            "node": "Carry validated invoice",
             "type": "main",
             "index": 0
           }
@@ -2418,6 +2450,17 @@
           }
         ]
       ]
+    },
+    "Carry validated invoice": {
+      "main": [
+        [
+          {
+            "node": "Sheets — Find existing invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -2425,6 +2468,5 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "nodeGroups": [],
-  "tags": []
+  "nodeGroups": []
 }

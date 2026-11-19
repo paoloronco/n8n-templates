@@ -1,6 +1,5 @@
 {
   "family": "video-production",
-  "date": "2026-11-18",
   "anonymous": true,
   "active": false,
   "providers": {
@@ -10,20 +9,20 @@
         "sha256": "25c31ca6280055ab8f578337252f6ae2962ca4e213711b1b19593e317b696b37"
       },
       "documentation.md": {
-        "bytes": 4073,
-        "sha256": "210d36cee1a2a2b5e0476eeccd641c5132b05052316ae9a0112753d9ce168286"
+        "bytes": 5216,
+        "sha256": "0410092b7f991c6e7f95f0b86b9b387f9aa4761fa544b260b13e051062afc960"
       },
       "README.md": {
-        "bytes": 4455,
-        "sha256": "4639cde4fee5934df0367f7a10561e50904111b329bb262c4a4ca8b45744b4af"
+        "bytes": 5598,
+        "sha256": "8812e872fefbac46af9725023aa327f05b0350c0452dc297e5236f296dd3f298"
       },
       "thumbnail.png": {
         "bytes": 29340,
         "sha256": "e0cda65bbd756aaff2b4f53ca6e6c2aa6b45740a5b25a6c334f43742b84155d0"
       },
       "workflow.json": {
-        "bytes": 982457,
-        "sha256": "7a5651208aa6c06b2fa269ce71d6c21f43987d65d363777c492fe676bf69c214"
+        "bytes": 982413,
+        "sha256": "7facf363dfaa67498be610e20484a0bb07d2dba9f92034581f7fc689e3d06b81"
       }
     },
     "NextCut": {
@@ -32,21 +31,22 @@
         "sha256": "c4d0586e17ef9305fe408a094add8fd5c0b2f5903db215a48d29462e9a3bad4f"
       },
       "documentation.md": {
-        "bytes": 5849,
-        "sha256": "b1eede119a3a0c545f154400f1f068f1113a206ea61f9d4305c92ab111fb5802"
+        "bytes": 6704,
+        "sha256": "c1560a2aa4fc7a9581edbee30221b63c1f3f318d874c0c173488051fd8380984"
       },
       "README.md": {
-        "bytes": 5867,
-        "sha256": "7ea7c8c3ca1559d213690ad40e11a429c63c48797247c8d7b47cb0d7fe97b862"
+        "bytes": 6722,
+        "sha256": "0b712cee3f4b98b8a4d0bcae82d6b058340574dda004c1bd337c2d0897018e3e"
       },
       "thumbnail.png": {
         "bytes": 27256,
         "sha256": "f504ec96ae103202d947b8d600fb9bf0294d4ae5166043d200201b6b5734db22"
       },
       "workflow.json": {
-        "bytes": 927670,
-        "sha256": "e4767052ca94afe505aec4ec0f7318c076ab60915fdbb146866bee3baf139a55"
+        "bytes": 928122,
+        "sha256": "65397dee9df0fc7489814945193145a7064e95f35fd3352d00e006f64dd39033"
       }
     }
-  }
+  },
+  "revision": "owner-reviewed-canvas"
 }

@@ -56,3 +56,10 @@ Create vertical Reels and Shorts from a structured brief and supplied narration 
 ## Version selection
 
 This is V2 NextCut Free. V1 uses a local worker and has a separate installation. One product download includes both versions. [Provider documentation](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f).
+
+
+## Canvas and template review
+
+This revision contains 146 nodes: 121 operational nodes and 25 sticky notes. The owner-reviewed HeyGen canvas is the layout reference. The overview uses the required How it works and Setup headings; white section notes contain only titles. Common nodes and note frames have identical positions in both providers. Provider rendering, recovery, authentication, audio-input and output-resolution contracts remain intact. Workflow JSON contains no selected personal credential IDs, owner workflow/instance metadata, personal support links, owner branding or production-content examples. Third-party bundled licenses are retained.
+
+The read-only Free-account check has its own compact horizontal section below the common canvas. It does not generate a video. No NextCut Creator Portal submission is recorded for this revision.

@@ -54,3 +54,10 @@ Create vertical Reels and Shorts from a structured brief and supplied narration 
 
 
 Read the linked provider guide for complete setup and recovery. No local renderer is required for V2. Set up your own brand, scenes and licensed media; templates contain no owner production videos or account credentials.
+
+
+## Canvas and template review
+
+This revision contains 146 nodes: 121 operational nodes and 25 sticky notes. The owner-reviewed HeyGen canvas is the layout reference. The overview uses the required How it works and Setup headings; white section notes contain only titles. Common nodes and note frames have identical positions in both providers. Provider rendering, recovery, authentication, audio-input and output-resolution contracts remain intact. Workflow JSON contains no selected personal credential IDs, owner workflow/instance metadata, personal support links, owner branding or production-content examples. Third-party bundled licenses are retained.
+
+The read-only Free-account check has its own compact horizontal section below the common canvas. It does not generate a video. No NextCut Creator Portal submission is recorded for this revision.

@@ -56,7 +56,9 @@ This workflow reviews weekly OrbitPage analytics, sends a measured report, and o
 
 This workflow requires a data table initialized with six string columns and a single control row, as described below. It strictly validates workspace content consistency and requires manual reconciliation if a journal is pending. The workflow sends weekly analytics reports and supports a double email approval process for one exact AI-generated CTA title improvement. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Full technical documentation: https://github.com/paoloronco/n8n-templates/tree/main/workflows/orbitpage/orbitpage-analytics-improvement#readme
+Full technical documentation: [OrbitPage Analytics Improvement — Notion](https://paoloronco.notion.site/OrbitPage-Analytics-Improvement-40df0ba27c32816dbcf8f7dd4c97e95d).
+
+The README below is the concise import and journal reference. The Notion guide covers service setup, testing, operations and customization.
 
 ## Download and import
 

@@ -10,6 +10,13 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 ## Template catalog
 
+### Importing a workflow
+
+1. Open the relevant template folder and read its README.
+2. Download the applicable workflow JSON (free templates) or obtain the paid package through its linked distribution channel.
+3. Import the JSON into n8n and configure credentials, endpoints and environment-specific values.
+4. Test manually before activating production triggers.
+
 Browse by topic. Each workflow name opens its GitHub folder; the remaining columns link to its n8n Creators listing, Gumroad package and setup guide.
 
 - [Social media and video](#social-media-and-video)
@@ -80,13 +87,6 @@ Page content, campaign launches, event updates and release checks. Browse the [O
 | [Update an OrbitPage Event Before, During and After](./workflows/orbitpage/orbitpage-event-lifecycle/) | Publish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR. | [View](https://n8n.io/workflows/22354-publish-phased-orbitpage-event-pages-with-email-approvals-and-data-tables/) | [View](https://paoloronco.gumroad.com/l/orbitpage-event-lifecycle) | [Guide](./workflows/orbitpage/orbitpage-event-lifecycle/README.md) |
 | [Build an OrbitPage Campaign Page with Ad Copy, UTM Links and QR](./workflows/orbitpage/orbitpage-campaign-launch-kit/) | Review one offer, publish its campaign subpage, verify the result and deliver matching ad copy, UTM links and a local QR. | [View](https://n8n.io/workflows/22355-publish-orbitpage-campaign-pages-with-email-approvals-and-qr-launch-kits/) | [View](https://paoloronco.gumroad.com/l/orbitpage-campaign-launch-kit) | [Guide](./workflows/orbitpage/orbitpage-campaign-launch-kit/README.md) |
 | [Review OrbitPage Analytics and Approve One CTA Improvement](./workflows/orbitpage/orbitpage-analytics-improvement/) | Send a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement. | [View](https://n8n.io/workflows/22356-send-weekly-orbitpage-analytics-reports-and-review-one-ai-cta-change-via-email/) | [View](https://paoloronco.gumroad.com/l/orbitpage-analytics-improvement) | [Guide](./workflows/orbitpage/orbitpage-analytics-improvement/README.md) |
-
-## Importing a workflow
-
-1. Open the relevant template folder and read its README.
-2. Download the applicable workflow JSON (free templates) or obtain the paid package through its linked distribution channel.
-3. Import the JSON into n8n and configure credentials, endpoints and environment-specific values.
-4. Test manually before activating production triggers.
 
 ## Professional services
 

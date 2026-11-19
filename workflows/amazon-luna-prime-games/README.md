@@ -53,7 +53,7 @@ Automatically fetch Amazon Luna games included with Prime, detect newly added ti
 
 ## Additional Info
 
-- [Full deployment guide](https://paoloronco.it/amazon-luna-fetch-included-with-prime-games/)
+- [Full deployment guide](https://paoloronco.it/writing/amazon-luna-fetch-included-with-prime-games)
 - Additional technical notes are available in the `docs/` directory.
 - Amazon may change Luna endpoints or request requirements; review the request configuration if fetching stops working.
 - Amazon data remains subject to Amazon's applicable terms and policies.

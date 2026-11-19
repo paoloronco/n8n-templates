@@ -1,6 +1,6 @@
 # 03 — Setup the n8n Workflow (V3)
 
-[Full Notion documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+[Full Notion documentation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V3/README.md)
 
 ## 1. Import and authentication
 Import [V3 JSON](../workflow/Online_Menu-Push_Notifications-Home_Assistant_TTS-BAC_Calculation-V3.json) as an inactive workflow. Configure the Webhook **Header Auth** credential and your frontend to send the matching header.

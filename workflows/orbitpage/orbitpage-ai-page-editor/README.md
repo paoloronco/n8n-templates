@@ -1,5 +1,9 @@
 # OrbitPage AI Page Editor — Review and Publish Page Changes from Chat
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41df0ba27c3281e8ae76c3b10b4e35a3)
+
 ## Quick overview
 
 Chat with an AI page editor to inspect your OrbitPage workspace, understand your current page, and prepare validated edits. Review each proposal directly in n8n Chat, then approve publication or reject it. The workflow applies approved changes and retrieves the resulting publication status.

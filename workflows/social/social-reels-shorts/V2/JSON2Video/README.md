@@ -1,5 +1,10 @@
 # Instagram Reels and YouTube Shorts — V2 JSON2Video
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c3281ab945ee3521ce3faa4)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-reels-shorts/V2/JSON2Video/documentation.md)
+
 ### Quick Overview
 
 Create and independently review English copy, then render 1080 × 1920 (9:16), narrated vertical MP4 plus cover and caption using JSON2Video. No local Social Studio, SSH, Python or FFmpeg worker is required. This is an inactive template with generation and publishing disabled.

@@ -1,4 +1,8 @@
 # OrbitPage Event Lifecycle
+
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/40df0ba27c32810d8540d623db4e082b)
 ## Quick overview
 This workflow manages the lifecycle of an OrbitPage event by approving event plans, publishing event phases before, during, and after the event, and maintaining a durable journal and stable URL with QR code.
 ## How it works

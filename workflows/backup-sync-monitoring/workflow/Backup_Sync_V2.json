@@ -275,7 +275,7 @@
     },
     {
       "parameters": {
-        "content": "## Reliable Backup & Sync Execution Validation (Log-Driven)\n\nMonitor backup/sync logs stored in GCS. Compare expected jobs from GitHub, validate execution markers and send deterministic or AI alerts.\n\n### Setup\nConfigure GCS bucket and host, GitHub manifest, Gmail recipients, OpenAI credentials and scheduling. Test before activation.\n\n### Documentation\n[Complete Setup Guide](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)\n\n### Professional Services & Consulting\nFor professional consulting, tailored solutions, or collaboration opportunities, feel free to get in touch.\n\n**Email:** info@paoloronco.it  \n**Website:** https://paoloronco.it",
+        "content": "## Reliable Backup & Sync Execution Validation (Log-Driven)\n\nMonitor backup/sync logs stored in GCS. Compare expected jobs from GitHub, validate execution markers and send deterministic or AI alerts.\n\n### Setup\nConfigure GCS bucket and host, GitHub manifest, Gmail recipients, OpenAI credentials and scheduling. Test before activation.\n\n### Documentation\n\n### Professional Services & Consulting\nFor professional consulting, tailored solutions, or collaboration opportunities, feel free to get in touch.\n\n**Email:** info@paoloronco.it  \n**Website:** https://paoloronco.it\n\n## Additional info\n\n- [Full Notion documentation](https://paoloronco.notion.site/403f0ba27c3280179a84fb206e06481a)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/backup-sync-monitoring/README.md)",
         "height": 468,
         "width": 608
       },

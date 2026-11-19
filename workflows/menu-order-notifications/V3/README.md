@@ -36,7 +36,7 @@ Receive menu orders through an authenticated n8n webhook, prevent duplicate proc
 The [static website mockup](./website-mockup/) includes a customer-facing menu, browser-based admin editor and sample menu data. It is a demonstration frontend: see its README for V3 authentication, stable order IDs and security limitations.
 
 ## Documentation
-- [Full setup guide (Notion)](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+- [Full setup guide (Notion)](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V3/README.md)
 - [n8n Creators listing](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 - [Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 

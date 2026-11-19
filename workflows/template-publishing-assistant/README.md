@@ -42,4 +42,4 @@ This workflow assists in preparing and publishing n8n workflow templates by sani
 
 This workflow automates multiple stages of n8n template publishing but requires manual review of sanitized workflows and generated documentation before final use. Sticky notes regeneration depends on the uploaded workflow's node data integrity. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Full technical documentation: https://app.notion.com/p/Template-Publishing-Assistant-v6-409f0ba27c3281ca947efce6f8e70ca4
+Full technical documentation: https://paoloronco.notion.site/409f0ba27c3281ca947efce6f8e70ca4

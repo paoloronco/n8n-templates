@@ -25,4 +25,4 @@ Serve this folder with any static HTTP server (for example, `python -m http.serv
 - The admin editor uses a default `admin` password stored as a hash in browser localStorage. **This is not server-side authentication.** Do not expose the admin page publicly as an administrative security boundary.
 - A menu-save webhook, if configured in the admin editor, is a separate workflow/service and is **not included** in V3.
 
-See the [V3 README](../README.md) and [full setup documentation](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55) for the n8n side.
+See the [V3 README](../README.md) and [full setup documentation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V3/README.md) for the n8n side.

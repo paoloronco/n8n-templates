@@ -2,7 +2,7 @@
 
 [Workflow JSON](./Google%20Cloud%20Inventory%20%26%20Change%20Audit.json)
 
-**Full documentation:** [Google Cloud Inventory & Change Audit — Notion](https://www.notion.so/402f0ba27c32801ba303f2549dbe9fa2)
+**Full documentation:** [Google Cloud Inventory & Change Audit — Notion](https://paoloronco.notion.site/402f0ba27c32801ba303f2549dbe9fa2)
 
 > **Need help deploying this workflow?** For managed setup, Google Cloud IAM and BigQuery configuration, troubleshooting, or consulting, contact [info@paoloronco.it](mailto:info@paoloronco.it) or visit [paoloronco.it](https://paoloronco.it).
 

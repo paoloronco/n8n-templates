@@ -48,7 +48,7 @@ API usage and email delivery may incur provider charges.
 ## Links
 
 - [Repository overview](../../README.md)
-- [Original deployment guide](https://paoloronco.it/n8n-template-rss-tech-news-to-your-inbox/) (may describe an earlier version)
+- [Original deployment guide](https://paoloronco.it/writing/n8n-template-rss-tech-news-to-your-inbox) (may describe an earlier version)
 - [n8n Creator profile](https://n8n.io/creators/paoloronco/)
 
 ## Additional info

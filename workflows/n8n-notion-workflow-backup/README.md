@@ -1,5 +1,9 @@
 # n8n Workflow Backup to Notion
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41af0ba27c32814d800cc4582aa68c04)
+
 Maintain a Notion catalog of active, inactive and archived n8n workflows. Each page contains an English README and one complete JSON attachment. The sync verifies saved content, preserves personal notes and reports incomplete backups as failures.
 
 ## How it works

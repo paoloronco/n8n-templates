@@ -1,5 +1,10 @@
 # Menu Order Push Notifications with ntfy and Home Assistant TTS
 
+## Documentation links
+
+- [n8n configuration for V2](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V2/docs/03-setup-n8n-workflow.md)
+- [Home Assistant TTS setup for V2](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V2/docs/04-setup-homeassistant-tts.md)
+
 ## Quick Overview
 
 Receive online menu orders through n8n, send push notifications with ntfy, log orders in an n8n Data Table, and announce new orders through Home Assistant TTS on a connected speaker.
@@ -50,7 +55,7 @@ Receive online menu orders through n8n, send push notifications with ntfy, log o
 
 ## Links
 
-- **Documentation:** [Setup guide](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+- **Documentation:** [Setup guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V2/README.md)
 
 - **n8n Creator:** Not Published
 - **Gumroad:** Not Published

@@ -57,5 +57,5 @@ Create personalized digital certificates through an n8n webhook, generate unique
 ## Additional Info
 
 - [Example certificate](./assets/Example-Certificate.pdf)
-- [Project guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
+- [Project guide](https://paoloronco.it/writing/n8n-template-certification-creator-checker)
 - Review authentication, abuse prevention, exposed personal data, and webhook security before production use.

@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "content": "# Collecting the news",
+        "content": "# Collecting the news\n\n## Additional info\n\n- [Full Notion documentation](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/ai-instagram-publishing/README.md)",
         "height": 288,
         "width": 464
       },

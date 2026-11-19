@@ -4,7 +4,7 @@ This workflow combines intent classification, safety routing, vector search with
 
 ## Project Links
 
-- [Documentation — Notion](https://paoloronco.notion.site/Website-AI-Chatbot-404f0ba27c32807bad10d69e95ef3179?pvs=73)
+- [Documentation — Notion](https://paoloronco.notion.site/404f0ba27c32807bad10d69e95ef3179)
 - [n8n Creators — Workflow](https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/)
 - [Gumroad — Website AI Chatbot](https://paoloronco.gumroad.com/l/ai-website-chatbot)
 

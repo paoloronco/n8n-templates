@@ -1,5 +1,10 @@
 # Google Cloud Inventory and IAM Audit — V2
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/408f0ba27c3281aea226fecadfab05f8)
+- [Complete configuration and IAM setup](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V2/SETUP.md)
+
 Revision 2.2.1. Explicit project inventory with five Google Sheets tabs.
 
 Collect Google Cloud inventory and visible IAM policies, retain complete snapshots and changes in BigQuery, review governance findings in Google Sheets, and download HTML/CSV reports. Optional email reports substantive additions and removals while suppressing routine lifecycle records and confirmed Google-managed key rotations.

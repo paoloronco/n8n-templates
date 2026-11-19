@@ -1,4 +1,8 @@
 # OrbitPage Campaign Launch Kit
+
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/40df0ba27c3281949701f8bff66e8bae)
 ## Quick overview
 This workflow builds an OrbitPage campaign subpage from a submitted campaign brief, generates ad copy with UTM links and a local QR code, manages email approval, publishes the approved campaign page, verifies the publication, and delivers the launch package.
 ## How it works

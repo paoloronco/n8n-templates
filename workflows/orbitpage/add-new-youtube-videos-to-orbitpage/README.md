@@ -22,7 +22,7 @@ Add new public YouTube videos to your OrbitPage as native video cards with a cov
 4. For `EMAIL_APPROVAL`, select SMTP on `Email approval — Approva or Rifiuta` and set `FROM_EMAIL` and `APPROVAL_EMAIL` to authorized addresses.
 5. Run `Manual check or replay` with `MANUAL_VIDEO_ID` empty to establish the baseline; confirm its result and registry.
 6. To test without a new upload, replay a recent feed video using `MANUAL_VIDEO_ID`; check approve, decline and duplicate behavior with separate videos, then clear the field.
-7. Confirm the page's YouTube consent configuration, inspect the public player, then publish the workflow to enable its schedule. Follow the [technical guide](https://github.com/paoloronco/n8n-templates/blob/8ac0080/free-templates/orbitpage-smart-bio-youtube/GUIDE.md) for the full test procedure.
+7. Confirm the page's YouTube consent configuration, inspect the public player, then publish the workflow to enable its schedule. Follow the [technical guide](https://paoloronco.notion.site/40df0ba27c3281b0ab62de488a03cb0a) for the full test procedure.
 
 ## Requirements
 

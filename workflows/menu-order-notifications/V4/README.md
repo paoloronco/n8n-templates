@@ -63,7 +63,7 @@ Use the **same** `orderId` for retries of one order.
 
 ## Documentation
 
-- [Full setup, architecture and troubleshooting — Notion](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-849f0ba27c32836e844101b86f496c55)
+- [Full setup, architecture and troubleshooting — Notion](https://paoloronco.notion.site/849f0ba27c32836e844101b86f496c55)
 - [Shared ntfy setup](../docs/01-setup-ntfy.md)
 - [Shared Cloudflare Tunnel setup](../docs/02-setup-cloudflare-tunnel.md)
 - [Previous V3 release](../V3/README.md)

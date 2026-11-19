@@ -1229,7 +1229,7 @@
         -128
       ],
       "parameters": {
-        "content": "# Social — provider templates\n\nNative n8n journal, rendering and file verification for Shotstack and JSON2Video.\n\nKeep templates inactive. Generation and publishing start disabled. No local worker, SSH or local renderer.\n\nShotstack uses the verified native node and a configured Sandbox credential. JSON2Video requires Header Auth `x-api-key`.\n\nSpeech uses each provider’s native scene timing. No artificial subtitle timestamps are produced.",
+        "content": "# Social — provider templates\n\nNative n8n journal, rendering and file verification for Shotstack and JSON2Video.\n\nKeep templates inactive. Generation and publishing start disabled. No local worker, SSH or local renderer.\n\nShotstack uses the verified native node and a configured Sandbox credential. JSON2Video requires Header Auth `x-api-key`.\n\nSpeech uses each provider’s native scene timing. No artificial subtitle timestamps are produced.\n\n## Additional info\n\n- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c3281a89696c3c0585159af)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-posts-carousels/V2/JSON2Video/README.md)\n- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-posts-carousels/V2/JSON2Video/documentation.md)",
         "width": 720,
         "height": 992,
         "color": 2

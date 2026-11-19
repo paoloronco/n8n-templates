@@ -45,7 +45,7 @@ Receive orders from an online menu through an n8n webhook, send real-time push n
 
 ## Links
 
-- **Documentation:** [Setup guide](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-48bf0ba27c3282fcb5e50148e52fb8cd)
+- **Documentation:** [Setup guide](https://paoloronco.notion.site/48bf0ba27c3282fcb5e50148e52fb8cd)
 
 - **n8n Creator:** Not Published
 - **Gumroad:** Not Published

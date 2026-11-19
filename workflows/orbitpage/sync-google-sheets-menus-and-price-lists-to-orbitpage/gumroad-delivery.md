@@ -36,4 +36,4 @@ Created by [Paolo Ronco](https://paoloronco.it).
 
 ## Complete Documentation
 
-[Read the full setup and technical guide](https://app.notion.com/p/Sync-Google-Sheets-Menus-and-Price-Lists-to-OrbitPage-409f0ba27c3281adaf97c84b96825cf3)
+[Read the full setup and technical guide](https://paoloronco.notion.site/409f0ba27c3281adaf97c84b96825cf3)

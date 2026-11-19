@@ -55,4 +55,4 @@ This workflow synchronizes menu items and price lists from a Google Sheets docum
 
 This workflow synchronizes a single OrbitPage native menu section with data from a Google Sheet, preserving all other page content and menu sections. It supports modes for sample testing, preview without writes, and email-based approval workflows with configurable timeouts. Deletion actions require explicit approval and configuration. The workflow enforces limits on the number of menu items and sections and requires a compatible OrbitPage plan and properly configured credentials. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Full technical documentation: https://app.notion.com/p/Sync-Google-Sheets-Menus-and-Price-Lists-to-OrbitPage-409f0ba27c3281adaf97c84b96825cf3
+Full technical documentation: https://paoloronco.notion.site/409f0ba27c3281adaf97c84b96825cf3

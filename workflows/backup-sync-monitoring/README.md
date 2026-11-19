@@ -52,7 +52,7 @@ Monitor backup and synchronization jobs through execution logs stored in Google 
 
 This workflow **monitors backup and sync executions; it does not run the backup jobs**. The included configuration expects logs in GCS and uses Gmail for notifications, including AI findings. The GitHub manifest and the log naming convention must match your environment. Weekly and monthly checks follow the workflow's implemented scheduling assumptions rather than a general-purpose cron interpreter.
 
-**[Complete Setup Guide & Technical Documentation](https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a)**
+**[Complete Setup Guide & Technical Documentation](https://paoloronco.notion.site/403f0ba27c3280179a84fb206e06481a)**
 
 
 ### Project Links

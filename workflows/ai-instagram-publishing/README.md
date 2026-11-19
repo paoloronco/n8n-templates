@@ -5,7 +5,7 @@
 ## Links
 
 - **Workflow JSON:** [Download and import](./RSS_AInews-socialPublishing_template.json)
-- **Documentation (Notion):** [Setup guide](https://paoloronco.notion.site/Documentation-n8n-RSS-AI-Instagram-Publishing-3f5f0ba27c32806ba425f7d84c72961a?pvs=74)
+- **Documentation (Notion):** [Setup guide](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)
 - **n8n Creator:** [View template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 

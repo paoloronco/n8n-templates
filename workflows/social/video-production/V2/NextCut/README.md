@@ -1,5 +1,10 @@
 # Create and Publish Reels & Shorts with NextCut and Dropbox
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41bf0ba27c3281b5a38fe146d963960f)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/NextCut/documentation.md)
+
 ## Quick overview
 
 Create vertical Reels and Shorts from a structured brief and supplied narration using NextCut. Verify each MP4, optionally archive it to Dropbox, and schedule Instagram or YouTube delivery. Keep job checkpoints and publishing receipts to recover interruptions without generating or uploading duplicates.

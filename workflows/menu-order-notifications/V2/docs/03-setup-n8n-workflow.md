@@ -1,6 +1,6 @@
 # Setup the n8n Workflow
 
-📖 **Full documentation:** [Notion](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
+📖 **Full documentation:** [Notion](https://paoloronco.notion.site/32ff0ba27c328073a168ff501c9cf33a)
 
 ---
 
@@ -37,7 +37,7 @@ Your Menu Website
    - **Name (header):** `Authorization`
    - **Value:** `Bearer YOUR_NTFY_TOKEN`
 
-> The token is generated with `docker exec ntfy ntfy token add admin` (see [Setup ntfy](01-setup-ntfy.md)).
+> The token is generated with `docker exec ntfy ntfy token add admin` (see [Setup ntfy](../../docs/01-setup-ntfy.md)).
 
 ---
 

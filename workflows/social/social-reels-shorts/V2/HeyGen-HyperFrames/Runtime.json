@@ -1351,7 +1351,7 @@
         -128
       ],
       "parameters": {
-        "content": "# Social — Cloud Runtime\n\nNative sub-workflow shared by Social Posts and Social Reels. It replaces the former local Studio service.\n\n### How it works\n1. Load the shared journal.\n2. Validate and conditionally commit the operation.\n3. Call the selected cloud renderer or deliver a verified file.\n\n### Setup\nSelect HeyGen Header Auth (`x-api-key`) and Creatomate Header Auth (`Authorization: Bearer …`). Keep parent generation and publishing disabled until ready.\n\nNo schedule, public webhook or local worker is defined here.",
+        "content": "# Social — Cloud Runtime\n\nNative sub-workflow shared by Social Posts and Social Reels. It replaces the former local Studio service.\n\n### How it works\n1. Load the shared journal.\n2. Validate and conditionally commit the operation.\n3. Call the selected cloud renderer or deliver a verified file.\n\n### Setup\nSelect HeyGen Header Auth (`x-api-key`) and Creatomate Header Auth (`Authorization: Bearer …`). Keep parent generation and publishing disabled until ready.\n\nNo schedule, public webhook or local worker is defined here.\n\n## Additional info\n\n- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c32819ea2a5d70400693892)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-reels-shorts/V2/HeyGen-HyperFrames/README.md)\n- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-reels-shorts/V2/HeyGen-HyperFrames/documentation.md)",
         "width": 720,
         "height": 832,
         "color": 2

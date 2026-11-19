@@ -51,7 +51,7 @@ Capture and organize content from Telegram messages including Instagram Reels, T
 
 This workflow processes only the first link per Telegram message and supports images under 10 MB. It requires replacing placeholder IDs with your own Telegram user ID and Notion database ID. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Full technical documentation: https://paoloronco.notion.site/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998
+Full technical documentation: https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v3/README.md
 
 ## Gumroad product details
 
@@ -61,6 +61,6 @@ Full technical documentation: https://paoloronco.notion.site/Telegram-Multimodal
 | Outputs and validation | Review the workflow execution and verify the expected destination data manually before publication. |
 | Limitations and troubleshooting | Requires correct credentials and configuration; inspect n8n execution errors when a run fails. |
 | What you receive | n8n workflow template; Setup and configuration guide |
-| Additional Details | This workflow processes only the first link per Telegram message and supports images under 10 MB. It requires replacing placeholder IDs with your own Telegram user ID and Notion database ID. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it. Full documentation: https://paoloronco.notion.site/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998 |
+| Additional Details | This workflow processes only the first link per Telegram message and supports images under 10 MB. It requires replacing placeholder IDs with your own Telegram user ID and Notion database ID. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it. Full documentation: https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v3/README.md |
 | Call to action | Use this workflow to capture and organize your Telegram content efficiently into Notion. |
 | Tags | n8n; Telegram; Notion; Second Brain; AI; Automation; Instagram; TikTok; Webpage; Workflow |

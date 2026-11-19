@@ -53,7 +53,7 @@ Turn Telegram messages into an organized Notion knowledge inbox. Capture Instagr
 - **Tasks:** Suggested next steps are labeled as suggestions, not commitments. No persistent deduplication is implemented.
 - **Reliability:** The bot confirms a successful save only after Notion returns a page ID. External services can fail or incur charges.
 
-**Full technical documentation:** [Notion — Telegram Second Brain](https://app.notion.com/p/Telegram-Multimodal-to-Notion-Second-Brain-40af0ba27c3281a79305de5bb8005998)
+**Full technical documentation:** [Notion — Telegram Second Brain](https://paoloronco.notion.site/404f0ba27c3281e1b7e0cd5159fb6bc7)
 
 **Support and customization:** [paoloronco.it](https://paoloronco.it) · [info@paoloronco.it](mailto:info@paoloronco.it)
 **Version:** V4. This importable workflow has been sanitized: personal user IDs, Notion identifiers, credential references, webhook IDs, and instance-specific metadata have been removed or replaced with placeholders.

@@ -1,5 +1,10 @@
 # Instagram Reels and YouTube Shorts — V1 Local Worker
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c3281aaac4ccce0f0929ee4)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-reels-shorts/V1/documentation.md)
+
 ### Quick Overview
 
 The preserved original template orchestrates AI writing/review, local Social Studio rendering and optional gated social delivery. A workflow import alone cannot install its companion worker.

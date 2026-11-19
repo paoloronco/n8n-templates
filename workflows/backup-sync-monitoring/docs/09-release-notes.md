@@ -10,4 +10,4 @@ The V2 has no embedded n8n credential objects and uses placeholders for bucket, 
 
 The workflow's monthly schedule assumptions, timezone handling and provider-specific log formats should be reviewed for each deployment.
 
-Online documentation: https://paoloronco.notion.site/Documentation-Reliable-Backup-Sync-Execution-Validation-Log-Driven-403f0ba27c3280179a84fb206e06481a
+Online documentation: https://paoloronco.notion.site/403f0ba27c3280179a84fb206e06481a

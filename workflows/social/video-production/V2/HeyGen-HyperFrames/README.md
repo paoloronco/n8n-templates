@@ -1,5 +1,10 @@
 # Create and Publish Reels & Shorts with HeyGen and Dropbox
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c3281129b90cecd2134fc53)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/HeyGen-HyperFrames/documentation.md)
+
 ## Quick overview
 
 Turn a brief into narrated Instagram Reels and YouTube Shorts with HeyGen, optionally archive the MP4 in Dropbox, and publish on schedule. One n8n workflow handles validation and recovery, reducing manual work without installing a video renderer on your server.

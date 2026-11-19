@@ -1,5 +1,10 @@
 # Local video production, draft approval and publishing
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c32816a8f5afafed8269368)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/documentation.md)
+
 Create narrated vertical videos locally from your own brief and images, review the exact MP4, then deliver approved versions through n8n to Instagram Reels and/or YouTube. This version includes the complete companion runtime: durable SQLite backend, offline speech, four HyperFrames layouts, loopback intake/review gallery, verified file upload and per-channel recovery.
 
 The interface, examples and documentation are in English. New drafts default to US English narration; historical approved media and receipts retain their original content.
@@ -37,7 +42,7 @@ The [cloud editions](../V2/README.md) have their own setup, provider requirement
 
 ## Documentation
 
-[Complete V1 setup, node map and recovery guide](https://www.notion.so/41cf0ba27c32816a8f5afafed8269368).
+[Complete V1 setup, node map and recovery guide](https://paoloronco.notion.site/41cf0ba27c32816a8f5afafed8269368).
 
 ## Requirements and setup
 

@@ -15,7 +15,7 @@ V4 beta is not included in this release. Each published GitHub version contains 
 - **n8n Creator:** [Original template](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/)
 - **Gumroad:** [Automated Invoice Archiving](https://paoloronco.gumroad.com/l/invoice-archiving)
 - **YouTube:** [Workflow walkthrough](https://youtu.be/0s-95L8cmyE)
-- **Setup article:** [paoloronco.it](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
+- **Setup article:** [paoloronco.it](https://paoloronco.it/writing/n8n-template-automated-invoice-archiving)
 
 ## V3 behavior
 

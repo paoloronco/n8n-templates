@@ -1,6 +1,6 @@
 # Setup Home Assistant TTS
 
-📖 **Full documentation:** [Notion](https://paoloronco.notion.site/Documentation-Menu-Order-Push-Notifications-Home-Assistant-TTS-32ff0ba27c328073a168ff501c9cf33a)
+📖 **Full documentation:** [Notion](https://paoloronco.notion.site/32ff0ba27c328073a168ff501c9cf33a)
 
 This guide configures **Home Assistant** to announce orders aloud on a Google Home (or any Google Cast device) when n8n calls it.
 

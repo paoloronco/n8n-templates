@@ -26,7 +26,7 @@ Turn useful Instagram Reels into searchable Notion knowledge. Send a public Reel
 - **Database properties:** Configure `Titolo` (Title), `Stato` (Status), `Tipo` (Select), `Categoria` (Select), `Fonte` (URL), and `Data` (Date), or adapt the mappings to your own schema.
 - **Default values:** The template expects `Stato` = `Da smistare`, `Tipo` = `Instagram`, and categories `AI`, `Cyber`, `Tech`, or `Lifestyle`. Ensure these options exist or change the mappings and parser.
 - **Activate and test:** Re-select all imported credentials, ensure no competing active workflow uses the same Telegram bot webhook, send a public Reel URL, and verify the Telegram response and Notion page.
-- **Detailed guide:** See the [complete setup documentation](https://paoloronco.notion.site/Documentation-Instagram-Reel-to-Notion-Second-Brain-404f0ba27c3281e1b7e0cd5159fb6bc7).
+- **Detailed guide:** See the [complete setup documentation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v2/README.md).
 
 ## Requirements
 
@@ -63,7 +63,7 @@ Turn useful Instagram Reels into searchable Notion knowledge. Send a public Reel
 - **OpenAI and Notion troubleshooting:** Check model access, structured output schema, integration permissions, database ID, property types, and Expression mode.
 - **Telegram formatting:** Check HTML parse mode and escaping of reserved characters if a reply fails.
 - **Security:** Store secrets in n8n credentials and replace personal IDs, database IDs, and credential references before distributing the workflow.
-- **Documentation:** [Full setup and troubleshooting guide](https://paoloronco.notion.site/Documentation-Instagram-Reel-to-Notion-Second-Brain-404f0ba27c3281e1b7e0cd5159fb6bc7).
+- **Documentation:** [Full setup and troubleshooting guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v2/README.md).
 - **Source code and creator:** [n8n templates repository](https://github.com/paoloronco/n8n-templates) and [n8n Creator profile](https://n8n.io/creators/paoloronco/).
 - **Attribution:** Adapted from an existing n8n Creator template for creator-focused Reel analysis. Credit the original author and listing once verified.
 - **Potential extensions:** Deduplication, video-frame analysis, external link verification, and additional content sources are not included in this release.

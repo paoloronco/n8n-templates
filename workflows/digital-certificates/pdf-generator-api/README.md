@@ -58,7 +58,7 @@ Issue and verify digital certificates with n8n using reusable PDF Generator API 
 ## Additional Info
 
 - [Example certificate](./assets/Example-Certificate.pdf)
-- [Full deployment guide](https://paoloronco.it/n8n-template-certification-creator-checker/)
+- [Full deployment guide](https://paoloronco.it/writing/n8n-template-certification-creator-checker)
 - [PDF Generator API](https://pdfgeneratorapi.com/)
 - The reusable PDF template is included under `PDFgeneratorAPI-Template/`.
 - Keep template placeholder names synchronized with the JSON keys sent by the workflow.

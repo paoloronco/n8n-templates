@@ -6,7 +6,7 @@ Thank you for downloading this workflow! Inventory resources across one or multi
 
 Download the workflow JSON attached to this page, then use these resources to set up your installation:
 
-- [Step-by-step setup guide](https://paoloronco.notion.site/Setup-Configuration-408f0ba27c3281159afbf589df96e399) — service accounts, APIs, permissions, n8n credentials, configuration and troubleshooting.
+- [Step-by-step setup guide](https://paoloronco.notion.site/408f0ba27c3281159afbf589df96e399) — service accounts, APIs, permissions, n8n credentials, configuration and troubleshooting.
 - [Make a copy of the Google Sheets dashboard](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy) — create your own editable copy of the model, which contains synthetic example data.
 - [GitHub source and README](https://github.com/paoloronco/n8n-templates/tree/main/workflows/google-cloud-inventory/V2) — workflow source files, README and updates.
 

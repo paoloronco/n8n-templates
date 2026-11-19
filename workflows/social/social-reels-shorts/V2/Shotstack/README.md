@@ -1,5 +1,10 @@
 # Instagram Reels and YouTube Shorts — V2 Shotstack Sandbox
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c328157b625de8de20ed542)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-reels-shorts/V2/Shotstack/documentation.md)
+
 ### Quick Overview
 
 Create and independently review English copy, then render 1080 × 1920 (9:16), narrated vertical MP4 plus cover and caption using Shotstack Sandbox. No local Social Studio, SSH, Python or FFmpeg worker is required. This is an inactive template with generation and publishing disabled.

@@ -1,5 +1,10 @@
 # Instagram Posts and Carousels — V2 Creatomate Cloud
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c32815db0d0e288e8c50416)
+- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-posts-carousels/V2/Creatomate/documentation.md)
+
 ### Quick Overview
 
 Create and independently review English copy, then render 1080 × 1350 (4:5), single musical MP4 or four-part video carousel using Creatomate Cloud. No local Social Studio, SSH, Python or FFmpeg worker is required. This is an inactive template with generation and publishing disabled.

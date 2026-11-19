@@ -1,5 +1,9 @@
 # Google Cloud Inventory and IAM Audit — V3
 
+## Documentation links
+
+- [Setup and operations for this version](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/SETUP.md)
+
 Revision 3.0.1. Accessible-project discovery, native metadata collectors and eight Google Sheets tabs.
 
 Collect Google Cloud inventory and visible IAM policies, retain complete snapshots and changes in BigQuery, review governance findings in Google Sheets, and download HTML/CSV reports. Optional email reports substantive additions and removals while suppressing routine lifecycle records and confirmed Google-managed key rotations.

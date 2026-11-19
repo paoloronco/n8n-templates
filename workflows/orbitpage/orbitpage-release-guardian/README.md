@@ -1,5 +1,9 @@
 # OrbitPage Release Guardian — Monitor, Approve and Roll Back Website Releases
 
+## Documentation links
+
+- [Full Notion documentation](https://paoloronco.notion.site/41df0ba27c328198b8d8d9e943b6bf8a)
+
 ## Quick overview
 
 Monitor OrbitPage revisions, compare changes with the last verified release, and check the live website after publication. Optionally approve private drafts by email. If a published page fails its HTTP check, request human approval before restoring an available earlier revision.

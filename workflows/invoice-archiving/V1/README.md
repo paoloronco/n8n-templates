@@ -59,7 +59,7 @@ Automatically collect invoice PDFs from Gmail, archive them in Google Drive or a
 
 ## Additional Info
 
-- [Full deployment guide](https://paoloronco.it/n8n-template-automated-invoice-archiving/)
+- [Full deployment guide](https://paoloronco.it/writing/n8n-template-automated-invoice-archiving)
 - Invoice documents may contain personal and financial information. Protect credentials, storage locations, spreadsheets, and FTP/SFTP access appropriately.
 - AI extraction accuracy depends on document structure and the selected model. Validate extracted data before using it for accounting or fiscal processes.
 - This workflow is an automation aid, not a replacement for legally compliant fiscal or document-retention systems.

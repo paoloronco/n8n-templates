@@ -51,4 +51,4 @@ This workflow converts recent WordPress posts into multilingual voiceovers using
 
 This workflow requires configuration of Google Cloud Run and Storage for audio generation and hosting, as well as a Google Sheets queue to manage processing jobs. It supports multiple languages with customizable voice settings and handles retries and concurrency. For implementation help or customization, contact info@paoloronco.it or visit https://paoloronco.it.
 
-Full technical documentation: https://app.notion.com/p/WordPress-VoiceOvers-415f0ba27c32816a960ac1a8a51dc5f9
+Full technical documentation: https://paoloronco.notion.site/415f0ba27c32816a960ac1a8a51dc5f9

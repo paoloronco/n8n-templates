@@ -12,26 +12,12 @@ A curated collection of n8n automation workflows, practical implementation guide
 
 Browse by topic. Each workflow name opens its GitHub folder; the remaining columns link to its n8n Creators listing, Gumroad package and setup guide.
 
-- [OrbitPage](#orbitpage)
 - [Social media and video](#social-media-and-video)
 - [Websites and WordPress](#websites-and-wordpress)
 - [Documents and business operations](#documents-and-business-operations)
 - [Knowledge and productivity](#knowledge-and-productivity)
 - [Monitoring and maintenance](#monitoring-and-maintenance)
-
-### OrbitPage
-
-Page content, campaign launches, event updates and release checks. Browse the [OrbitPage collection](./workflows/orbitpage/) for an overview.
-
-| Workflow and files | Description | n8n Creators | Gumroad | Setup guide |
-| --- | --- | --- | --- | --- |
-| [Sync Google Sheets Menus and Price Lists to OrbitPage](./workflows/orbitpage/sync-google-sheets-menus-and-price-lists-to-orbitpage/) | Sync approved sheet rows to a native menu section with previews, email review and preserved unrelated content. | [View](https://n8n.io/workflows/22130-sync-approved-google-sheets-menu-items-with-orbitpage-native-menus/) | — | [Guide](./workflows/orbitpage/sync-google-sheets-menus-and-price-lists-to-orbitpage/README.md) |
-| [Add New YouTube Videos to OrbitPage](./workflows/orbitpage/add-new-youtube-videos-to-orbitpage/) | Add new YouTube videos as native players, automatically or after email approval. No YouTube API key. | [View](https://n8n.io/workflows/22127-publish-new-youtube-videos-to-orbitpage-with-optional-email-approval/) | — | [Guide](./workflows/orbitpage/add-new-youtube-videos-to-orbitpage/README.md) |
-| [OrbitPage AI Page Editor](./workflows/orbitpage/orbitpage-ai-page-editor/) | Edit OrbitPage pages through AI chat, review validated previews and approve publication. | [View](https://n8n.io/workflows/21795-edit-and-publish-orbitpage-site-content-with-openai-chat-approval/) | [View](https://paoloronco.gumroad.com/l/orbitpage-ai-pageeditor) | [Guide](./workflows/orbitpage/orbitpage-ai-page-editor/README.md) |
-| [OrbitPage Release Guardian](./workflows/orbitpage/orbitpage-release-guardian/) | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. | [View](https://n8n.io/workflows/21773-guard-orbitpage-releases-with-gmail-approvals-and-rollback-controls/) | — | [Guide](./workflows/orbitpage/orbitpage-release-guardian/README.md) |
-| [Update an OrbitPage Event Before, During and After](./workflows/orbitpage/orbitpage-event-lifecycle/) | Publish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR. | [View](https://n8n.io/workflows/22354-publish-phased-orbitpage-event-pages-with-email-approvals-and-data-tables/) | [View](https://paoloronco.gumroad.com/l/orbitpage-event-lifecycle) | [Guide](./workflows/orbitpage/orbitpage-event-lifecycle/README.md) |
-| [Build an OrbitPage Campaign Page with Ad Copy, UTM Links and QR](./workflows/orbitpage/orbitpage-campaign-launch-kit/) | Review one offer, publish its campaign subpage, verify the result and deliver matching ad copy, UTM links and a local QR. | [View](https://n8n.io/workflows/22355-publish-orbitpage-campaign-pages-with-email-approvals-and-qr-launch-kits/) | [View](https://paoloronco.gumroad.com/l/orbitpage-campaign-launch-kit) | [Guide](./workflows/orbitpage/orbitpage-campaign-launch-kit/README.md) |
-| [Review OrbitPage Analytics and Approve One CTA Improvement](./workflows/orbitpage/orbitpage-analytics-improvement/) | Send a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement. | [View](https://n8n.io/workflows/22356-send-weekly-orbitpage-analytics-reports-and-review-one-ai-cta-change-via-email/) | [View](https://paoloronco.gumroad.com/l/orbitpage-analytics-improvement) | [Guide](./workflows/orbitpage/orbitpage-analytics-improvement/README.md) |
+- [OrbitPage](#orbitpage)
 
 ### Social media and video
 
@@ -80,6 +66,20 @@ Capture content, build a knowledge base and track useful information. Compare [S
 | [Backup & Sync Execution Validation](./workflows/backup-sync-monitoring/) | Log-driven validation of scheduled backup/sync jobs. | [View](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/) | [View](https://paoloronco.gumroad.com/l/ReliableBackup-SyncExecutionValidation) | [Guide](https://paoloronco.notion.site/403f0ba27c3280179a84fb206e06481a) |
 | [n8n → Notion Workflow Backup & Sync](./workflows/n8n-notion-workflow-backup/) | Catalog active, inactive and archived workflows with an English README and one verified, complete JSON attachment per page. | — | [View](https://paoloronco.gumroad.com/l/n8n-backup-notiondb) | [Guide](./workflows/n8n-notion-workflow-backup/README.md) |
 | [Template Publishing Assistant](./workflows/template-publishing-assistant/) | Prepare sanitized workflow JSON, documentation, cover and thumbnail images, and a delivery package for review. | — | — | [Guide](./workflows/template-publishing-assistant/README.md) |
+
+### OrbitPage
+
+Page content, campaign launches, event updates and release checks. Browse the [OrbitPage collection](./workflows/orbitpage/) for an overview.
+
+| Workflow and files | Description | n8n Creators | Gumroad | Setup guide |
+| --- | --- | --- | --- | --- |
+| [Sync Google Sheets Menus and Price Lists to OrbitPage](./workflows/orbitpage/sync-google-sheets-menus-and-price-lists-to-orbitpage/) | Sync approved sheet rows to a native menu section with previews, email review and preserved unrelated content. | [View](https://n8n.io/workflows/22130-sync-approved-google-sheets-menu-items-with-orbitpage-native-menus/) | — | [Guide](./workflows/orbitpage/sync-google-sheets-menus-and-price-lists-to-orbitpage/README.md) |
+| [Add New YouTube Videos to OrbitPage](./workflows/orbitpage/add-new-youtube-videos-to-orbitpage/) | Add new YouTube videos as native players, automatically or after email approval. No YouTube API key. | [View](https://n8n.io/workflows/22127-publish-new-youtube-videos-to-orbitpage-with-optional-email-approval/) | — | [Guide](./workflows/orbitpage/add-new-youtube-videos-to-orbitpage/README.md) |
+| [OrbitPage AI Page Editor](./workflows/orbitpage/orbitpage-ai-page-editor/) | Edit OrbitPage pages through AI chat, review validated previews and approve publication. | [View](https://n8n.io/workflows/21795-edit-and-publish-orbitpage-site-content-with-openai-chat-approval/) | [View](https://paoloronco.gumroad.com/l/orbitpage-ai-pageeditor) | [Guide](./workflows/orbitpage/orbitpage-ai-page-editor/README.md) |
+| [OrbitPage Release Guardian](./workflows/orbitpage/orbitpage-release-guardian/) | Monitor website revisions, verify published pages, approve private drafts and request human-approved rollback after failed checks. | [View](https://n8n.io/workflows/21773-guard-orbitpage-releases-with-gmail-approvals-and-rollback-controls/) | — | [Guide](./workflows/orbitpage/orbitpage-release-guardian/README.md) |
+| [Update an OrbitPage Event Before, During and After](./workflows/orbitpage/orbitpage-event-lifecycle/) | Publish approved event phases at one stable URL, with guarded revisions, a durable journal and a reusable local QR. | [View](https://n8n.io/workflows/22354-publish-phased-orbitpage-event-pages-with-email-approvals-and-data-tables/) | [View](https://paoloronco.gumroad.com/l/orbitpage-event-lifecycle) | [Guide](./workflows/orbitpage/orbitpage-event-lifecycle/README.md) |
+| [Build an OrbitPage Campaign Page with Ad Copy, UTM Links and QR](./workflows/orbitpage/orbitpage-campaign-launch-kit/) | Review one offer, publish its campaign subpage, verify the result and deliver matching ad copy, UTM links and a local QR. | [View](https://n8n.io/workflows/22355-publish-orbitpage-campaign-pages-with-email-approvals-and-qr-launch-kits/) | [View](https://paoloronco.gumroad.com/l/orbitpage-campaign-launch-kit) | [Guide](./workflows/orbitpage/orbitpage-campaign-launch-kit/README.md) |
+| [Review OrbitPage Analytics and Approve One CTA Improvement](./workflows/orbitpage/orbitpage-analytics-improvement/) | Send a measured analytics report and optionally review and publish one exact server-previewed CTA title improvement. | [View](https://n8n.io/workflows/22356-send-weekly-orbitpage-analytics-reports-and-review-one-ai-cta-change-via-email/) | [View](https://paoloronco.gumroad.com/l/orbitpage-analytics-improvement) | [Guide](./workflows/orbitpage/orbitpage-analytics-improvement/README.md) |
 
 ## Importing a workflow
 

@@ -62,6 +62,6 @@ This is V2 HeyGen Voice + HyperFrames. V1 uses a local worker and has a separate
 
 This revision contains 148 nodes: 124 operational nodes and 24 sticky notes. The owner-reviewed HeyGen canvas is the layout reference. The overview uses the required How it works and Setup headings; white section notes contain only titles. Common nodes and note frames have identical positions in both providers. Provider rendering, recovery, authentication, audio-input and output-resolution contracts remain intact. Workflow JSON contains no selected personal credential IDs, owner workflow/instance metadata, personal support links, owner branding or production-content examples. Third-party bundled licenses are retained.
 
-The owner reports resubmitting [Creator Portal entry 23115](https://creators.n8n.io/dashboard) after feedback about sticky notes and canvas organization. This records the owner's submission; it does not imply approval or an additional agent submission.
+[Creator Portal entry 23115](https://creators.n8n.io/dashboard) received feedback about sticky notes and canvas organization. The revised workflow is prepared for review. Resubmission is unverified; the earlier owner-resubmission statement was an interpretation error. No Submit action was performed by the assistant.
 
-The Creator Portal dashboard still shows **Implement changes** for the HeyGen entry. The owner-reported resubmission is recorded separately from this observed status; approval or successful re-entry into review is not confirmed.
+The last observed Creator Portal dashboard status for the HeyGen entry is **Implement changes**. This does not confirm a new submission or approval.

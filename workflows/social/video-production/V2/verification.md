@@ -6,6 +6,6 @@ Offline validation passed 33 HeyGen checks and 17 NextCut checks. The Crypto has
 
 Both providers retain their original runtime parameters, credentials placeholders, functional node IDs and connections. The 116 common functional nodes and 24 common note frames use identical positions. NextCut's existing Free-account query and its receipt have an additional compact quota section. Its WAV-input, Free-plan quota, renderer-response and output-size contracts remain provider-specific.
 
-The owner reports resubmitting the HeyGen workflow after the two reviews of sticky notes and canvas organization. The Creator Portal dashboard still shows Implement changes. This observation does not confirm approval or a completed new review submission; no agent submission was performed.
+Resubmission of the revised HeyGen workflow is unverified. The earlier statement attributing a resubmission to the owner was an interpretation error and is not evidence of submission. The last observed Creator Portal dashboard status is Implement changes. No Submit action was performed by the assistant.
 
 The exact owner layout is preserved. The SVG routing check still detects the shared Dropbox return crossing one node and three labels; NextCut also has one existing manual-recovery return crossing a validation node. Section titles are clear. These routes were not rearranged over the owner's manual edits.

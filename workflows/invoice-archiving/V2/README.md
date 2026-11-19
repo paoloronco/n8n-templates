@@ -1,67 +1,72 @@
-# Unified Invoice Archiving
+# Archive and log invoices from Gmail with SFTP and Google Sheets
 
-## Quick overview
-
-Automatically collect PDF invoices from Gmail, identify supported providers, extract and validate invoice data without AI, archive PDFs via SFTP, and update Google Sheets. Includes four configurable example provider profiles (A–D), with manual or scheduled execution. No live vendor-specific parsing rules are distributed.
+Collect text-based invoice PDFs from Gmail, extract invoice details with configurable rules, archive each PDF over SFTP, and insert or update a shared Google Sheets register. Four example categories cover utilities, internet, cloud and hosting. No AI API or OCR service is required.
 
 ## How it works
 
-1. **Trigger** — Run manually or automatically every six hours.
-2. **Gmail intake** — Search for messages from configured senders with PDF attachments.
-3. **PDF filtering** — Process eligible PDF attachments individually; skip unrelated Octopus documents.
-4. **Text extraction** — Extract readable text from each PDF using n8n's Extract from File node.
-5. **Invoice parsing** — Identify the provider and extract invoice number, date, amount, and optional service information using the regex patterns configured in **Configure Providers**.
-6. **Validation** — Reject invoices with missing required fields. Validate required fields; provider-specific VAT and gross-total reconciliation is not included in this generic version.
-7. **SFTP archiving** — Route the PDF to the provider's configured directory using a standardized filename.
-8. **Google Sheets** — Insert or update the corresponding invoice record in the provider's worksheet.
-9. **Completion** — End the provider branch after successful processing. The original Gmail message is retained.
+1. Start manually or run every six hours after publishing/activating the workflow.
+2. Gmail retrieves all messages matching `has:attachment filename:pdf newer_than:30d (subject:invoice OR subject:fattura)`, including read messages, and downloads their attachments.
+3. Messages without binary attachments are discarded. **Normalize PDF binary** splits PDF attachments into individual linked items and rejects any PDF larger than 20 MiB using its actual binary size. Other attachment types are skipped.
+4. **Extract PDF text** reads text from binary property `data`.
+5. **Parse invoice and canonical name** matches one of four example provider patterns, extracts and validates the invoice number, date and total, and builds the filename and destination path.
+6. One provider filter routes the invoice to its SFTP upload node. After a successful upload, a per-item Code node restores the corresponding parsed record and PDF using n8n item linking.
+7. The provider's Google Sheets node inserts or updates a row in the same `Invoices` worksheet, matching on **Unique Key** (`Provider:Invoice Number`).
+8. The branch completes. Source Gmail messages are retained without modification.
 
-The workflow uses deterministic parsing rather than an AI model. No OpenRouter or OpenAI API key is required.
+The five canvas notes include one yellow overview with setup instructions and four brief gray section notes. Existing node IDs, positions, sticky dimensions and connections are preserved.
 
 ## Setup
 
-1. **Import the workflow** — Import `Unified_Invoice_Archiving - template.json` into n8n.
-2. **Connect Gmail** — Configure Gmail OAuth2 in **Gmail - Get invoice messages**. Update the Gmail query to match your invoice senders and review the `newer_than:30d` search window.
-3. **Connect SFTP** — Configure SFTP credentials in the four **SFTP upload** nodes. Set the SFTP folders in the four profiles inside **Configure Providers**; placeholder folders must be replaced with writable paths.
-4. **Connect Google Sheets** — Configure Google Sheets credentials, replace `YOUR_SPREADSHEET_ID`, and set worksheet names and column mappings in the four **Sheets upsert** nodes. Create the expected headers before testing. Keep each node's matching column aligned with its worksheet.
-5. **Review provider rules** — In **Configure Providers**, replace the four example sender addresses, names, regex patterns, and destination folders. Test each parser against actual PDFs.
-6. **Review the schedule** — The Schedule Trigger is configured to run every six hours. Adjust it if needed; keep the workflow inactive during initial testing.
-7. **Test each provider** — Run manually with representative PDFs for each configured provider. Verify the SFTP file, filename, destination, amount including VAT where applicable, and Google Sheets row.
-8. **Test reprocessing and failures** — Re-run a previously processed invoice and check how your SFTP server handles an existing file. Test an invalid PDF and an unavailable SFTP destination before activating the schedule.
+1. Import `Unified_Invoice_Archiving - template.json` into n8n. Leave the workflow inactive while configuring it.
+2. Connect Gmail OAuth2 in **Gmail - Get invoice messages**. Restrict the search to your invoice senders, review the 30-day lookback and test the query in Gmail. `Return All` is enabled, so all matching messages are retrieved; use a narrow query for large mailboxes.
+3. Open **Parse invoice and canonical name** and customize the `patterns` array and extraction regexes to match your real PDF text. The shipped rules are working examples, not vendor-specific parsers. Provider names must match their downstream filter values:
 
-## Requirements
+   | Provider | Category | Default SFTP folder |
+   | --- | --- | --- |
+   | `UtilityProvider` | `utilities` | `/invoices/utilities` |
+   | `InternetProvider` | `internet` | `/invoices/internet` |
+   | `CloudProvider` | `cloud` | `/invoices/cloud` |
+   | `HostingProvider` | `hosting` | `/invoices/hosting` |
 
-- An n8n instance with Gmail, Extract from File, Code, SFTP (FTP node), and Google Sheets nodes.
-- A Gmail account with OAuth2 credentials and access to invoice emails.
-- An SFTP server, valid credentials, and writable destination directories.
-- A Google Sheets spreadsheet with appropriate worksheets, headers, and credentials.
-- Text-based PDF invoices compatible with the regex rules you configure.
+4. Create those folders on your SFTP server, with write access for the SFTP account, or adjust `targetPath` in the parser. Connect credentials in **all four SFTP upload nodes**. Binary property `data` contains the PDF.
+5. Create a Google spreadsheet with an `Invoices` worksheet and these exact headers:
 
-**Not required:** AI provider, LLM API key, Google Drive, or OCR service.
+   `Provider`, `Category`, `Invoice Number`, `Date`, `Amount`, `File`, `Unique Key`
 
-## Customization
+6. The four Sheets nodes use **Service Account** authentication. Create/connect that credential, enable the required Google Sheets/Drive APIs, and share the spreadsheet with the service account email as **Editor**. Replace `REPLACE_WITH_GOOGLE_SHEET_ID` in **all four Sheets nodes**. Keep `Unique Key` as the matching column. To use OAuth2 instead, change each node's authentication and credential selection.
+7. Test a representative text-based PDF for each provider and an email with several PDF attachments. Compare the source invoice with the SFTP file and spreadsheet fields. Re-run an invoice and verify your server's overwrite behavior and the existing Sheets row.
+8. Test invalid input and service failures. Review the schedule and workflow timezone before publishing/activating unattended runs.
 
-- **Invoice providers** — Modify the Gmail search query and provider profiles in **Configure Providers**; extend routing when adding more than four providers.
-- **PDF selection** — Adjust the PDF attachment filter in **Normalize PDF binary**.
-- **Filenames and folders** — Set destination folders in **Configure Providers** and adjust the canonical filename pattern in **Parse invoice and canonical name**.
-- **Spreadsheet fields** — Update the per-provider Google Sheets mappings and matching columns.
-- **Schedule** — Change the Schedule Trigger interval or use the Manual Trigger for controlled runs.
-- **Document retention** — Gmail messages are preserved by default. Add labels or archival actions only after validating successful processing.
-- **Additional providers** — Extend the parser and add the corresponding storage and Sheets branch, or refactor the routing for larger deployments.
+## Parsing examples
 
-## Additional info
+The initial patterns recognize text such as `Utility Provider`, `Internet Provider`, `Cloud Provider` and `Hosting Provider`. Provider detection examines PDF text, so Gmail sender filtering should be configured separately in the Gmail query.
 
-- **Duplicate handling:** Google Sheets uses insert-or-update behavior, but the workflow does **not** perform a preventive SFTP duplicate lookup or maintain a persistent processing registry. Verify your server's behavior when the same filename is uploaded again.
-- **Failure handling:** Parsing and upload errors can stop an execution. There is no dedicated error workflow, automatic notification, or centralized failure log in this version.
-- **PDF limitations:** Image-only PDFs require OCR, which is not included. Changes to a provider's invoice layout may require updating its parsing expressions.
-- **Multiple attachments:** Eligible PDFs are separated into individual items, but this should be tested with real multi-attachment messages.
-- **Data security:** Invoices may contain personal, billing, and financial information. Restrict access to Gmail, n8n execution data, SFTP folders, and Google Sheets; use least-privilege credentials.
-- **Production readiness:** Test the imported workflow against actual invoice samples and failure scenarios before enabling unattended runs. It is not a substitute for legally compliant accounting or document retention.
+Supported field labels include `Invoice number`, `Invoice no.`, `Invoice #`, `Fattura n.`, `Invoice date`, `Data fattura`, `Total due`, `Total amount`, `Totale da pagare` and `Importo totale`. Adapt these expressions when suppliers use different labels or layouts.
 
-## Security and publishing
+- Dates accept `YYYY-MM-DD` or day/month/year with `/`, `.` or `-` separators. Calendar dates are validated. US month/day/year dates need a custom rule.
+- Totals accept `1234.56`, `1234,56`, `1,234.56` and `1.234,56`, with optional leading `EUR`, `USD`, `GBP`, `€`, `$` or `£`. Negative totals, malformed grouping and ambiguous single separators with three fractional digits are rejected. Credit notes require a custom rule.
+- Example input: `Cloud Provider`, `Invoice number: INV-1001`, `Invoice date: 2026-11-01`, `Total due: EUR 1.234,56`.
+- Example result: amount `1234.56`, key `CloudProvider:INV-1001`, file `2026-11-01_CloudProvider_INV-1001.pdf`, folder `/invoices/cloud`.
+- Invoice numbers are URL-encoded in filenames, so a slash becomes `%2F`; the original invoice number remains in the register.
 
-- This public template intentionally excludes real OAuth/SFTP/Google Sheets credential references, personal sender addresses, private storage paths, live spreadsheet IDs, and n8n instance identifiers.
-- Example provider addresses and `YOUR_*` values are placeholders. Configure them after import; do not commit populated exports back to a public repository.
-- n8n workflow exports do not include stored credential secrets, but may include credential IDs, names, URLs, account identifiers, and paths. Review all fields and sticky notes before sharing.
-- Never publish execution histories, extracted PDF text, sample invoices containing billing data, or credential backups.
-- The private production workflow includes additional vendor-specific handling and Gmail Trash actions; **those features are not part of this public template**.
+## Limitations and recovery
+
+- Scanned/image-only PDFs require OCR, which is not included. Encrypted or unreadable PDFs may fail text extraction.
+- Unknown or ambiguous providers, missing fields, invalid dates and invalid totals stop the execution. There is no review queue, dedicated error workflow or automatic failure notification.
+- SFTP and Sheets retry failed operations up to **three total attempts**, waiting three seconds between attempts.
+- There is no transaction across SFTP and Sheets. If Sheets fails after upload, the PDF may already exist. Fix the failing service and rerun with the same invoice key.
+- There is no preventive duplicate lookup or persistent processing registry. Repeated executions upload the same canonical filename again and may overwrite it. The 30-day Gmail window includes previously processed messages.
+- Sheets upsert matches `Provider:Invoice Number`; invoice numbers must be unique within a provider. Adapt the key if a supplier reuses numbers across years or accounts.
+- VAT reconciliation, currency conversion, invoice authenticity verification, Google Drive archiving and Gmail cleanup are not implemented in this V2 template.
+
+## Review and validation
+
+The revision corrects escaped parser regexes and Code-node input access, restores invoice data once per input item after SFTP, validates dates and European/US amount formats, and checks actual PDF byte size. The README now describes the nodes and values present in the JSON.
+
+Local regression checks cover PDF attachment splitting and size limits, all four provider routes, per-item data restoration, repeated invoice keys, malformed inputs and graph/configuration integrity. Synthetic PDFs are used for the parser fixtures; SFTP and Sheets effects are simulated. These checks do not establish connectivity to your Gmail mailbox, SFTP server or Google spreadsheet. Verify those services with your own credentials before enabling the schedule.
+
+## Customization and sharing
+
+Adjust the Gmail query, provider expressions, destination folders, filename format, schedule and Sheets mappings. When adding a provider, extend the parser and add a matching filter/storage/Sheets branch. Configure account-specific credentials and resource values after import; the public JSON contains no credential bindings, personal invoice data or live spreadsheet IDs.
+
+The workflow is saved inactive for setup. Publishing this file to GitHub does not submit it for review in the n8n Creator Portal.

@@ -2,6 +2,39 @@
 
 This directory is the complete companion runtime for the n8n workflow. It includes the durable backend, local render worker, intake/review gallery, offline narration and recovery controls. Importing the workflow alone does not install these components.
 
+## Start here
+
+This is **V1 — local rendering**. Download the [V1 workflow and runtime](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/V1) from the same package. The cloud providers in V2 use different workflows.
+
+Configure the three parts in order: **Linux backend → n8n → rendering computer**. Keep backend `enabled: false` during setup. All individual workflow nodes remain enabled; keep the imported workflow inactive until its credentials, paths and routes are configured.
+
+### Canvas map
+
+| Section | Entry or key node | Purpose |
+| --- | --- | --- |
+| 1. Private drafts | `Create four private drafts` | Queue four examples; poll their existing job IDs; open the local review links. |
+| Diagnostic | `Inspect local publishing host` | Read backend status, queue counts, heartbeat and free disk. |
+| 2. Worker bridge | `PC pulls signed jobs` | Authenticate signed worker operations and manage durable job leases. |
+| 3. Daily check | `Check approved drafts daily` | Report approved ready jobs at 09:00; create no content. |
+| 4. Instagram | `One reel at each time slot` | Claim a due approved job, execute Meta actions and retain receipts. |
+| 5. YouTube upload | `Check YouTube channel` | Check the destination and upload the original MP4 once. |
+| 6. YouTube verification | `Recorded YouTube ID?` | Poll the saved ID and verify processing, visibility and stream metadata. |
+| 7. MP4 intake | `Receive a rendered production video` | Authorize a signed upload and verify the exact file. |
+| 8. Media delivery | `Instagram fetches signed video` | Serve the authorized MP4 through an expiring signed URL. |
+| 9. Channel recovery | `Record YouTube recovery state` | Preserve errors and IDs for gallery recovery and reconciliation. |
+
+The existing node label `Local Instagram verified?` is a YouTube-target gate: it checks approval, a selected YouTube target and prepared media. A YouTube-only private test can pass this gate with Instagram skipped. An Instagram-only job ends without a YouTube upload.
+
+### First configuration checklist
+
+- Select your SSH credential on **all 17 SSH nodes**. Select Meta OAuth on `Instagram with official OAuth`, and the same intended YouTube OAuth connection on `Check YouTube channel`, `Upload YouTube Short` and `Verify YouTube processing`.
+- Replace `REPLACE_WITH_YOUTUBE_CHANNEL_ID` in `Prepare YouTube media and claim`; use the same value in backend `channelId`.
+- Set the same signing secret in the backend and worker private configuration. Set the three production HTTPS routes together with their Webhook node paths.
+- Replace helper and state directories consistently in every SSH command and file-transfer node. Keep private configuration outside the public package.
+- Follow the numbered installation sections, run the offline checks, then create one gallery draft targeting **YouTube only + private test**. Review and approve that file before deliberately enabling delivery.
+
+The optional four-draft manual branch uses a new idempotency key for each n8n execution. Repeating it creates a new batch; polling and gallery recovery reuse the existing job. Manual publishing bypasses the clock slot, not approval, the earliest publishing time or the backend gate.
+
 ## Architecture
 
 `local form → signed n8n bridge → SQLite queue → local HyperFrames worker → verified MP4 upload → human approval → n8n OAuth delivery → durable provider receipts`
@@ -33,7 +66,7 @@ Run `python3 -B backend_test.py` and `python3 production.py status`. A helper fa
 
 ## 2. n8n configuration
 
-Import **Local Video Production (template)** with schedules inactive. All individual production nodes should remain enabled. Its credential selectors use no credential bindings; they are intentionally unbound and contain no account credentials. This also prevents n8n from automatically choosing an existing account during import.
+Import **Coordinate local video rendering with Instagram Reels and YouTube Shorts** with the workflow inactive. The reviewed canvas contains 65 operational nodes and 11 sticky notes. All individual production nodes should remain enabled. Its credential selectors use generic names and `null` IDs; they are intentionally unbound and contain no account credentials. This also prevents n8n from automatically choosing an existing account during import.
 
 1. Select your dedicated SSH credential on every SSH node, including recovery and file transfer nodes.
 2. Search the workflow for `/opt/local-video-production` and `/var/lib/local-video-production`. Replace both consistently if you use other directories. Uploads, the original MP4 download and the signed media endpoint must use the same persistent state directory.
@@ -41,7 +74,7 @@ Import **Local Video Production (template)** with schedules inactive. All indivi
 4. Use unique production webhook paths. Put the bridge POST, upload POST and media GET production URLs into the corresponding runtime configurations. Publish the workflow inside your own n8n to register the production webhooks.
 5. Set the workflow timezone and match the backend hours. Keep the daily and publishing schedules disabled until the first test passes. The 09:00 branch reports approved drafts; it does not create or approve content automatically.
 
-The example configurations match the imported paths: bridge `local-video-worker`, upload `local-video-upload`, and media `local-video-media`. Change each URL and its corresponding n8n webhook together. The template uses `Europe/Rome`, a 09:00 approved-queue check and delivery slots at 10:00, 12:00, 15:00, 18:00 and 21:00. It retains successful executions; review instance-level retention and disk usage for the worker's regular bridge polls.
+The example configurations match the imported paths: bridge `local-video-worker`, upload `local-video-upload`, and media `local-video-media`. Change each URL and its corresponding n8n webhook together. The example timezone is `Europe/Rome`; choose your own timezone. The template uses, a 09:00 approved-queue check and delivery slots at 10:00, 12:00, 15:00, 18:00 and 21:00. It retains successful executions; review instance-level retention and disk usage for the worker's regular bridge polls.
 
 Instagram delivery requires a supported professional account and appropriate Meta app access. YouTube requires an OAuth connection that can upload to, and read the processing/file metadata of, the configured channel. Check the current platform requirements for your own app. Platform errors are retained rather than converted into success.
 
@@ -100,6 +133,20 @@ This changes only the delivery gate. The gallery continues accepting and reviewi
 
 Native n8n executions show HTTP/SSH failures. The gallery displays worker, render and channel errors. SQLite stores job state, approvals, timestamps and provider receipts; its `events` table records transitions. Completion requires actual provider read-back with the expected channel/identity and visibility. Local audio measurements and remote stream metadata do not prove spoken content accuracy or guarantee YouTube's Shorts classification.
 
+## Input and media reference
+
+| Input | Implemented limit |
+| --- | --- |
+| Title / brand | 100 / 40 characters. |
+| Narration / caption | 1,600 / 2,200 characters. Narration must still fit the final duration limit. |
+| Scenes | 2–5; each title at most 70 characters and body at most 160. |
+| Layout | `wall_text`, `hook_demo`, `custom_motion` or `slideshow`. Every slideshow scene needs a locally uploaded PNG/JPEG/WebP asset. |
+| Language | `en-US`, `en-GB` or `it-IT`. |
+| Targets | Instagram and/or YouTube. `privateTest: true` requires YouTube alone. |
+| Accepted master | H.264 video, 1080 × 1920, 3–60 seconds, with AAC audio. The backend decodes the complete file and rejects silent or very quiet audio. |
+
+There is no external paid generative API in V1. Local dependencies and models need initial downloads; CPU/GPU, storage and platform access are operator supplied. Full decoding and loudness thresholds do not verify what the narration says; watch and listen before approval.
+
 ## Backups and maintenance
 
 Back up `config.local.json`, worker configuration, the SQLite database and all original MP4s. Use SQLite's backup API or `.backup`; do not copy only the main database file while WAL writes are active. Keep the signing secret with encrypted configuration backups. Media and receipts are retained for recovery; this package performs no automatic destructive cleanup. Apply your own reviewed retention policy after reconciliation.
@@ -112,4 +159,10 @@ Public routes validate signatures, expiry, purpose and nonces. The gallery check
 
 Run `python3 -B backend_test.py`, `node --test worker.test.mjs workflow.test.cjs`, then a real approved private test on your own instance. Automated unit fixtures do not publish to providers. Each render runs HyperFrames checks and FFmpeg verification before upload.
 
-Dependencies are pinned in `package-lock.json` and `requirements.txt`. HyperFrames, GSAP, Kokoro, the voice/model assets and the bundled Inter fonts retain their upstream licenses; see [THIRD_PARTY.md](THIRD_PARTY.md). Use only content and images you may publish. This package does not call a paid generative API.
+Dependencies are pinned in `package-lock.json` and `requirements.txt`. HyperFrames, GSAP, Kokoro, the voice/model assets and any assets distributed by installed dependencies retain their upstream licenses; see [THIRD_PARTY.md](THIRD_PARTY.md). Use only content and images you may publish. This package does not call a paid generative API.
+
+## Generic demonstration visuals
+
+The supplied renderer uses plain example cards, the generic `sans-serif` font family and an editable accent. No production footage, branded layouts, logos, custom fonts, personal copy or original media are included. The `wall_text`, `hook_demo`, `custom_motion` and `slideshow` values are retained as input-compatible layout choices. Replace the fictional paper-bookmark brief and customize the renderer with your own visual identity.
+
+Runtime package version: **2.0.2**. The renderer cache revision is **2.0.4**, so newly rendered jobs do not reuse the older visual preset. Already approved files and provider receipts remain unchanged in an operator's existing state; start public-template tests with a fresh state directory.

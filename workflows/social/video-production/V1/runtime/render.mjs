@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import crypto from 'node:crypto';
 
 export const runtimeRoot = path.dirname(fileURLToPath(import.meta.url));
-const rendererVersion = '2.0.3';
+const rendererVersion = '2.0.4';
 export const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 
@@ -26,8 +26,8 @@ export function composition(request, duration) {
   if (!/^#[a-fA-F0-9]{6}$/.test(b.accent) || !Number.isFinite(duration) || duration<3 || duration>60) throw Error('Invalid render settings');
   const scenes=b.scenes.map((_,i)=>`<div id="scene-${i}" class="clip" data-composition-id="scene-${i}" data-composition-src="compositions/scene-${i}.html" data-start="${i*slot}" data-duration="${slot}" data-track-index="0" data-width="1080" data-height="1920"></div>`).join('\n');
   return `<!doctype html><html lang="${escapeHtml(b.language.split('-')[0])}"><head><meta charset="utf-8"><meta name="viewport" content="width=1080,height=1920"><title>${escapeHtml(b.title)}</title><script src="assets/gsap.min.js"></script>
-  <style>@font-face{font-family:Inter;src:url('assets/Inter-700.woff2');font-weight:700}@font-face{font-family:Inter;src:url('assets/Inter-400.woff2');font-weight:400}
-  *{box-sizing:border-box}body{margin:0;background:#ffffff;color:#202020;font-family:Inter,sans-serif}#root{position:relative;width:100%;height:100%;overflow:hidden}.clip{position:absolute;inset:0}.scene-inner{position:absolute;inset:0;background:#ffffff;overflow:hidden}.eyebrow{position:absolute;top:300px;left:140px;right:250px;font-size:26px;letter-spacing:2px;font-weight:700;color:#555555;display:flex;justify-content:space-between}.line{position:absolute;left:140px;top:410px;width:110px;height:8px;background:${b.accent}}.copy{position:absolute;left:140px;right:250px;top:570px}.number{font-size:26px;font-weight:700;color:${b.accent};margin-bottom:44px}h1{font-size:66px;font-weight:700;line-height:1.05;letter-spacing:-2px;margin:0 0 26px;overflow-wrap:anywhere}p{font-size:36px;line-height:1.35;margin:0;color:#555555;overflow-wrap:anywhere}.progress{position:absolute;left:140px;right:250px;bottom:270px;height:5px;background:#777777}.progress-fill{height:100%;width:100%;background:${b.accent};transform-origin:left center}.art{position:absolute;left:140px;top:420px;width:690px;height:580px;object-fit:contain}.slideshow .copy{top:1140px}.slideshow h1{font-size:64px;margin-bottom:26px}.slideshow p{font-size:36px}.slideshow .number{display:none}.hook_demo .copy{top:450px;padding:50px 36px;border:2px solid #777777;border-radius:28px;background:#ffffff}.hook_demo h1{font-size:60px}.hook_demo .art+.copy{top:1120px;padding:30px 0;border:0;background:none}.hook_demo .art+.copy h1{font-size:60px}.custom_motion .line{width:690px;height:200px;top:430px;background:${b.accent}}.custom_motion .copy{top:700px}.custom_motion .number{color:#202020}.wall_text .art+.copy{top:1120px}.wall_text .art+.copy h1{font-size:64px}.wall_text .art+.copy p{font-size:36px}
+  <style>
+  *{box-sizing:border-box}body{margin:0;background:#eeeeee;color:#222222;font-family:sans-serif}#root{position:relative;width:100%;height:100%;overflow:hidden}.clip{position:absolute;inset:0}.scene-inner{position:absolute;inset:0;background:#eeeeee;overflow:hidden}.sheet{position:absolute;inset:220px 280px 660px 110px;display:flex;flex-direction:column;justify-content:center;gap:34px;padding:48px;background:#ffffff;border:2px solid #cccccc}.brand{font-size:28px;line-height:1.3;font-weight:600;color:#555555;overflow-wrap:anywhere}.scene-count{font-size:28px;line-height:1.3;color:#555555}h1{font-size:58px;line-height:1.12;font-weight:700;margin:0;overflow-wrap:anywhere}p{font-size:34px;line-height:1.4;margin:0;color:#333333;overflow-wrap:anywhere}.art{display:block;width:100%;height:280px;object-fit:contain;background:#f4f4f4}.hook_demo .scene-count{border-bottom:4px solid ${b.accent};padding-bottom:20px}.custom_motion .sheet{border-left:14px solid ${b.accent}}.slideshow .sheet{gap:26px;inset:220px 280px 660px 110px}.slideshow h1{font-size:50px}.slideshow p{font-size:30px}
   </style></head><body><div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0" data-duration="${duration}">${scenes}<audio id="narration" class="clip" data-start="0" data-duration="${duration}" data-track-index="1" data-track-kind="audio" src="assets/narration.wav"></audio></div><script>const tl=gsap.timeline({paused:true});window.__timelines['main']=tl;</script></body></html>`;
 }
 
@@ -35,11 +35,11 @@ export function sceneComposition(request, duration, i) {
   const b=request.brief,s=b.scenes[i],count=b.scenes.length,slot=duration/count,id='scene-'+i;
   return `<!doctype html><html><body><template><style>#root{position:absolute;inset:0;width:100%;height:100%}</style>
   <div id="root" data-composition-id="${id}" data-width="1080" data-height="1920"><section class="scene-inner ${escapeHtml(request.format)}">
-    <div class="eyebrow">${escapeHtml(b.brand)}<span>${String(i+1).padStart(2,'0')} / ${String(count).padStart(2,'0')}</span></div>
-    <div class="line"></div>${s.asset?`<img class="art" src="../assets/${escapeHtml(s.asset)}" alt="${escapeHtml(s.title)}">`:''}
-    <div id="${id}-copy" class="copy"><div class="number">${String(i+1).padStart(2,'0')}</div><h1>${escapeHtml(s.title)}</h1><p>${escapeHtml(s.body)}</p></div>
-    <div class="progress"><div id="${id}-progress" class="progress-fill"></div></div></section></div>
-    <script>{const tl=gsap.timeline({paused:true});tl.fromTo('#${id}-copy',{y:38,opacity:0},{y:0,opacity:1,duration:0.55,ease:'power3.out'},0.05);tl.fromTo('#${id}-progress',{scaleX:0},{scaleX:1,duration:${slot-0.1},ease:'none'},0);window.__timelines['${id}']=tl;}</script>
+    <div id="${id}-copy" class="sheet" data-hold><div class="brand">${escapeHtml(b.brand)}</div>
+    ${s.asset?`<img class="art" src="../assets/${escapeHtml(s.asset)}" alt="${escapeHtml(s.title)}">`:''}
+    <h1>${escapeHtml(s.title)}</h1><p>${escapeHtml(s.body)}</p>
+    <div class="scene-count">Scene ${i+1} of ${count}</div></div></section></div>
+    <script>{const tl=gsap.timeline({paused:true});window.__timelines['${id}']=tl;}</script>
   </template></body></html>`;
 }
 
@@ -63,8 +63,6 @@ export async function render(job, c) {
   try {const old=JSON.parse(await fs.readFile(manifestFile,'utf8'));if(old.requestHash===hash&&digest(await fs.readFile(output))===old.sha256)return {...old,folder,output};}catch{}
   await fs.writeFile(path.join(folder,'brief.json'),JSON.stringify(job.request.brief,null,2));
   await fs.copyFile(path.join(runtimeRoot,'node_modules/gsap/dist/gsap.min.js'),path.join(assets,'gsap.min.js'));
-  const fonts=path.join(runtimeRoot,'node_modules/hyperframes/dist/skills/hyperframes/assets/frame-presets/code-editorial/fonts');
-  for(const font of ['Inter-400.woff2','Inter-700.woff2'])await fs.copyFile(path.join(fonts,font),path.join(assets,font));
   for(const scene of job.request.brief.scenes)if(scene.asset){if(!/^[a-f0-9]{64}\.(png|jpg|jpeg|webp)$/.test(scene.asset))throw Error('Invalid asset name');await fs.copyFile(path.join(root,'assets',scene.asset),path.join(assets,scene.asset));}
   const narration=path.join(assets,'narration.wav');
   if(c.voicePython && c.modelsDir){

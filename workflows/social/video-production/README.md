@@ -10,6 +10,8 @@ One package includes **V1 with a local worker** and **V2 with a choice of cloud 
 | [HeyGen Voice + HyperFrames](./V2/HeyGen-HyperFrames/README.md) | Cloud narration and vertical HyperFrames rendering. API credits required. |
 | [NextCut Free](./V2/NextCut/README.md) | Supplied narration PCM WAV; verified Free-plan quota, 396 × 704, 30 fps. No generated speech. |
 
+V1 runtime **2.0.2** includes the reviewed 76-node canvas, unbound credential selectors and generic demonstration visuals. See [V1 documentation](./V1/documentation.md).
+
 ### How It Works
 
 Provide your own structured brief and scenes. The selected local worker or cloud service renders the video; n8n coordinates verification, optional archive and guarded channel delivery.
@@ -17,14 +19,14 @@ Provide your own structured brief and scenes. The selected local worker or cloud
 ### Setup
 
 1. Choose V1 or one V2 provider and read its README and documentation.md.
-2. Import inactive. For Social V2 import Runtime.json first and select it in every Execute Sub-workflow caller.
+2. Import only the workflow for your selected version/provider, and keep it inactive during configuration.
 3. Configure your own service credentials, account IDs, HTTPS routes, storage and limits.
 4. Keep generation and publication off during setup. Use a fresh journal and media directory; do not import an existing production database.
 5. Review a private preview before deliberately enabling a separately configured working copy.
 
 ### Requirements
 
-n8n, persistent storage, public HTTPS where media delivery requires it, and credentials for the services you select. V1 additionally needs its local worker dependencies; V2 needs provider access/quota. Social copy generation uses OpenAI and may incur costs. Free renderer offers do not cover unrelated services.
+n8n, persistent storage, public HTTPS where media delivery requires it, and credentials for the services you select. V1 additionally needs its local worker dependencies; V2 needs provider access/quota. Free renderer offers do not cover unrelated services.
 
 ### Customization
 

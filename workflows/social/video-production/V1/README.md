@@ -6,7 +6,7 @@ The interface, examples and documentation are in English. New drafts default to 
 
 ## Included
 
-- `workflow.json`: **Local Video Production (template)**, with generic, unbound credential selectors and schedules inactive (the source template file is named `workflow.json`).
+- `workflow.json`: **Coordinate local video rendering with Instagram Reels and YouTube Shorts**, with generic, unbound credential selectors and schedules inactive (the source template file is named `workflow.json`).
 - `runtime/`: working Python backend, Node.js render worker/gallery, pinned dependencies, examples and tests.
 - [Runtime installation and operations guide](runtime/README.md): configuration, first private test, approval, recovery and backups.
 
@@ -23,13 +23,21 @@ The daily branch reports approved ready drafts and the publishing slots use the 
 
 The default schedule checks up to five approved ready drafts at **09:00** and publishes eligible, due drafts at **10:00, 12:00, 15:00, 18:00 and 21:00**, in `Europe/Rome`. An empty or ineligible queue produces a no-op; it does not fill the day with sample videos. Successful executions are retained for schedule monitoring.
 
-## Production and template editions
+## Reusable public edition
 
-This template is derived from the owner's live local production export. Its 74-node graph, node positions, sticky-note geometry, approval checks and recovery behavior match that production version. Installation paths, webhook paths, channel ID, file naming, branding and credential selectors are generalized. Private configuration, actual briefs, media, approval records, execution data and account bindings are excluded. Credential bindings are removed; select your own credentials during setup.
+Version **2.0.2** contains 65 operational nodes and 11 sticky notes. The main note has one short overview and separate How it works, Customization, Requirements and Additional info sections. Its documentation link points to the V1 setup guide.
 
-Rendering, speech and media storage run on infrastructure you control. No HeyGen, cloud rendering, paid generative API or cloud media storage is used by this edition. Initial dependency/model installation requires downloads; publishing still requires the official Instagram and YouTube APIs and a reachable signed HTTPS media endpoint.
+The export excludes instance/workflow metadata, account bindings, credential IDs, execution data and production media. Node IDs and canvas geometry are structural workflow data and are preserved. All processing nodes remain enabled; the workflow and backend publishing gate start inactive.
 
-The separate [cloud edition](https://github.com/paoloronco/n8n-templates/tree/main/workflows/social/video-production/V2) follows the same brief → render → exact-file approval → durable delivery/recovery approach using a different rendering adapter. Its genuine cloud generation remains unverified because the test API wallet had no credits. The local edition requires its companion runtime and does not satisfy the cloud edition's no-extra-installation constraint. Both target 1080×1920 H.264/AAC output; equal resolution does not imply identical visual rendering.
+Examples use a fictional paper-bookmark brief and generic card visuals. No branded layouts, original production presets, logos, private fonts or personal sample content are distributed. Replace the example and choose your own visual identity.
+
+Rendering, speech and media storage run on infrastructure you control. This edition does not call a paid generative API. Installation needs dependency/model downloads; social delivery uses the official Instagram and YouTube APIs and your own HTTPS media endpoint.
+
+The [cloud editions](../V2/README.md) have their own setup, provider requirements and validation scope.
+
+## Documentation
+
+[Complete V1 setup, node map and recovery guide](https://www.notion.so/41cf0ba27c32816a8f5afafed8269368).
 
 ## Requirements and setup
 
@@ -47,4 +55,3 @@ The package now includes the previously missing renderer and backend. Missing jo
 
 Run the included Python and Node tests, then a reviewed private test using your own n8n instance. Unit fixtures do not publish. Keep runtime state, original MP4s and configuration backed up; inspect provider state before reconciling uncertain delivery. See the runtime guide for exact recovery controls and limitations.
 
-For implementation support and customization: [paoloronco.it](https://paoloronco.it).

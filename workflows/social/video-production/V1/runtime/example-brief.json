@@ -1,33 +1,33 @@
 {
-  "idempotencyKey": "example-first-draft",
+  "idempotencyKey": "example-paper-bookmark",
   "format": "wall_text",
   "channels": [
     "youtube"
   ],
   "privateTest": true,
   "brief": {
-    "title": "From your brief to approved publishing",
-    "brand": "Local Video",
+    "title": "Make a paper bookmark",
+    "brand": "Example Studio",
     "language": "en-US",
-    "accent": "#555555",
-    "narration": "Start with a concrete brief and create the video on your computer. Watch the complete draft, check the text and listen to the voiceover. Approve only the version you want to publish. Each channel keeps its own receipt, so errors can be resumed without uploading duplicate videos.",
-    "caption": "Private integration test: local rendering, draft approval and verified publishing.",
+    "accent": "#666666",
+    "narration": "A paper bookmark is a simple craft project. Choose a small sheet of paper and fold it into a long rectangle. Add a pattern with a pencil or marker. Write a short message, then place the finished bookmark inside a book. Use your own words and images when creating a real video.",
+    "caption": "Fictional craft demonstration. Replace this example with your own content.",
     "scenes": [
       {
-        "title": "A concrete brief",
-        "body": "Choose the text, voiceover and channels before you start."
+        "title": "Choose your paper",
+        "body": "Use a small sheet that folds easily."
       },
       {
-        "title": "Review the draft",
-        "body": "Watch the complete video and listen to the narration."
+        "title": "Fold a rectangle",
+        "body": "Make a long shape and press the fold flat."
       },
       {
-        "title": "Approve this version",
-        "body": "Approval matches the exact file you reviewed."
+        "title": "Add a pattern",
+        "body": "Draw simple lines or shapes with a pencil."
       },
       {
-        "title": "Resume without duplicates",
-        "body": "Each channel retains its ID, status and receipt."
+        "title": "Keep your place",
+        "body": "Write a short message and try it in a book."
       }
     ]
   }

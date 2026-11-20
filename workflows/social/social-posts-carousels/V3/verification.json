@@ -1,0 +1,14 @@
+{
+  "offlineTests": 36,
+  "offlinePassed": 36,
+  "nativeHtmlExtractionPassed": true,
+  "nativeDataTableCASPassed": true,
+  "nativeStaleWriterRejected": true,
+  "paidAiRequests": 0,
+  "paidRenderRequests": 0,
+  "emailsSent": 0,
+  "socialPublications": 0,
+  "productionWorkflowModified": false,
+  "liveEndToEndApiCertification": false,
+  "defaultActive": false
+}

@@ -1,23 +1,17 @@
-# V3 validation
+# Verification scope
 
-## Automated checks
+The revision changes canvas positions and sticky notes. All 25 operating nodes in the main workflow and all 10 in the required setup companion retain their original IDs, names, parameters and connections. No runtime feature was added.
 
-42 local checks passed across the catalog engine, setup engine and bundled n8n node contracts. Coverage includes automatic provisioning, all 14 property types and values, repeatability, pagination, API limits, uncertain create responses, conflicting column types, partial failures, personal content, secret blocking, large files and attachment corruption.
+The canonical source was retrieved from paoloronco/n8n-templates, workflows/n8n-notion-workflow-backup/workflow.json. Its Git blob was independently checked: 26c6b2118030dc6dd8b8916bf9517876f7e98a2b. Original downloaded bytes are preserved separately.
 
-The setup request is checked for an explicit JSON body and preservation of the requested Notion API version. Date comparisons use Notion's minute precision.
+- 42 existing behavioral/runtime tests passed, covering discovery, repeats, changed sources, large attachments, owner notes, byte verification, failed requests, retry limits and companion provisioning. External APIs are simulated in these tests.
+- The five runtime-contract tests were also run against the exact revised JSON files. These are repeated checks from the suite, not five additional distinct scenarios.
+- All 13 Code nodes compiled. Unique node identities, valid connections/references, enabled operating nodes, inactive workflows and absence of bound credentials or pinned data were checked.
+- One yellow overview per workflow follows the How it works / Setup / Customization structure. Main overview: 220 words; companion overview: 189 words. Each white section note has fewer than 50 words.
+- Native n8n imports and native re-export comparisons verify the saved review drafts. No Gmail, Notion content write, email or publication action was executed by these drafts during this revision. The owner's production backup was compared before and after import and remained unchanged.
 
-## Integration checks
+The prior implementation has separate historical live-account evidence, including unchanged/changed runs and recovered JSON imports. It is not described as a new live-provider acceptance test of this revision. Configure the intended accounts and perform the README's manual/repeat/download/restore checks before enabling unattended operation.
 
-- Imported the setup companion and main workflow into n8n and ran against a separate Notion catalog.
-- Created a dedicated page, inline database, all 14 typed columns and a Setup and restore subpage through the companion.
-- Verified three source workflows, including an inactive scheduled workflow and workflows with multiple trigger types and tags.
-- Completed two final full-verification runs with 3/3 sources processed and no failures. Reused the same catalog rows and JSON attachments.
-- Downloaded all three complete JSON files separately and checked their identity, byte length, SHA-256 and graph information against the catalog.
-- Changed a disposable row's node count to an incorrect value and added a personal note. The next backup repaired the count and preserved the note.
-- Imported a recovered workflow into a separate inactive n8n copy: 49 processing nodes and seven sticky notes were restored. The source workflow was not executed as part of that import check.
+No GitHub, Gumroad or Creator Portal publication/submission is included. Creator approval remains an independent review decision.
 
-## Release checks
-
-The public workflows import inactive. Credential bindings, private account configuration, workflow instance metadata, pinned data and execution cache are removed. Existing main-workflow node IDs, positions, sticky-note text and geometry are retained; the owner's public documentation link remains intentional.
-
-The repository and downloadable bundle are verified separately after publication. These checks establish the tested behavior and file integrity; they do not imply n8n Creator Portal submission or approval.
+UI export comparison also passed after normalizing known omitted default parameters and the local webhook IDs that n8n generates for Wait/email nodes on opening the editor. Those generated IDs are excluded from the public files.

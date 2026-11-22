@@ -4,7 +4,7 @@
 
 - [Setup and operations for this version](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/SETUP.md)
 
-Revision 3.0.1. Accessible-project discovery, native metadata collectors and eight Google Sheets tabs.
+Revision 3.0.2. Accessible-project discovery, native metadata collectors and eight Google Sheets tabs.
 
 Collect Google Cloud inventory and visible IAM policies, retain complete snapshots and changes in BigQuery, review governance findings in Google Sheets, and download HTML/CSV reports. Optional email reports substantive additions and removals while suppressing routine lifecycle records and confirmed Google-managed key rotations.
 
@@ -19,3 +19,7 @@ The canvas mirrors the owner's approved compact horizontal arrangement, with sep
 Updated canvas geometry and annotations; configurable `n8nBaseUrl`; disabled-by-default email; consistent filtering across email counts, body and resource-change CSV; before/after metadata returned by the comparison query for safe key classification. Full inventory and change history remain available. Automatic discovery no longer starts with example projects preconfigured as required fallbacks.
 
 No credentials, personal account/project configuration, workflow instance IDs, webhooks or execution samples are embedded in this JSON. Example configuration values must be replaced before running. Published repository files do not submit a Creator Portal revision.
+
+## Revised presentation and privacy
+
+The reviewed horizontal canvas and seven concise notes are applied to the current V3 runtime. Existing notification filtering, metadata checks and configurable execution links are retained. Owner contact details and private documentation references were removed; public setup assets remain documented. No private credentials, instance metadata or execution samples are distributed.

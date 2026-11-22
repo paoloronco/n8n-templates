@@ -8,20 +8,20 @@ Collect text-based invoice PDFs from Gmail, extract invoice details with configu
 
 1. Start manually or run every six hours after publishing/activating the workflow.
 2. Gmail retrieves all messages matching `has:attachment filename:pdf newer_than:30d (subject:invoice OR subject:fattura)`, including read messages, and downloads their attachments.
-3. Messages without binary attachments are discarded. **Normalize PDF binary** splits PDF attachments into individual linked items and rejects any PDF larger than 20 MiB using its actual binary size. Other attachment types are skipped.
-4. **Extract PDF text** reads text from binary property `data`.
-5. **Parse invoice and canonical name** matches one of four example provider patterns, extracts and validates the invoice number, date and total, and builds the filename and destination path.
+3. Messages without binary attachments are discarded. **Normalize PDF Attachments** splits PDF attachments into individual linked items and rejects any PDF larger than 20 MiB using its actual binary size. Other attachment types are skipped.
+4. **Extract Text from PDF** reads text from binary property `data`.
+5. **Parse Invoice Details** matches one of four example provider patterns, extracts and validates the invoice number, date and total, and builds the filename and destination path.
 6. One provider filter routes the invoice to its SFTP upload node. After a successful upload, a per-item Code node restores the corresponding parsed record and PDF using n8n item linking.
 7. The provider's Google Sheets node inserts or updates a row in the same `Invoices` worksheet, matching on **Unique Key** (`Provider:Invoice Number`).
 8. The branch completes. Source Gmail messages are retained without modification.
 
-The five canvas notes include one yellow overview with setup instructions and four brief gray section notes. Existing node IDs, positions, sticky dimensions and connections are preserved.
+The reviewed canvas has nine notes: one yellow overview and eight short white section notes. Four provider branches stay in aligned horizontal bands. Operating node IDs, the reviewed positions and connections are preserved.
 
 ## Setup
 
 1. Import `Unified_Invoice_Archiving - template.json` into n8n. Leave the workflow inactive while configuring it.
-2. Connect Gmail OAuth2 in **Gmail - Get invoice messages**. Restrict the search to your invoice senders, review the 30-day lookback and test the query in Gmail. `Return All` is enabled, so all matching messages are retrieved; use a narrow query for large mailboxes.
-3. Open **Parse invoice and canonical name** and customize the `patterns` array and extraction regexes to match your real PDF text. The shipped rules are working examples, not vendor-specific parsers. Provider names must match their downstream filter values:
+2. Connect Gmail OAuth2 in **Fetch Invoice Emails**. Restrict the search to your invoice senders, review the 30-day lookback and test the query in Gmail. `Return All` is enabled, so all matching messages are retrieved; use a narrow query for large mailboxes.
+3. Open **Parse Invoice Details** and customize the `patterns` array and extraction regexes to match your real PDF text. The shipped rules are working examples, not vendor-specific parsers. Provider names must match their downstream filter values:
 
    | Provider | Category | Default SFTP folder |
    | --- | --- | --- |

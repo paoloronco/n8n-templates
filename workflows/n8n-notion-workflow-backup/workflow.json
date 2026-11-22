@@ -1,5 +1,5 @@
 {
-  "name": "n8n Workflow Backup to Notion",
+  "name": "Back up workflow catalog JSON to Notion — V3 — Revised",
   "nodes": [
     {
       "parameters": {},
@@ -9,7 +9,7 @@
       "typeVersion": 1,
       "position": [
         0,
-        80
+        96
       ]
     },
     {
@@ -23,8 +23,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        160
+        320,
+        192
       ],
       "onError": "continueErrorOutput"
     },
@@ -39,8 +39,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        784,
-        -368
+        640,
+        928
       ]
     },
     {
@@ -73,8 +73,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1440,
-        -384
+        1568,
+        928
       ]
     },
     {
@@ -91,8 +91,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1664,
-        -592
+        1856,
+        832
       ],
       "onError": "continueRegularOutput"
     },
@@ -107,8 +107,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1920,
-        -592
+        2144,
+        832
       ],
       "onError": "continueErrorOutput"
     },
@@ -123,8 +123,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2176,
-        -368
+        2432,
+        928
       ]
     },
     {
@@ -138,8 +138,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        144
+        960,
+        192
       ],
       "onError": "continueErrorOutput"
     },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        784,
-        128
+        1280,
+        192
       ]
     },
     {
@@ -188,8 +188,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1168,
-        -368
+        1280,
+        928
       ],
       "onError": "continueErrorOutput"
     },
@@ -204,8 +204,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1280,
-        320
+        1568,
+        -32
       ]
     },
     {
@@ -217,8 +217,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1472,
-        -48
+        1856,
+        192
       ],
       "onError": "continueErrorOutput"
     },
@@ -252,8 +252,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1808,
-        -64
+        2144,
+        192
       ]
     },
     {
@@ -288,8 +288,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2384,
-        0
+        2432,
+        80
       ],
       "onError": "continueRegularOutput"
     },
@@ -300,8 +300,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2800,
-        160
+        3008,
+        192
       ]
     },
     {
@@ -340,8 +340,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2384,
-        160
+        2720,
+        240
       ],
       "onError": "continueRegularOutput"
     },
@@ -362,30 +362,30 @@
       "typeVersion": 1.2,
       "position": [
         0,
-        240
+        288
       ]
     },
     {
       "parameters": {
-        "content": "# n8n Workflow Backup to Notion\n\nAutomatically back up and document your n8n workflows in Notion, with structured documentation, verified JSON exports, and change tracking.\n\n### How it works\n- Retrieves active, inactive, and archived workflows via the n8n API.\n- Creates or updates dedicated Notion pages with generated documentation.\n- Uploads and verifies complete JSON workflow backups.\n- Preserves personal notes and previous backups on failure.\n- Tracks changes, handles API limits, and reports errors.\n\n### Setup\n- Import the workflow into n8n.\n- Connect your n8n API and Notion credentials.\n- Create a Notion catalog database with the required properties.\n- Update database IDs, URLs, and settings in **Configuration**.\n- Run a manual test, verify backups, and enable the schedule.\n\n### Requirements\n- n8n instance with API access.\n- Notion database and integration with read/write permissions.\n- Sufficient Notion file-upload allowance.\n- SMTP credentials (optional).\n- No AI services or community nodes required.\n\n### Customization\n- Adjust backup frequency and time zone.\n- Include or exclude specific workflows.\n- Customize documentation through workflow sticky notes.\n- Configure API limits, file sizes, and email notifications.\n\n### Additional Info\n- One-way backup: n8n → Notion.\n- Restore workflows by importing their JSON files.\n- Credentials, database, and encryption keys require separate backups.\n- Failed backups are reported without deleting previous copies.\n\n**Full Documentation:** [n8n Workflow Backup to Notion](https://paoloronco.notion.site/n8n-Workflow-Backup-to-Notion-41af0ba27c32814d800cc4582aa68c04?source=copy_link)",
-        "height": 848,
+        "content": "## Verified n8n backups in a Notion catalog\n\n### How it works\nFor n8n operators who need a readable catalog and recoverable workflow exports. Run manually or hourly. The companion creates or reuses a Notion catalog with 14 typed properties. The main workflow discovers visible sources, updates stable documentation pages and attaches complete JSON exports.\n\nDownloaded bytes and SHA-256 are checked before replacing a managed attachment. Unchanged sources reuse their verified copy; personal notes remain. Failed or oversized uploads retain the previous backup. This is a one-way definition backup, not a complete instance backup.\n\n### Setup\n1. Import [the companion setup workflow](https://github.com/paoloronco/n8n-templates/blob/main/workflows/n8n-notion-workflow-backup/setup-notion-catalog.json). Bind its Notion credential and save it inactive.\n2. Bind n8n read-only and Notion credentials in the main HTTP nodes. Share one parent page with the Notion integration, including file-upload access.\n3. In **Configuration**, set setupWorkflowId, notionParentPageId, instance URLs and a stable catalogTitle. Leave documentationDataSourceId empty for automatic creation. Run initial setup sequentially.\n4. Run manually; inspect documentation and download/import a JSON into a separate inactive workflow. Repeat to check reuse before enabling the schedule.\n\n### Customization\nAdjust source filters, timezone, pacing and file limits. Enable optional email only after configuring SMTP and addresses. Recognizable secrets are redacted heuristically; review confidential parameters. Credential secrets, encryption keys and the n8n database need separate backups.\n\n[Detailed configuration and restore guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/n8n-notion-workflow-backup/README.md)",
         "width": 688,
-        "color": 2
+        "height": 528,
+        "color": 1
       },
       "id": "615a3649-892c-488e-8103-65569696d5fe",
       "name": "00 · Overview and operations",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -848,
-        -704
+        -816,
+        -208
       ]
     },
     {
       "parameters": {
-        "content": "## 01 · Start and inventory\n\nStart manually or hourly. Include active, inactive and archived workflows, follow pagination and check for overlapping executions. Keep only essential inventory metadata in memory.",
-        "height": 560,
-        "width": 1104,
+        "content": "## 01 · Start and configure\n\nManual and hourly runs share one configuration. Set the destination, instance URLs and source filters here. API permissions define coverage; active, inactive and archived workflows are included by default.",
+        "width": 592,
+        "height": 688,
         "color": 7
       },
       "id": "a98a50a2-9dea-49d8-ac82-0279ad49720c",
@@ -393,15 +393,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -48,
-        -144
+        -64,
+        -208
       ]
     },
     {
       "parameters": {
-        "content": "## 02 · Controlled API requests\n\nPrepare the state and attachments, respect Notion limits and send one request at a time. Bounded retries and explicit waits keep service failures visible.",
-        "height": 848,
-        "width": 1120,
+        "content": "## 03 · Dispatch one API request\n\nPreserve the current state, pace requests, then route to read-only n8n, Notion JSON or file upload. Service responses rejoin before verification. The return loop advances one bounded request at a time.",
+        "width": 1936,
+        "height": 896,
         "color": 7
       },
       "id": "3168e41d-8fd9-4f6b-9771-5942a9d4efc7",
@@ -409,15 +409,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1104,
-        -144
+        1248,
+        -208
       ]
     },
     {
       "parameters": {
-        "content": "## 03 · Catalog, README and JSON attachment\n\nRead one source at a time, update its stable page and attach the complete .json file directly. Verify the downloaded bytes before retiring the previous copy or legacy JSON subpage. Preserve personal notes. If a file exceeds the Notion account limit, report an error and retain the previous backup.",
-        "height": 960,
-        "width": 2080,
+        "content": "## 04 · Verify before advancing\n\nJoin each response with its saved state. Download attached JSON when required; verify bytes, identity and SHA-256 before promoting a replacement. Personal notes and the previous verified copy survive failed verification.",
+        "width": 1504,
+        "height": 592,
         "color": 7
       },
       "id": "16c75bf7-13cb-4ff7-9575-5e0f3993e0e8",
@@ -425,15 +425,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2256,
-        -144
+        3216,
+        -208
       ]
     },
     {
       "parameters": {
-        "content": "## 04 · Report and notifications\n\nCompare expected coverage with actual results. Partial failures remain failures. Optional notifications check SMTP acceptance; the instance error handler covers unhandled execution failures.",
-        "height": 512,
-        "width": 1552,
+        "content": "## 06 · Report and finish\n\nCompare expected coverage with actual results. Email is optional and checks SMTP acceptance. Both notified and skipped results reach the final outcome; an incomplete backup cannot finish as a successful sync.",
+        "width": 1504,
+        "height": 400,
         "color": 7
       },
       "id": "091b2636-d03e-4bc9-a212-aed259200f08",
@@ -441,15 +441,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1120,
-        -672
+        1248,
+        704
       ]
     },
     {
       "parameters": {
-        "content": "## 05 · Execution failures\n\nSend technical failures to the final report without claiming a successful sync. Preserve personal content and existing copies when verification fails.",
-        "height": 496,
-        "width": 352,
+        "content": "## 05 · Collect execution failures\n\nErrors from setup, requests and verification enter the shared failure report. Partial coverage stays a failure; the final outcome exposes it after optional notification. Use an independent Error Workflow for unexpected failures.",
+        "width": 656,
+        "height": 400,
         "color": 7
       },
       "id": "404a2401-0636-446b-9486-2c50a6604347",
@@ -457,8 +457,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        704,
-        -672
+        560,
+        704
       ]
     },
     {
@@ -480,8 +480,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3056,
-        592
+        3264,
+        -32
       ],
       "onError": "continueErrorOutput"
     },
@@ -514,8 +514,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3408,
-        576
+        3552,
+        -32
       ]
     },
     {
@@ -529,8 +529,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3840,
-        384
+        4128,
+        -32
       ],
       "onError": "continueErrorOutput"
     },
@@ -545,8 +545,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4144,
-        592
+        4416,
+        192
       ],
       "onError": "continueErrorOutput"
     },
@@ -580,8 +580,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2064,
-        176
+        2432,
+        320
       ]
     },
     {
@@ -627,8 +627,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2384,
-        320
+        2720,
+        480
       ],
       "onError": "continueRegularOutput"
     },
@@ -652,8 +652,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3600,
-        384
+        3840,
+        -32
       ],
       "onError": "continueRegularOutput"
     },
@@ -663,8 +663,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        256,
-        576
+        640,
+        192
       ],
       "parameters": {
         "source": "database",
@@ -706,14 +706,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -48,
-        448
+        560,
+        -208
       ],
       "parameters": {
-        "content": "## 06 · Automatic Notion setup (V3)\nImport the companion setup workflow and select its ID in Configuration. It reuses a dedicated catalog or creates the page, inline database, 14 typed columns and a restore guide. Existing compatible catalogs receive missing columns without changing notes or column types.\n\nThe existing overview above describes the original manual setup; this band replaces that database-creation step.",
-        "width": 1104,
-        "height": 336,
-        "color": 4
+        "content": "## 02 · Create or reuse the catalog\n\nThe companion provisions the page, database and 14 columns before discovery. Existing compatible catalogs are reused. Conflicting types stop setup. Save the companion and select its ID in Configuration.",
+        "width": 656,
+        "height": 592,
+        "color": 7
       }
     }
   ],

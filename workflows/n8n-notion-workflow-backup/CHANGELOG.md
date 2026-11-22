@@ -11,3 +11,10 @@
 - Retained complete JSON download verification, personal-note preservation, paced requests and failure reporting.
 
 Earlier revisions remain available in the repository history.
+
+## Revised canvas and documentation
+
+- Group configuration, catalog setup, API dispatch and attachment verification horizontally.
+- Put failure reporting and optional notifications in a separate band.
+- Fit concise notes to the reviewed canvas and document the required setup companion.
+- Remove credential bindings, local webhook identities and instance metadata from distribution files. Runtime logic remains unchanged.

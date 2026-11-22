@@ -1,5 +1,5 @@
 {
-  "name": "n8n Notion Backup · Setup catalog",
+  "name": "Notion backup catalog setup — V3 — Revised",
   "nodes": [
     {
       "id": "ff5b569b-cf88-4419-9ce2-c6970a664443",
@@ -203,10 +203,26 @@
         -176
       ],
       "parameters": {
-        "content": "# Automatic Notion catalog setup\nCall this companion from the backup, or run it manually after editing Setup configuration. Select the Notion credential in Notion setup API. A shared parent page is the only Notion ID required for a new catalog.\n\nCreates a dedicated page, inline Workflows database, 14 typed columns and a restore guide. Reuses the same structure on subsequent runs. An existing data source can be adopted by ID; missing compatible columns are added, conflicting types stop the run. Do not run initial setup concurrently for the same parent and title.",
+        "content": "## Create and verify the destination\n\nReuse the matching catalog, or create its page, database, 14 typed columns and restore guide. Add missing compatible columns without changing personal content. Ambiguous identities or conflicting types stop setup.",
         "width": 1840,
         "height": 640,
-        "color": 4
+        "color": 7
+      }
+    },
+    {
+      "id": "46e0ce37-5a71-4f92-a372-c6239af431d9",
+      "name": "Overview and setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -176
+      ],
+      "parameters": {
+        "color": 1,
+        "width": 688,
+        "height": 480,
+        "content": "## Prepare the Notion backup catalog\n\n### How it works\nThis companion supplies the destination for the main workflow. It creates or reuses a dedicated catalog page, inline Workflows database, 14 typed properties and a restore guide, then returns the verified data source configuration. Repeated runs reuse the same structure. Existing compatible catalogs gain missing properties; conflicting types stop the run.\n\n### Setup\n1. Connect your Notion integration in **Notion setup API**. Share a parent page with that integration and save this workflow inactive.\n2. Import the main backup workflow. In its **Configuration**, enter this saved workflow ID, the shared parent page UUID and a stable catalog title. The main workflow calls this companion automatically.\n3. For standalone provisioning, edit **Setup configuration** with the same values and run manually.\n4. Inspect the database and restore guide. Repeat once to confirm reuse. Run initial provisioning sequentially for each parent/title combination.\n\n### Customization\nSet the title or provide an existing data source ID. This helper creates structure; the main workflow populates documentation pages and verified JSON attachments. It does not copy n8n credentials or activate workflows.\n\n[Main workflow and setup guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/n8n-notion-workflow-backup)"
       }
     }
   ],

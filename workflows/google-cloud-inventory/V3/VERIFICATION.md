@@ -13,3 +13,7 @@ SMTP transport was not exercised by the integration runs. Generated email conten
 The canvas uses the owner's approved functional geometry. Overview notes contain about 200 words; section notes are under 50 words. The public JSON is inactive with no pinned execution data, credential references, personal cloud project/account settings, operational spreadsheet IDs, instance metadata or webhook identifiers. Existing public node IDs were preserved; V2 adds one documentation-only worker note.
 
 The JSON and Markdown documentation were edited directly for this revision. No Publishing Assistant run or newly generated artwork is claimed. Original source exports are retained separately from the reviewed files. Publishing these files to GitHub does not submit a revision to n8n Creators.
+
+## Presentation revision
+
+The current runtime is preserved. Canvas positions and note geometry follow the reviewed instance export; two node labels and their references are made clearer. Privacy review removes all credential bindings, webhook identifiers, instance metadata and personal contact links. Regression checks are rerun on the prepared file. Previous live-account runs above are historical evidence; no new Google scan or SMTP delivery is claimed by this presentation update.

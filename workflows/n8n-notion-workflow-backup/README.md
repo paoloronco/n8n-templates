@@ -25,7 +25,7 @@ Back up the workflows visible to your n8n API account into a structured Notion c
 
 Email is optional. With `notifyOnErrors` and `notifyOnChanges` set to `false`, no SMTP credential is needed. To enable email, configure **Send backup email**, sender/recipient addresses and notification flags. An independent n8n error workflow can be configured separately.
 
-The preserved overview sticky note describes the earlier manual database setup. The **06 · Automatic Notion setup (V3)** note and this guide replace that step.
+The overview and **02 · Create or reuse the catalog** section describe automatic setup. Source discovery, API dispatch, attachment verification and final outcomes are grouped separately on the canvas.
 
 ### Upgrade an existing catalog
 

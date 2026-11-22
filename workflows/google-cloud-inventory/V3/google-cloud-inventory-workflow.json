@@ -8,8 +8,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        33088,
-        4624
+        -16,
+        192
       ]
     },
     {
@@ -28,8 +28,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        33088,
-        4432
+        -16,
+        0
       ]
     },
     {
@@ -43,8 +43,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        33408,
-        4528
+        304,
+        96
       ]
     },
     {
@@ -56,8 +56,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        34048,
-        4528
+        944,
+        96
       ]
     },
     {
@@ -132,8 +132,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        34368,
-        4528
+        1264,
+        96
       ]
     },
     {
@@ -327,8 +327,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        34688,
-        4528
+        1584,
+        96
       ]
     },
     {
@@ -348,8 +348,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        35008,
-        4528
+        1904,
+        96
       ],
       "onError": "continueErrorOutput",
       "notes": "Dataset already provisioned. Runtime identity cannot create arbitrary datasets."
@@ -363,8 +363,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        35328,
-        4528
+        2224,
+        96
       ],
       "onError": "continueErrorOutput"
     },
@@ -391,8 +391,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        36176,
-        4400
+        3072,
+        -32
       ],
       "onError": "continueErrorOutput"
     },
@@ -405,8 +405,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        36496,
-        4384
+        3392,
+        -48
       ],
       "onError": "continueErrorOutput"
     },
@@ -419,8 +419,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        36816,
-        4368
+        3712,
+        -64
       ]
     },
     {
@@ -449,8 +449,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        37072,
-        4368
+        3968,
+        -64
       ],
       "onError": "continueErrorOutput"
     },
@@ -463,8 +463,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        37344,
-        4352
+        4240,
+        -80
       ],
       "onError": "continueErrorOutput"
     },
@@ -498,8 +498,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        37632,
-        4336
+        4528,
+        -96
       ]
     },
     {
@@ -532,8 +532,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        37936,
-        4320
+        4832,
+        -112
       ]
     },
     {
@@ -566,8 +566,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        38288,
-        4400
+        5184,
+        -32
       ]
     },
     {
@@ -621,8 +621,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        39088,
-        4304
+        5984,
+        -128
       ],
       "onError": "continueErrorOutput"
     },
@@ -635,8 +635,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        42016,
-        4304
+        8912,
+        -128
       ],
       "onError": "continueErrorOutput"
     },
@@ -697,8 +697,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        42624,
-        4288
+        9520,
+        -144
       ],
       "onError": "continueErrorOutput"
     },
@@ -711,8 +711,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        43216,
-        4288
+        10112,
+        -144
       ],
       "onError": "continueErrorOutput"
     },
@@ -725,8 +725,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        43456,
-        4272
+        10352,
+        -160
       ],
       "onError": "continueErrorOutput"
     },
@@ -735,12 +735,12 @@
         "options": {}
       },
       "id": "80ff757a-56c8-4467-8b74-46b5d61f3b54",
-      "name": "Batch loop",
+      "name": "Process persistence batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        44688,
-        4256
+        11584,
+        -176
       ]
     },
     {
@@ -752,8 +752,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        45392,
-        4272
+        12288,
+        -160
       ],
       "onError": "continueErrorOutput"
     },
@@ -766,8 +766,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        45024,
-        4240
+        11920,
+        -192
       ],
       "onError": "continueErrorOutput"
     },
@@ -801,8 +801,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        43152,
-        5088
+        10048,
+        656
       ],
       "onError": "continueErrorOutput"
     },
@@ -815,8 +815,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        43456,
-        5072
+        10352,
+        640
       ],
       "onError": "continueErrorOutput"
     },
@@ -1011,8 +1011,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        43776,
-        5056
+        10672,
+        624
       ]
     },
     {
@@ -1041,8 +1041,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        44080,
-        5056
+        10976,
+        624
       ],
       "onError": "continueErrorOutput"
     },
@@ -1055,8 +1055,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        44656,
-        5024
+        11552,
+        592
       ],
       "onError": "continueErrorOutput"
     },
@@ -1078,8 +1078,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        44976,
-        5008
+        11872,
+        576
       ],
       "onError": "continueErrorOutput"
     },
@@ -1092,8 +1092,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        45248,
-        4992
+        12144,
+        560
       ],
       "onError": "continueErrorOutput"
     },
@@ -1127,8 +1127,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        45520,
-        4976
+        12416,
+        544
       ]
     },
     {
@@ -1148,8 +1148,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        45824,
-        4880
+        12720,
+        448
       ],
       "onError": "continueErrorOutput"
     },
@@ -1162,8 +1162,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        46192,
-        5152
+        13088,
+        720
       ],
       "onError": "continueErrorOutput"
     },
@@ -1185,8 +1185,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        46448,
-        5136
+        13344,
+        704
       ],
       "onError": "continueErrorOutput"
     },
@@ -1381,8 +1381,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        46736,
-        5120
+        13632,
+        688
       ]
     },
     {
@@ -1390,12 +1390,12 @@
         "jsCode": "const report=$('Build report and exports').first();\nreturn [{json:{...$('Delivery complete').first().json,download:'Open Binary to download report.html and CSV files; Google Sheet updated'},binary:report.binary}];\n"
       },
       "id": "bafddce3-d636-4f20-a226-51764d896def",
-      "name": "Report files",
+      "name": "Return report files",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        46992,
-        5120
+        13888,
+        688
       ]
     },
     {
@@ -1407,8 +1407,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        36096,
-        4928
+        2992,
+        496
       ]
     },
     {
@@ -1602,8 +1602,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        36416,
-        4928
+        3312,
+        496
       ]
     },
     {
@@ -1615,13 +1615,13 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        36736,
-        4928
+        3632,
+        496
       ]
     },
     {
       "parameters": {
-        "content": "# Google Cloud Inventory and IAM Audit\n\n### How it works\nFor cloud operations teams: collect resource metadata and visible IAM policies, assess governance rules, and compare complete snapshots in BigQuery. Discover accessible projects and extend Cloud Asset Inventory with native Google APIs. Review eight Google Sheets tabs, including API state and coverage. HTML/CSV files are available from Report files. The first scan establishes a baseline. Optional email reports substantive resource additions and removals while keeping all records in history. Access and API visibility determine coverage; findings require review.\n\n### Setup\n1. Enable the required Google APIs. Select Google credentials in every HTTP Request node and grant inventory read, BigQuery job/table write and spreadsheet edit access.\n2. Create the BigQuery dataset in advance. Prepare the five base dashboard tabs; the workflow adds the three extended tabs.\n3. Fill Configuration: project access, dataset/location, spreadsheet ID, n8nBaseUrl and limits. Configure SMTP and sender/recipient addresses only when sendEmail is enabled.\n4. Run twice manually. Check BigQuery, Sheets and downloads, then configure the workflow timezone and an Error Workflow before enabling the daily schedule.\n\n**Guide:** see this version's README and SETUP.md in the GitHub package. Google Cloud storage and query charges follow your configuration.\n\n## Additional info\n\n- [Setup and operations for this version](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/SETUP.md)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/README.md)",
+        "content": "## Google Cloud Inventory & IAM Audit\n\n**Full setup guide:** [Read the complete documentation](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/SETUP.md)\n\n### How it works\nRun manually or daily at 03:15 in the workflow timezone. Discover resources, enabled APIs and visible IAM policies across configured projects. BigQuery stores complete snapshots, findings and change history; only completed scans become comparison baselines.\n\nEight Sheets tabs preserve review decisions: Dashboard, Inventory, Findings, Changes, Scans, Enabled APIs, Technical resources and Coverage. HTML/CSV exports and optional email complete delivery. Email reports substantive resource additions/removals; routine lifecycle records and confirmed system-managed key rotations are suppressed. Unknown key metadata stays visible. Coverage depends on API permissions and visibility.\n\n### Setup\n1. Enable the required Google APIs. Bind credentials to all Google HTTP nodes with inventory/IAM read, BigQuery job/dataset and Sheets access.\n2. In **Configuration**, set project scopes, billing/quota project, dataset, location and sheetId. Review limits and governance rules.\n3. [Open the Sheets dashboard/model](https://docs.google.com/spreadsheets/d/16uTQRgZSTN2GN2nE2giTPu2ZyfWONfvt5m5gkOIOgeY/copy), create your copy and grant the Sheets identity Editor access. Follow the setup guide for worksheets and headers.\n4. Configure emailTo, emailFrom and SMTP when using sendEmail. Set n8nBaseUrl in **Configuration**; review timezone and Error Workflow in Settings.\n5. Run a baseline and comparison manually; verify BigQuery, Sheets and exports before enabling the schedule. BigQuery usage may incur charges.\n\n### Customization\nAdjust requiredLabels, allowedLocations, retention and limits. Preserve sheet headers, hidden identifiers and review columns.",
         "height": 880,
         "width": 760
       },
@@ -1630,13 +1630,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        32128,
-        4208
+        -976,
+        -224
       ]
     },
     {
       "parameters": {
-        "content": "## 01 · Configuration and run tracking\n\nSet credentials, destinations and limits. Validate the configuration and register the run before reading cloud resources. Run and delivery status are tracked separately.",
+        "content": "## 01 · Configure and track runs\n\nSet project scopes, destinations and limits before discovery. The run registry tracks scan status independently from delivery, so failed or incomplete scans cannot silently become successful baselines.",
         "height": 688,
         "width": 2960,
         "color": 7
@@ -1646,13 +1646,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        33008,
-        4208
+        -96,
+        -224
       ]
     },
     {
       "parameters": {
-        "content": "## 02 · Resource and IAM discovery\n\nCollect paginated inventory, enabled APIs and visible IAM policies. Native API collectors extend Cloud Asset metadata. Incomplete resource discovery stops the scan; unavailable IAM coverage is reported explicitly.",
+        "content": "## 02 · Discover and assess\n\nCollect resources, enabled APIs and visible IAM policies. Native API requests enrich metadata beyond Cloud Asset Inventory. Check public access, broad roles, labels and locations; missing permissions reduce coverage and are reported explicitly.",
         "height": 496,
         "width": 4496,
         "color": 7
@@ -1662,13 +1662,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        38592,
-        4144
+        5488,
+        -288
       ]
     },
     {
       "parameters": {
-        "content": "## 04 · Snapshots and change history\n\nWrite bounded batches, verify row counts and compare complete compatible snapshots. Keep all additions, modifications and removals in BigQuery. The first successful run establishes a baseline.",
+        "content": "## 03 · Persist and compare snapshots\n\nWrite bounded batches, then compare complete snapshots in BigQuery. The first scan establishes a baseline; later scans retain additions, modifications and removals. Setup, batch and audit jobs return through the shared worker.",
         "height": 496,
         "width": 2560,
         "color": 7
@@ -1678,13 +1678,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        43104,
-        4144
+        10000,
+        -288
       ]
     },
     {
       "parameters": {
-        "content": "## 05 · Dashboard, exports and notifications\n\nPreserve review notes and finding status. Update Google Sheets and generate HTML/CSV downloads. Email only substantive additions or removals; routine history and confirmed Google-managed key rotations remain in the full history.",
+        "content": "## 04 · Review and deliver results\n\nUpdate eight Sheets tabs while preserving review checkboxes and notes by stable identifiers. Email includes only substantive resource additions/removals. Download HTML and CSV from **Return report files**; keep sheet headers and hidden IDs intact.",
         "height": 608,
         "width": 4080,
         "color": 7
@@ -1694,13 +1694,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        43120,
-        4832
+        10016,
+        400
       ]
     },
     {
       "parameters": {
-        "content": "## Failure handling\n\nRecord the failure and stop the execution. Configure an Error Workflow for scheduled-run alerts. Inspect manual failures in Executions. Delivery status remains distinct from inventory completion.",
+        "content": "## 05 · Record failures\n\nSave failure details, then stop execution. Automatic runs can invoke the Error Workflow selected in Settings; inspect manual failures in Executions. Incomplete scans remain excluded from comparison baselines.",
         "height": 320,
         "width": 1120,
         "color": 7
@@ -1710,8 +1710,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        36048,
-        4800
+        2944,
+        368
       ]
     },
     {
@@ -1741,8 +1741,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        44384,
-        5040
+        11280,
+        608
       ],
       "onError": "continueErrorOutput"
     },
@@ -1755,8 +1755,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        38768,
-        4304
+        5664,
+        -128
       ]
     },
     {
@@ -1768,8 +1768,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        42304,
-        4288
+        9200,
+        -144
       ]
     },
     {
@@ -1781,8 +1781,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        39424,
-        4288
+        6320,
+        -144
       ]
     },
     {
@@ -1835,8 +1835,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        39728,
-        4288
+        6624,
+        -144
       ],
       "onError": "continueErrorOutput",
       "notes": "Authoritative enabled API list. Cloud Asset may retain stale service enablements after API disable."
@@ -1850,8 +1850,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        41312,
-        4208
+        8208,
+        -224
       ],
       "onError": "continueErrorOutput"
     },
@@ -1864,8 +1864,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        44000,
-        4256
+        10896,
+        -176
       ],
       "onError": "continueErrorOutput"
     },
@@ -1926,8 +1926,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        43744,
-        4256
+        10640,
+        -176
       ],
       "onError": "continueErrorOutput",
       "notes": "Authoritative enabled API list. Cloud Asset may retain stale service enablements after API disable."
@@ -1989,8 +1989,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        44368,
-        4256
+        11264,
+        -176
       ],
       "onError": "continueErrorOutput",
       "notes": "Authoritative enabled API list. Cloud Asset may retain stale service enablements after API disable."
@@ -2025,8 +2025,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        41632,
-        4192
+        8528,
+        -240
       ]
     },
     {
@@ -2088,8 +2088,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        33728,
-        4528
+        624,
+        96
       ]
     },
     {
@@ -2101,8 +2101,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        40048,
-        4272
+        6944,
+        -160
       ],
       "onError": "continueErrorOutput"
     },
@@ -2115,8 +2115,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        40672,
-        4240
+        7568,
+        -192
       ],
       "onError": "continueErrorOutput"
     },
@@ -2162,8 +2162,8 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        40368,
-        4256
+        7264,
+        -176
       ],
       "onError": "continueErrorOutput"
     },
@@ -2209,14 +2209,14 @@
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "position": [
-        40992,
-        4224
+        7888,
+        -208
       ],
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "content": "## 03 · Shared BigQuery worker\n\nSubmit and poll setup, batch and comparison jobs. Validate completion and route the result to the correct phase. Errors enter the failure band below.",
+        "content": "## 03a · Shared BigQuery job worker\n\nSubmit, poll and validate setup, persistence and comparison jobs. Successful jobs route back to discovery, the batch loop or report delivery. Errors converge on the failure section below.",
         "height": 416,
         "width": 2512,
         "color": 7
@@ -2226,8 +2226,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        36032,
-        4224
+        2928,
+        -208
       ]
     }
   ],
@@ -2457,7 +2457,7 @@
       "main": [
         [
           {
-            "node": "Batch loop",
+            "node": "Process persistence batches",
             "type": "main",
             "index": 0
           }
@@ -2547,7 +2547,7 @@
       "main": [
         [
           {
-            "node": "Batch loop",
+            "node": "Process persistence batches",
             "type": "main",
             "index": 0
           }
@@ -2561,7 +2561,7 @@
         ]
       ]
     },
-    "Batch loop": {
+    "Process persistence batches": {
       "main": [
         [
           {
@@ -2810,7 +2810,7 @@
       "main": [
         [
           {
-            "node": "Report files",
+            "node": "Return report files",
             "type": "main",
             "index": 0
           }
@@ -3089,5 +3089,6 @@
     "executionTimeout": 3600
   },
   "active": false,
-  "pinData": {}
+  "pinData": {},
+  "tags": []
 }

@@ -1,90 +1,151 @@
 {
-  "name": "Archive and log invoices from Gmail with SFTP and Google Sheets — V2",
+  "name": "Archive and log invoices from Gmail with SFTP and Google Sheets — V2 — Revised",
   "nodes": [
     {
       "parameters": {
-        "content": "### How it works\nFor small teams that archive supplier invoices and maintain an invoice register. Run manually or every six hours: Gmail retrieves matching messages, each PDF becomes one item, and text extraction feeds a configurable parser. Four example provider categories route validated invoices to SFTP, then insert or update one Google Sheets row using `Provider:Invoice Number` as the Unique Key. Source emails are retained.\n\nText-based PDFs only; OCR and AI are not included. Unknown providers, missing fields and invalid dates or amounts stop processing. Repeated runs upload the same filename again; Sheets upserts do not prevent SFTP overwrites.\n\n### Setup\n1. Connect Gmail OAuth2 in the Gmail node; narrow its query to your invoice senders and review the 30-day lookback.\n2. In **Parse invoice and canonical name**, adapt provider patterns, field regexes and destination paths to your PDFs. Dates accept ISO or day/month/year; amounts accept decimal and grouped European/US formats.\n3. Connect all four SFTP nodes. Create writable `/invoices/utilities`, `/invoices/internet`, `/invoices/cloud` and `/invoices/hosting` folders, or change the parser paths.\n4. Create an `Invoices` worksheet with headers: `Provider`, `Category`, `Invoice Number`, `Date`, `Amount`, `File`, `Unique Key`. Replace `REPLACE_WITH_GOOGLE_SHEET_ID` in all four Sheets nodes, connect a Google service account and share the spreadsheet with it as Editor.\n5. Test each provider and a multi-PDF email; compare files and rows, then rerun an invoice before enabling the schedule.\n\n### Customization\nAdjust the schedule, Gmail query, provider rules and column mappings. Keep provider names aligned with the four routing filters.\n\n## Additional info\n\n- [Setup and operations for this version](https://github.com/paoloronco/n8n-templates/blob/main/workflows/invoice-archiving/V2/README.md)",
-        "height": 1016,
-        "width": 636,
-        "color": 1
+        "content": "## Archive and log invoice PDFs\n\n### How it works\n1. A manual run or six-hour schedule retrieves matching Gmail messages, including read emails.\n2. Each PDF attachment is separated and its text is extracted.\n3. Configurable rules validate the provider, invoice number, date and total, then build a canonical filename.\n4. Four provider branches upload PDFs over SFTP and upsert the invoice register in Google Sheets. Source emails are retained.\n\n### Setup\n- [ ] Connect Gmail OAuth2 and narrow the email query to your invoice senders.\n- [ ] Customize the rules in **Parse Invoice Details** using text from real invoices.\n- [ ] Create the four `/invoices/` category folders and connect all SFTP nodes.\n- [ ] Share your spreadsheet with the Google service account. Replace the spreadsheet ID in all four Sheets nodes.\n- [ ] Create the `Invoices` tab with Provider, Category, Invoice Number, Date, Amount, File and Unique Key columns.\n- [ ] Test every provider and a multi-PDF email before enabling the schedule.\n\n### Customization\nAdapt provider rules and destination folders. Image-only PDFs require OCR. Repeated runs upload the same filename and upsert the same key; confirm your SFTP overwrite behavior.",
+        "height": 544,
+        "width": 640
       },
-      "id": "cf62e776-c0a6-40f4-9db8-3565cf02e0ab",
-      "name": "00 — WORKFLOW OVERVIEW",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        -800,
-        -256
+        -816,
+        -80
       ],
-      "typeVersion": 1
+      "id": "9e625e5b-d30f-4472-9b4e-5664156d0325",
+      "name": "Sticky Note"
     },
     {
       "parameters": {
-        "content": "## 01 · Start a controlled run\nUse Manual Trigger for setup checks. The schedule repeats every six hours once the workflow is published; leave it inactive until all credentials, folders and parsing rules are configured.",
-        "height": 578,
-        "width": 362,
+        "content": "## Start\n\nManual or every six hours.",
+        "height": 528,
         "color": 7
       },
-      "id": "7ec9cb04-5c5e-446e-ad9d-1f55ecf6fbb4",
-      "name": "01 — TRIGGERS",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        -160,
-        -48
+        -96,
+        32
       ],
-      "typeVersion": 1
+      "id": "b859c818-bf47-4625-b33e-bd10e48a9bbc",
+      "name": "Sticky Note1"
     },
     {
       "parameters": {
-        "content": "## 02 · Collect individual invoice PDFs\nSearch matching mail from the last 30 days and download attachments. Keep PDFs as separate linked items, skip other attachments and reject PDFs larger than 20 MiB.",
-        "height": 578,
-        "width": 904,
+        "content": "## Read invoice emails\n\nIncludes read mail. Only messages with attachments continue.",
+        "height": 304,
+        "width": 496,
         "color": 7
       },
-      "id": "217c4d62-d7f8-4635-b9dc-4fa6e4f38cb4",
-      "name": "02 — GMAIL INTAKE",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        240,
-        -48
+        256,
+        144
       ],
-      "typeVersion": 1
+      "id": "12e5f632-f63e-48ff-a4b3-c2dcdfdee0a2",
+      "name": "Sticky Note2"
     },
     {
       "parameters": {
-        "content": "## 03 · Turn PDF text into invoice records\nCustomize the four provider patterns and field regexes in the parser. Unsupported, ambiguous or incomplete invoices stop execution before upload; scanned PDFs need an OCR step.",
-        "height": 578,
-        "width": 638,
+        "content": "## Prepare PDF text\n\nKeep PDFs linked to their Gmail message. Scanned PDFs need OCR.",
+        "height": 304,
+        "width": 544,
         "color": 7
       },
-      "id": "56f236bd-5ca3-4b34-8e84-772ff9a6c3f4",
-      "name": "03 — EXTRACT & VALIDATE",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        1168,
-        -48
+        864,
+        144
       ],
-      "typeVersion": 1
+      "id": "85673683-dd80-40cd-af01-e3db705fad5b",
+      "name": "Sticky Note3"
     },
     {
       "parameters": {
-        "content": "## 04 · Archive first, then update the register\nEach category uploads its PDF, restores the matching invoice and upserts the same Invoices worksheet. SFTP/Sheets retry up to three attempts; repeat uploads may overwrite files. Emails stay in Gmail; failures stop without a notification branch.",
-        "height": 1088,
-        "width": 1266,
+        "content": "## Validate\n\nEdit provider rules here.\nMissing fields stop the run.",
+        "height": 320,
         "color": 7
       },
-      "id": "ad889340-5715-4c15-a175-81ba92f2d607",
-      "name": "04 — STORAGE & COMPLETION",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        1824,
-        -256
+        1504,
+        144
       ],
-      "typeVersion": 1
+      "id": "33647394-7fcd-4054-b292-f85b416c231d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Utility invoices\n\nArchive to `/invoices/utilities/`; update Sheets by provider + invoice number.",
+        "height": 272,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        -80
+      ],
+      "id": "899a1dd5-df71-4bb7-844c-dc7e6117f9ec",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Internet invoices\n\nArchive to `/invoices/internet/`; update Sheets by provider + invoice number.",
+        "height": 272,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        224
+      ],
+      "id": "c1b3299f-8d96-4101-91cf-9a0a7f858577",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Cloud invoices\n\nArchive to `/invoices/cloud/`; update Sheets by provider + invoice number.",
+        "height": 272,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        528
+      ],
+      "id": "d490b44d-2c87-4aa6-8691-6cf7473175b2",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Hosting invoices\n\nArchive to `/invoices/hosting/`; update Sheets by provider + invoice number.",
+        "height": 272,
+        "width": 1136,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        832
+      ],
+      "id": "1985727d-a63a-4808-a84d-2c884c12057e",
+      "name": "Sticky Note8"
     },
     {
       "parameters": {},
       "id": "5e6ef999-f2a0-4a79-bfb4-3d195591fc61",
-      "name": "Manual Trigger",
+      "name": "Manual Start Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "position": [
         -48,
@@ -104,7 +165,7 @@
         }
       },
       "id": "68c00013-36bb-49d5-bc49-dd21589062b1",
-      "name": "Schedule Trigger",
+      "name": "Trigger Every 6 Hours",
       "type": "n8n-nodes-base.scheduleTrigger",
       "position": [
         -48,
@@ -115,6 +176,7 @@
     {
       "parameters": {
         "operation": "getAll",
+        "returnAll": true,
         "simple": false,
         "filters": {
           "q": "has:attachment filename:pdf newer_than:30d (subject:invoice OR subject:fattura)",
@@ -122,11 +184,10 @@
         },
         "options": {
           "downloadAttachments": true
-        },
-        "returnAll": true
+        }
       },
       "id": "baab2d06-9525-412c-add0-e53d9f80052c",
-      "name": "Gmail - Get invoice messages",
+      "name": "Fetch Invoice Emails",
       "type": "n8n-nodes-base.gmail",
       "position": [
         304,
@@ -160,7 +221,7 @@
         "options": {}
       },
       "id": "5dd597c7-337a-40d6-83de-1dfd339247d2",
-      "name": "Keep messages with attachments",
+      "name": "Filter Emails with Attachments",
       "type": "n8n-nodes-base.filter",
       "position": [
         608,
@@ -170,11 +231,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Split PDF attachments and retain n8n item links and binary storage references.\nconst items = $input.all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  for (const [key, binary] of Object.entries(item.binary || {})) {\n    const fileName = String(binary.fileName || binary.filename || 'invoice.pdf');\n    if (!fileName.toLowerCase().endsWith('.pdf') && String(binary.mimeType || '').toLowerCase() !== 'application/pdf') continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    if (buffer.length > 20 * 1024 * 1024) throw new Error(`PDF exceeds 20 MiB: ${fileName}`);\n    out.push({\n      json: { ...item.json, attachmentKey: key, originalFileName: fileName },\n      binary: { data: { ...binary, fileName } },\n      pairedItem: { item: i },\n    });\n  }\n}\nreturn out;\n",
-        "mode": "runOnceForAllItems"
+        "jsCode": "// Split PDF attachments and retain n8n item links and binary storage references.\nconst items = $input.all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  for (const [key, binary] of Object.entries(item.binary || {})) {\n    const fileName = String(binary.fileName || binary.filename || 'invoice.pdf');\n    if (!fileName.toLowerCase().endsWith('.pdf') && String(binary.mimeType || '').toLowerCase() !== 'application/pdf') continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    if (buffer.length > 20 * 1024 * 1024) throw new Error(`PDF exceeds 20 MiB: ${fileName}`);\n    out.push({\n      json: { ...item.json, attachmentKey: key, originalFileName: fileName },\n      binary: { data: { ...binary, fileName } },\n      pairedItem: { item: i },\n    });\n  }\n}\nreturn out;\n"
       },
       "id": "2a81381f-5345-4152-b9e2-9917fbdf897e",
-      "name": "Normalize PDF binary",
+      "name": "Normalize PDF Attachments",
       "type": "n8n-nodes-base.code",
       "position": [
         912,
@@ -188,7 +248,7 @@
         "options": {}
       },
       "id": "9ef80dc3-e84a-4fa2-b2c7-c530fb5b9d84",
-      "name": "Extract PDF text",
+      "name": "Extract Text from PDF",
       "type": "n8n-nodes-base.extractFromFile",
       "position": [
         1264,
@@ -199,10 +259,10 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Replace these example provider rules with patterns from your text-based PDFs.\nconst source = $('Normalize PDF binary').item;\nif (!source?.json || !source?.binary?.data) throw new Error('Missing source PDF');\nconst sourceMessageId = source.json.id || source.json.messageId;\nif (!sourceMessageId) throw new Error('Missing source Gmail message ID');\nconst text = String($input.item.json.text || $input.item.json.data || '').replace(/\\r/g, '');\nif (text.trim().length < 30) throw new Error('No extractable PDF text; OCR may be required');\nconst patterns = [\n  { provider: 'UtilityProvider', category: 'utilities', match: /utility provider|electricity|gas bill/i },\n  { provider: 'InternetProvider', category: 'internet', match: /internet provider|broadband|connectivity/i },\n  { provider: 'CloudProvider', category: 'cloud', match: /cloud provider|cloud services/i },\n  { provider: 'HostingProvider', category: 'hosting', match: /hosting provider|hosting services/i },\n];\nconst matches = patterns.filter(p => p.match.test(text));\nif (matches.length !== 1) throw new Error('Unknown or ambiguous provider; configure patterns for your invoices');\nconst { provider, category } = matches[0];\nconst invoiceNumber = (text.match(/(?:Invoice\\s*(?:number|no\\.?|#)|Fattura\\s*(?:n\\.?|numero))\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/_-]*)/i) || [])[1];\nconst dateMatch = text.match(/(?:Invoice date|Data fattura)\\s*[:#-]?\\s*(\\d{4}-\\d{2}-\\d{2}|\\d{2}[/.\\-]\\d{2}[/.\\-]\\d{4})(?!\\d)/i);\nconst amountMatch = text.match(/(?:Total due|Total amount|Totale da pagare|Importo totale)\\s*[:]?\\s*(?:(?:EUR|USD|GBP|[€$£])\\s*)?(-?[0-9][0-9.,]*)/i);\nif (!invoiceNumber || !dateMatch || !amountMatch) throw new Error('Required invoice fields not found; customize extraction rules');\nconst rawDate = dateMatch[1];\nconst date = /^\\d{4}-/.test(rawDate) ? rawDate : rawDate.split(/[/.\\-]/).reverse().join('-');\nconst parsedDate = new Date(`${date}T00:00:00.000Z`);\nif (!Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) throw new Error('Invalid invoice date');\nconst rawAmount = amountMatch[1];\nlet normalized;\nif (rawAmount.includes(',') && rawAmount.includes('.')) {\n  const decimal = rawAmount.lastIndexOf(',') > rawAmount.lastIndexOf('.') ? ',' : '.';\n  const grouping = decimal === ',' ? '.' : ',';\n  const escapedGrouping = grouping === '.' ? '\\\\.' : ',';\n  const escapedDecimal = decimal === '.' ? '\\\\.' : ',';\n  if (!new RegExp(`^-?\\\\d{1,3}(?:${escapedGrouping}\\\\d{3})+${escapedDecimal}\\\\d{1,2}$`).test(rawAmount)) throw new Error('Invalid total amount');\n  normalized = rawAmount.split(grouping).join('').replace(decimal, '.');\n} else {\n  // A lone separator is decimal; more than two fractional digits is ambiguous.\n  if (!/^-?\\d+(?:[.,]\\d{1,2})?$/.test(rawAmount)) throw new Error('Invalid or ambiguous total amount');\n  normalized = rawAmount.replace(',', '.');\n}\nconst amount = Number(normalized);\nif (!Number.isFinite(amount) || amount < 0) throw new Error('Invalid total amount');\nconst safeInvoice = encodeURIComponent(invoiceNumber);\nconst fileName = `${date}_${provider}_${safeInvoice}.pdf`;\nconst targetPath = `/invoices/${category}/${fileName}`;\nreturn {\n  json: { provider, type: category, invoiceNumber, uniqueKey: `${provider}:${invoiceNumber}`, date, amount,\n    account: '', service: '', netAmount: null, vatAmount: null, tab: category, fileName, targetPath,\n    sourceMessageId, sourceAttachmentKey: source.json.attachmentKey || '', subject: source.json.subject || '' },\n  binary: { data: { ...source.binary.data, fileName } },\n};\n"
+        "jsCode": "// Replace these example provider rules with patterns from your text-based PDFs.\nconst source = $('Normalize PDF Attachments').item;\nif (!source?.json || !source?.binary?.data) throw new Error('Missing source PDF');\nconst sourceMessageId = source.json.id || source.json.messageId;\nif (!sourceMessageId) throw new Error('Missing source Gmail message ID');\nconst text = String($input.item.json.text || $input.item.json.data || '').replace(/\\r/g, '');\nif (text.trim().length < 30) throw new Error('No extractable PDF text; OCR may be required');\nconst patterns = [\n  { provider: 'UtilityProvider', category: 'utilities', match: /utility provider|electricity|gas bill/i },\n  { provider: 'InternetProvider', category: 'internet', match: /internet provider|broadband|connectivity/i },\n  { provider: 'CloudProvider', category: 'cloud', match: /cloud provider|cloud services/i },\n  { provider: 'HostingProvider', category: 'hosting', match: /hosting provider|hosting services/i },\n];\nconst matches = patterns.filter(p => p.match.test(text));\nif (matches.length !== 1) throw new Error('Unknown or ambiguous provider; configure patterns for your invoices');\nconst { provider, category } = matches[0];\nconst invoiceNumber = (text.match(/(?:Invoice\\s*(?:number|no\\.?|#)|Fattura\\s*(?:n\\.?|numero))\\s*[:#-]?\\s*([A-Z0-9][A-Z0-9\\/_-]*)/i) || [])[1];\nconst dateMatch = text.match(/(?:Invoice date|Data fattura)\\s*[:#-]?\\s*(\\d{4}-\\d{2}-\\d{2}|\\d{2}[/.\\-]\\d{2}[/.\\-]\\d{4})(?!\\d)/i);\nconst amountMatch = text.match(/(?:Total due|Total amount|Totale da pagare|Importo totale)\\s*[:]?\\s*(?:(?:EUR|USD|GBP|[€$£])\\s*)?(-?[0-9][0-9.,]*)/i);\nif (!invoiceNumber || !dateMatch || !amountMatch) throw new Error('Required invoice fields not found; customize extraction rules');\nconst rawDate = dateMatch[1];\nconst date = /^\\d{4}-/.test(rawDate) ? rawDate : rawDate.split(/[/.\\-]/).reverse().join('-');\nconst parsedDate = new Date(`${date}T00:00:00.000Z`);\nif (!Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) throw new Error('Invalid invoice date');\nconst rawAmount = amountMatch[1];\nlet normalized;\nif (rawAmount.includes(',') && rawAmount.includes('.')) {\n  const decimal = rawAmount.lastIndexOf(',') > rawAmount.lastIndexOf('.') ? ',' : '.';\n  const grouping = decimal === ',' ? '.' : ',';\n  const escapedGrouping = grouping === '.' ? '\\\\.' : ',';\n  const escapedDecimal = decimal === '.' ? '\\\\.' : ',';\n  if (!new RegExp(`^-?\\\\d{1,3}(?:${escapedGrouping}\\\\d{3})+${escapedDecimal}\\\\d{1,2}$`).test(rawAmount)) throw new Error('Invalid total amount');\n  normalized = rawAmount.split(grouping).join('').replace(decimal, '.');\n} else {\n  // A lone separator is decimal; more than two fractional digits is ambiguous.\n  if (!/^-?\\d+(?:[.,]\\d{1,2})?$/.test(rawAmount)) throw new Error('Invalid or ambiguous total amount');\n  normalized = rawAmount.replace(',', '.');\n}\nconst amount = Number(normalized);\nif (!Number.isFinite(amount) || amount < 0) throw new Error('Invalid total amount');\nconst safeInvoice = encodeURIComponent(invoiceNumber);\nconst fileName = `${date}_${provider}_${safeInvoice}.pdf`;\nconst targetPath = `/invoices/${category}/${fileName}`;\nreturn {\n  json: { provider, type: category, invoiceNumber, uniqueKey: `${provider}:${invoiceNumber}`, date, amount,\n    account: '', service: '', netAmount: null, vatAmount: null, tab: category, fileName, targetPath,\n    sourceMessageId, sourceAttachmentKey: source.json.attachmentKey || '', subject: source.json.subject || '' },\n  binary: { data: { ...source.binary.data, fileName } },\n};\n"
       },
       "id": "3888ca64-d271-450b-ba9e-53a576b2309e",
-      "name": "Parse invoice and canonical name",
+      "name": "Parse Invoice Details",
       "type": "n8n-nodes-base.code",
       "position": [
         1568,
@@ -235,7 +295,7 @@
         "options": {}
       },
       "id": "763de55a-2d51-42f6-9cd5-b4761a459437",
-      "name": "Filter Utility",
+      "name": "Filter Utility Invoices",
       "type": "n8n-nodes-base.filter",
       "position": [
         1936,
@@ -251,7 +311,7 @@
         "options": {}
       },
       "id": "b43ae77c-c939-4fde-a417-118157e93d01",
-      "name": "SFTP upload Utility",
+      "name": "Upload Utility Invoices SFTP",
       "type": "n8n-nodes-base.ftp",
       "maxTries": 3,
       "position": [
@@ -359,7 +419,7 @@
         "options": {}
       },
       "id": "9d46e73a-264c-465f-bd68-519b0a87402d",
-      "name": "Sheets upsert Utility Invoices",
+      "name": "Upsert Utility Invoices in Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "maxTries": 3,
       "position": [
@@ -395,11 +455,11 @@
         "options": {}
       },
       "id": "e62557d7-fd70-48f6-ac67-85ae7123f19b",
-      "name": "Filter InternetProvider",
+      "name": "Filter Internet Invoices",
       "type": "n8n-nodes-base.filter",
       "position": [
         1936,
-        240
+        336
       ],
       "typeVersion": 2.2
     },
@@ -411,12 +471,12 @@
         "options": {}
       },
       "id": "013b1172-2d45-4d66-9b19-fec2d0611ad7",
-      "name": "SFTP upload InternetProvider",
+      "name": "Upload Internet Invoices SFTP",
       "type": "n8n-nodes-base.ftp",
       "maxTries": 3,
       "position": [
         2192,
-        240
+        336
       ],
       "retryOnFail": true,
       "typeVersion": 1,
@@ -519,12 +579,12 @@
         "options": {}
       },
       "id": "ce7da96b-e666-4c4d-99c5-cff5eb40d4b1",
-      "name": "Sheets upsert Internet Invoices",
+      "name": "Upsert Internet Invoices in Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "maxTries": 3,
       "position": [
         2640,
-        240
+        336
       ],
       "retryOnFail": true,
       "typeVersion": 4.7,
@@ -555,11 +615,11 @@
         "options": {}
       },
       "id": "1169ff41-d7fb-4d63-9b79-6c2742ce1602",
-      "name": "Filter CloudProvider",
+      "name": "Filter Cloud Invoices",
       "type": "n8n-nodes-base.filter",
       "position": [
         1936,
-        448
+        640
       ],
       "typeVersion": 2.2
     },
@@ -571,12 +631,12 @@
         "options": {}
       },
       "id": "e0e5a8e2-d579-4950-b59d-594f5e7e29c4",
-      "name": "SFTP upload CloudProvider",
+      "name": "Upload Cloud Invoices SFTP",
       "type": "n8n-nodes-base.ftp",
       "maxTries": 3,
       "position": [
         2192,
-        448
+        640
       ],
       "retryOnFail": true,
       "typeVersion": 1,
@@ -679,12 +739,12 @@
         "options": {}
       },
       "id": "276e0438-2fab-4810-8ecc-e6ac113e8bfe",
-      "name": "Sheets upsert CloudProvider",
+      "name": "Upsert Cloud Invoices in Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "maxTries": 3,
       "position": [
         2640,
-        448
+        640
       ],
       "retryOnFail": true,
       "typeVersion": 4.7,
@@ -692,11 +752,11 @@
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
-        "mode": "runOnceForEachItem"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $('Parse Invoice Details').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n"
       },
       "id": "ad166be6-1630-4717-ade8-0076167fb1fe",
-      "name": "Restore parsed item Utility",
+      "name": "Restore Utility Invoice",
       "type": "n8n-nodes-base.code",
       "position": [
         2416,
@@ -707,7 +767,7 @@
     {
       "parameters": {},
       "id": "a9726b86-dea9-4179-9e1e-e2f7dab139c8",
-      "name": "Completed Utility (email retained)",
+      "name": "Finish Utility Invoice Process",
       "type": "n8n-nodes-base.noOp",
       "position": [
         2880,
@@ -717,51 +777,51 @@
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
-        "mode": "runOnceForEachItem"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $('Parse Invoice Details').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n"
       },
       "id": "15c3ca0a-735a-461e-8fbc-5a115e230184",
-      "name": "Restore parsed item InternetProvider",
+      "name": "Restore Internet Invoice",
       "type": "n8n-nodes-base.code",
       "position": [
         2416,
-        240
+        336
       ],
       "typeVersion": 2
     },
     {
       "parameters": {},
       "id": "374c134d-775f-44ff-9b17-fdbbf6a9f101",
-      "name": "Completed InternetProvider (email retained)",
+      "name": "Finish Internet Invoice Process",
       "type": "n8n-nodes-base.noOp",
       "position": [
         2880,
-        240
+        336
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
-        "mode": "runOnceForEachItem"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $('Parse Invoice Details').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n"
       },
       "id": "f0ffd963-3526-4306-97f5-0c51c2ba3c3e",
-      "name": "Restore parsed item CloudProvider",
+      "name": "Restore Cloud Invoice",
       "type": "n8n-nodes-base.code",
       "position": [
         2416,
-        448
+        640
       ],
       "typeVersion": 2
     },
     {
       "parameters": {},
       "id": "a55e6b52-b85e-433f-8b75-a0d3556beeda",
-      "name": "Completed CloudProvider (email retained)",
+      "name": "Finish Cloud Invoice Process",
       "type": "n8n-nodes-base.noOp",
       "position": [
         2880,
-        448
+        640
       ],
       "typeVersion": 1
     },
@@ -773,12 +833,12 @@
         "options": {}
       },
       "id": "a5582cf0-cebb-4e6c-952d-76061348e052",
-      "name": "SFTP upload HostingProvider",
+      "name": "Upload Hosting Invoices SFTP",
       "type": "n8n-nodes-base.ftp",
       "maxTries": 3,
       "position": [
         2192,
-        656
+        944
       ],
       "retryOnFail": true,
       "typeVersion": 1,
@@ -881,12 +941,12 @@
         "options": {}
       },
       "id": "cbf83594-aad8-4c19-aeef-9330c77c94ad",
-      "name": "Sheets upsert HostingProvider",
+      "name": "Upsert Hosting Invoices in Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "maxTries": 3,
       "position": [
         2640,
-        656
+        944
       ],
       "retryOnFail": true,
       "typeVersion": 4.7,
@@ -894,26 +954,26 @@
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n",
-        "mode": "runOnceForEachItem"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $('Parse Invoice Details').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn { json: src.json, binary: src.binary };\n"
       },
       "id": "d350c08d-95c3-4a41-a19a-84fa28fb590c",
-      "name": "Restore parsed item HostingProvider",
+      "name": "Restore Hosting Invoice",
       "type": "n8n-nodes-base.code",
       "position": [
         2416,
-        656
+        944
       ],
       "typeVersion": 2
     },
     {
       "parameters": {},
       "id": "63622aa3-56ba-4bab-90e6-c5b4d118c934",
-      "name": "Completed HostingProvider (email retained)",
+      "name": "Finish Hosting Invoice Process",
       "type": "n8n-nodes-base.noOp",
       "position": [
         2880,
-        656
+        944
       ],
       "typeVersion": 1
     },
@@ -942,279 +1002,279 @@
         "options": {}
       },
       "id": "a3849253-9f19-4389-9828-27e5547ad835",
-      "name": "Filter HostingProvider",
+      "name": "Filter Hosting Invoices",
       "type": "n8n-nodes-base.filter",
       "position": [
         1936,
-        656
+        944
       ],
       "typeVersion": 2.2
     }
   ],
   "pinData": {},
   "connections": {
-    "Filter HostingProvider": {
+    "Filter Hosting Invoices": {
       "main": [
         [
           {
-            "node": "SFTP upload HostingProvider",
+            "node": "Upload Hosting Invoices SFTP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Utility": {
+    "Filter Utility Invoices": {
       "main": [
         [
           {
-            "node": "SFTP upload Utility",
+            "node": "Upload Utility Invoices SFTP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Manual Trigger": {
+    "Manual Start Trigger": {
       "main": [
         [
           {
-            "node": "Gmail - Get invoice messages",
+            "node": "Fetch Invoice Emails",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract PDF text": {
+    "Extract Text from PDF": {
       "main": [
         [
           {
-            "node": "Parse invoice and canonical name",
+            "node": "Parse Invoice Details",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Schedule Trigger": {
+    "Trigger Every 6 Hours": {
       "main": [
         [
           {
-            "node": "Gmail - Get invoice messages",
+            "node": "Fetch Invoice Emails",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter InternetProvider": {
+    "Filter Internet Invoices": {
       "main": [
         [
           {
-            "node": "SFTP upload InternetProvider",
+            "node": "Upload Internet Invoices SFTP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter CloudProvider": {
+    "Filter Cloud Invoices": {
       "main": [
         [
           {
-            "node": "SFTP upload CloudProvider",
+            "node": "Upload Cloud Invoices SFTP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload HostingProvider": {
+    "Upload Hosting Invoices SFTP": {
       "main": [
         [
           {
-            "node": "Restore parsed item HostingProvider",
+            "node": "Restore Hosting Invoice",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload Utility": {
+    "Upload Utility Invoices SFTP": {
       "main": [
         [
           {
-            "node": "Restore parsed item Utility",
+            "node": "Restore Utility Invoice",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize PDF binary": {
+    "Normalize PDF Attachments": {
       "main": [
         [
           {
-            "node": "Extract PDF text",
+            "node": "Extract Text from PDF",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert HostingProvider": {
+    "Upsert Hosting Invoices in Sheets": {
       "main": [
         [
           {
-            "node": "Completed HostingProvider (email retained)",
+            "node": "Finish Hosting Invoice Process",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload InternetProvider": {
+    "Upload Internet Invoices SFTP": {
       "main": [
         [
           {
-            "node": "Restore parsed item InternetProvider",
+            "node": "Restore Internet Invoice",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SFTP upload CloudProvider": {
+    "Upload Cloud Invoices SFTP": {
       "main": [
         [
           {
-            "node": "Restore parsed item CloudProvider",
+            "node": "Restore Cloud Invoice",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert Internet Invoices": {
+    "Upsert Internet Invoices in Sheets": {
       "main": [
         [
           {
-            "node": "Completed InternetProvider (email retained)",
+            "node": "Finish Internet Invoice Process",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert CloudProvider": {
+    "Upsert Cloud Invoices in Sheets": {
       "main": [
         [
           {
-            "node": "Completed CloudProvider (email retained)",
+            "node": "Finish Cloud Invoice Process",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sheets upsert Utility Invoices": {
+    "Upsert Utility Invoices in Sheets": {
       "main": [
         [
           {
-            "node": "Completed Utility (email retained)",
+            "node": "Finish Utility Invoice Process",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item HostingProvider": {
+    "Restore Hosting Invoice": {
       "main": [
         [
           {
-            "node": "Sheets upsert HostingProvider",
+            "node": "Upsert Hosting Invoices in Sheets",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item Utility": {
+    "Restore Utility Invoice": {
       "main": [
         [
           {
-            "node": "Sheets upsert Utility Invoices",
+            "node": "Upsert Utility Invoices in Sheets",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Gmail - Get invoice messages": {
+    "Fetch Invoice Emails": {
       "main": [
         [
           {
-            "node": "Keep messages with attachments",
+            "node": "Filter Emails with Attachments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Keep messages with attachments": {
+    "Filter Emails with Attachments": {
       "main": [
         [
           {
-            "node": "Normalize PDF binary",
+            "node": "Normalize PDF Attachments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item InternetProvider": {
+    "Restore Internet Invoice": {
       "main": [
         [
           {
-            "node": "Sheets upsert Internet Invoices",
+            "node": "Upsert Internet Invoices in Sheets",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Restore parsed item CloudProvider": {
+    "Restore Cloud Invoice": {
       "main": [
         [
           {
-            "node": "Sheets upsert CloudProvider",
+            "node": "Upsert Cloud Invoices in Sheets",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse invoice and canonical name": {
+    "Parse Invoice Details": {
       "main": [
         [
           {
-            "node": "Filter Utility",
+            "node": "Filter Utility Invoices",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter InternetProvider",
+            "node": "Filter Internet Invoices",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter CloudProvider",
+            "node": "Filter Cloud Invoices",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Filter HostingProvider",
+            "node": "Filter Hosting Invoices",
             "type": "main",
             "index": 0
           }
@@ -1227,5 +1287,6 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "nodeGroups": []
+  "nodeGroups": [],
+  "tags": []
 }

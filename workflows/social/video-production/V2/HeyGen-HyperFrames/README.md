@@ -66,7 +66,3 @@ This is V2 HeyGen Voice + HyperFrames. V1 uses a local worker and has a separate
 ## Canvas and template review
 
 This revision contains 148 nodes: 124 operational nodes and 24 sticky notes. The owner-reviewed HeyGen canvas is the layout reference. The overview uses the required How it works and Setup headings; white section notes contain only titles. Common nodes and note frames have identical positions in both providers. Provider rendering, recovery, authentication, audio-input and output-resolution contracts remain intact. Workflow JSON contains no selected personal credential IDs, owner workflow/instance metadata, personal support links, owner branding or production-content examples. Third-party bundled licenses are retained.
-
-The revised HeyGen / Dropbox workflow targets **Creator Portal proposal #23113**, currently titled **New Submission**, as explicitly selected by the owner. This package contains 148 nodes: 124 operational nodes and 24 sticky notes. Proposal #23115 contains the separate Social Reels workflow and is not the selected destination for this package.
-
-The portal currently blocks resubmission with HTTP 400: **A complete description is required to submit for review**. Its request retains the placeholder title and description **New Submission**, while the Implement changes panel exposes only the replacement JSON. The verified JSON is ready, but the proposal remains **Implement changes** until its description is completed and the submission succeeds. No successful resubmission or approval is claimed.

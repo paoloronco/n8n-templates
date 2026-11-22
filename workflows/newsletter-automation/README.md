@@ -76,3 +76,7 @@ Release emails can be prepared with OpenAI using structured output, while a dete
 - The default subscriber query returns every row in the Data Table. If you add unsubscribe handling, update this node to filter only active subscribers.
 - The template contains example product names, domains, release URLs, sender addresses, and legal text. Replace all placeholders before production use.
 - For real mailing lists, review applicable privacy, consent, unsubscribe, and email-marketing requirements before collecting or contacting subscribers.
+
+## AI and fallback configuration
+
+`Release Email Copywriter Agent` is enabled and routes execution errors to `Build Fallback Release Email Content`. Connect the OpenAI model and structured parser before using AI copywriting. Keep `SEND_EMAIL=NO` while configuring and testing; changing the AI node does not authorize subscriber delivery.

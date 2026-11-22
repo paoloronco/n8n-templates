@@ -485,7 +485,7 @@
       "maxTries": 2,
       "waitBetweenTries": 2000,
       "notesInFlow": true,
-      "disabled": true,
+      "disabled": false,
       "onError": "continueErrorOutput",
       "notes": "Optional AI editorial path. Produces structured English release copy. Errors continue to the deterministic fallback branch."
     },

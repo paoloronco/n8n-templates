@@ -301,7 +301,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const x=$input.item.json??{},b=x.body??x,r=b.result??{};const f=(...v)=>v.find(z=>z!==undefined&&z!==null&&String(z).trim()!=='')??'';const mv=v=>Array.isArray(v)?v.map(String):v?String(v).split(/[\n,]+/).map(s=>s.trim()).filter(Boolean):[];const u=mv(f(r.targeted_users,r.user,r.users,r.target_user)),h=mv(f(r.targeted_hosts,r.host,r.hosts,r.dest_host));const a=parseInt(f(r.failed_attempts,r.count,r.event_count,0),10)||0;let s=String(f(b.severity,b.urgency,r.severity,r.urgency)).toLowerCase();s=({crit:'critical',severe:'critical',warning:'medium',info:'informational'})[s]??s;if(!['critical','high','medium','low','informational'].includes(s))s=a>=20?'critical':a>=10?'high':a>=3?'medium':'low';const ip=String(f(r.src_ip,r.source_ip,r.src,r.rhost)).trim();const p=ip.split('.').map(Number);const pub=p.length===4&&!p.some(n=>!Number.isInteger(n)||n<0||n>255)&&p[0]!==10&&p[0]!==127&&p[0]!==0&&p[0]<224&&!(p[0]===169&&p[1]===254)&&!(p[0]===172&&p[1]>=16&&p[1]<=31)&&!(p[0]===192&&p[1]===168)&&!(p[0]===100&&p[1]>=64&&p[1]<=127);const now=new Date();return{json:{search_name:String(f(b.search_name,r.search_name,b.name,'Splunk alert')),results_link:String(f(b.results_link,r.results_link)),splunk_severity:s,src_ip:ip,is_public_ipv4:pub,failed_attempts:a,targeted_users:u,targeted_users_str:u.join(', ')||'N/A',targeted_hosts:h,targeted_hosts_str:h.join(', ')||'N/A',unique_users:parseInt(r.unique_users,10)||u.length,unique_hosts:parseInt(r.unique_hosts,10)||h.length,received_at:now.toISOString(),received_epoch:now.getTime()}};"
+        "jsCode": "const x=$input.item.json??{},b=x.body??x,r=b.result??{};const f=(...v)=>v.find(z=>z!==undefined&&z!==null&&String(z).trim()!=='')??'';const mv=v=>Array.isArray(v)?v.map(String):v?String(v).split(/[\\n,]+/).map(s=>s.trim()).filter(Boolean):[];const u=mv(f(r.targeted_users,r.user,r.users,r.target_user)),h=mv(f(r.targeted_hosts,r.host,r.hosts,r.dest_host));const a=parseInt(f(r.failed_attempts,r.count,r.event_count,0),10)||0;let s=String(f(b.severity,b.urgency,r.severity,r.urgency)).toLowerCase();s=({crit:'critical',severe:'critical',warning:'medium',info:'informational'})[s]??s;if(!['critical','high','medium','low','informational'].includes(s))s=a>=20?'critical':a>=10?'high':a>=3?'medium':'low';const ip=String(f(r.src_ip,r.source_ip,r.src,r.rhost)).trim();const p=ip.split('.').map(Number);const pub=p.length===4&&!p.some(n=>!Number.isInteger(n)||n<0||n>255)&&p[0]!==10&&p[0]!==127&&p[0]!==0&&p[0]<224&&!(p[0]===169&&p[1]===254)&&!(p[0]===172&&p[1]>=16&&p[1]<=31)&&!(p[0]===192&&p[1]===168)&&!(p[0]===100&&p[1]>=64&&p[1]<=127);const now=new Date();return{json:{search_name:String(f(b.search_name,r.search_name,b.name,'Splunk alert')),results_link:String(f(b.results_link,r.results_link)),splunk_severity:s,src_ip:ip,is_public_ipv4:pub,failed_attempts:a,targeted_users:u,targeted_users_str:u.join(', ')||'N/A',targeted_hosts:h,targeted_hosts_str:h.join(', ')||'N/A',unique_users:parseInt(r.unique_users,10)||u.length,unique_hosts:parseInt(r.unique_hosts,10)||h.length,received_at:now.toISOString(),received_epoch:now.getTime()}};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1504,7 +1504,7 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"

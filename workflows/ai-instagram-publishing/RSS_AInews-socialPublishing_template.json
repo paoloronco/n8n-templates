@@ -13,12 +13,12 @@
           ]
         }
       },
-      "id": "fef7ad34-d7c5-4b63-aa29-da1b4f9eb658",
+      "id": "24bb8a20-01c2-4c6e-a10b-33c16321aff4",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "position": [
-        16,
-        624
+        2368,
+        2000
       ],
       "typeVersion": 1.2
     },
@@ -27,12 +27,12 @@
         "url": "https://follow.it/thehackernews/rss",
         "options": {}
       },
-      "id": "7953a309-9988-43ad-99c3-e9abc510ce12",
+      "id": "9d9509ed-6054-492b-8825-f4102b566dd6",
       "name": "RSS Read",
       "type": "n8n-nodes-base.rssFeedRead",
       "position": [
-        176,
-        624
+        2528,
+        2000
       ],
       "typeVersion": 1.2
     },
@@ -53,12 +53,12 @@
         },
         "options": {}
       },
-      "id": "3967fd7a-287e-4f7f-9e42-a89508dcf347",
+      "id": "cb3ce99d-aaa2-4c11-95b9-1385d2b173ff",
       "name": "Aggregate",
       "type": "n8n-nodes-base.aggregate",
       "position": [
-        320,
-        624
+        2672,
+        2000
       ],
       "typeVersion": 1
     },
@@ -68,12 +68,12 @@
         "text": "=I want you to analyze the following for my company. Find me the best articles to use in my medium post. My company is about AI Agents & Automation. Pick up to 3. Reply ONLY with a comma-separated list of the IDs (e.g., 3,7,12).\n\n{{ $json.forAI }}\n\n",
         "options": {}
       },
-      "id": "efe477d9-de40-4d76-b302-bf8859ffd0bc",
+      "id": "bfda6d4e-ac1f-4bf2-a158-a7c6afac09a5",
       "name": "Best Article finder",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "position": [
-        736,
-        368
+        3088,
+        1744
       ],
       "typeVersion": 2.2
     },
@@ -84,40 +84,25 @@
         "message": "={{ $json.output }}",
         "options": {}
       },
-      "id": "83f6b00e-01c5-4d75-a300-588a0a667746",
+      "id": "0befba7d-e9f9-4e91-908e-ed778f9d2289",
       "name": "Send Content Confirmation1",
       "type": "n8n-nodes-base.gmail",
       "position": [
-        1936,
-        624
+        4320,
+        1648
       ],
       "typeVersion": 2.1
     },
     {
       "parameters": {
-        "content": "# Collecting the news\n\n## Additional info\n\n- [Full Notion documentation](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/ai-instagram-publishing/README.md)",
-        "height": 288,
-        "width": 464
-      },
-      "id": "539847fe-ab5c-4c03-b509-f5c550214945",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        144,
-        528
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
         "jsCode": "// Inputs expected from Aggregate/RSS: arrays: title[], content[], link[]\nconst all = items[0].json;              // aggregated item\nconst titles = all.title || [];\nconst contents = all.content || [];\nconst links = all.link || [];\n\nconst articles = [];\nconst lines = [];\n\nconst maxLen = Math.max(titles.length, contents.length, links.length);\nfor (let i = 0; i < maxLen; i++) {\n  const obj = {\n    id: i + 1,                          // stable ID (1..N). Use guid if you have one.\n    title: titles[i] ?? \"\",\n    content: contents[i] ?? \"\",\n    link: links[i] ?? \"\"\n  };\n  articles.push(obj);\n  // Short preview for the AI to choose from:\n  const preview = (obj.content || \"\").replace(/\\s+/g, \" \").slice(0, 220);\n  lines.push(`${obj.id}. ${obj.title}\\n${preview}${preview.length === 220 ? \"…\" : \"\"}`);\n}\n\nreturn [\n  {\n    json: {\n      articles,                         // keep the structured mapping\n      forAI: lines.join(\"\\n\\n\")         // human-readable list for the model\n    }\n  }\n];"
       },
-      "id": "da372939-c50f-4b09-8bf5-bf524985ab87",
+      "id": "2bcd7a1a-1fe6-4618-abb7-b14b73c4f42b",
       "name": "group the news into 1 item",
       "type": "n8n-nodes-base.code",
       "position": [
-        480,
-        624
+        2832,
+        2000
       ],
       "typeVersion": 2
     },
@@ -125,12 +110,12 @@
       "parameters": {
         "jsCode": "// Code node — Run Once for All Items\n\n// 1) Read AI output text (your AI Agent uses `output`)\nlet aiText =\n  (items[0]?.json?.output ??\n   items[0]?.json?.result ??\n   items[0]?.json?.text ??\n   items[0]?.json?.response ??\n   \"\").toString().trim();\n\n// Fallback: read directly from the AI Agent node by name if not passed through\nif (!aiText) {\n  const ai = $items(\"Best Article finder\", 0, 0);   // <-- change to your AI node name if different\n  if (Array.isArray(ai) && ai.length) {\n    aiText = (ai[0].json.output ?? ai[0].json.result ?? ai[0].json.text ?? \"\").toString().trim();\n  }\n}\n\nif (!aiText) {\n  throw new Error(\"AI output is empty. Make sure the AI Agent node's field name is 'output' (or adjust above).\");\n}\n\n// 2) Get articles array from builder node\nlet articles = items[0]?.json?.articles;\nif (!articles) {\n  const built = $items(\"group the news into 1 item\", 0, 0);   // <-- change \"Code1\" to your builder node name\n  if (Array.isArray(built) && built.length) {\n    articles = built[0]?.json?.articles;\n  }\n}\nif (!Array.isArray(articles)) {\n  throw new Error(\"Couldn't find 'articles' array. Ensure the builder node outputs { json: { articles: [...] } }.\");\n}\n\n// 3) Extract numeric IDs (handles commas, spaces, newlines, bullets)\nconst ids = (aiText.match(/\\d+/g) || []).map(n => parseInt(n, 10));\n\n// 4) Map IDs → full article objects\nconst chosen = ids\n  .map(id => articles.find(a => a.id === id))\n  .filter(Boolean);\n\n// 5) Return one item with arrays\nreturn [{\n  json: {\n    raw: aiText,\n    ids,                                  // e.g., [2,18,45]\n    chosen,                                // [{id, title, content, link}, ...]\n    titles: chosen.map(c => c.title),\n    links: chosen.map(c => c.link)\n  }\n}];"
       },
-      "id": "badf8eb8-330a-4383-bea1-f4d4b2d7fe46",
+      "id": "44224f3f-982d-4c43-ac0f-92774690d731",
       "name": "Find the urls the ai outputted",
       "type": "n8n-nodes-base.code",
       "position": [
-        1216,
-        624
+        3616,
+        1984
       ],
       "typeVersion": 2
     },
@@ -138,47 +123,14 @@
       "parameters": {
         "jsCode": "// Code node — Run Once for All Items\n\n// Collect all links from input items\nconst links = [];\nfor (const item of $input.all()) {\n  if (item.json.link) {\n    links.push(item.json.link);\n  }\n  // if articles are inside \"chosen\" array:\n  if (Array.isArray(item.json.chosen)) {\n    for (const c of item.json.chosen) {\n      if (c.link) links.push(c.link);\n    }\n  }\n}\n\n// Return as one item with all links\nreturn [\n  {\n    json: {\n      links,                          // array of links\n      linksString: links.join(\"\\n\")   // optional: single string\n    }\n  }\n];"
       },
-      "id": "cab1974d-b9e3-4812-bf61-1819379e90f3",
+      "id": "e81ae74c-1804-4f56-afaa-468e802460a1",
       "name": "All url's to 1 string",
       "type": "n8n-nodes-base.code",
       "position": [
-        1408,
-        624
+        3808,
+        1984
       ],
       "typeVersion": 2
-    },
-    {
-      "parameters": {
-        "content": "# Generate content based on the news for Medium, Linkedin & Instagram\n",
-        "height": 464,
-        "width": 848
-      },
-      "id": "9177990a-e7de-421e-afbf-ccfa9917b83c",
-      "name": "Sticky Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1360,
-        512
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-4o-mini"
-        },
-        "options": {}
-      },
-      "id": "9c988918-8d6e-40bd-afeb-83087cd615a0",
-      "name": "4o-mini",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "position": [
-        736,
-        528
-      ],
-      "typeVersion": 1.2
     },
     {
       "parameters": {
@@ -190,12 +142,12 @@
         },
         "options": {}
       },
-      "id": "f1836196-0158-451f-a57e-d002de102e0f",
+      "id": "659d8289-863f-4d90-a2aa-ce662bf7ddbf",
       "name": "4.1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "position": [
-        1616,
-        896
+        4000,
+        2128
       ],
       "typeVersion": 1.2
     },
@@ -205,12 +157,12 @@
         "combineBy": "combineAll",
         "options": {}
       },
-      "id": "2f426219-8697-4082-be1a-3658dfa7f310",
+      "id": "b3adfb49-d62c-45c2-bb03-4d59e0ef19c0",
       "name": "Merge",
       "type": "n8n-nodes-base.merge",
       "position": [
-        1024,
-        624
+        3376,
+        1984
       ],
       "typeVersion": 3.2
     },
@@ -223,10 +175,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        2192,
-        992
+        4672,
+        1984
       ],
-      "id": "78186cc8-f4f1-46f6-b250-6c800ae33438",
+      "id": "42572fbc-d8fe-4867-8bea-a378d83c4a56",
       "name": "Generate an image"
     },
     {
@@ -247,10 +199,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        2944,
-        992
+        5520,
+        1984
       ],
-      "id": "f3cd9aa1-319d-477f-829a-39b16d1134f4",
+      "id": "dae64428-85fd-475e-bd4b-30e96eccb575",
       "name": "Upload file"
     },
     {
@@ -261,12 +213,12 @@
           "systemMessage": "You are a content creator, for a big instagram account where we spread news on CyberSecurity\nAlways use the tone of voice:\n- Professional, innovative, and human\n- Short, clear, and active sentences\n- Address the reader directly (\"you,\" \"your company\")\n- Explain technical terms simply with examples or metaphors\n- Write in a positive and forward-thinking tone\n- Conclude often with a question or call to action\n- Use empathetic and results-oriented language\n\nStrict rule:\nDo not use markdown or emojis in any response."
         }
       },
-      "id": "423aec0d-0bd4-4c4b-af40-c5923544450c",
+      "id": "8b300d33-0c5b-4f14-9b38-0cedda2f01e3",
       "name": "News-writer",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "position": [
-        1616,
-        752
+        4000,
+        1984
       ],
       "typeVersion": 2.2
     },
@@ -290,10 +242,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1872,
-        992
+        4336,
+        1984
       ],
-      "id": "10c146fb-c11a-4ed7-be9d-a41e1eec143b",
+      "id": "6b4f53a2-533f-4c52-a7e0-335a38dbacb5",
       "name": "Message a model"
     },
     {
@@ -313,12 +265,12 @@
           }
         }
       },
-      "id": "e79df11a-7431-4c8e-9e23-b432b5b2737e",
+      "id": "a4a6ffc1-4659-4103-a834-b1058729f3f8",
       "name": "Instagram publish media",
       "type": "n8n-nodes-base.facebookGraphApi",
       "position": [
-        4240,
-        1200
+        7024,
+        2256
       ],
       "typeVersion": 1
     },
@@ -348,12 +300,12 @@
         },
         "options": {}
       },
-      "id": "59b31f32-9f4e-4363-bba4-46c7dd8fc788",
+      "id": "48a207a1-9e27-4864-9f2b-e3c66249287f",
       "name": "Instagram params",
       "type": "n8n-nodes-base.set",
       "position": [
-        3008,
-        1264
+        5872,
+        2320
       ],
       "typeVersion": 3.4
     },
@@ -371,12 +323,12 @@
           }
         }
       },
-      "id": "974dd69e-2776-44ae-ba24-0d539ef1ac87",
+      "id": "3abbda30-c111-4007-8570-75498114035f",
       "name": "Instagram check status of media uploaded before",
       "type": "n8n-nodes-base.facebookGraphApi",
       "position": [
-        3440,
-        1264
+        6304,
+        2320
       ],
       "typeVersion": 1
     },
@@ -384,10 +336,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "combinator": "and",
           "conditions": [
@@ -405,12 +357,12 @@
         },
         "options": {}
       },
-      "id": "a4863844-d155-43d7-ac4a-08ddec029c07",
+      "id": "2720f280-2d8e-4be0-bdd3-d0e542c33baf",
       "name": "If media status is finished",
       "type": "n8n-nodes-base.if",
       "position": [
-        3856,
-        1264
+        6720,
+        2320
       ],
       "typeVersion": 2.2
     },
@@ -434,28 +386,12 @@
           }
         }
       },
-      "id": "b9221749-06f5-4731-966b-7145393bff20",
+      "id": "13539374-02e1-4410-a167-cb83a076921e",
       "name": "Instagram check status of media published before",
       "type": "n8n-nodes-base.facebookGraphApi",
       "position": [
-        4448,
-        1200
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "from https://n8n.io/workflows/2537-simple-social-instagram-single-image-post-with-facebook-api/",
-        "height": 80,
-        "width": 704,
-        "color": 3
-      },
-      "id": "078d200d-1cd4-4eb3-a2b7-447ccc72a95b",
-      "name": "Sticky Note8",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2976,
-        1664
+        7232,
+        2256
       ],
       "typeVersion": 1
     },
@@ -487,24 +423,24 @@
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
       "position": [
-        3232,
-        1264
+        6096,
+        2320
       ],
-      "id": "174d8df0-cec4-4e35-972d-72ab7131f9d0",
+      "id": "4e54bfdb-9a86-452e-8e49-79955bff1106",
       "name": "Facebook Graph API"
     },
     {
       "parameters": {
-        "url": "={{ $json.webContentLink }}",
-        "additionalFields": {}
+        "resource": "upload",
+        "operation": "uploadUrl"
       },
       "type": "n8n-nodes-cloudinary.cloudinary",
       "typeVersion": 1,
       "position": [
-        3152,
-        992
+        5664,
+        2320
       ],
-      "id": "2a2f5dcc-a908-461d-bb51-4dc0fd6f36c1",
+      "id": "ebf718ca-d8b8-4ff7-91da-cc95cc362b4c",
       "name": "Upload an asset from URL"
     },
     {
@@ -514,10 +450,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        3648,
-        1264
+        6512,
+        2320
       ],
-      "id": "df5b9e21-1f34-422a-98b3-5f49a54f038b",
+      "id": "014e38be-b977-4683-a6f7-2d4232a72c7f",
       "name": "Wait"
     },
     {
@@ -527,10 +463,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        4112,
-        1344
+        7008,
+        2464
       ],
-      "id": "759199f8-10f7-42ff-9c92-faf04b05b67a",
+      "id": "d1852f8a-f97d-4d7e-8453-9ef9c32f88c3",
       "name": "Loop Over Items"
     },
     {
@@ -543,10 +479,10 @@
       "type": "n8n-nodes-base.editImage",
       "typeVersion": 1,
       "position": [
-        2368,
-        992
+        4848,
+        1984
       ],
-      "id": "3dcc983c-3716-477b-9d75-03dbd12386f0",
+      "id": "c6dea9d9-ab6a-4bf1-897e-2f222fecdcbc",
       "name": "Blur_image"
     },
     {
@@ -562,10 +498,10 @@
       "type": "n8n-nodes-base.editImage",
       "typeVersion": 1,
       "position": [
-        2560,
-        992
+        5040,
+        1984
       ],
-      "id": "4697be60-0fde-4d54-adb8-283d6577d6c1",
+      "id": "6762bcd2-2f60-48a3-962c-8afc68ca3599",
       "name": "Add_textTitle-toimage"
     },
     {
@@ -580,10 +516,10 @@
       "type": "n8n-nodes-base.editImage",
       "typeVersion": 1,
       "position": [
-        2768,
-        992
+        5248,
+        1984
       ],
-      "id": "00b6ca0e-1c2f-452f-b1e5-ef5724bd8f13",
+      "id": "1a9053c8-f818-48dc-a3dc-fe9d21ce3f36",
       "name": "Add_textReadMore-toimage"
     },
     {
@@ -591,10 +527,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        3152,
-        848
+        5712,
+        1984
       ],
-      "id": "40de2fa3-2ca5-4f7b-a884-aec579a9d288",
+      "id": "8713a08f-79e6-44ec-9ba6-698a7f1a675c",
       "name": "Wait2"
     },
     {
@@ -610,11 +546,141 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        3360,
-        848
+        5920,
+        1984
       ],
-      "id": "40c92592-cd70-4dff-8709-6c2a4d41f4bb",
+      "id": "87769f8d-8204-4785-b72e-f316772d67f1",
       "name": "Delete a file"
+    },
+    {
+      "parameters": {
+        "content": "# RSS to Instagram with AI\n\nTurn RSS news into an Instagram post with AI-written copy and a generated image. The workflow selects up to three articles, emails the draft, hosts the visual on Cloudinary, and publishes through Meta's Graph API.\n\n## How it works\n- Read an RSS feed and select up to three relevant articles.\n- Write the Instagram copy and email the draft.\n- Generate an image, add text overlays and host it on Cloudinary.\n- Create the Instagram media container, check readiness, publish and verify.\n\n## Setup\n- Install the Cloudinary node and connect OpenAI, Gmail, Drive, Cloudinary and Meta credentials.\n- Replace feed, email, folder, Cloudinary and Instagram account settings.\n- Check the AI prompts, image settings and Meta publishing permissions.\n- Test with your own accounts, review the result, then enable the schedule.\n\n## Customize\n- Choose your RSS feed, topics and publishing schedule.\n- Adjust the selection prompt, writing style and image overlays.\n- Set the email recipient, storage folder and Instagram account.\n\n## Additional info\n- The draft email is a notification, not an approval gate.\n- Uses the Cloudinary community node; provider charges may apply.\n- [Setup guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/ai-instagram-publishing/README.md) · [Full documentation](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)\n\n",
+        "height": 656,
+        "width": 736
+      },
+      "id": "bf1ba0e6-6bf6-491f-8550-7cb4088d348a",
+      "name": "NOTE 00 - Start here",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        1632
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 01 · Collect RSS articles\n\nThe schedule reads the configured feed. Aggregate and Code nodes combine its articles into the structured input used by the selection agent.",
+        "height": 352,
+        "width": 672,
+        "color": 7
+      },
+      "id": "48a4072e-a507-4c65-8066-a3ed0e524e96",
+      "name": "NOTE 01 - Collect RSS",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 02 · Select relevant stories\n\nOpenAI picks up to three article IDs. Merge and Code nodes match those IDs to the original feed entries and pass their source URLs to the writer.",
+        "height": 592,
+        "width": 560,
+        "color": 7
+      },
+      "id": "11434cc7-6ee3-4585-96f6-729a025c000d",
+      "name": "NOTE 02 - Select stories",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        1632
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 03 · Write the post and image title\n\nThe writing agent creates the Instagram copy. Gmail emails the draft; a separate OpenAI step generates the image headline. The email does not pause publishing.",
+        "height": 368,
+        "width": 688,
+        "color": 7
+      },
+      "id": "040d5216-f841-40fd-a5d3-8382896675fa",
+      "name": "NOTE 03 - Write copy",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        1856
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 04 · Generate and style the image\n\nOpenAI generates the visual. Image nodes apply the blur, headline and read-more text before the file is uploaded.",
+        "height": 368,
+        "width": 1104,
+        "color": 7
+      },
+      "id": "3d12affa-d7b1-47d8-86cd-f8af18c36391",
+      "name": "NOTE 04 - Create image",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4304,
+        1856
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 05 · Host the image and clean up\n\nDrive stores the generated file and Cloudinary provides its public media URL. A separate wait-and-delete branch removes the temporary Drive file after processing.",
+        "height": 304,
+        "width": 608,
+        "color": 7
+      },
+      "id": "f3ec086d-ecfb-46f4-9174-1726f7560b4b",
+      "name": "NOTE 05 - Host and clean up",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5440,
+        1856
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 06 · Publish to Instagram\n\nSet the target account and media parameters, create the Meta container, and check readiness. The wait-and-loop path retries processing; the ready path publishes and checks the result.",
+        "height": 432,
+        "width": 1808,
+        "color": 7
+      },
+      "id": "b2ba6ef6-fcb0-4bcb-8314-7998c7612e2f",
+      "name": "NOTE 06 - Publish Instagram",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5632,
+        2192
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.5",
+          "mode": "list",
+          "cachedResultName": "gpt-5.5"
+        },
+        "options": {}
+      },
+      "id": "80aa5f85-4b2a-4975-bfa2-817fcb158f90",
+      "name": "gpt-5.5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        3088,
+        1920
+      ],
+      "typeVersion": 1.2
     }
   ],
   "pinData": {},
@@ -636,17 +702,6 @@
           {
             "node": "Find the urls the ai outputted",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "4o-mini": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Best Article finder",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -705,11 +760,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Send Content Confirmation1": {
-      "main": [
-        []
       ]
     },
     "group the news into 1 item": {
@@ -844,11 +894,6 @@
         ]
       ]
     },
-    "Instagram check status of media published before": {
-      "main": [
-        []
-      ]
-    },
     "Facebook Graph API": {
       "main": [
         [
@@ -937,10 +982,23 @@
           }
         ]
       ]
+    },
+    "gpt-5.5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Best Article finder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1"
-  }
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": []
 }

@@ -1,17 +1,22 @@
-# Verification scope
+# Validation scope — V4
 
-The revision changes canvas positions and sticky notes. All 25 operating nodes in the main workflow and all 10 in the required setup companion retain their original IDs, names, parameters and connections. No runtime feature was added.
+The public `workflow.json` contains 30 nodes: 24 operational nodes and 6 sticky notes. It uses the unified runtime with catalog setup in the same workflow. The final owner refinement changes 13 node positions and the dimensions of 2 sticky notes. Operational code, node identities, connections and sticky-note text are unchanged by that refinement.
 
-The canonical source was retrieved from paoloronco/n8n-templates, workflows/n8n-notion-workflow-backup/workflow.json. Its Git blob was independently checked: 26c6b2118030dc6dd8b8916bf9517876f7e98a2b. Original downloaded bytes are preserved separately.
+## Automated checks
 
-- 42 existing behavioral/runtime tests passed, covering discovery, repeats, changed sources, large attachments, owner notes, byte verification, failed requests, retry limits and companion provisioning. External APIs are simulated in these tests.
-- The five runtime-contract tests were also run against the exact revised JSON files. These are repeated checks from the suite, not five additional distinct scenarios.
-- All 13 Code nodes compiled. Unique node identities, valid connections/references, enabled operating nodes, inactive workflows and absence of bound credentials or pinned data were checked.
-- One yellow overview per workflow follows the How it works / Setup / Customization structure. Main overview: 220 words; companion overview: 189 words. Each white section note has fewer than 50 words.
-- Native n8n imports and native re-export comparisons verify the saved review drafts. No Gmail, Notion content write, email or publication action was executed by these drafts during this revision. The owner's production backup was compared before and after import and remained unchanged.
+- All 54 existing behavioral, provisioning, endpoint and runtime-contract checks passed against the exact distribution JSON.
+- The checks cover discovery and pagination, changed and unchanged sources, large JSON attachments, byte/hash verification, personal-content preservation, bounded retries, setup reuse, compatible schemas and published endpoint metadata.
+- Runtime-contract checks compile the Code nodes and verify the HTTP request paths, bodies and download handling.
+- The public artifact was checked for credential bindings, owner email addresses, private instance/resource identifiers and owner documentation links. Destination configuration uses generic examples and empty IDs.
+- Node positions, sticky-note geometry and structural identities were compared with a fresh owner export. The execution graph matches the previously verified unified runtime.
 
-The prior implementation has separate historical live-account evidence, including unchanged/changed runs and recovered JSON imports. It is not described as a new live-provider acceptance test of this revision. Configure the intended accounts and perform the README's manual/repeat/download/restore checks before enabling unattended operation.
+## Recorded real-account checks of the same runtime
 
-No GitHub, Gumroad or Creator Portal publication/submission is included. Creator approval remains an independent review decision.
+- A full instance run processed 64 eligible sources: 48 updated and 16 unchanged, with no failures, retries or warnings.
+- A setup-only run verified the existing catalog and 17 managed properties without exporting source workflows.
+- A changed-source run updated documentation and the JSON attachment. The next unchanged-source run reused the same page, attachment, bytes and SHA-256 digest.
+- A JSON attachment downloaded from Notion was imported into a separate inactive n8n workflow. Its nodes and connections matched the downloaded export. The restore copy and validation workflows were then archived.
 
-UI export comparison also passed after normalizing known omitted default parameters and the local webhook IDs that n8n generates for Wait/email nodes on opening the editor. Those generated IDs are excluded from the public files.
+These recorded checks used configured accounts. The public template intentionally removes those bindings and requires the importing user to configure and test their own instance. The final geometry-only refinement was checked structurally and with the automated suite; no additional live publication or source-workflow execution was needed for it.
+
+GitHub availability is separate from Gumroad delivery updates and n8n Creator Portal approval. V4 has not been submitted to the Creator Portal as part of this release.

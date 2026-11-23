@@ -1,4 +1,4 @@
-# AI News → Social Publishing Automation
+# RSS to Instagram with AI
 
 ![AI News → Social Publishing Automation](assets/cover.png)
 
@@ -6,12 +6,16 @@
 
 - **Workflow JSON:** [Download and import](./RSS_AInews-socialPublishing_template.json)
 - **Documentation (Notion):** [Setup guide](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)
-- **n8n Creator:** [View template](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/)
+- **n8n Creator:** Revision of submission #11791 is being prepared; the previous approval does not indicate current public availability.
 - **Gumroad:** [View on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 
 ## Quick Overview
 
 Turn RSS news into publishable Instagram content automatically. The workflow collects articles, uses AI to select and transform relevant stories, generates captions and visuals, uploads media through Cloudinary, and publishes to Instagram through the Meta Graph API.
+
+## Template Layout
+
+The workflow contains 36 nodes: 29 operational nodes and 7 sticky notes. The introduction and six functional sections preserve the owner-approved arrangement. Import credentials and instance metadata are excluded from the public JSON.
 
 ## How It Works
 
@@ -28,7 +32,8 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 - **Get the workflow** — Download the workflow JSON from this folder and import it into n8n. Configure your own credentials, email recipient, Google Drive folder ID, and Instagram business account ID.
 - **Configure RSS feeds** — Replace or extend the source feeds for your target niche, publication set, or topic.
 - **Configure AI services** — Add the required AI credentials and review prompts for selection, copy, and image generation.
-- **Configure Cloudinary** — Connect the account used to host generated social images.
+- **Configure Gmail and Drive** — Set the draft-email recipient and temporary Google Drive folder. The email is a notification and does not pause publishing for approval.
+- **Configure Cloudinary** — Install `n8n-nodes-cloudinary`, connect the account used to host generated social images and confirm the uploaded asset is publicly accessible.
 - **Configure Meta** — Connect the required Instagram/Meta Graph API credentials and target professional account.
 - **Review the schedule** — Set a publishing frequency appropriate for your content strategy.
 - **Test before publishing** — Run the workflow with controlled inputs and verify copy, image, upload, and Instagram publishing.
@@ -38,7 +43,8 @@ Turn RSS news into publishable Instagram content automatically. The workflow col
 - n8n instance
 - One or more RSS feeds
 - AI provider/API credentials required by the workflow
-- Cloudinary account
+- Gmail and Google Drive credentials
+- Cloudinary account and the `n8n-nodes-cloudinary` community node
 - Meta/Instagram professional account with Graph API access
 - Required Meta application permissions and credentials
 

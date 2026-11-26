@@ -1,4 +1,6 @@
-# Archive Gmail invoices to SFTP with duplicate checks and review queue — V2.1
+# Archive Gmail invoice PDFs to SFTP with Google Sheets and review queue
+
+**Version 2.1.**
 
 Collect text-based invoice PDFs from Gmail, validate invoice details, archive them over SFTP and maintain provider registers in Google Sheets. Prevent repeated uploads, record rejected documents in a Review Queue and move a source message to Gmail Trash only after all its eligible PDFs are archived or verified duplicates.
 

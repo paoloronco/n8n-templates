@@ -1,5 +1,5 @@
 {
-  "name": "Archive Gmail invoices to SFTP with duplicate checks and review queue - V2.1",
+  "name": "Archive Gmail invoice PDFs to SFTP with Google Sheets and review queue",
   "nodes": [
     {
       "parameters": {
@@ -889,7 +889,7 @@
         }
       },
       "id": "d541b39b-6bb0-4e56-a978-c4e04d5919dd",
-      "name": "Schedule Trigger",
+      "name": "Check Gmail invoices every 15 minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
       "position": [
@@ -900,7 +900,7 @@
     {
       "parameters": {},
       "id": "d9e752d8-5f5c-4db4-9cd7-829eda160c4d",
-      "name": "Manual Trigger",
+      "name": "Start invoice archiving manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
@@ -974,16 +974,16 @@
     },
     {
       "parameters": {
-        "content": "# Archive invoice PDFs with SFTP\n\n### Quick overview\nSave invoice PDFs from Gmail to SFTP and record them in Google Sheets. Check registered files before uploading, send invalid documents to a Review Queue, and trash emails only after all eligible PDFs are complete.\n\n### How it works\n- Fetch matching Gmail PDFs and process one at a time.\n- Extract invoice fields with four configurable provider profiles.\n- Check Sheets and SFTP; upload missing PDFs and update the register.\n- Log rejected documents. Trash a message only when all its PDFs are archived or verified duplicates.\n\n### Setup\n- Connect Gmail, SFTP and Sheets credentials.\n- Set the spreadsheet ID in all six Sheets nodes.\n- Create Utilities, Internet, Cloud, Hosting and Review Queue tabs with the README headers.\n- Adapt profile rules and `/invoices/` folders in **Parse invoice and canonical name**.\n- Narrow the Gmail query and test each outcome before activation.\n\n### Requirements\nText-based PDFs up to 20 MiB, SFTP access and a writable Google spreadsheet.\n\n### Customization\nChange provider patterns, folders, worksheet mappings or the 15-minute schedule. The sample query searches 30 days.\n\n### Notes\nNo OCR or AI service is included. Avoid overlapping runs. Review messages stay in Gmail; service failures stop the run.",
-        "height": 1016,
-        "width": 636
+        "content": "# Archive Gmail invoice PDFs to SFTP with Google Sheets and review queue\n\n## Quick overview\n\nThis workflow runs manually or every 15 minutes to collect invoice PDFs from Gmail, validate and categorize them, upload missing files to an SFTP server, and upsert invoice registers in Google Sheets with duplicate checks and a Review Queue.\n\n## How it works\n\n1. Runs on a manual trigger or a 15-minute schedule and searches Gmail for recent messages matching an invoice query with PDF attachments.\n2. Splits messages into PDF attachments and skips other file types. Files over 20 MiB stop normalization; accepted PDFs are processed one at a time and their text is extracted.\n3. Applies four fictional provider profiles for utility, internet, cloud and hosting invoices. The parser extracts invoice fields and builds a canonical filename; unreadable or unsupported documents enter Review Queue.\n4. For validated invoices, checks Google Sheets for an existing matching entry and verifies key fields (invoice number, date, and amount) to decide whether to upload, treat as registered, or send to review.\n5. For a registered invoice, checks the SFTP filename and byte size. A matching file skips upload, a missing file is uploaded, and conflicting register rows or file sizes enter Review Queue.\n6. Uploads new or missing PDFs to SFTP and upserts the provider register in Sheets. The cloud profile keeps invoice and summary PDFs separate while retaining the canonical invoice filename in the register.\n7. Logs review items to the Google Sheets “Review Queue” and only trashes the Gmail message when all its PDF attachments are confirmed archived or verified duplicates.\n\n## Setup\n\n1. Add Gmail OAuth2 credentials (with permission to read messages and move them to Trash) and update the Gmail search query if needed.\n2. Add SFTP credentials and ensure the target folder structure (for example under /invoices/...) exists and is writable.\n3. Connect Google Sheets service-account credentials and share the spreadsheet with that account as Editor. Set its ID in all six Sheets nodes. Create Utilities, Internet, Cloud, Hosting and Review Queue tabs using the column names in the write-node mappings.\n4. Adjust the provider parsing rules, canonical naming, and target paths in the invoice parsing code to match your vendors’ PDF layouts and desired archive structure.\n5. Test new invoices, verified duplicates, missing archived files, rejected PDFs and messages with mixed attachments using the Manual Trigger. Check SFTP files, Sheets rows and Gmail Trash behavior before enabling the schedule. Avoid overlapping executions.\n\n## Requirements\n\n- An n8n instance with Gmail, Extract from File, Code, FTP/SFTP and Google Sheets nodes.\n- Gmail OAuth2 credentials that can read messages and move completed messages to Trash.\n- An SFTP account with permission to list the archive folders and upload PDFs.\n- A Google Sheets service account with Editor access to the spreadsheet and its five worksheet tabs.\n- Text-based PDF invoices up to 20 MiB. Scanned documents require a separate OCR step.\n\n## Customization\n\n- Change the Gmail query and its 30-day lookback, or adjust the 15-minute schedule.\n- Replace the four fictional provider profiles with rules for your own invoice layouts.\n- Change SFTP folders and canonical filenames in Parse invoice and canonical name.\n- Update worksheet names, headers and matching columns together with the duplicate lookup and write nodes.\n- When adding a provider, extend the parser, filters, duplicate-lookup column map and SFTP/Sheets branch.\n\n## Additional info\n\nDuplicate checks compare register fields, filename and byte size. PDF contents are not hashed. A registered invoice with a missing PDF is uploaded again; conflicting rows or file sizes enter Review Queue.\n\nMessages with review items remain in Gmail. Review rows use the message and attachment key and are not automatically marked resolved later.\n\nPDFs over 20 MiB stop normalization before Review Queue. OCR, AI extraction, currency conversion and invoice-authenticity checks are not included.\n\nSFTP and Sheets writes are not transactional. Service failures stop the run. Add your own error notifications and avoid overlapping executions.\n",
+        "height": 1856,
+        "width": 1040
       },
       "id": "37f30f81-c4cf-48b7-bf78-d30eebdd3594",
       "name": "00 — Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2864,
+        2448,
         1088
       ]
     },
@@ -1897,7 +1897,7 @@
         ]
       ]
     },
-    "Schedule Trigger": {
+    "Check Gmail invoices every 15 minutes": {
       "main": [
         [
           {
@@ -1908,7 +1908,7 @@
         ]
       ]
     },
-    "Manual Trigger": {
+    "Start invoice archiving manually": {
       "main": [
         [
           {

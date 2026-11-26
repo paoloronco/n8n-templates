@@ -1,5 +1,5 @@
 {
-  "name": "Website Updates to Approved Instagram Videos — V3 Creatomate (Template)",
+  "name": "Create and publish Instagram video posts with OpenAI and Creatomate",
   "active": false,
   "nodes": [
     {
@@ -3498,10 +3498,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "# Website updates to approved Instagram videos — V3\n\nRead selected facts from one configured public page, skip handled revisions, write/review grounded copy, render a single video or four-part carousel in Creatomate, request one human decision and optionally publish through Meta.\n\n**Setup**\n1. Import inactive; no production workflow or local worker is needed.\n2. Configure **Configure V3 only**. Run action `setup` once, never concurrently.\n3. Select your own OpenAI, Creatomate Header Auth, SMTP and Meta OAuth credentials.\n4. Set current AI rates, selectors, brand, email and destinations. Enable generation deliberately for `preview`; publication remains off.\n5. Preview URLs and approval links need HTTPS. Inspect every video and caption.\n\n**Limits**\nAPI quota/permissions and final visual quality require live acceptance testing. Verification shipped here uses fixtures, not paid APIs. Monthly guards are conservative local reservations, not provider billing caps. See README.md and verification.md. No Creator Portal submission.",
+        "content": "# Website updates to Instagram videos · V3\n\n### How it works\nFor small editorial teams turning a public article, product page or release note into Instagram content.\n\n1. A manual or daily run reads selected facts and skips revisions already handled.\n2. OpenAI writes the copy; a separate review allows one correction.\n3. Creatomate renders one video or a four-video carousel.\n4. Email approval gates optional Instagram publication; a Data Table keeps progress and receipts.\n\n### Setup\n- [ ] In **Configure V3 only**, choose a dedicated `jobsTable`. Run `action: setup` once, sequentially.\n- [ ] Connect OpenAI, Creatomate Header Auth and SMTP credentials. For publishing, connect Meta OAuth with Instagram publishing permissions.\n- [ ] Set `sourceUrl`, CSS selectors, brand, email addresses and current model prices. Use a professional Instagram account and public HTTPS approval links.\n- [ ] Run `action: preview` with `generationEnabled: true`; keep `publishingEnabled: false`. Inspect all videos and test approval/rejection.\n- [ ] To publish, configure the exact Instagram destination and use `action: publish` with `publishingEnabled: true`. Test before enabling the disabled schedule.\n\n### Customization\nChoose `single` or `carousel`, English or Italian, CTA and optional licensed image/music URLs.\n\nPreview uses paid APIs and sends email. Uncertain requests need manual reconciliation. Remote services still require live acceptance testing.\n\n[Complete setup and recovery guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-posts-carousels/V3/documentation.md)",
         "width": 704,
         "height": 928,
-        "color": 4
+        "color": 1
       },
       "position": [
         -768,
@@ -3514,10 +3514,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## 1. Source, change detection and durable reservation\nSelect a meaningful title and fact blocks; footer/navigation are ignored. A revision hash includes selected facts and output settings. Data Tables expose status, caption, render IDs and actual Instagram receipt.\n\nSetup creates a dedicated table and preserves its ledger. One atomic compare-and-set lock serializes this template, including approval waits. A busy/uncertain job blocks a new paid job. Reuse an approved preview for publication without re-rendering.\n\nNever point this configuration at a production journal.",
+        "content": "## 1. Detect a new source revision\nSelected facts identify the revision; a Data Table records progress and prevents duplicate jobs. An atomic reservation serializes processing, including approval waits.",
         "width": 4464,
         "height": 624,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,
@@ -3530,10 +3530,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## Setup only — no paid or social requests\nInitialize once with action `setup`. Existing reservations are never reset by setup. Do not launch simultaneous setup runs.",
+        "content": "## Create the editorial register\nRun `action: setup` once with a dedicated table name. Setup preserves existing records and makes no AI, rendering, email or social requests.",
         "width": 1744,
         "height": 560,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,
@@ -3546,10 +3546,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## 2. Grounded writer and independent reviewer\nSource text is data, not instructions. Four bounded slides cite fact IDs; numeric claims must occur in selected facts. The independent reviewer checks meaning and grammar. One correction is allowed, then reject.\n\nThe source page is not independently verified. Budget and intent are persisted before AI calls. No model tools or automatic retries.",
+        "content": "## 2. Write and review the copy\nOpenAI drafts from selected facts, then checks accuracy and grammar. One correction is allowed before rejection; inspect the source claims yourself.",
         "width": 3376,
         "height": 640,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,
@@ -3562,10 +3562,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## 3. Creatomate only — no local worker or Runtime.json\nBuild visible 4:5 RenderScript; preserve each render ID before polling. Single = 16.5 s; carousel = four 5.5 s videos, 1080 × 1350, 24 fps. Optional licensed music/image URLs.\n\nUncertain POST: stop and reconcile the existing request. File metadata validation does not replace watching/listening. Provider URLs have limited retention; download approved files for long-term archiving.",
+        "content": "## 3. Render with Creatomate\nCreate one 16.5-second video or four ordered 5.5-second videos at 1080 × 1350. Saved render IDs let the workflow poll existing requests.",
         "width": 3648,
         "height": 624,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,
@@ -3578,10 +3578,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## 4. One exact human approval\nEmail contains all ordered video links, snapshots and the final caption. Rejection or expiry ends without publishing. A hash binds source, copy, render IDs and destination; changed packages require new approval.\n\nPreview mode still sends this email when deliberately run. Publish mode refreshes the same render URLs and verifies the authenticated Instagram identity.",
+        "content": "## 4. Review the exact video package\nEmail presents the videos, caption and destination for one decision. Rejection, expiry or changed content prevents publication; preview also sends this email.",
         "width": 3920,
         "height": 624,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,
@@ -3594,10 +3594,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "parameters": {
-        "content": "## 5. Durable Meta publishing and terminal result\nPersist every action intent and receipt. Carousel child containers finish before the parent; publish only a FINISHED container. A single video uses REELS with share_to_feed. Verify the actual media ID and permalink.\n\nKnown terminal outcomes release the owned lock. Timeout/ambiguous POST keeps the lock and IDs for manual reconciliation; never restart with a new key to bypass it. No exactly-once guarantee is claimed across provider/network failures.",
+        "content": "## 5. Publish and keep the receipt\nPublish only approved media to the verified Instagram account, then save its ID and permalink. Reconcile uncertain requests before retrying to avoid duplicates.",
         "width": 3920,
         "height": 624,
-        "color": 6
+        "color": 7
       },
       "position": [
         -48,

@@ -1,5 +1,16 @@
 # Tech & AI News Intelligence
 
+## Versions
+
+| Version | Workflow JSON | n8n status | Purpose |
+| --- | --- | --- | --- |
+| [V1](V1/README.md) | [Download V1](V1/Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json) | Existing public listing [#11466](https://n8n.io/workflows/11466) | Portable archive of the workflow distributed by that listing. |
+| [V2](V2/README.md) | [Download V2](V2/Tech_AI_Daily_Briefing-RSS-AI-Email-V2.json) | Submission [#23696](https://creators.n8n.io/workflows/23696), in review | Current revision with the corrected future-date limit and portable setup values. |
+
+Use **V2** for new installations. The [existing unversioned JSON](Tech_AI_Daily_Briefing-RSS-AI-Email.json) remains an identical copy of V2 so existing download links keep working.
+
+V1 is a snapshot of the file distributed by listing #11466, not a reconstruction of the earliest workflow described by its original title. Both archived versions already use **OpenAI as the primary provider, Gemini as a fallback, and SMTP delivery**. V2 does not introduce those features.
+
 ## Quick overview
 
 Collect news from cybersecurity, AI, and technology RSS feeds, rank and group related stories, and deliver a curated English-language email briefing. OpenAI handles selection and summaries, Gemini provides an AI fallback, and a deterministic fallback keeps the digest available when both fail.

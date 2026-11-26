@@ -1,0 +1,2156 @@
+{
+  "name": "Archive Gmail invoices to SFTP with duplicate checks and review queue - V2.1",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();\nconst groups=new Map();\nfor(let i=0;i<items.length;i++){\n const j=items[i].json;\n if(!j.sourceMessageId||!j.sourceAttachmentKey||!j.invoiceNumber) throw new Error('Missing saved CloudProvider source identity');\n const key=j.sourceMessageId+'|'+j.invoiceNumber;\n if(!groups.has(key)) groups.set(key,{json:{...j,savedDocuments:[]},pairedItem:{item:i}});\n const g=groups.get(key),r=g.json;\n if(r.date!==j.date || r.amount!==j.amount || (r.account&&j.account&&r.account!==j.account)) throw new Error('CloudProvider invoice metadata conflict');\n if(r.savedDocuments.some(d=>d.sourceAttachmentKey===j.sourceAttachmentKey||d.fileName===j.fileName)) throw new Error('CloudProvider duplicate saved attachment or filename conflict');\n r.account=r.account||j.account;\n r.fileName=j.registerFileName||r.fileName;\n r.savedDocuments.push({sourceAttachmentKey:j.sourceAttachmentKey,fileName:j.fileName,targetPath:j.targetPath});\n if(j.documentKind==='invoice') r.fileName=j.fileName;\n}\nreturn [...groups.values()];\n"
+      },
+      "id": "f11f4e6e-2c9a-490c-9564-7d5ba7174614",
+      "name": "Prepare cloud register",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6400,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "if(!Array.isArray($json.labelIds) || !$json.labelIds.includes('TRASH')) throw new Error('Gmail did not confirm the email is in Trash');\nreturn {json:{sourceMessageId:$json.id,trashed:true,labelIds:$json.labelIds}};"
+      },
+      "id": "44f0c2ec-0b3e-4e12-b466-b07d9d71eb53",
+      "name": "Verify invoice email trashed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6192,
+        1488
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + $json.sourceMessageId + '/trash' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "options": {}
+      },
+      "id": "fa264844-cc20-47d4-91dd-833fad31cbee",
+      "name": "Gmail - Trash archived invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        5920,
+        1488
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9008b05a-bb71-46a2-a164-b9577617d347",
+              "leftValue": "={{ $json.provider }}",
+              "rightValue": "HostingProvider",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d17b9547-769e-480b-81f2-69adff174474",
+      "name": "Filter hosting invoices",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        5648,
+        3328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map((item,i)=>{\n const src=$(\"Restore hosting invoice\").itemMatching(i).json;\n const row=item.json;\n if(!src.sourceMessageId || !src.sourceAttachmentKey || String(row.invoiceNumber ?? row['Numero Fattura'] ?? '')!==src.invoiceNumber)\n   throw new Error('Invoice register confirmation mismatch; email retained');\n if(row.File!==undefined && row.File!==src.fileName)throw new Error('Invoice filename confirmation mismatch; email retained');\n return {json:{status:'archived',sourceMessageId:src.sourceMessageId,sourceAttachmentKey:src.sourceAttachmentKey,\n  invoiceNumber:src.invoiceNumber,fileName:src.fileName},pairedItem:{item:i}};\n});"
+      },
+      "id": "7b177194-208a-4460-995c-435eed483f8c",
+      "name": "Confirm hosting archive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6880,
+        3328
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn {json:src.json,binary:src.binary};"
+      },
+      "id": "e150a9e9-dcf0-4a48-86c7-f943b67c7ea9",
+      "name": "Restore hosting invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6128,
+        3328
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Hosting",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data Fattura": "={{ $json.date }}",
+            "Numero Fattura": "={{ $json.invoiceNumber }}",
+            "IMPORTO": "={{ $json.amount }}",
+            "Servizio": "={{ $json.service }}"
+          },
+          "matchingColumns": [
+            "Numero Fattura"
+          ],
+          "schema": [
+            {
+              "id": "Servizio",
+              "displayName": "Servizio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data Fattura",
+              "displayName": "Data Fattura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Numero Fattura",
+              "displayName": "Numero Fattura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "IMPORTO",
+              "displayName": "IMPORTO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8debd6ce-98d4-44bd-bc90-050759782292",
+      "name": "Register hosting invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        6640,
+        3328
+      ]
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "={{ $json.targetPath }}",
+        "options": {}
+      },
+      "id": "a6c5245c-43c6-4b91-b97d-8ef2435af82f",
+      "name": "Upload hosting PDFs",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        5904,
+        3328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map((item,i)=>{\n const src=$(\"Prepare cloud register\").itemMatching(i).json;\n const row=item.json;\n if(!src.sourceMessageId || !src.sourceAttachmentKey || String(row.invoiceNumber ?? row['Numero Fattura'] ?? '')!==src.invoiceNumber)\n   throw new Error('Invoice register confirmation mismatch; email retained');\n if(row.File!==undefined && row.File!==src.fileName)throw new Error('Invoice filename confirmation mismatch; email retained');\n return {json:{status:'archived',sourceMessageId:src.sourceMessageId,sourceAttachmentKey:src.sourceAttachmentKey,\n  invoiceNumber:src.invoiceNumber,fileName:src.fileName},pairedItem:{item:i}};\n});"
+      },
+      "id": "9db32535-921b-4857-a2d1-f3a7b56fcccf",
+      "name": "Confirm cloud archive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6880,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn {json:src.json,binary:src.binary};"
+      },
+      "id": "202ba872-18a9-4484-be6e-0d53292f109b",
+      "name": "Restore cloud invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6128,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map((item,i)=>{\n const src=$(\"Restore internet invoice\").itemMatching(i).json;\n const row=item.json;\n if(!src.sourceMessageId || !src.sourceAttachmentKey || String(row.invoiceNumber ?? row['Numero Fattura'] ?? '')!==src.invoiceNumber)\n   throw new Error('Invoice register confirmation mismatch; email retained');\n if(row.File!==undefined && row.File!==src.fileName)throw new Error('Invoice filename confirmation mismatch; email retained');\n return {json:{status:'archived',sourceMessageId:src.sourceMessageId,sourceAttachmentKey:src.sourceAttachmentKey,\n  invoiceNumber:src.invoiceNumber,fileName:src.fileName},pairedItem:{item:i}};\n});"
+      },
+      "id": "882e5ec8-8b83-4021-b331-7c4f5c32dd8a",
+      "name": "Confirm internet archive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6880,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn {json:src.json,binary:src.binary};"
+      },
+      "id": "618295a7-f00c-4e64-b7dc-56843ce0a8ed",
+      "name": "Restore internet invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6128,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map((item,i)=>{\n const src=$(\"Restore utility invoice\").itemMatching(i).json;\n const row=item.json;\n if(!src.sourceMessageId || !src.sourceAttachmentKey || String(row.invoiceNumber ?? row['Numero Fattura'] ?? '')!==src.invoiceNumber)\n   throw new Error('Invoice register confirmation mismatch; email retained');\n if(row.File!==undefined && row.File!==src.fileName)throw new Error('Invoice filename confirmation mismatch; email retained');\n return {json:{status:'archived',sourceMessageId:src.sourceMessageId,sourceAttachmentKey:src.sourceAttachmentKey,\n  invoiceNumber:src.invoiceNumber,fileName:src.fileName},pairedItem:{item:i}};\n});"
+      },
+      "id": "8181a067-1c7b-4b0e-9043-a0328aa1e038",
+      "name": "Confirm utility archive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6880,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Parse invoice and canonical name').item;\nif (!src?.json?.sourceMessageId || !src?.binary?.data) throw new Error('Parsed item or PDF missing; refusing to continue');\nreturn {json:src.json,binary:src.binary};"
+      },
+      "id": "6810d5b7-6e6f-41d1-ada4-4e2a67963d2f",
+      "name": "Restore utility invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6128,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Cloud",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "CloudProvider": "Cloud Provider",
+            "Account": "={{ $json.account }}",
+            "Data Fattura": "={{ $json.date }}",
+            "Numero Fattura": "={{ $json.invoiceNumber }}",
+            "IMPORTO": "={{ $json.amount }}",
+            "TOTALE": "={{ $json.amount }}",
+            "File": "={{ $json.fileName }}"
+          },
+          "matchingColumns": [
+            "Numero Fattura"
+          ],
+          "schema": [
+            {
+              "id": "CloudProvider",
+              "displayName": "CloudProvider",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Account",
+              "displayName": "Account",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data Fattura",
+              "displayName": "Data Fattura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Numero Fattura",
+              "displayName": "Numero Fattura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "IMPORTO",
+              "displayName": "IMPORTO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TOTALE",
+              "displayName": "TOTALE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c1069f87-2256-4953-a41c-c10d0d852676",
+      "name": "Register cloud invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        6640,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "={{ $json.targetPath }}",
+        "options": {}
+      },
+      "id": "d4d43cf0-8001-4dfb-b73d-b21873e6e219",
+      "name": "Upload cloud PDFs",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        5904,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9008b05a-bb71-46a2-a164-b9577617d347",
+              "leftValue": "={{ $json.provider }}",
+              "rightValue": "CloudProvider",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "068b17bc-3bdb-4a6c-8915-0fc023fe563e",
+      "name": "Filter cloud invoices",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        5648,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Internet",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fornitore": "InternetProvider",
+            "Tipo": "internet",
+            "Data": "={{ $json.date }}",
+            "Importo": "={{ $json.amount }}",
+            "invoiceNumber": "={{ $json.invoiceNumber }}",
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "File": "={{ $json.fileName }}"
+          },
+          "matchingColumns": [
+            "invoiceNumber"
+          ],
+          "schema": [
+            {
+              "id": "Fornitore",
+              "displayName": "Fornitore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Importo",
+              "displayName": "Importo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceNumber",
+              "displayName": "invoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ad405e12-6572-4850-a585-2259d415f287",
+      "name": "Register internet invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        6640,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "={{ $json.targetPath }}",
+        "options": {}
+      },
+      "id": "8ac3037b-286c-41c8-bd3e-f58d4a1d0258",
+      "name": "Upload internet PDFs",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        5904,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "37c89354-7a2a-43d3-aa15-2b395a8c9c63",
+              "leftValue": "={{ $json.provider }}",
+              "rightValue": "InternetProvider",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "278b443f-0a73-4532-b55f-175bf222f963",
+      "name": "Filter internet invoices",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        5648,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Utilities",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fornitore": "UtilityProvider",
+            "Tipo": "={{ $json.type }}",
+            "Data": "={{ $json.date }}",
+            "Importo": "={{ $json.amount }}",
+            "invoiceNumber": "={{ $json.invoiceNumber }}",
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "File": "={{ $json.fileName }}"
+          },
+          "matchingColumns": [
+            "uniqueKey"
+          ],
+          "schema": [
+            {
+              "id": "Fornitore",
+              "displayName": "Fornitore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Importo",
+              "displayName": "Importo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceNumber",
+              "displayName": "invoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "610b1914-1b96-4f3b-89c0-cff6af077439",
+      "name": "Register utility invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        6640,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "={{ $json.targetPath }}",
+        "options": {}
+      },
+      "id": "649cf025-d984-4792-9e84-9c8f5b6feefe",
+      "name": "Upload utility PDFs",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        5904,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "60c4293a-55e6-4837-bd05-db61f50af88e",
+              "leftValue": "={{ $json.provider }}",
+              "rightValue": "UtilityProvider",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "da32893f-da97-495f-b9cf-eb7320c48565",
+      "name": "Filter utility invoices",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        5648,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n  const parsed = (() => {\nconst source = $('Normalize PDF binary').item;\nif (!source?.json) throw new Error('Missing paired source PDF');\nconst bin = source.binary || {};\nconst b = bin.data || {};\nconst text = String(item.json.text || item.json.data || item.json.output || item.json.content || item.json.document || '').replace(/\\r/g,'');\nif (text.trim().length < 30) throw new Error('Empty or image-only PDF: OCR needed');\nconst subject = String(source.json.subject || '');\nconst from = String(source.json.from?.text || source.json.from || source.json.sender || '').toLowerCase();\nfunction normDate(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}\nfunction ymd(s){return String(s||'').replace(/-/g,'')}\nfunction money(v){ if(v==null) return null; let s=String(v).replace(/\\s|€/g,''); if(s.includes(',')&&s.includes('.')) s=s.replace(/\\./g,'').replace(',','.'); else s=s.replace(',','.'); const n=Number(s.replace(/[^0-9.-]/g,'')); return Number.isFinite(n)?Math.round(n*100)/100:null; }\nfunction m1(pat){ const m=text.match(pat); return m?m[1]:null; }\nfunction dateFromText(){\n for (const pat of [/(?:Data fattura|DATA FATTURA|Data del documento|Documento del|Invoice date|Data)\\D{0,35}(\\d{1,2})[/-](\\d{1,2})[/-](20\\d{2})/i,/(\\d{1,2})[/-](\\d{1,2})[/-](20\\d{2})/]) { const m=text.match(pat); if(m) return normDate(m[3],m[2],m[1]); }\n for (const pat of [/(?:Invoice date|Date of invoice|Rechnungsdatum)\\D{0,35}(\\d{1,2})[./-](\\d{1,2})[./-](20\\d{2})/i, /(?:Invoice date|Date of invoice|Rechnungsdatum)\\D{0,35}(20\\d{2})[-/.](\\d{1,2})[-/.](\\d{1,2})/i]) { const m=text.match(pat); if(m) return m[1].length===4?normDate(m[1],m[2],m[3]):normDate(m[3],m[2],m[1]); }\n return '';\n}\nlet provider='', type='', invoice='', date='', amount=null, account='', tab='', folder='';\nif (from.includes('utility-provider') || /Utility Provider/i.test(text+subject)) {\n provider='UtilityProvider';\n const head=(text.slice(0,5000)+' '+subject);\n const luce=/bolletta\\s+luce/i.test(head) || /fornitura:\\s*energia\\s+elettrica/i.test(head) || /\\bkWh\\b/i.test(head);\n const gas=/bolletta\\s+gas/i.test(head) || /fornitura:\\s*gas/i.test(head) || /\\bSmc\\b/i.test(head);\n if (luce && !gas) type='electricity'; else if (gas && !luce) type='gas'; else throw new Error(`UtilityProvider type ambiguous: luce=${luce} gas=${gas} file=${b.fileName||''} subject=${subject}`);\n invoice=m1(/(UT-\\d{4}-\\d+)/i) || (b.fileName||'').match(/(UT-\\d{4}-\\d+)/i)?.[1] || m1(/(?:NUMERO FATTURA ELETTRONICA VALIDA AI FINI FISCALI|Fattura n:)\\s*([A-Z0-9-]+)/i) || '';\n date=dateFromText();\n amount=money(m1(/Questo mese dovrai pagare\\s*\\n\\s*([0-9]+[,.][0-9]{2})\\s*€/i) || m1(/Totale:\\s*([0-9]+[,.][0-9]{2})\\s*€/i) || m1(/Totale importo da pagare\\s*\\n\\s*€?\\s*([0-9]+[,.][0-9]{2})/i) || m1(/Totale \\(IVA inclusa\\)\\s*:?\\s*([0-9]+[,.][0-9]{2})/i) || m1(/TOTALE DA PAGARE\\s*([0-9]+[,.][0-9]{2})/i));\n tab='Utilities'; folder=`/invoices/utilities/${type}`;\n} else if (from.includes('internet-provider') || /Internet Provider/i.test(text+subject)) {\n provider='InternetProvider'; type='internet'; invoice=(text.match(/(\\d{5,})\\s*\\/\\s*([A-Z])\\s*\\/\\s*(20\\d{2})/)||[]).slice(1).join('-') || '';\n date=dateFromText(); amount=money(m1(/TOTALE\\s+FATTURA\\s*([0-9]+[,.][0-9]{2})/i)); tab='Internet'; folder='/invoices/internet';\n} else if (from.includes('hosting-provider') || /Hosting Provider/i.test(text+subject)) {\n provider='HostingProvider'; type='cloud';\n invoice=m1(/(?:Invoice\\s*(?:number|no\\.?|#)|Rechnungs(?:nummer|nr\\.? )|Invoice\\s*No\\.?|Fattura\\s*n\\.?)[\\s:#-]*([A-Z0-9][A-Z0-9\\/-]{3,})/i) || String(b.fileName||'').match(/(?:invoice|rechnung)[-_\\s]*([0-9]{5,})/i)?.[1] || '';\n date=dateFromText();\n // HostingProvider overview: Service | Period | Total (excl. VAT) | Tax | Total.\n // Read the final total on the overview row, not the net amount.\n // PDF extraction may put each table cell on a separate line.\n // Restrict extraction to Overview, before payment instructions / product details.\n const overview=text.match(/\\bOverview\\b([\\s\\S]*?)(?:Please pay|Click here|Due upon receipt|\\bProduct\\s+count\\b)/i)?.[1] || '';\n const overviewLines=overview.split('\\n').map(x=>x.trim()).filter(Boolean);\n let gross=null, net=null, vat=null, service='';\n const amounts=[...overview.matchAll(/€\\s*([\\d.,]+[.,]\\d{2})(?!\\d)/g)].map(m=>money(m[1]));\n // In the HostingProvider Overview each service row ends in net, tax, gross.\n // The last three monetary values in the overview are the final totals.\n if(amounts.length>=3 && amounts.length%3===0) {\n   net=amounts[amounts.length-3];\n   vat=amounts[amounts.length-2];\n   gross=amounts[amounts.length-1];\n }\n // Require arithmetic consistency; never silently fall back to net.\n if(gross===null || net===null || vat===null || Math.abs((net+vat)-gross)>0.02)\n   throw new Error(`HostingProvider Overview totals invalid: monetary values=${JSON.stringify(amounts)}`);\n amount=gross;\n const productMatch=text.match(/\\b(ST\\d+\\s+Storage Plan|(?:VM|ST)\\d+[A-Z0-9-]*\\s+[^\\n€]{0,65}|Storage Plan|Cloud Server)\\b/i);\n service=productMatch?.[1]?.trim() || overviewLines.find(l=>/^(?:Storage|Cloud|Server|Domain|Web Hosting|Managed|Networking)\\s+\\d{2}\\/20\\d{2}/i.test(l))?.split(/\\s+\\d{2}\\/20\\d{2}/)[0] || '';\n account=m1(/(?:Customer\\s*(?:number|ID)|Kundennummer|Client\\s*ID)[\\s:#-]*([A-Z0-9-]+)/i)||'';\n item.json.service=service;\n item.json.netAmount=net;\n item.json.vatAmount=vat;\n tab='Hosting'; folder='/invoices/hosting';\n} else if (from.includes('cloud-provider') || /Cloud Provider/i.test(text+subject)) {\n provider='CloudProvider'; type='cloud'; invoice=m1(/(CINV\\d+)/i) || ''; date=dateFromText();\n // Google summary dates are localized and can precede the extracted labels.\n if(!date) {\n   const months={gen:1,feb:2,mar:3,apr:4,mag:5,giu:6,lug:7,ago:8,set:9,ott:10,nov:11,dic:12};\n   const dm=text.match(/(?:Data fattura\\s*[:.]?\\s*|\\.{3,}\\s*)(\\d{1,2})\\s+(gen(?:naio)?|feb(?:braio)?|mar(?:zo)?|apr(?:ile)?|mag(?:gio)?|giu(?:gno)?|lug(?:lio)?|ago(?:sto)?|set(?:tembre)?|ott(?:obre)?|nov(?:embre)?|dic(?:embre)?)\\.?\\s+(20\\d{2})/i);\n   if(dm) {\n     const y=Number(dm[3]),m=months[dm[2].slice(0,3).toLowerCase()],d=Number(dm[1]);\n     const dt=new Date(Date.UTC(y,m-1,d));\n     if(dt.getUTCFullYear()===y && dt.getUTCMonth()===m-1 && dt.getUTCDate()===d) date=normDate(y,m,d);\n   }\n }\n account=m1(/ID account\\s*[:.]?\\s*([0-9A-Z]{6}-[0-9A-Z]{6}-[0-9A-Z]{6})/i)||m1(/\\b([0-9A-F]{6}-[0-9A-F]{6}-[0-9A-F]{6})\\b/i)||'';\n const explicitTotal=m1(/Importo totale\\s*:?\\s*€?\\s*(-?[0-9]+[,.][0-9]{2})/i);\n if(explicitTotal!==null) amount=money(explicitTotal);\n else {\n   // Extracted summary puts the net/VAT/gross values BEFORE their labels.\n   // Require a complete totals block and arithmetic, never a lone adjacent value.\n   const totals=[...text.matchAll(/(-?[\\d.,]+[,.]\\d{2})\\s*€\\s*\\n\\s*(-?[\\d.,]+[,.]\\d{2})\\s*€\\s*\\n\\s*(-?[\\d.,]+[,.]\\d{2})\\s*€\\s*\\n\\s*(?:Riepilogo[^\\n]*\\n\\s*)?Imponibile in EUR\\s*\\n\\s*IVA[^\\n]*\\n\\s*Totale in EUR/gi)];\n   if(!totals.length) throw new Error('CloudProvider gross totals block missing; refusing net fallback');\n   const values=totals.map(m=>m.slice(1,4).map(money));\n   if(values.some(([net,vat,gross])=>[net,vat,gross].some(v=>v===null)||Math.abs(net+vat-gross)>0.011)||values.some(v=>v[2]!==values[0][2])) throw new Error('CloudProvider net/VAT/gross totals inconsistent');\n   amount=values[0][2]; item.json.netAmount=values[0][0]; item.json.vatAmount=values[0][1];\n }\n tab='Cloud'; folder='/invoices/cloud';\n}\nif(!provider || !type || !invoice || !date || amount===null) throw new Error(`Cannot parse invoice: provider=${provider} type=${type} invoice=${invoice} date=${date} amount=${amount} file=${b.fileName||''} subject=${subject}`);\nconst registerFileName = `${ymd(date)} ${type} ${provider} ${invoice}.pdf`;\nconst isGoogleSummary=provider==='CloudProvider' && /Questo è un riepilogo della fattura elettronica/i.test(text);\nconst fileName=isGoogleSummary?registerFileName.replace(/\\.pdf$/,' riepilogo.pdf'):registerFileName;\nreturn {json:{provider,type,invoiceNumber:invoice,uniqueKey:`${provider}:${invoice}`, date,amount,account,service:item.json.service||'',netAmount:item.json.netAmount??null,vatAmount:item.json.vatAmount??null,tab,fileName,registerFileName,documentKind:isGoogleSummary?'summary':'invoice',targetPath:`${folder}/${fileName}`,sourceMessageId:source.json.id||source.json.messageId||'',sourceAttachmentKey:source.json.attachmentKey||'',subject}, binary:{data:{...b,fileName}}};\n  })();\n  if ($json.error) throw new Error(String($json.error.message || $json.error));\n  parsed.json.status = 'validated';\n  return parsed;\n} catch (error) {\n  const src = $('Normalize PDF binary').item;\n  if (!src?.json?.id && !src?.json?.messageId) throw error;\n  return {json:{sourceMessageId:String(src.json.id || src.json.messageId),\n    sourceAttachmentKey:src.json.attachmentKey, originalFileName:src.json.originalFileName,\n    fileName:src.json.originalFileName || src.binary?.data?.fileName || '',\n    subject:src.json.subject || '', status:'review', reason:String(error.message || error)},\n    binary:src.binary};\n}"
+      },
+      "id": "713f9068-30a5-437d-8b15-3c5c72176eda",
+      "name": "Parse invoice and canonical name",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5344,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "e6520c55-e220-49a3-9a20-49e96cfad97b",
+      "name": "Extract PDF text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5120,
+        1744
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const out=[];\nfor (let i=0;i<items.length;i++) {\n const it=items[i];\n for (const [key,b] of Object.entries(it.binary||{})) {\n  const name=String(b.fileName||b.filename||'');\n  const mime=String(b.mimeType||'').toLowerCase();\n  if (!(name.toLowerCase().endsWith('.pdf')||mime==='application/pdf')) continue;\n  const bytes=await this.helpers.getBinaryDataBuffer(i,key);\n  if(bytes.length>20*1024*1024)throw new Error('PDF exceeds 20 MiB: '+name);\n  out.push({json:{...it.json,attachmentKey:key,originalFileName:name},binary:{data:{...b,fileName:name||'invoice.pdf'}},pairedItem:{item:i}});\n }\n}\nreturn out;"
+      },
+      "id": "61da53f6-cebc-481e-8dcd-dce1a49f0a48",
+      "name": "Normalize PDF binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4576,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93c6857c-ec25-4eee-86e1-46c9afedde10",
+              "operator": {
+                "type": "array",
+                "operation": "lengthGt",
+                "rightType": "number"
+              },
+              "leftValue": "={{ Object.keys($binary ?? {}) }}",
+              "rightValue": 0
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bf61c54a-2823-48cd-899d-00a0a7ed2a8d",
+      "name": "Keep messages with attachments",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        4272,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": false,
+        "filters": {
+          "q": "has:attachment filename:pdf newer_than:30d (subject:invoice OR subject:fattura)",
+          "readStatus": "both"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "b4e29ffb-8b20-495a-b75b-aa14fb60ebd5",
+      "name": "Gmail - Get invoice messages",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3968,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "d541b39b-6bb0-4e56-a978-c4e04d5919dd",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        3632,
+        1760
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d9e752d8-5f5c-4db4-9cd7-829eda160c4d",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        3632,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Archive and complete\nRoute valid invoices, upload missing PDFs over SFTP and upsert the provider register. Confirm each attachment before moving a message to Gmail Trash. Any review attachment retains the entire source message.",
+        "height": 1104,
+        "width": 1554,
+        "color": 7
+      },
+      "id": "07fae8dd-b961-4e49-b90f-a0992c855616",
+      "name": "04 — SFTP archive",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5536,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Extract and validate\nRead PDF text and apply the four fictional provider profiles. Validate required invoice fields and supported total checks. Unreadable or invalid documents enter **Review Queue**. Adapt the rules to your own PDF layouts.",
+        "height": 578,
+        "width": 686,
+        "color": 7
+      },
+      "id": "1a3a75d2-f2cc-4d0b-bce8-5602eea1ca14",
+      "name": "03 — Extraction",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4832,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Collect invoice PDFs\nSearch the last **30 days** for matching PDF attachments, including read messages. Exclude unrelated messages by narrowing the query. Split eligible PDFs into linked items and reject files over 20 MiB.",
+        "height": 578,
+        "width": 904,
+        "color": 7
+      },
+      "id": "cc88e7bd-a372-4169-bf03-029c32594d91",
+      "name": "02 — Email intake",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3904,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Start\nRun manually or every **15 minutes** after setup. Keep the workflow inactive while configuring credentials and testing invoice samples. Avoid overlapping runs.",
+        "height": 578,
+        "width": 362,
+        "color": 7
+      },
+      "id": "f445018b-3abf-46f7-8bd4-0eacb076d8ed",
+      "name": "01 — Start",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Archive invoice PDFs with SFTP\n\n### How it works\nCollect Gmail PDF invoices manually or every 15 minutes. Four configurable provider profiles extract invoice details. Google Sheets and SFTP checks skip registered PDFs with matching filenames and sizes. Invalid or conflicting documents enter Review Queue. Messages move to Gmail Trash only after every eligible PDF is archived or confirmed duplicate.\n\n### Setup\n- Connect Gmail OAuth2, SFTP and Google Sheets service-account credentials.\n- Narrow the Gmail query; the default searches 30 days.\n- Adapt the fictional provider rules and `/invoices/` destinations in **Parse invoice and canonical name**.\n- Set the spreadsheet ID in all six Sheets nodes. Create Utilities, Internet, Cloud, Hosting and Review Queue tabs with the documented headers.\n- Test each profile, duplicate, review and multi-PDF cases before activating.\n\n### Requirements\nText-based PDFs up to 20 MiB and writable SFTP/Sheets access. OCR and AI are not included. Avoid overlapping runs.",
+        "height": 1016,
+        "width": 636
+      },
+      "id": "37f30f81-c4cf-48b7-bf78-d30eebdd3594",
+      "name": "00 — Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "11d28f83-f3d9-58db-b3df-8f33b6fe0468",
+      "name": "Process PDF attachments one by one",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4896,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "65c7fd48-5f08-4884-b716-f65d0fc1afc5",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "validated",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "validated"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "45284770-2234-4b26-be49-35f231a4c377",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "review"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "513acd6a-d251-5769-b1f4-64c06a4c8f49",
+      "name": "Invoice validation result",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        5648,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$input.item;\nconst j=src.json;\nconst columns={UtilityProvider:'uniqueKey',InternetProvider:'invoiceNumber',CloudProvider:'Numero Fattura',HostingProvider:'Numero Fattura'};\nif(!columns[j.provider] || !j.tab || !j.sourceMessageId || !j.sourceAttachmentKey || !src.binary?.data)\n  throw new Error('Missing validated invoice identity or PDF');\nconst bytes=await this.helpers.getBinaryDataBuffer(0,'data');\nreturn {json:{...j,lookupColumn:columns[j.provider],lookupValue:j.provider==='UtilityProvider'?j.uniqueKey:j.invoiceNumber,\n  pdfBytes:bytes.length,targetFolder:j.targetPath.slice(0,j.targetPath.lastIndexOf('/'))},binary:src.binary};"
+      },
+      "id": "a4b6566e-15ee-5f90-a406-9bfcdb750404",
+      "name": "Prepare duplicate lookup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5920,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.tab }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "={{ $json.lookupColumn }}",
+              "lookupValue": "={{ $json.lookupValue }}"
+            }
+          ]
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "SERIAL_NUMBER"
+            }
+          },
+          "returnFirstMatch": false
+        }
+      },
+      "id": "b406fdb8-ae51-53ff-9294-a5e9f098e1f9",
+      "name": "Sheets - Find registered invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "alwaysOutputData": true,
+      "position": [
+        6192,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src=$('Prepare duplicate lookup').item;\nconst j=src.json;\nconst rows=$input.all().map(i=>i.json).filter(r=>Object.keys(r).length);\nconst normalizeDate=value=>{\n if(typeof value==='number')return new Date(Date.UTC(1899,11,30)+Math.round(value)*86400000).toISOString().slice(0,10);\n const s=String(value??'').trim();\n if(/^\\d{4}-\\d{2}-\\d{2}/.test(s))return s.slice(0,10);\n const m=/^(\\d{1,2})[./-](\\d{1,2})[./-](\\d{4})$/.exec(s);\n return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:s;\n};\nlet decision=rows.length?'registered':'upload',reason='';\nif(rows.length>1) {decision='review';reason='Multiple invoice register rows match the invoice identity';}\nif(rows.length===1) {\n const r=rows[0],number=String(r.invoiceNumber ?? r['Numero Fattura'] ?? '');\n const raw=r.amount ?? r.IMPORTO ?? r.Importo;\n const amount=typeof raw==='number'?raw:Number(String(raw??'').replace(/\\s|€/g,'').replace(',','.'));\n const rowDate=normalizeDate(r.date ?? r['Data Fattura'] ?? r.Data ?? '');\n if(number!==j.invoiceNumber || raw===null || raw===undefined || raw==='' || !Number.isFinite(amount) || Math.abs(amount-j.amount)>0.011 || rowDate!==j.date) {\n   decision='review';reason='Registered invoice metadata differs from this PDF (number, date or amount)';\n }\n}\nreturn [{json:{...j,decision,reason},binary:src.binary}];"
+      },
+      "id": "dc30d282-507b-5e48-8773-9b2bd798a8fc",
+      "name": "Assess registered invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6464,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "77872d5a-ea76-456a-8ea2-c08909bae813",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "upload",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "upload"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e66bacf6-2cb3-4021-ae29-4b4f5095f886",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "registered",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "registered"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "470562e9-17bf-4847-9bde-a6008f8e712b",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "review"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "658c782a-f49b-5cd3-a71e-e5e5ae3dc005",
+      "name": "Registered invoice decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        6736,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "list",
+        "path": "={{ $json.targetFolder }}",
+        "options": {}
+      },
+      "id": "28723d0d-f3bc-510d-a0d1-f0fd4172838b",
+      "name": "SFTP - Check registered PDF",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "position": [
+        7008,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src=$('Assess registered invoice').item;\nconst j=src.json;\nconst matches=$input.all().map(i=>i.json).filter(f=>f.name===j.fileName && f.type!=='d');\nlet decision='upload',reason='';\nif(matches.length>1) {decision='review';reason='Multiple SFTP entries match the canonical PDF filename';}\nelse if(matches.length===1) {\n if(Number(matches[0].size)===j.pdfBytes && j.pdfBytes>0) decision='duplicate';\n else {decision='review';reason='Registered SFTP PDF size differs from the email attachment';}\n}\nreturn [{json:{...j,decision,reason},binary:src.binary}];"
+      },
+      "id": "7e7ad766-8df8-5695-8332-25e78ae137b8",
+      "name": "Assess archived PDF",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7280,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "57d5cbde-3166-41db-9e78-530d2355aaa9",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "upload",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "upload"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ff5ed7f0-8da6-4b67-998d-f18c4a0744c3",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "duplicate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "duplicate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9b85c8cc-79e4-42b5-9607-c77050cc3bc5",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "review"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "ed9af90b-940a-5cf0-99e6-3d40ad1b9ff2",
+      "name": "Archived PDF decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        7552,
+        1696
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j=$json;\nif(j.decision!=='duplicate')throw new Error('Duplicate completion requires a verified register and SFTP file');\nreturn {json:{status:'duplicate',sourceMessageId:j.sourceMessageId,sourceAttachmentKey:j.sourceAttachmentKey,\n invoiceNumber:j.invoiceNumber,fileName:j.fileName}};"
+      },
+      "id": "223e8912-f790-5d23-8b19-afbfad41682d",
+      "name": "Duplicate - safely completed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7824,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j=$json;\nif(!j.sourceMessageId || !j.sourceAttachmentKey)throw new Error('Missing review document identity; email retained');\nreturn {json:{uniqueKey:[j.sourceMessageId,j.sourceAttachmentKey].map(encodeURIComponent).join(':'),\n invoiceNumber:j.invoiceNumber||'',vendor:j.provider||'',invoiceDate:j.date||'',amount:j.amount??'',\n currency:j.currency||'EUR',category:j.type||'',fileName:j.originalFileName||j.fileName||'',\n targetPath:j.targetPath||'',status:'review',sourceMessageId:j.sourceMessageId,\n sourceAttachmentKey:j.sourceAttachmentKey,processedAt:new Date().toISOString(),reason:j.reason||'Invoice requires review'}};"
+      },
+      "id": "1e336bdb-7e03-524b-af15-7202b57ef27a",
+      "name": "Prepare review row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6176,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Review Queue",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueKey": "={{ $json.uniqueKey }}",
+            "invoiceNumber": "={{ $json.invoiceNumber }}",
+            "vendor": "={{ $json.vendor }}",
+            "invoiceDate": "={{ $json.invoiceDate }}",
+            "amount": "={{ $json.amount }}",
+            "currency": "={{ $json.currency }}",
+            "category": "={{ $json.category }}",
+            "fileName": "={{ $json.fileName }}",
+            "targetPath": "={{ $json.targetPath }}",
+            "status": "={{ $json.status }}",
+            "sourceMessageId": "={{ $json.sourceMessageId }}",
+            "sourceAttachmentKey": "={{ $json.sourceAttachmentKey }}",
+            "processedAt": "={{ $json.processedAt }}",
+            "reason": "={{ $json.reason }}"
+          },
+          "matchingColumns": [
+            "uniqueKey"
+          ],
+          "schema": [
+            {
+              "id": "uniqueKey",
+              "displayName": "uniqueKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceNumber",
+              "displayName": "invoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vendor",
+              "displayName": "vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoiceDate",
+              "displayName": "invoiceDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fileName",
+              "displayName": "fileName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "targetPath",
+              "displayName": "targetPath",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sourceMessageId",
+              "displayName": "sourceMessageId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sourceAttachmentKey",
+              "displayName": "sourceAttachmentKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processedAt",
+              "displayName": "processedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "7433750e-cd25-5ebd-b934-c47a916d0cef",
+      "name": "Sheets - Review Queue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        6448,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src=$('Prepare review row').item.json;\nif(String($json.uniqueKey||'')!==src.uniqueKey)throw new Error('Review Queue write confirmation mismatch');\nreturn {json:{status:'review',sourceMessageId:src.sourceMessageId,sourceAttachmentKey:src.sourceAttachmentKey,\n invoiceNumber:src.invoiceNumber,fileName:src.fileName}};"
+      },
+      "id": "863bf556-02e5-51d7-996e-d1340e80c502",
+      "name": "Review - retain source email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6720,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const outcomes=$input.all();\nconst expected=$('Normalize PDF binary').all();\nconst groups=new Map();\nfor(let i=0;i<outcomes.length;i++) {\n const j=outcomes[i].json;\n if(!j.sourceMessageId || !j.sourceAttachmentKey || !['archived','duplicate','review'].includes(j.status))\n   throw new Error('Unexpected attachment completion; email retained');\n if(!groups.has(j.sourceMessageId))groups.set(j.sourceMessageId,{keys:new Map(),invoices:[],files:[],index:i});\n const g=groups.get(j.sourceMessageId);\n if(g.keys.has(j.sourceAttachmentKey))throw new Error('Duplicate attachment completion; email retained');\n g.keys.set(j.sourceAttachmentKey,j.status);g.invoices.push(j.invoiceNumber);g.files.push(j.fileName);\n}\nconst completed=[];\nfor(const [id,g] of groups) {\n const keys=expected.filter(i=>String(i.json.id||i.json.messageId||'')===id).map(i=>i.json.attachmentKey);\n if(!keys.length || keys.length!==g.keys.size || keys.some(k=>!g.keys.has(k)))\n   throw new Error('Not all invoice PDFs have completed; email retained');\n if([...g.keys.values()].includes('review'))continue;\n completed.push({json:{sourceMessageId:id,invoiceNumbers:g.invoices,files:g.files,\n   archivedAttachments:g.keys.size,duplicateAttachments:[...g.keys.values()].filter(s=>s==='duplicate').length},\n   pairedItem:{item:g.index}});\n}\nreturn completed;"
+      },
+      "id": "30d90e78-3ffa-517a-8e1b-66fec3a813fa",
+      "name": "Confirm completed invoice messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5648,
+        1488
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Check duplicates and review\nMatch invoice number, date and total in Sheets, then check the SFTP filename and byte size. Skip verified duplicates and upload missing files. Upsert rejected or conflicting documents in **Review Queue**; their messages remain in Gmail.",
+        "height": 1040,
+        "width": 2528,
+        "color": 7
+      },
+      "id": "11e66f60-32eb-5bbb-bd25-416266e64205",
+      "name": "05 — Duplicates and review",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5536,
+        1328
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare cloud register": {
+      "main": [
+        [
+          {
+            "node": "Register cloud invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Trash archived invoice": {
+      "main": [
+        [
+          {
+            "node": "Verify invoice email trashed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter hosting invoices": {
+      "main": [
+        [
+          {
+            "node": "Upload hosting PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm hosting archive": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore hosting invoice": {
+      "main": [
+        [
+          {
+            "node": "Register hosting invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register hosting invoice": {
+      "main": [
+        [
+          {
+            "node": "Confirm hosting archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload hosting PDFs": {
+      "main": [
+        [
+          {
+            "node": "Restore hosting invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm cloud archive": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore cloud invoice": {
+      "main": [
+        [
+          {
+            "node": "Prepare cloud register",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm internet archive": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore internet invoice": {
+      "main": [
+        [
+          {
+            "node": "Register internet invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm utility archive": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore utility invoice": {
+      "main": [
+        [
+          {
+            "node": "Register utility invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register cloud invoice": {
+      "main": [
+        [
+          {
+            "node": "Confirm cloud archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload cloud PDFs": {
+      "main": [
+        [
+          {
+            "node": "Restore cloud invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter cloud invoices": {
+      "main": [
+        [
+          {
+            "node": "Upload cloud PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register internet invoice": {
+      "main": [
+        [
+          {
+            "node": "Confirm internet archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload internet PDFs": {
+      "main": [
+        [
+          {
+            "node": "Restore internet invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter internet invoices": {
+      "main": [
+        [
+          {
+            "node": "Upload internet PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register utility invoice": {
+      "main": [
+        [
+          {
+            "node": "Confirm utility archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload utility PDFs": {
+      "main": [
+        [
+          {
+            "node": "Restore utility invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter utility invoices": {
+      "main": [
+        [
+          {
+            "node": "Upload utility PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse invoice and canonical name": {
+      "main": [
+        [
+          {
+            "node": "Invoice validation result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF text": {
+      "main": [
+        [
+          {
+            "node": "Parse invoice and canonical name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize PDF binary": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep messages with attachments": {
+      "main": [
+        [
+          {
+            "node": "Normalize PDF binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Get invoice messages": {
+      "main": [
+        [
+          {
+            "node": "Keep messages with attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Get invoice messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Get invoice messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process PDF attachments one by one": {
+      "main": [
+        [
+          {
+            "node": "Confirm completed invoice messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract PDF text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice validation result": {
+      "main": [
+        [
+          {
+            "node": "Prepare duplicate lookup",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare duplicate lookup": {
+      "main": [
+        [
+          {
+            "node": "Sheets - Find registered invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets - Find registered invoice": {
+      "main": [
+        [
+          {
+            "node": "Assess registered invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess registered invoice": {
+      "main": [
+        [
+          {
+            "node": "Registered invoice decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registered invoice decision": {
+      "main": [
+        [
+          {
+            "node": "Filter hosting invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter cloud invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter internet invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter utility invoices",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SFTP - Check registered PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SFTP - Check registered PDF": {
+      "main": [
+        [
+          {
+            "node": "Assess archived PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess archived PDF": {
+      "main": [
+        [
+          {
+            "node": "Archived PDF decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archived PDF decision": {
+      "main": [
+        [
+          {
+            "node": "Filter hosting invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter cloud invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter internet invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter utility invoices",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Duplicate - safely completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare review row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate - safely completed": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare review row": {
+      "main": [
+        [
+          {
+            "node": "Sheets - Review Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets - Review Queue": {
+      "main": [
+        [
+          {
+            "node": "Review - retain source email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review - retain source email": {
+      "main": [
+        [
+          {
+            "node": "Process PDF attachments one by one",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm completed invoice messages": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Trash archived invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "nodeGroups": []
+}

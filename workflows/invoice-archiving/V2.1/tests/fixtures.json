@@ -1,0 +1,52 @@
+[
+  {
+    "profile": "UtilityProvider",
+    "from": "utility-provider",
+    "subject": "Invoice electricity",
+    "text": "Utility Provider\nBolletta luce\nFattura n: UT-2026-1001\nData fattura 20/11/2026\nTotale: 12,20 €",
+    "invoiceNumber": "UT-2026-1001",
+    "amount": 12.2,
+    "tab": "Utilities",
+    "type": "electricity"
+  },
+  {
+    "profile": "UtilityProvider",
+    "from": "utility-provider",
+    "subject": "Invoice gas",
+    "text": "Utility Provider\nBolletta gas\nFattura n: UT-2026-1002\nData fattura 20/11/2026\nTotale: 8,40 €",
+    "invoiceNumber": "UT-2026-1002",
+    "amount": 8.4,
+    "tab": "Utilities",
+    "type": "gas"
+  },
+  {
+    "profile": "InternetProvider",
+    "from": "internet-provider",
+    "subject": "Invoice",
+    "text": "Internet Provider\nFattura 12345 / A / 2026\nData fattura 20/11/2026\nTOTALE FATTURA 12,20",
+    "invoiceNumber": "12345-A-2026",
+    "amount": 12.2,
+    "tab": "Internet",
+    "type": "internet"
+  },
+  {
+    "profile": "CloudProvider",
+    "from": "cloud-provider",
+    "subject": "Invoice",
+    "text": "Cloud Provider\nCINV12345678\nData fattura 20/11/2026\nImporto totale: 12,20\nCloud services invoice",
+    "invoiceNumber": "CINV12345678",
+    "amount": 12.2,
+    "tab": "Cloud",
+    "type": "cloud"
+  },
+  {
+    "profile": "HostingProvider",
+    "from": "hosting-provider",
+    "subject": "Invoice",
+    "text": "Hosting Provider\nInvoice number: 123456\nInvoice date: 20.11.2026\nOverview\nCloud\n€ 10.00\n€ 2.20\n€ 12.20\nPlease pay\nST11 Storage Plan",
+    "invoiceNumber": "123456",
+    "amount": 12.2,
+    "tab": "Hosting",
+    "type": "cloud"
+  }
+]

@@ -4,7 +4,7 @@
 
 | Version | Workflow JSON | n8n status | Purpose |
 | --- | --- | --- | --- |
-| [V1](V1/README.md) | [Download V1](V1/Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json) | Existing public listing [#11466](https://n8n.io/workflows/11466) | Portable archive of the workflow distributed by that listing. |
+| [V1](V1/README.md) | [Download V1](V1/Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json) | Existing public listing [#11466](https://n8n.io/workflows/11466-create-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/) | Portable archive of the workflow distributed by that listing. |
 | [V2](V2/README.md) | [Download V2](V2/Tech_AI_Daily_Briefing-RSS-AI-Email-V2.json) | Submission [#23696](https://creators.n8n.io/workflows/23696), in review | Current revision with the corrected future-date limit and portable setup values. |
 
 Use **V2** for new installations. The [existing unversioned JSON](Tech_AI_Daily_Briefing-RSS-AI-Email.json) remains an identical copy of V2 so existing download links keep working.

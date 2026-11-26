@@ -9,7 +9,7 @@
 
 Import [Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json](Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json).
 
-This is a portable snapshot of the 48-node workflow distributed by the public n8n listing [#11466](https://n8n.io/workflows/11466). Its runtime already uses **OpenAI as the primary provider, Google Gemini as a fallback, Google Sheets subscribers, and SMTP delivery**, even though the listing title mentions Gemini and Gmail.
+This is a portable snapshot of the 48-node workflow distributed by the public n8n listing [#11466](https://n8n.io/workflows/11466-create-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/). Its runtime already uses **OpenAI as the primary provider, Google Gemini as a fallback, Google Sheets subscribers, and SMTP delivery**, even though the listing title mentions Gemini and Gmail.
 
 This archive does not claim to reproduce the earliest historical Gemini/Gmail implementation. Use [V2](../V2/README.md) for new installations.
 

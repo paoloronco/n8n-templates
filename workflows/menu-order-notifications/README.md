@@ -12,7 +12,7 @@ Order notification automation for online menus. Select one functional variant:
 ## Published version
 
 - **Gumroad:** [V3 — Home Assistant TTS + BAC](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications). Only V3 is published on Gumroad.
-- **n8n Creators:** [V3 — View template](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/).
+- **n8n Creators:** [V4 public release — 71 nodes](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/). This is distinct from the 22-node V3 JSON and the 66-node V4 STAGING candidate; [public release copy](../../catalog/n8n-published/14487/README.md).
 
 ## Shared resources
 

@@ -16,7 +16,7 @@ Turn RSS stories into an Instagram post with AI-written copy and a generated ima
 - [Read the complete setup documentation](https://paoloronco.notion.site/3f5f0ba27c32806ba425f7d84c72961a)
 - [Get the template on Gumroad](https://paoloronco.gumroad.com/l/AInews-SocialPubblishing)
 
-The revision of n8n Creator submission **#11791** has been submitted for review. Publication in the n8n template library depends on that review.
+n8n listing **#11791 is published** as a paid template. Its public API and Creator Portal Copy JSON expose the 36-node preview, not the complete purchased workflow. The full source revision is linked separately; the preview cannot certify the delivered package byte for byte.
 
 ## How it works
 

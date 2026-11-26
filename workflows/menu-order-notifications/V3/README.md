@@ -37,7 +37,7 @@ The [static website mockup](./website-mockup/) includes a customer-facing menu, 
 
 ## Documentation
 - [Full setup guide (Notion)](https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V3/README.md)
-- [n8n Creators listing](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
+- [Related V4 public release #14487 — not this V3 JSON](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/)
 - [Gumroad](https://paoloronco.gumroad.com/l/n8n-menuwebsite-ordernotifications)
 
 ## Additional Info

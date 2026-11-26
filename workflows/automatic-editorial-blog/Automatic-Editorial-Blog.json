@@ -1,0 +1,791 @@
+{
+  "name": "Automatic Editorial Blog",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "4712e5c2-f0aa-4a78-8447-3e33457f46ae",
+      "name": "Daily recovery check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        400
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e28f1b47-aada-4fa3-b7a7-55a30e00ed19",
+      "name": "Run one editorial slot",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://example.com/api/editorial",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=  {{ JSON.stringify({action:\"claim\", ...($execution.mode === \"test\" && $(\"Run one editorial slot\").isExecuted ? {manualKey:$execution.id} : {})}) }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 25000
+        }
+      },
+      "id": "1d71502e-1a6d-4619-ab5b-76401908bf85",
+      "name": "Claim budget and original topic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        400
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "An article is due",
+              "leftValue": "={{ $json.status === \"claimed\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a4988551-eb6a-45aa-a252-b956a006cfad",
+      "name": "An article is due",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "response",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.writerRequest.model }}"
+        },
+        "responses": {
+          "values": [
+            {
+              "type": "text",
+              "role": "={{ typeof $json.writerRequest.input === 'string' ? 'user' : $json.writerRequest.input[0].role }}",
+              "content": "={{ (()=>{const v=$json.writerRequest.input;if(typeof v==='string')return v;if(!Array.isArray(v)||v.length!==1)throw new Error('This native mapping requires exactly one text message');const c=v[0].content;if(typeof c==='string')return c;if(!Array.isArray(c)||c.some(x=>x.type!=='input_text'))throw new Error('Text-only input is required');return c.map(x=>x.text).join('\\n');})() }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "store": "={{ $json.writerRequest.store ?? false }}",
+          "serviceTier": "={{ $json.writerRequest.service_tier ?? 'default' }}",
+          "maxTokens": "={{ $json.writerRequest.max_output_tokens }}",
+          "metadata": "={{ JSON.stringify($json.writerRequest.metadata ?? {}) }}",
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "={{ $json.writerRequest.reasoning.effort }}",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "={{ $json.writerRequest.text.format.name }}",
+              "schema": "={{ JSON.stringify($json.writerRequest.text.format.schema) }}",
+              "strict": "={{ $json.writerRequest.text.format.strict ?? false }}",
+              "verbosity": "={{ $json.writerRequest.text.verbosity ?? 'medium' }}"
+            }
+          }
+        }
+      },
+      "id": "62580be0-ba49-4295-8187-92f53ea49ff3",
+      "name": "Write sourced article",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        848,
+        384
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://example.com/api/editorial",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({action:'draft',runId:$(\"Claim budget and original topic\").first().json.runId,response:(()=>{const r=JSON.parse(JSON.stringify($json));for(const o of r.output??[])if(o.type==='message')for(const c of o.content??[])if(c.type==='output_text'&&typeof c.text!=='string')c.text=JSON.stringify(c.text);return r;})()}) }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 25000
+        }
+      },
+      "id": "18b5986b-c43c-495c-8579-318565086ebc",
+      "name": "Archive and validate draft",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        368
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "response",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.reviewRequest.model }}"
+        },
+        "responses": {
+          "values": [
+            {
+              "type": "text",
+              "role": "={{ typeof $json.reviewRequest.input === 'string' ? 'user' : $json.reviewRequest.input[0].role }}",
+              "content": "={{ (()=>{const v=$json.reviewRequest.input;if(typeof v==='string')return v;if(!Array.isArray(v)||v.length!==1)throw new Error('This native mapping requires exactly one text message');const c=v[0].content;if(typeof c==='string')return c;if(!Array.isArray(c)||c.some(x=>x.type!=='input_text'))throw new Error('Text-only input is required');return c.map(x=>x.text).join('\\n');})() }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "store": "={{ $json.reviewRequest.store ?? false }}",
+          "serviceTier": "={{ $json.reviewRequest.service_tier ?? 'default' }}",
+          "maxTokens": "={{ $json.reviewRequest.max_output_tokens }}",
+          "metadata": "={{ JSON.stringify($json.reviewRequest.metadata ?? {}) }}",
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "={{ $json.reviewRequest.reasoning.effort }}",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "={{ $json.reviewRequest.text.format.name }}",
+              "schema": "={{ JSON.stringify($json.reviewRequest.text.format.schema) }}",
+              "strict": "={{ $json.reviewRequest.text.format.strict ?? false }}",
+              "verbosity": "={{ $json.reviewRequest.text.verbosity ?? 'medium' }}"
+            }
+          }
+        }
+      },
+      "id": "7e1efeb2-76bc-4f5e-8304-f0fc70cd780c",
+      "name": "Independent editorial review",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        352
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://example.com/api/editorial",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({action:'complete',runId:$(\"Claim budget and original topic\").first().json.runId,response:(()=>{const r=JSON.parse(JSON.stringify($json));for(const o of r.output??[])if(o.type==='message')for(const c of o.content??[])if(c.type==='output_text'&&typeof c.text!=='string')c.text=JSON.stringify(c.text);return r;})()}) }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 25000
+        }
+      },
+      "id": "7a4c7576-7ca3-4445-b811-a52289ef4464",
+      "name": "Publish approved article atomically",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        336
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Publication confirmed",
+              "leftValue": "={{ $json.status === \"published\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "133707fa-a139-44e3-bfb7-d9faeb950f60",
+      "name": "Publication confirmed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://example.com\" + $json.path }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text",
+              "outputPropertyName": "body"
+            }
+          },
+          "timeout": 25000
+        }
+      },
+      "id": "e50881b1-e0b4-4f0a-a069-5c5cadafff08",
+      "name": "Verify public article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        304
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "const response=$input.first().json;\nconst published=$('Publish approved article atomically').item.json;\nconst expected=published.verificationText;\nif(typeof expected!=='string'||!expected.trim())throw new Error('The editorial API must return a non-empty verificationText for the published article.');\nif(response.statusCode!==200||!String(response.body??response.data).includes(expected))throw new Error('Publication is stored; public rendering requires reconciliation. Do not regenerate this slot.');\nreturn [{json:{status:'published',url:'https://example.com'+published.path,runId:$('Claim budget and original topic').first().json.runId}}];"
+      },
+      "id": "230372c9-c3b6-44fd-93f2-df1daa7b4645",
+      "name": "Confirm live receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        304
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0f72ab6a-8e79-4367-8510-6d9d0e31c4b8",
+      "name": "No AI spend this run",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        576,
+        800
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "1de55e4e-d278-4a51-bacc-e4e9c38959d2",
+      "name": "Keep rejected draft for audit",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stages={'Write sourced article':'writer','Archive and validate draft':'draft','Independent editorial review':'reviewer','Publish approved article atomically':'publication'}; return [{json:{action:'fail',runId:$('Claim budget and original topic').first().json.runId,stage:stages[$prevNode.name] || 'publication'}}];"
+      },
+      "id": "0b5cae5b-12ef-4b81-87be-f153be37c0ec",
+      "name": "Prepare failure receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://example.com/api/editorial",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 25000
+        }
+      },
+      "id": "6e175669-f51d-4437-8a78-434bc06129ca",
+      "name": "Record failed run without regeneration",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        720
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "errorMessage": "Editorial run failed. Inspect this execution and the durable API receipt before retrying. Budget reservations, archived drafts and retry limits are managed by your editorial API."
+      },
+      "id": "f00df235-f18d-4817-8209-14e0a65e49d7",
+      "name": "Stop with durable failure",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Automatic Editorial Blog\n\nWrite, review and publish sourced articles using OpenAI nodes and a compatible editorial API.\n\n### How it works\n- **Claim:** Reserve a due topic and its budget.\n- **Write:** Generate and archive a sourced draft.\n- **Review:** Assess the draft independently and allow one correction.\n- **Publish:** Publish approved content once and verify the live page.\n\n### Setup\n- Connect OpenAI and editorial API credentials.\n- Set the four API URLs and your public blog origin.\n- Configure your backend and test before activation.\n\n### Customization\n- **Content:** Set topics, sources, prompts and schemas in your API.\n- **Automation:** Adjust the schedule, budget and correction limits.\n\n### Requirements\n- n8n with OpenAI, Code and HTTP Request nodes.\n- OpenAI API access.\n- Editorial API with persistent state and CMS publishing.\n\n### Additional info\n- [Full documentation](https://paoloronco.notion.site/Automatic-Editorial-Blog-Native-OpenAI-424f0ba27c3281828db5f28abc20a6e3)\n- [Setup guide and workflow files](https://github.com/paoloronco/n8n-templates/tree/main/workflows/automatic-editorial-blog)\n- **Support:** [info@paoloronco.it](mailto:info@paoloronco.it) · [paoloronco.it](https://paoloronco.it/)",
+        "height": 588,
+        "width": 550
+      },
+      "id": "bc4dda55-b32b-4ebb-a7a5-6d5666cada58",
+      "name": "Editorial desk",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1 · Reserve and select",
+        "height": 406,
+        "width": 768,
+        "color": 7
+      },
+      "id": "18038f3e-3e19-4b15-940e-2a8e9faaeb79",
+      "name": "1 · Reserve and select",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2 · Write and archive",
+        "height": 342,
+        "width": 512,
+        "color": 7
+      },
+      "id": "50d54df7-ebe2-4d47-987b-ac177d149220",
+      "name": "2 · Write and archive",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        784,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3 · Review and publish",
+        "height": 342,
+        "width": 720,
+        "color": 7
+      },
+      "id": "2cd25b87-5ce5-4b7b-80d9-b61e23cedc08",
+      "name": "3 · Review and publish",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4 · Verify delivery",
+        "height": 390,
+        "width": 448,
+        "color": 7
+      },
+      "id": "e681706e-b5ba-4f1a-a30a-582aecbbaf5a",
+      "name": "4 · Verify delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Recovery and audit",
+        "height": 288,
+        "width": 1536,
+        "color": 7
+      },
+      "id": "1e9329ac-9f90-4941-9e40-a210fede252e",
+      "name": "Recovery and audit",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        496,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "One editorial revision needed",
+              "leftValue": "={{ $json.status === \"revision\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef687da4-8493-4eac-8c83-82123aaae393",
+      "name": "One editorial revision needed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## One editorial correction",
+        "height": 288,
+        "width": 448,
+        "color": 7
+      },
+      "id": "e53efd87-36af-4e2d-a32b-04057d3cba87",
+      "name": "Bounded editorial correction",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        640
+      ]
+    }
+  ],
+  "connections": {
+    "Daily recovery check": {
+      "main": [
+        [
+          {
+            "node": "Claim budget and original topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run one editorial slot": {
+      "main": [
+        [
+          {
+            "node": "Claim budget and original topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim budget and original topic": {
+      "main": [
+        [
+          {
+            "node": "An article is due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "An article is due": {
+      "main": [
+        [
+          {
+            "node": "Write sourced article",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No AI spend this run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write sourced article": {
+      "main": [
+        [
+          {
+            "node": "Archive and validate draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare failure receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive and validate draft": {
+      "main": [
+        [
+          {
+            "node": "Independent editorial review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare failure receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Independent editorial review": {
+      "main": [
+        [
+          {
+            "node": "Publish approved article atomically",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare failure receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish approved article atomically": {
+      "main": [
+        [
+          {
+            "node": "Publication confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare failure receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publication confirmed": {
+      "main": [
+        [
+          {
+            "node": "Verify public article",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "One editorial revision needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify public article": {
+      "main": [
+        [
+          {
+            "node": "Confirm live receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare failure receipt": {
+      "main": [
+        [
+          {
+            "node": "Record failed run without regeneration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record failed run without regeneration": {
+      "main": [
+        [
+          {
+            "node": "Stop with durable failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One editorial revision needed": {
+      "main": [
+        [
+          {
+            "node": "Write sourced article",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Keep rejected draft for audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "executionTimeout": 600
+  },
+  "pinData": {}
+}

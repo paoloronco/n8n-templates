@@ -17,7 +17,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/amazon-luna-prime-games/Amazon_Luna-Prime_Games-Google_Sheets.json",
       "summary": "Stessa pipeline; differenze nelle credenziali e nella versione browser dello user-agent.",
       "comparison": "Same pipeline; credential bindings and browser user-agent version differ.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c3281d28ab5e6cc186fe372",
       "purchase": null
     },
     {
@@ -35,7 +34,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/invoice-archiving/V1/Email_Invoices-AI_Extraction-Archiving.json",
       "summary": "26 nodi; logica e canvas coincidenti. Una nota e i metadati differiscono.",
       "comparison": "26 nodes; operational parameters and canvas match. One note and export metadata differ.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c32817b94fec8c341293788",
       "purchase": null
     },
     {
@@ -53,7 +51,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/tech-ai-news-digest/V1/Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json",
       "summary": "48 nodi; codice e canvas della V1. GitHub usa configurazioni portabili per Sheets e SMTP; V2 #23696 resta in review.",
       "comparison": "48 nodes; V1 code and canvas. The source uses portable Sheets/SMTP configuration. V2 #23696 is under review.",
-      "notion": "https://app.notion.com/p/424f0ba27c3281cf863fcf0842ec3751",
       "purchase": null
     },
     {
@@ -71,7 +68,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/tree/main/workflows/wordpress-ai-voiceovers",
       "summary": "Anteprima a pagamento da 27 nodi, non export completo. Versione distinta dalla V2 gratuita #22712.",
       "comparison": "Paid V1.3 preview with 27 nodes, not the complete deliverable. Distinct from free V2 #22712.",
-      "notion": "https://app.notion.com/p/424f0ba27c3281de9cece625d55fa7d1",
       "purchase": "https://paoloronco.gumroad.com/l/ailfum"
     },
     {
@@ -89,7 +85,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/ai-instagram-publishing/RSS_AInews-socialPublishing_template.json",
       "summary": "Anteprima a pagamento da 36 nodi; parametri nascosti dal portale. Il sorgente completo GitHub non è verificabile integralmente attraverso questa anteprima.",
       "comparison": "Paid 36-node preview; the portal hides parameters. Full GitHub source identity cannot be established from this preview.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c3281f9b0bcc82bdc272b0c",
       "purchase": "https://paoloronco.gumroad.com/l/AInews-SocialPubblishing"
     },
     {
@@ -107,7 +102,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/digital-certificates/pdf-generator-api/Certificate_Creation-Validation-PDF_Templates.json",
       "summary": "19 nodi; stessa logica. GitHub rimuove associazioni alle credenziali e importa il workflow inattivo.",
       "comparison": "19 nodes; same logic. Source credential bindings and inactive import metadata differ.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c3281adbbe4f5a763615fce",
       "purchase": null
     },
     {
@@ -125,7 +119,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/backup-sync-monitoring/workflow/Backup_Sync_V2.json",
       "summary": "38 nodi; stessa logica e connessioni, una nota differisce.",
       "comparison": "38 nodes; same logic and graph, one note differs.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c32812ea173dd7f0d27e51e",
       "purchase": null
     },
     {
@@ -143,7 +136,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/wordpress-ai-chatbot/template.json",
       "summary": "64 nodi pubblici contro 63 del sorgente corretto. Il nodo Build context from Qdrant results1 contiene un ritorno troncato; correzione già disponibile su GitHub.",
       "comparison": "Published: 64 nodes; corrected source: 63. Build context from Qdrant results1 has a truncated return and fails JavaScript syntax validation; the source contains the fix.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c328136aa67ef75ec53a48b",
       "purchase": null
     },
     {
@@ -161,7 +153,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/menu-order-notifications/V4/workflow/Smart_Menu_Order_Automation_V4_STAGING.json",
       "summary": "71 nodi nella release pubblica; V4 STAGING ha 66 nodi e cinque operazioni Delete in meno. Le versioni precedenti restano separate.",
       "comparison": "Published release: 71 nodes. V4 STAGING: 66 nodes, with five Delete operations removed. Earlier versions remain separate.",
-      "notion": "https://app.notion.com/p/424f0ba27c328179a51dc7e563cd20b8",
       "purchase": null
     },
     {
@@ -179,7 +170,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/splunk-alert-notifications/v2/Splunk_notification%20%28template2%29.json",
       "summary": "40 nodi; Normalize Splunk Alert Payload contiene una regex non valida nella copia pubblica. Correzione già disponibile su GitHub.",
       "comparison": "40 nodes; Normalize Splunk Alert Payload contains an invalid regular expression in the public release. The source contains the fix.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c32812290afeb3bfe18906c",
       "purchase": null
     },
     {
@@ -197,7 +187,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/website-ai-chatbot/Website_AI_Chatbot.json",
       "summary": "25 nodi; stessa logica, differenze nelle credenziali e in una nota. Famiglia distinta dal chatbot WordPress.",
       "comparison": "25 nodes; same logic, credential bindings and one note differ. Separate from the WordPress chatbot.",
-      "notion": "https://app.notion.com/p/405f0ba27c32814c86c6f6304aea46a4",
       "purchase": null
     },
     {
@@ -215,7 +204,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/newsletter-automation/Newsletter%20Subscribe%20%2B%20New%20Release%20Notification%20_%20template.json",
       "summary": "37 nodi; nella release pubblica Release Email Copywriter Agent è disabilitato. La revisione GitHub lo abilita e aggiorna i parametri.",
       "comparison": "37 nodes; Release Email Copywriter Agent is disabled in the public release. The source revision enables it and changes agent parameters.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c328126a3f8ecd25badf07e",
       "purchase": null
     },
     {
@@ -233,7 +221,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/invoice-archiving/V2/Unified_Invoice_Archiving%20-%20template.json",
       "summary": "36 nodi; oggetto workflow identico al sorgente GitHub, incluse note e layout. V3 Drive e V2.1 sono revisioni distinte.",
       "comparison": "36 nodes; exact workflow-object match including notes and layout. V3 Drive and V2.1 are separate revisions.",
-      "notion": "https://app.notion.com/p/402f0ba27c328115b9e2c55ccca87a2b",
       "purchase": null
     },
     {
@@ -251,7 +238,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v2/Instagram_Reel_to_Notion_Second_Brain_EN.json",
       "summary": "29 nodi, 22 operativi e 7 note. Sorgente corretto: v2 English; non la V4 da 57 nodi.",
       "comparison": "29 nodes, 22 operational and 7 notes. Correct source: v2 English, not the 57-node V4.",
-      "notion": "https://app.notion.com/p/416f0ba27c3281b389aae90628cd7e77",
       "purchase": null
     },
     {
@@ -269,7 +255,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-release-guardian/OrbitPage_Release_Guardian.json",
       "summary": "38 nodi; stessa logica, differenze nelle credenziali e in una nota.",
       "comparison": "38 nodes; same logic, credential bindings and one note differ.",
-      "notion": "https://app.notion.com/p/407f0ba27c3280ffa6c0f1e2de345dd5",
       "purchase": null
     },
     {
@@ -287,7 +272,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-ai-page-editor/OrbitPage_AI_Page_Editor.json",
       "summary": "25 nodi; stessa logica, con differenze in credenziali, webhook e annotazioni/layout.",
       "comparison": "25 nodes; same logic, with credential bindings, webhook metadata and documentation/layout differences.",
-      "notion": "https://app.notion.com/p/407f0ba27c3280528c4df38442e1824e",
       "purchase": null
     },
     {
@@ -305,7 +289,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V2/google-cloud-inventory-workflow.json",
       "summary": "47 nodi pubblicati. La cartella GitHub V2 contiene V2.2.1 da 52 nodi: revisione successiva, non il JSON di #22116. V3 #22943 è un listing distinto.",
       "comparison": "Published V2.0.1: 47 nodes. Main V2 folder contains later V2.2.1 with 52 nodes. V3 #22943 is a separate listing.",
-      "notion": "https://app.notion.com/p/424f0ba27c32814ca1cde4cbdb584ca9",
       "purchase": null
     },
     {
@@ -323,7 +306,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/template-publishing-assistant/Template-Publishing-Assistant.json",
       "summary": "57 nodi in entrambe le copie; il sorgente modifica codice di sanitizzazione, pagine Notion, note, delivery ed email. È una revisione successiva, non una copia identica.",
       "comparison": "57 nodes in both copies; the source changes sanitization, Notion page creation, sticky-note generation, delivery and email code. It is a distinct source revision.",
-      "notion": "https://app.notion.com/p/409f0ba27c3281548d31ec1b3035efac",
       "purchase": null
     },
     {
@@ -339,9 +321,8 @@
       "snapshot": "catalog/n8n-published/22127/public-export.json",
       "sourcePath": "workflows/orbitpage/add-new-youtube-videos-to-orbitpage/Add_New_YouTube_Videos_to_OrbitPage.json",
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/add-new-youtube-videos-to-orbitpage/Add_New_YouTube_Videos_to_OrbitPage.json",
-      "summary": "52 nodi; stessa logica, differenze nelle credenziali e in una nota. La descrizione n8n contiene collegamenti GitHub storici.",
-      "comparison": "52 nodes; same logic, credential bindings and one note differ. The n8n description contains legacy GitHub paths.",
-      "notion": "https://app.notion.com/p/409f0ba27c3281d69b8de5629b77be15",
+      "summary": "52 nodi; stessa logica, differenze nelle credenziali e in una nota. I collegamenti GitHub storici della descrizione n8n sono stati corretti.",
+      "comparison": "52 nodes; same logic, credential bindings and one note differ. Legacy GitHub paths in the n8n description have been corrected.",
       "purchase": null
     },
     {
@@ -359,7 +340,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/sync-google-sheets-menus-and-price-lists-to-orbitpage/Sync-Google-Sheets-Menus-and-Price-Lists-to-OrbitPage_sanitized.json",
       "summary": "43 nodi; stessi Code node, ma parametri nativi dei connettori e autenticazione Sheets differiscono. Non dichiarare le copie identiche.",
       "comparison": "43 nodes; Code nodes match, while native connector parameters and Sheets authentication differ. These are not identical exports.",
-      "notion": "https://app.notion.com/p/409f0ba27c3281ac80c2d7dede3ffa2a",
       "purchase": null
     },
     {
@@ -377,7 +357,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-event-lifecycle/OrbitPage-Event-Lifecycle.json",
       "summary": "41 nodi pubblici contro 40 GitHub; stessi Code node, parametri nativi dei connettori e annotazioni differenti.",
       "comparison": "41 public nodes versus 40 in source; same Code nodes, different native connector parameters and annotations.",
-      "notion": "https://app.notion.com/p/40df0ba27c3281aaa7d5c1a9e3c941ab",
       "purchase": null
     },
     {
@@ -395,7 +374,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-campaign-launch-kit/OrbitPage-Campaign-Launch-Kit.json",
       "summary": "46 nodi in entrambe le copie; il sorgente contiene differenze nei Code node e nei parametri nativi. Conservate release e revisione separatamente.",
       "comparison": "46 nodes in both copies; source Code nodes and native connector parameters differ. Release and source revision are kept separate.",
-      "notion": "https://app.notion.com/p/40df0ba27c3281f88861c4703490ccad",
       "purchase": null
     },
     {
@@ -413,7 +391,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/orbitpage/orbitpage-analytics-improvement/OrbitPage-Analytics-Improvement.json",
       "summary": "43 nodi; logica e connessioni coincidono, una nota differisce.",
       "comparison": "43 nodes; logic and graph match, one note differs.",
-      "notion": "https://app.notion.com/p/40df0ba27c3281a6b01ec21aea86768d",
       "purchase": null
     },
     {
@@ -431,7 +408,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/wordpress-ai-voiceovers/workflow/wordpress-google-cloud-voiceovers.json",
       "summary": "51 nodi pubblici e 50 nel sorgente, entrambi con 43 nodi operativi. Differiscono credenziali e documentazione; V1.3 #11789 resta distinta.",
       "comparison": "51 public nodes and 50 source nodes, both with 43 operational nodes. Credential bindings and documentation differ. Paid V1.3 #11789 remains separate.",
-      "notion": "https://app.notion.com/p/3fdf0ba27c3281b0b0c1c336a30366a1",
       "purchase": null
     },
     {
@@ -449,7 +425,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/secondbrain/v4/Build-an-AI-Second-Brain-Telegram-OpenAI-Notion-V4.json",
       "summary": "57 nodi; stessa pipeline. GitHub sostituisce identità Telegram e configurazioni Notion con valori portabili, oltre alle credenziali.",
       "comparison": "57 nodes; same pipeline. Source replaces Telegram identity and Notion configuration with portable values, in addition to credential bindings.",
-      "notion": "https://app.notion.com/p/41af0ba27c3280f9ae99c933d50f4448",
       "purchase": null
     },
     {
@@ -467,7 +442,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/google-cloud-inventory-workflow.json",
       "summary": "62 nodi; oggetto workflow identico al sorgente GitHub, note e layout compresi. #21565 è la vecchia candidatura di cui è stata chiesta la rimozione.",
       "comparison": "62 nodes; exact workflow-object match including notes and layout. Removal was requested for obsolete submission #21565 only.",
-      "notion": "https://app.notion.com/p/41af0ba27c3280d595f9c11098c94251",
       "purchase": null
     },
     {
@@ -485,7 +459,6 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/social-posts-carousels/V3/workflow.json",
       "summary": "84 nodi; JSON V3 identico a GitHub, note e layout compresi. Il titolo pubblico storico cita Facebook Graph API.",
       "comparison": "84 nodes; exact V3 workflow-object match including notes and layout. The listing retains its original Facebook Graph API title.",
-      "notion": "https://app.notion.com/p/41af0ba27c32818bb595d4b552352694",
       "purchase": null
     },
     {
@@ -503,8 +476,17 @@
       "sourceUrl": "https://github.com/paoloronco/n8n-templates/blob/main/workflows/n8n-notion-workflow-backup/workflow.json",
       "summary": "32 nodi più companion setup da 12 nodi nel pacchetto storico GitHub (10 operativi e 2 note). V4 unificata: 30 nodi, candidatura #22936 in review.",
       "comparison": "V3: 32 nodes plus the 12-node setup companion (10 operational, 2 notes) from repository history. Unified V4: 30 nodes, submission #22936 under review.",
-      "notion": "https://app.notion.com/p/424f0ba27c32817ba7abc5c645bfcace",
       "purchase": null
+    }
+  ],
+  "drafts": [
+    {
+      "id": 23702,
+      "family": "Invoice Archiving",
+      "version": "V2.1",
+      "state": "Finalize submission",
+      "url": "https://creators.n8n.io/workflows/23702/edit",
+      "sourcePath": "workflows/invoice-archiving/V2.1/Gmail_Invoice_Archiving_SFTP_V2.1.json"
     }
   ]
 }

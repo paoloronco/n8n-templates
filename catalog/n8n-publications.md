@@ -42,6 +42,8 @@ This catalog maps each published Creator Portal listing to the workflow actually
 | [#23696](https://creators.n8n.io/workflows/23696) | Tech & AI News V2, 48 nodes | Under review | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/tech-ai-news-digest/V2/Tech_AI_Daily_Briefing-RSS-AI-Email-V2.json) |
 | [#23115](https://creators.n8n.io/workflows/23115) | HeyGen / Dropbox, 148 nodes | Changes requested; 148-node replacement prepared, not submitted | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V2/HeyGen-HyperFrames/workflow.json) |
 
+Invoice V2.1 has a separate [draft #23702](https://creators.n8n.io/workflows/23702/edit), in Finalize submission. It has not been submitted for review and does not replace published V2 #21592.
+
 Removal was requested only for obsolete Splunk V1 #19818 and Google Cloud #21565. They remain changes-requested until n8n closes them; no resubmission is planned.
 
 Invoice V1 #10923 and V2 SFTP #21592 are published. V3 Drive and V2.1 are separate repository revisions, without a verified separate published listing. Menu V1–V3, V4 STAGING, NextCut, Social Reels and HTML/PDF Certificates remain distinct source variants.

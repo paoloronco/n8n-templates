@@ -1,0 +1,1844 @@
+{
+  "name": "Secrets Exposure & Credential Leak Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v4-github_owner",
+              "name": "github_owner",
+              "value": "your-github-owner",
+              "type": "string"
+            },
+            {
+              "id": "v4-github_repo",
+              "name": "github_repo",
+              "value": "your-repository",
+              "type": "string"
+            },
+            {
+              "id": "v4-target_branch",
+              "name": "target_branch",
+              "value": "main",
+              "type": "string"
+            },
+            {
+              "id": "v4-alert_from_email",
+              "name": "alert_from_email",
+              "value": "security@example.com",
+              "type": "string"
+            },
+            {
+              "id": "v4-alert_to_email",
+              "name": "alert_to_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "v4-history_enabled",
+              "name": "history_enabled",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "v4-test_fixture",
+              "name": "test_fixture",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "v4-max_requests_per_run",
+              "name": "max_requests_per_run",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "v4-max_files_per_run",
+              "name": "max_files_per_run",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "v4-max_commits_per_scan",
+              "name": "max_commits_per_scan",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "v4-max_file_bytes",
+              "name": "max_file_bytes",
+              "value": 500000,
+              "type": "number"
+            },
+            {
+              "id": "v4-max_snapshot_files",
+              "name": "max_snapshot_files",
+              "value": 10000,
+              "type": "number"
+            },
+            {
+              "id": "v4-max_findings_per_run",
+              "name": "max_findings_per_run",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "v4-minimum_confidence",
+              "name": "minimum_confidence",
+              "value": 75,
+              "type": "number"
+            },
+            {
+              "id": "v4-email_minimum_confidence",
+              "name": "email_minimum_confidence",
+              "value": 85,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "18262d86-0e61-4e57-bdd8-23abced4b828",
+      "name": "V4 \u00b7 Config: Target Repository",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        3440
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "0d6c6241-16ef-44af-aea9-e8996235d019",
+      "name": "V4 \u00b7 Scheduled Scan (Every 6h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        3440
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e846d8b1-edbb-4f72-9cdd-97a837dbbf14",
+      "name": "V4 \u00b7 Manual Scan",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        3440
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "secrets_monitor_v4_state",
+        "columns": {
+          "column": [
+            {
+              "name": "key"
+            },
+            {
+              "name": "payload"
+            },
+            {
+              "name": "owner"
+            },
+            {
+              "name": "lease",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "45275d18-7529-48a0-b7f0-fb48042080fe",
+      "name": "V4 \u00b7 State: Ensure Table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        3440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ $('V4 \u00b7 Config: Target Repository').first().json.github_owner.toLowerCase()+'/'+$('V4 \u00b7 Config: Target Repository').first().json.github_repo.toLowerCase()+'@'+$('V4 \u00b7 Config: Target Repository').first().json.target_branch+($('V4 \u00b7 Config: Target Repository').first().json.test_fixture?'#controlled-test':'') }}"
+            }
+          ]
+        },
+        "limit": 2
+      },
+      "id": "a62767bb-ff76-48cf-ba4e-a40f20a42536",
+      "name": "V4 \u00b7 State: Read Repository",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        3440
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f39c001b-e5ad-43af-b800-fa71c763fda5",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e02d4ed5-1d78-4628-8c34-eab63175d040",
+      "name": "V4 \u00b7 State: Row Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        3440
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ $('V4 \u00b7 Config: Target Repository').first().json.github_owner.toLowerCase()+'/'+$('V4 \u00b7 Config: Target Repository').first().json.github_repo.toLowerCase()+'@'+$('V4 \u00b7 Config: Target Repository').first().json.target_branch+($('V4 \u00b7 Config: Target Repository').first().json.test_fixture?'#controlled-test':'') }}",
+            "payload": "{}",
+            "owner": "",
+            "lease": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "56e18c40-3fea-4a57-bc18-fa774ca719bf",
+      "name": "V4 \u00b7 State: Initialize Row",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        3616
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const core=(()=>{\nfunction sha256(ascii) {\n  ascii = unescape(encodeURIComponent(ascii));\n  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }\n  const mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length';\n  let i, j, result = '';\n  const words = [], asciiBitLength = ascii[lengthProperty] * 8;\n  let hash = sha256.h = sha256.h || [];\n  const k = sha256.k = sha256.k || [];\n  let primeCounter = k[lengthProperty];\n  const isComposite = {};\n  for (let candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;\n      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;\n      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;\n    }\n  }\n  ascii += '\\x80';\n  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i) & 0xff;\n    words[i >> 2] |= j << ((3 - i) % 4) * 8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);\n  words[words[lengthProperty]] = (asciiBitLength);\n  for (j = 0; j < words[lengthProperty];) {\n    const w = words.slice(j, j += 16), oldHash = hash;\n    hash = hash.slice(0, 8);\n    for (i = 0; i < 64; i++) {\n      const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];\n      const temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);\n      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n      hash = [(temp1 + temp2) | 0].concat(hash);\n      hash[4] = (hash[4] + temp1) | 0;\n    }\n    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;\n  }\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j + 1; j--) {\n      const b = (hash[i] >> (j * 8)) & 255;\n      result += ((b < 16) ? 0 : '') + b.toString(16);\n    }\n  }\n  return result;\n}\n\n\n// Bundled into the n8n Code nodes; no network, filesystem or credential access.\nconst RULE_REVISION = '4.1';\nfunction fingerprint(value) { return sha256(value); }\nfunction entropy(s) { const f={}; for(const c of s) f[c]=(f[c]||0)+1; return Object.values(f).reduce((v,n)=>v-n/s.length*Math.log2(n/s.length),0); }\nfunction placeholder(s) {\n return /^(?:\\$|\\{|<|process\\.|import\\.|os\\.|env\\.|config\\.|settings\\.|secrets\\.|vault\\.|undefined$|null$|true$|false$)/i.test(s) ||\n /^(?:your[_-]|replace[_-]|insert[_-]|changeme|change_me|example|placeholder|dummy|sample[_-])/i.test(s) ||\n /^(?:[xX*]+|0+|1+)$/.test(s) || /(?:AKIAIOSFODNN7EXAMPLE|wJalrXUtnFEMI\\/K7MDENG\\/bPxRfiCYEXAMPLEKEY)/.test(s);\n}\nfunction eligible(path) {\n return !/(^|\\/)(?:node_modules|vendor|dist|build|\\.git|coverage|\\.next|\\.venv|venv|__pycache__)\\//i.test(path) &&\n !/(?:package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|\\.min\\.[cm]?js|\\.map)$/i.test(path) &&\n (/\\.(?:env(?:\\.[^/]+)?|py|[cm]?js|jsx|ts|tsx|json|jsonc|ya?ml|toml|ini|cfg|conf|config|properties|sh|bash|php|go|java|rb|rs|tf|tfvars|txt|md|xml|gradle|pem|key|ipynb|sql|ps1|log|csv)$/i.test(path) || /(^|\\/)(?:Dockerfile(?:\\.[^/]+)?|Makefile|\\.npmrc|\\.pypirc|\\.netrc|\\.gitconfig|\\.env(?:\\.[^/]+)?|credentials|config|id_rsa|id_ed25519)$/i.test(path));\n}\nfunction validate(raw) {\n const c={...raw};\n if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(c.github_owner||'') || !/^[A-Za-z0-9_.-]{1,100}$/.test(c.github_repo||'') || !c.target_branch || /[\\r\\n?#]/.test(c.target_branch)) throw Error('Invalid repository or branch configuration');\n const ranges={max_requests_per_run:[2,100],max_files_per_run:[1,50],max_commits_per_scan:[1,20],max_file_bytes:[1024,500000],max_snapshot_files:[1,10000],max_findings_per_run:[1,500],minimum_confidence:[60,100],email_minimum_confidence:[60,100]};\n for(const [key,[min,max]] of Object.entries(ranges)) if(!Number.isInteger(c[key])||c[key]<min||c[key]>max) throw Error('Invalid scan setting: '+key);\n if(c.email_minimum_confidence<c.minimum_confidence) throw Error('Email threshold must be at least the detection threshold');\n for(const k of ['alert_from_email','alert_to_email']) if(!/^[^\\s@,;]+@[^\\s@,;]+\\.[^\\s@,;]+$/.test(c[k]||'')) throw Error('Invalid email setting: '+k);\n if(c.test_fixture!==undefined&&typeof c.test_fixture!=='boolean') throw Error('test_fixture must be boolean');\n c.scope=`${c.github_owner.toLowerCase()}/${c.github_repo.toLowerCase()}@${c.target_branch}${c.test_fixture?'#controlled-test':''}`;\n return c;\n}\nfunction detect(text,path,sha,source,c,lineMap) {\n const repo=`${c.github_owner}/${c.github_repo}`, result=[], seen=new Set();\n function add(rule,kind,severity,value,index,confidence) {\n  if(placeholder(value)||confidence<c.minimum_confidence) return;\n  const hash=fingerprint(`${repo}::${path}::${rule}::${value}`); if(seen.has(hash)) return; seen.add(hash);\n  const indexLine=text.slice(0,index).split('\\n').length;\n  const line=lineMap?.[indexLine-1]||indexLine;\n  result.push({finding_hash:hash,secret_fingerprint:fingerprint(`${repo}::${rule}::${value}`),rule_id:rule,secret_type:kind,severity,confidence,repository:repo,file_path:path,line_number:line,commit_sha:sha,source,masked_secret:'[REDACTED]',author:'repository-scan',commit_url:`https://github.com/${repo}/blob/${encodeURIComponent(sha)}/${path.split('/').map(encodeURIComponent).join('/')}#L${line}`,remediation_steps:'Confermare il risultato; revocare o ruotare la credenziale; correggere il codice e controllare gli accessi. La corrispondenza non verifica che la credenziale sia attiva.'});\n }\n const rules=[\n  ['github-pat','GitHub token','CRITICAL',/\\b(?:gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82})\\b/g,98],\n  ['aws-key','AWS access key ID','HIGH',/\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b/g,90],\n  ['google-key','Google API key','HIGH',/\\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])/g,95],\n  ['openai-key','AI provider key','HIGH',/\\bsk-(?:proj-[A-Za-z0-9_-]{40,200}|[A-Za-z0-9]{48})(?![A-Za-z0-9_-])/g,90],\n  ['slack-token','Slack token','HIGH',/\\bxox[baprs]-[0-9A-Za-z-]{20,200}\\b/g,95],\n  ['stripe-key','Stripe secret key','HIGH',/\\b[rs]k_(?:live|test)_[A-Za-z0-9]{24,200}\\b/g,95],\n  ['private-key','Private key material','CRITICAL',/-----BEGIN ((?:RSA |OPENSSH |EC |DSA |ENCRYPTED )?PRIVATE KEY)-----\\s*([A-Za-z0-9+/=\\s]{64,})-----END \\1-----/g,100],\n  ['connection-uri','Database connection URI','HIGH',/\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|rediss?):\\/\\/[^\\s\"'`<>]+/gi,85]\n ];\n for(const [id,kind,severity,re,confidence] of rules) for(const m of text.matchAll(re)) {\n  if(id==='connection-uri') { const auth=m[0].match(/:\\/\\/([^/@]+):([^/@]+)@/); if(!auth||placeholder(auth[2])||auth[2].length<6) continue; }\n  add(id,kind,severity,m[0],m.index,confidence);\n }\n // Only literal assignments to credential names, with enough entropy. Runtime references and names alone do not qualify.\n const generic=/(?:^|[\\s,{])['\"]?((?:[A-Za-z][\\w.-]*[_-])?(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key))['\"]?\\s*[:=]\\s*(?:\"([^\"\\r\\n]{12,300})\"|'([^'\\r\\n]{12,300})'|([A-Za-z0-9_+/.=-]{16,300}))/gim;\n for(const m of text.matchAll(generic)) {\n  const value=m[2]||m[3]||m[4]; if(placeholder(value)||/[\\s{}]/.test(value)||entropy(value)<3.5) continue;\n  const classes=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(re=>re.test(value)).length;\n  if(classes<3 && !(value.length>=32&&classes>=2)) continue;\n  const confidence=/(^|\\/)(?:tests?|fixtures|examples|docs|samples|__tests__)(\\/|$)|\\.(?:example|sample|template)(?:\\.|$)/i.test(path)?65:80;\n  add('credential-assignment','Hardcoded credential','MEDIUM',value,m.index,confidence);\n }\n return result;\n}\nfunction initialState(c) {return {version:4,scope:c.scope,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1},seen:{},gaps:[],cooldown_until:0};}\nfunction initialize(c,payload,execution) {\n let persisted=payload?JSON.parse(payload):{};\n if(persisted.committed?.scope && persisted.committed.scope!==c.scope) throw Error('State scope mismatch');\n let s=persisted.committed||initialState(c);\n if(s.version!==4) throw Error('Unsupported state version');\n if(s.revision!==RULE_REVISION) {s={...s,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1}};}\n const base={cfg:c,execution:String(execution),persisted,state:JSON.parse(JSON.stringify(s)),requests:0,files:0,commits:0,findings:[],errors:[],new_gaps:[],next:null,done:false,stage:'head',started:Date.now()};\n if(persisted.pending) {base.pending=persisted.pending;base.done=true;base.stage='outbox-recovery';}\n else if(s.cooldown_until>Date.now()) {base.done=true;base.stage='cooldown';}\n else if(c.test_fixture) {\n  const value='ghp_'+'R4d8kP2qN7mX9cV3bZ6sL1wF5yH0tJ8uA2eD';\n  base.findings=detect(value,'__monitor_controlled_test__/config.env','0000000000000000000000000000000000000000','CONTROLLED TEST - synthetic credential',c).filter(f=>!s.seen[f.finding_hash]).map(f=>({...f,commit_url:`https://github.com/${c.github_owner}/${c.github_repo}`,secret_type:'TEST ONLY - synthetic GitHub token'}));\n  base.files=1;base.done=true;base.stage='controlled-fixture';\n }\n return base;\n}\nfunction gap(x,message) {if(!x.state.gaps.includes(message)) {x.state.gaps.push(message);x.new_gaps.push(message);} if(x.state.gaps.length>300) throw Error('Coverage gap ledger exceeds 300; review and reset explicitly');}\nfunction finish(x,stage) {x.done=true;x.stage=stage; x.next=null; return x;}\nfunction plan(x) {\n if(x.done) return x;\n if(Date.now()-x.started>240000 || x.requests>=x.cfg.max_requests_per_run || x.findings.length>=x.cfg.max_findings_per_run) return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,h=s.history;\n const root=`/repos/${encodeURIComponent(c.github_owner)}/${encodeURIComponent(c.github_repo)}`;\n function req(kind,suffix,extra={}) {x.next={kind,path:root+suffix,...extra};return x;}\n if(x.stage==='head') return req('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot') {\n  if(!s.snapshot) {\n   if(s.snapshot_head===x.head) {x.stage='history'; return plan(x);}\n   return req('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');\n  }\n  const p=s.snapshot;\n  while(p.offset<p.files.length && s.cache[p.files[p.offset].path]===p.files[p.offset].sha) p.offset++;\n  if(p.offset>=p.files.length) {\n   const valid=new Set(p.files.map(f=>f.path)); for(const path of Object.keys(s.cache)) if(!valid.has(path)) delete s.cache[path];\n   s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);\n  }\n  if(x.files>=c.max_files_per_run) return finish(x,'snapshot-pending');\n  const file=p.files[p.offset]; return req('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='history') {\n  if(!c.history_enabled) return finish(x,'snapshot-only');\n  if(!h.anchor) {\n   if(h.tip===x.head) return finish(x,'up-to-date');\n   h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;\n  }\n  if(x.commits>=c.max_commits_per_scan) return finish(x,'history-pending');\n  if(h.index<h.queue.length) return req('commit',`/commits/${h.queue[h.index]}?per_page=100&page=${h.filePage}`,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound || h.exhausted) {\n   if(h.tip&&!h.stopFound) gap(x,'Previous history tip not reachable from current anchor; branch history may have been rewritten');\n   h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;\n   return finish(x,'up-to-date');\n  }\n  return req('commits',`/commits?sha=${h.anchor}&per_page=${c.max_commits_per_scan}&page=${h.page}`);\n }\n throw Error('Unknown scan stage');\n}\nfunction addFindings(x,found) {\n const hashes=new Set(x.findings.map(f=>f.finding_hash));\n for(const f of found) if(!x.state.seen[f.finding_hash]&&!hashes.has(f.finding_hash)) {hashes.add(f.finding_hash);x.findings.push(f);}\n if(x.findings.length>500) throw Error('More than 500 findings in a single response; no checkpoint saved');\n}\nfunction advance(x,response) {\n const request=x.next;x.requests++;x.next=null;\n const status=Number(response.statusCode||0),b=response.body,headers=Object.fromEntries(Object.entries(response.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));\n if(status!==200) {\n  const retry=Number(headers['retry-after']),reset=Number(headers['x-ratelimit-reset'])*1000;\n  if(status===403||status===429) x.state.cooldown_until=Math.max(Date.now()+60000,Number.isFinite(retry)?Date.now()+retry*1000:0,Number.isFinite(reset)?reset:0);\n  x.errors.push({stage:request.kind,status:status||'transport',message:'GitHub request failed; response content omitted'});\n  return finish(x,'request-error');\n }\n if(Number(headers['x-ratelimit-remaining'])<=10 && headers['x-ratelimit-remaining']!==undefined) {x.stop_after_response=true;x.state.cooldown_until=Math.max(Date.now()+60000,Number(headers['x-ratelimit-reset'])*1000||0);}\n if(request.kind==='head') {\n  if(!/^[a-f0-9]{40,64}$/i.test(b?.commit?.sha||'')) throw Error('Invalid branch HEAD response');\n  x.head=b.commit.sha;x.stage='snapshot';\n } else if(request.kind==='tree') {\n  if(!Array.isArray(b?.tree)||b.truncated) {x.errors.push({stage:'tree',message:'Missing or truncated repository tree; snapshot checkpoint unchanged'});return finish(x,'incomplete-tree');}\n  const files=b.tree.filter(f=>f.type==='blob'&&f.mode!=='120000'&&eligible(f.path));\n  if(files.length>x.cfg.max_snapshot_files) {x.errors.push({stage:'tree',message:'Eligible file count exceeds max_snapshot_files; checkpoint unchanged'});return finish(x,'scope-limit');}\n  const small=[];\n  for(const f of files) {if(typeof f.size!=='number'||f.size>x.cfg.max_file_bytes) gap(x,'Oversized or unknown-size snapshot file: '+f.path);else small.push({path:f.path,sha:f.sha,size:f.size});}\n  small.sort((a,b)=>{const score=p=>/(\\.env|\\.pem|\\.key|credentials|id_rsa|id_ed25519)/i.test(p)?0:/config|secret/i.test(p)?1:2;return score(a.path)-score(b.path)||a.path.localeCompare(b.path);});\n  x.state.snapshot={sha:x.head,files:small,offset:0};\n } else if(request.kind==='blob') {\n  if(b?.sha!==request.file.sha||b.encoding!=='base64'||typeof b.content!=='string'||b.size>x.cfg.max_file_bytes) throw Error('Invalid or oversized Git blob response');\n  const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');\n  if(bytes.length!==b.size) throw Error('Git blob length mismatch');\n  const text=bytes.toString('utf8');\n  if(text.includes('\\uFFFD')||text.includes('\\0')) gap(x,'Binary or invalid UTF-8 file: '+request.file.path);\n  else addFindings(x,detect(text,request.file.path,request.sha,'Current repository snapshot',x.cfg));\n  x.state.cache[request.file.path]=request.file.sha;x.state.snapshot.offset++;x.files++;\n } else if(request.kind==='commits') {\n  if(!Array.isArray(b)) throw Error('Invalid commits response');\n  const h=x.state.history;h.queue=[];h.index=0;h.filePage=1;h.page++;\n  for(const item of b) {if(!/^[a-f0-9]{40,64}$/i.test(item.sha||'')) throw Error('Invalid commit identifier');if(item.sha===h.tip) {h.stopFound=true;break;} h.queue.push(item.sha);}\n  h.exhausted=b.length<x.cfg.max_commits_per_scan;\n } else if(request.kind==='commit') {\n  if(b?.sha!==request.sha||!Array.isArray(b.files)) throw Error('Invalid commit details response');\n  for(const f of b.files) {\n   if(!eligible(f.filename)||!f.changes) continue;\n   if(typeof f.patch!=='string') {gap(x,'Missing historical patch: '+request.sha+' '+f.filename);continue;}\n   const added=[],removed=[],addMap=[],removeMap=[];let old=1,now=1;\n   for(const line of f.patch.split('\\n')) {\n    const m=line.match(/^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)/);if(m){old=+m[1];now=+m[2];continue;}\n    if(line.startsWith('+')) {added.push(line.slice(1));addMap.push(now++);} else if(line.startsWith('-')) {removed.push(line.slice(1));removeMap.push(old++);} else if(line.startsWith(' ')) {old++;now++;}\n   }\n   addFindings(x,detect(added.join('\\n'),f.filename,request.sha,'Git history added lines',x.cfg,addMap));\n   if(b.parents?.[0]?.sha) addFindings(x,detect(removed.join('\\n'),f.previous_filename||f.filename,b.parents[0].sha,'Git history removed lines',x.cfg,removeMap));\n  }\n  const h=x.state.history;\n  if(/rel=\"next\"/.test(String(headers.link||''))) {if(h.filePage>=30) {gap(x,'Historical commit exceeds GitHub file pagination limit: '+request.sha);h.index++;h.filePage=1;x.commits++;} else h.filePage++;}\n  else {h.index++;h.filePage=1;x.commits++;}\n }\n if(x.stop_after_response) return finish(x,'rate-limit-reserve');\n return x;\n}\nreturn {RULE_REVISION,fingerprint,eligible,validate,detect,initialState,initialize,plan,advance};\n\n})();\nconst rows=$input.all();if(rows.length!==1||!rows[0].json.id)throw Error('Expected exactly one state row; duplicate or missing state requires review');\nconst row=rows[0].json;const cfg=core.validate($('V4 \u00b7 Config: Target Repository').first().json);\nif(Number(row.lease||0)>Date.now())return [];\nreturn [{json:{row_id:row.id,execution:String($execution.id),cfg,payload:row.payload||'{}',previous_owner:row.owner||'',previous_lease:Number(row.lease||0)}}];"
+      },
+      "id": "43baade7-022e-4318-bd4b-b7ed1d60f174",
+      "name": "V4 \u00b7 State: Validate and Prepare Lease",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        3616
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.row_id }}"
+            },
+            {
+              "keyName": "owner",
+              "keyValue": "={{ $json.previous_owner }}"
+            },
+            {
+              "keyName": "lease",
+              "keyValue": "={{ $json.previous_lease }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "owner": "={{ $json.execution }}",
+            "lease": "={{ Date.now()+900000 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "59711338-cbc0-4c8f-976d-e93c689b053a",
+      "name": "V4 \u00b7 State: Acquire Lease",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2336,
+        3616
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "89d05482-c2df-4177-a35c-5d1b54d7315e",
+              "leftValue": "={{ !!$json.id && $json.owner === String($execution.id) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f0aeb7b7-cab5-46cc-95b2-bb77191cdabb",
+      "name": "V4 \u00b7 State: Lease Acquired?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        3616
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const core=(()=>{\nfunction sha256(ascii) {\n  ascii = unescape(encodeURIComponent(ascii));\n  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }\n  const mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length';\n  let i, j, result = '';\n  const words = [], asciiBitLength = ascii[lengthProperty] * 8;\n  let hash = sha256.h = sha256.h || [];\n  const k = sha256.k = sha256.k || [];\n  let primeCounter = k[lengthProperty];\n  const isComposite = {};\n  for (let candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;\n      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;\n      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;\n    }\n  }\n  ascii += '\\x80';\n  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i) & 0xff;\n    words[i >> 2] |= j << ((3 - i) % 4) * 8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);\n  words[words[lengthProperty]] = (asciiBitLength);\n  for (j = 0; j < words[lengthProperty];) {\n    const w = words.slice(j, j += 16), oldHash = hash;\n    hash = hash.slice(0, 8);\n    for (i = 0; i < 64; i++) {\n      const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];\n      const temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);\n      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n      hash = [(temp1 + temp2) | 0].concat(hash);\n      hash[4] = (hash[4] + temp1) | 0;\n    }\n    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;\n  }\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j + 1; j--) {\n      const b = (hash[i] >> (j * 8)) & 255;\n      result += ((b < 16) ? 0 : '') + b.toString(16);\n    }\n  }\n  return result;\n}\n\n\n// Bundled into the n8n Code nodes; no network, filesystem or credential access.\nconst RULE_REVISION = '4.1';\nfunction fingerprint(value) { return sha256(value); }\nfunction entropy(s) { const f={}; for(const c of s) f[c]=(f[c]||0)+1; return Object.values(f).reduce((v,n)=>v-n/s.length*Math.log2(n/s.length),0); }\nfunction placeholder(s) {\n return /^(?:\\$|\\{|<|process\\.|import\\.|os\\.|env\\.|config\\.|settings\\.|secrets\\.|vault\\.|undefined$|null$|true$|false$)/i.test(s) ||\n /^(?:your[_-]|replace[_-]|insert[_-]|changeme|change_me|example|placeholder|dummy|sample[_-])/i.test(s) ||\n /^(?:[xX*]+|0+|1+)$/.test(s) || /(?:AKIAIOSFODNN7EXAMPLE|wJalrXUtnFEMI\\/K7MDENG\\/bPxRfiCYEXAMPLEKEY)/.test(s);\n}\nfunction eligible(path) {\n return !/(^|\\/)(?:node_modules|vendor|dist|build|\\.git|coverage|\\.next|\\.venv|venv|__pycache__)\\//i.test(path) &&\n !/(?:package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|\\.min\\.[cm]?js|\\.map)$/i.test(path) &&\n (/\\.(?:env(?:\\.[^/]+)?|py|[cm]?js|jsx|ts|tsx|json|jsonc|ya?ml|toml|ini|cfg|conf|config|properties|sh|bash|php|go|java|rb|rs|tf|tfvars|txt|md|xml|gradle|pem|key|ipynb|sql|ps1|log|csv)$/i.test(path) || /(^|\\/)(?:Dockerfile(?:\\.[^/]+)?|Makefile|\\.npmrc|\\.pypirc|\\.netrc|\\.gitconfig|\\.env(?:\\.[^/]+)?|credentials|config|id_rsa|id_ed25519)$/i.test(path));\n}\nfunction validate(raw) {\n const c={...raw};\n if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(c.github_owner||'') || !/^[A-Za-z0-9_.-]{1,100}$/.test(c.github_repo||'') || !c.target_branch || /[\\r\\n?#]/.test(c.target_branch)) throw Error('Invalid repository or branch configuration');\n const ranges={max_requests_per_run:[2,100],max_files_per_run:[1,50],max_commits_per_scan:[1,20],max_file_bytes:[1024,500000],max_snapshot_files:[1,10000],max_findings_per_run:[1,500],minimum_confidence:[60,100],email_minimum_confidence:[60,100]};\n for(const [key,[min,max]] of Object.entries(ranges)) if(!Number.isInteger(c[key])||c[key]<min||c[key]>max) throw Error('Invalid scan setting: '+key);\n if(c.email_minimum_confidence<c.minimum_confidence) throw Error('Email threshold must be at least the detection threshold');\n for(const k of ['alert_from_email','alert_to_email']) if(!/^[^\\s@,;]+@[^\\s@,;]+\\.[^\\s@,;]+$/.test(c[k]||'')) throw Error('Invalid email setting: '+k);\n if(c.test_fixture!==undefined&&typeof c.test_fixture!=='boolean') throw Error('test_fixture must be boolean');\n c.scope=`${c.github_owner.toLowerCase()}/${c.github_repo.toLowerCase()}@${c.target_branch}${c.test_fixture?'#controlled-test':''}`;\n return c;\n}\nfunction detect(text,path,sha,source,c,lineMap) {\n const repo=`${c.github_owner}/${c.github_repo}`, result=[], seen=new Set();\n function add(rule,kind,severity,value,index,confidence) {\n  if(placeholder(value)||confidence<c.minimum_confidence) return;\n  const hash=fingerprint(`${repo}::${path}::${rule}::${value}`); if(seen.has(hash)) return; seen.add(hash);\n  const indexLine=text.slice(0,index).split('\\n').length;\n  const line=lineMap?.[indexLine-1]||indexLine;\n  result.push({finding_hash:hash,secret_fingerprint:fingerprint(`${repo}::${rule}::${value}`),rule_id:rule,secret_type:kind,severity,confidence,repository:repo,file_path:path,line_number:line,commit_sha:sha,source,masked_secret:'[REDACTED]',author:'repository-scan',commit_url:`https://github.com/${repo}/blob/${encodeURIComponent(sha)}/${path.split('/').map(encodeURIComponent).join('/')}#L${line}`,remediation_steps:'Confermare il risultato; revocare o ruotare la credenziale; correggere il codice e controllare gli accessi. La corrispondenza non verifica che la credenziale sia attiva.'});\n }\n const rules=[\n  ['github-pat','GitHub token','CRITICAL',/\\b(?:gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82})\\b/g,98],\n  ['aws-key','AWS access key ID','HIGH',/\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b/g,90],\n  ['google-key','Google API key','HIGH',/\\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])/g,95],\n  ['openai-key','AI provider key','HIGH',/\\bsk-(?:proj-[A-Za-z0-9_-]{40,200}|[A-Za-z0-9]{48})(?![A-Za-z0-9_-])/g,90],\n  ['slack-token','Slack token','HIGH',/\\bxox[baprs]-[0-9A-Za-z-]{20,200}\\b/g,95],\n  ['stripe-key','Stripe secret key','HIGH',/\\b[rs]k_(?:live|test)_[A-Za-z0-9]{24,200}\\b/g,95],\n  ['private-key','Private key material','CRITICAL',/-----BEGIN ((?:RSA |OPENSSH |EC |DSA |ENCRYPTED )?PRIVATE KEY)-----\\s*([A-Za-z0-9+/=\\s]{64,})-----END \\1-----/g,100],\n  ['connection-uri','Database connection URI','HIGH',/\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|rediss?):\\/\\/[^\\s\"'`<>]+/gi,85]\n ];\n for(const [id,kind,severity,re,confidence] of rules) for(const m of text.matchAll(re)) {\n  if(id==='connection-uri') { const auth=m[0].match(/:\\/\\/([^/@]+):([^/@]+)@/); if(!auth||placeholder(auth[2])||auth[2].length<6) continue; }\n  add(id,kind,severity,m[0],m.index,confidence);\n }\n // Only literal assignments to credential names, with enough entropy. Runtime references and names alone do not qualify.\n const generic=/(?:^|[\\s,{])['\"]?((?:[A-Za-z][\\w.-]*[_-])?(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key))['\"]?\\s*[:=]\\s*(?:\"([^\"\\r\\n]{12,300})\"|'([^'\\r\\n]{12,300})'|([A-Za-z0-9_+/.=-]{16,300}))/gim;\n for(const m of text.matchAll(generic)) {\n  const value=m[2]||m[3]||m[4]; if(placeholder(value)||/[\\s{}]/.test(value)||entropy(value)<3.5) continue;\n  const classes=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(re=>re.test(value)).length;\n  if(classes<3 && !(value.length>=32&&classes>=2)) continue;\n  const confidence=/(^|\\/)(?:tests?|fixtures|examples|docs|samples|__tests__)(\\/|$)|\\.(?:example|sample|template)(?:\\.|$)/i.test(path)?65:80;\n  add('credential-assignment','Hardcoded credential','MEDIUM',value,m.index,confidence);\n }\n return result;\n}\nfunction initialState(c) {return {version:4,scope:c.scope,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1},seen:{},gaps:[],cooldown_until:0};}\nfunction initialize(c,payload,execution) {\n let persisted=payload?JSON.parse(payload):{};\n if(persisted.committed?.scope && persisted.committed.scope!==c.scope) throw Error('State scope mismatch');\n let s=persisted.committed||initialState(c);\n if(s.version!==4) throw Error('Unsupported state version');\n if(s.revision!==RULE_REVISION) {s={...s,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1}};}\n const base={cfg:c,execution:String(execution),persisted,state:JSON.parse(JSON.stringify(s)),requests:0,files:0,commits:0,findings:[],errors:[],new_gaps:[],next:null,done:false,stage:'head',started:Date.now()};\n if(persisted.pending) {base.pending=persisted.pending;base.done=true;base.stage='outbox-recovery';}\n else if(s.cooldown_until>Date.now()) {base.done=true;base.stage='cooldown';}\n else if(c.test_fixture) {\n  const value='ghp_'+'R4d8kP2qN7mX9cV3bZ6sL1wF5yH0tJ8uA2eD';\n  base.findings=detect(value,'__monitor_controlled_test__/config.env','0000000000000000000000000000000000000000','CONTROLLED TEST - synthetic credential',c).filter(f=>!s.seen[f.finding_hash]).map(f=>({...f,commit_url:`https://github.com/${c.github_owner}/${c.github_repo}`,secret_type:'TEST ONLY - synthetic GitHub token'}));\n  base.files=1;base.done=true;base.stage='controlled-fixture';\n }\n return base;\n}\nfunction gap(x,message) {if(!x.state.gaps.includes(message)) {x.state.gaps.push(message);x.new_gaps.push(message);} if(x.state.gaps.length>300) throw Error('Coverage gap ledger exceeds 300; review and reset explicitly');}\nfunction finish(x,stage) {x.done=true;x.stage=stage; x.next=null; return x;}\nfunction plan(x) {\n if(x.done) return x;\n if(Date.now()-x.started>240000 || x.requests>=x.cfg.max_requests_per_run || x.findings.length>=x.cfg.max_findings_per_run) return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,h=s.history;\n const root=`/repos/${encodeURIComponent(c.github_owner)}/${encodeURIComponent(c.github_repo)}`;\n function req(kind,suffix,extra={}) {x.next={kind,path:root+suffix,...extra};return x;}\n if(x.stage==='head') return req('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot') {\n  if(!s.snapshot) {\n   if(s.snapshot_head===x.head) {x.stage='history'; return plan(x);}\n   return req('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');\n  }\n  const p=s.snapshot;\n  while(p.offset<p.files.length && s.cache[p.files[p.offset].path]===p.files[p.offset].sha) p.offset++;\n  if(p.offset>=p.files.length) {\n   const valid=new Set(p.files.map(f=>f.path)); for(const path of Object.keys(s.cache)) if(!valid.has(path)) delete s.cache[path];\n   s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);\n  }\n  if(x.files>=c.max_files_per_run) return finish(x,'snapshot-pending');\n  const file=p.files[p.offset]; return req('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='history') {\n  if(!c.history_enabled) return finish(x,'snapshot-only');\n  if(!h.anchor) {\n   if(h.tip===x.head) return finish(x,'up-to-date');\n   h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;\n  }\n  if(x.commits>=c.max_commits_per_scan) return finish(x,'history-pending');\n  if(h.index<h.queue.length) return req('commit',`/commits/${h.queue[h.index]}?per_page=100&page=${h.filePage}`,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound || h.exhausted) {\n   if(h.tip&&!h.stopFound) gap(x,'Previous history tip not reachable from current anchor; branch history may have been rewritten');\n   h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;\n   return finish(x,'up-to-date');\n  }\n  return req('commits',`/commits?sha=${h.anchor}&per_page=${c.max_commits_per_scan}&page=${h.page}`);\n }\n throw Error('Unknown scan stage');\n}\nfunction addFindings(x,found) {\n const hashes=new Set(x.findings.map(f=>f.finding_hash));\n for(const f of found) if(!x.state.seen[f.finding_hash]&&!hashes.has(f.finding_hash)) {hashes.add(f.finding_hash);x.findings.push(f);}\n if(x.findings.length>500) throw Error('More than 500 findings in a single response; no checkpoint saved');\n}\nfunction advance(x,response) {\n const request=x.next;x.requests++;x.next=null;\n const status=Number(response.statusCode||0),b=response.body,headers=Object.fromEntries(Object.entries(response.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));\n if(status!==200) {\n  const retry=Number(headers['retry-after']),reset=Number(headers['x-ratelimit-reset'])*1000;\n  if(status===403||status===429) x.state.cooldown_until=Math.max(Date.now()+60000,Number.isFinite(retry)?Date.now()+retry*1000:0,Number.isFinite(reset)?reset:0);\n  x.errors.push({stage:request.kind,status:status||'transport',message:'GitHub request failed; response content omitted'});\n  return finish(x,'request-error');\n }\n if(Number(headers['x-ratelimit-remaining'])<=10 && headers['x-ratelimit-remaining']!==undefined) {x.stop_after_response=true;x.state.cooldown_until=Math.max(Date.now()+60000,Number(headers['x-ratelimit-reset'])*1000||0);}\n if(request.kind==='head') {\n  if(!/^[a-f0-9]{40,64}$/i.test(b?.commit?.sha||'')) throw Error('Invalid branch HEAD response');\n  x.head=b.commit.sha;x.stage='snapshot';\n } else if(request.kind==='tree') {\n  if(!Array.isArray(b?.tree)||b.truncated) {x.errors.push({stage:'tree',message:'Missing or truncated repository tree; snapshot checkpoint unchanged'});return finish(x,'incomplete-tree');}\n  const files=b.tree.filter(f=>f.type==='blob'&&f.mode!=='120000'&&eligible(f.path));\n  if(files.length>x.cfg.max_snapshot_files) {x.errors.push({stage:'tree',message:'Eligible file count exceeds max_snapshot_files; checkpoint unchanged'});return finish(x,'scope-limit');}\n  const small=[];\n  for(const f of files) {if(typeof f.size!=='number'||f.size>x.cfg.max_file_bytes) gap(x,'Oversized or unknown-size snapshot file: '+f.path);else small.push({path:f.path,sha:f.sha,size:f.size});}\n  small.sort((a,b)=>{const score=p=>/(\\.env|\\.pem|\\.key|credentials|id_rsa|id_ed25519)/i.test(p)?0:/config|secret/i.test(p)?1:2;return score(a.path)-score(b.path)||a.path.localeCompare(b.path);});\n  x.state.snapshot={sha:x.head,files:small,offset:0};\n } else if(request.kind==='blob') {\n  if(b?.sha!==request.file.sha||b.encoding!=='base64'||typeof b.content!=='string'||b.size>x.cfg.max_file_bytes) throw Error('Invalid or oversized Git blob response');\n  const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');\n  if(bytes.length!==b.size) throw Error('Git blob length mismatch');\n  const text=bytes.toString('utf8');\n  if(text.includes('\\uFFFD')||text.includes('\\0')) gap(x,'Binary or invalid UTF-8 file: '+request.file.path);\n  else addFindings(x,detect(text,request.file.path,request.sha,'Current repository snapshot',x.cfg));\n  x.state.cache[request.file.path]=request.file.sha;x.state.snapshot.offset++;x.files++;\n } else if(request.kind==='commits') {\n  if(!Array.isArray(b)) throw Error('Invalid commits response');\n  const h=x.state.history;h.queue=[];h.index=0;h.filePage=1;h.page++;\n  for(const item of b) {if(!/^[a-f0-9]{40,64}$/i.test(item.sha||'')) throw Error('Invalid commit identifier');if(item.sha===h.tip) {h.stopFound=true;break;} h.queue.push(item.sha);}\n  h.exhausted=b.length<x.cfg.max_commits_per_scan;\n } else if(request.kind==='commit') {\n  if(b?.sha!==request.sha||!Array.isArray(b.files)) throw Error('Invalid commit details response');\n  for(const f of b.files) {\n   if(!eligible(f.filename)||!f.changes) continue;\n   if(typeof f.patch!=='string') {gap(x,'Missing historical patch: '+request.sha+' '+f.filename);continue;}\n   const added=[],removed=[],addMap=[],removeMap=[];let old=1,now=1;\n   for(const line of f.patch.split('\\n')) {\n    const m=line.match(/^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)/);if(m){old=+m[1];now=+m[2];continue;}\n    if(line.startsWith('+')) {added.push(line.slice(1));addMap.push(now++);} else if(line.startsWith('-')) {removed.push(line.slice(1));removeMap.push(old++);} else if(line.startsWith(' ')) {old++;now++;}\n   }\n   addFindings(x,detect(added.join('\\n'),f.filename,request.sha,'Git history added lines',x.cfg,addMap));\n   if(b.parents?.[0]?.sha) addFindings(x,detect(removed.join('\\n'),f.previous_filename||f.filename,b.parents[0].sha,'Git history removed lines',x.cfg,removeMap));\n  }\n  const h=x.state.history;\n  if(/rel=\"next\"/.test(String(headers.link||''))) {if(h.filePage>=30) {gap(x,'Historical commit exceeds GitHub file pagination limit: '+request.sha);h.index++;h.filePage=1;x.commits++;} else h.filePage++;}\n  else {h.index++;h.filePage=1;x.commits++;}\n }\n if(x.stop_after_response) return finish(x,'rate-limit-reserve');\n return x;\n}\nreturn {RULE_REVISION,fingerprint,eligible,validate,detect,initialState,initialize,plan,advance};\n\n})();\nconst row=$input.first().json;\nconst cfg=core.validate($('V4 \u00b7 Config: Target Repository').first().json);\nconst ctx=core.initialize(cfg,row.payload,String($execution.id));\nconst profile=['4.2',cfg.minimum_confidence,cfg.max_file_bytes,cfg.max_snapshot_files].join(':');\nif(!ctx.pending&&ctx.state.profile!==profile){if(ctx.state.profile&&ctx.state.profile.split(':')[1]!==String(cfg.minimum_confidence))ctx.state.history={tip:'',anchor:'',page:1,queue:[],index:0,filePage:1};ctx.state.cache={};ctx.state.snapshot=null;ctx.state.snapshot_head='';ctx.state.profile=profile;ctx.state.gaps=ctx.state.gaps.filter(g=>!g.startsWith('Oversized or unknown-size snapshot file:')&&!g.startsWith('Binary or invalid UTF-8 file:'));}\nctx.row_id=row.id;\nreturn [{json:ctx}];"
+      },
+      "id": "4eccab34-e763-488a-9cf7-850b6183d953",
+      "name": "V4 \u00b7 Scan: Initialize Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2864,
+        3600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function finish(x,stage){x.done=true;x.stage=stage;x.next=null;return x;}\nfunction plan(x){\n if(x.done)return x;\n if(Date.now()-x.started>240000||x.requests>=x.cfg.max_requests_per_run||x.findings.length>=x.cfg.max_findings_per_run)return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,root='/repos/'+encodeURIComponent(c.github_owner)+'/'+encodeURIComponent(c.github_repo);\n const request=(kind,path,extra={})=>{x.next={kind,path:root+path,...extra};return x;};\n if(x.stage==='head')return request('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot'){\n  if(!s.snapshot){if(s.snapshot_head===x.head){x.stage='history';return plan(x);}return request('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');}\n  const p=s.snapshot;while(p.offset<p.files.length&&s.cache[p.files[p.offset].path]===p.files[p.offset].sha)p.offset++;\n  if(p.offset>=p.files.length){const paths=new Set(p.files.map(f=>f.path));for(const path of Object.keys(s.cache))if(!paths.has(path))delete s.cache[path];s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);}\n  if(x.files>=c.max_files_per_run){x.stage='history';return plan(x);}\n  const file=p.files[p.offset];return request('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='watch'||x.stage==='history'){\n  const watch=x.stage==='watch';\n  if(!c.history_enabled){if(watch){x.stage='snapshot';return plan(x);}return finish(x,s.snapshot?'snapshot-pending':'snapshot-only');}\n  const h=watch?(s.recent=s.recent||{tip:x.head,anchor:'',page:1,queue:[],index:0,filePage:1}):s.history;\n  function completeStage(){if(watch){x.stage='snapshot';return plan(x);}return finish(x,s.snapshot?'snapshot-pending':'up-to-date');}\n  if(!h.anchor){if(h.tip===x.head)return completeStage();h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;}\n  if(x.commits>=c.max_commits_per_scan){if(watch){x.stage='snapshot';return plan(x);}return finish(x,'history-pending');}\n  const prefix=watch?'watch-':'';\n  if(h.index<h.queue.length)return request(prefix+'commit','/commits/'+h.queue[h.index]+'?per_page=100&page='+h.filePage,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound||h.exhausted){if(h.tip&&!h.stopFound){const message='Previous history tip not reachable from current anchor; branch history may have been rewritten';if(!s.gaps.includes(message)){s.gaps.push(message);x.new_gaps.push(message);}}h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;return completeStage();}\n  return request(prefix+'commits','/commits?sha='+h.anchor+'&per_page='+c.max_commits_per_scan+'&page='+h.page);\n }\n throw Error('Unknown scan stage');\n}\nreturn [{json:plan($input.first().json)}];"
+      },
+      "id": "aba34655-e08d-46ac-b28f-0c419cc2f44b",
+      "name": "V4 \u00b7 GitHub: Request Planner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3088,
+        3600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json;const prefix='/repos/'+encodeURIComponent(x.cfg.github_owner)+'/'+encodeURIComponent(x.cfg.github_repo)+'/';\nif(!x.next?.path.startsWith(prefix)||/[\\r\\n]/.test(x.next.path)||x.requests>=x.cfg.max_requests_per_run)throw Error('Request boundary or budget validation failed');\nreturn [{json:x}];"
+      },
+      "id": "d23ecd93-0832-4aec-874e-b49cbb73d027",
+      "name": "V4 \u00b7 GitHub: Validate Request Boundary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3552,
+        3584
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const table=$input.first().json;if(!table.id)throw Error('State table could not be opened');\nif(Array.isArray(table.columns))for(const [name,type] of [['key','string'],['payload','string'],['owner','string'],['lease','number']])if(!table.columns.some(c=>c.name===name&&c.type===type))throw Error('State table schema mismatch: '+name);\nreturn $input.all();"
+      },
+      "id": "1748f3b8-4db5-42c8-a237-3deac3f20188",
+      "name": "V4 \u00b7 State: Verify Table Schema",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        3440
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eece79d2-5b0a-45fc-9453-cd8f6346a50c",
+              "leftValue": "={{ !!$json.next }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f6e4e7cd-c87d-484f-8dd8-94cf35f1e804",
+      "name": "V4 \u00b7 GitHub: Request Needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3312,
+        3600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com{{ $json.next.path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-SecOps-Monitor-v4"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "4cecd531-dd75-4f8f-b6cf-2e5fe4c3a0eb",
+      "name": "V4 \u00b7 GitHub: Fetch Blob",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3776,
+        3584
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const core=(()=>{\nfunction sha256(ascii) {\n  ascii = unescape(encodeURIComponent(ascii));\n  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }\n  const mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length';\n  let i, j, result = '';\n  const words = [], asciiBitLength = ascii[lengthProperty] * 8;\n  let hash = sha256.h = sha256.h || [];\n  const k = sha256.k = sha256.k || [];\n  let primeCounter = k[lengthProperty];\n  const isComposite = {};\n  for (let candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;\n      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;\n      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;\n    }\n  }\n  ascii += '\\x80';\n  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i) & 0xff;\n    words[i >> 2] |= j << ((3 - i) % 4) * 8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);\n  words[words[lengthProperty]] = (asciiBitLength);\n  for (j = 0; j < words[lengthProperty];) {\n    const w = words.slice(j, j += 16), oldHash = hash;\n    hash = hash.slice(0, 8);\n    for (i = 0; i < 64; i++) {\n      const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];\n      const temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);\n      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n      hash = [(temp1 + temp2) | 0].concat(hash);\n      hash[4] = (hash[4] + temp1) | 0;\n    }\n    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;\n  }\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j + 1; j--) {\n      const b = (hash[i] >> (j * 8)) & 255;\n      result += ((b < 16) ? 0 : '') + b.toString(16);\n    }\n  }\n  return result;\n}\n\n\n// Bundled into the n8n Code nodes; no network, filesystem or credential access.\nconst RULE_REVISION = '4.1';\nfunction fingerprint(value) { return sha256(value); }\nfunction entropy(s) { const f={}; for(const c of s) f[c]=(f[c]||0)+1; return Object.values(f).reduce((v,n)=>v-n/s.length*Math.log2(n/s.length),0); }\nfunction placeholder(s) {\n return /^(?:\\$|\\{|<|process\\.|import\\.|os\\.|env\\.|config\\.|settings\\.|secrets\\.|vault\\.|undefined$|null$|true$|false$)/i.test(s) ||\n /^(?:your[_-]|replace[_-]|insert[_-]|changeme|change_me|example|placeholder|dummy|sample[_-])/i.test(s) ||\n /^(?:[xX*]+|0+|1+)$/.test(s) || /(?:AKIAIOSFODNN7EXAMPLE|wJalrXUtnFEMI\\/K7MDENG\\/bPxRfiCYEXAMPLEKEY)/.test(s);\n}\nfunction eligible(path) {\n return !/(^|\\/)(?:node_modules|vendor|dist|build|\\.git|coverage|\\.next|\\.venv|venv|__pycache__)\\//i.test(path) &&\n !/(?:package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|\\.min\\.[cm]?js|\\.map)$/i.test(path) &&\n (/\\.(?:env(?:\\.[^/]+)?|py|[cm]?js|jsx|ts|tsx|json|jsonc|ya?ml|toml|ini|cfg|conf|config|properties|sh|bash|php|go|java|rb|rs|tf|tfvars|txt|md|xml|gradle|pem|key|ipynb|sql|ps1|log|csv)$/i.test(path) || /(^|\\/)(?:Dockerfile(?:\\.[^/]+)?|Makefile|\\.npmrc|\\.pypirc|\\.netrc|\\.gitconfig|\\.env(?:\\.[^/]+)?|credentials|config|id_rsa|id_ed25519)$/i.test(path));\n}\nfunction validate(raw) {\n const c={...raw};\n if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(c.github_owner||'') || !/^[A-Za-z0-9_.-]{1,100}$/.test(c.github_repo||'') || !c.target_branch || /[\\r\\n?#]/.test(c.target_branch)) throw Error('Invalid repository or branch configuration');\n const ranges={max_requests_per_run:[2,100],max_files_per_run:[1,50],max_commits_per_scan:[1,20],max_file_bytes:[1024,500000],max_snapshot_files:[1,10000],max_findings_per_run:[1,500],minimum_confidence:[60,100],email_minimum_confidence:[60,100]};\n for(const [key,[min,max]] of Object.entries(ranges)) if(!Number.isInteger(c[key])||c[key]<min||c[key]>max) throw Error('Invalid scan setting: '+key);\n if(c.email_minimum_confidence<c.minimum_confidence) throw Error('Email threshold must be at least the detection threshold');\n for(const k of ['alert_from_email','alert_to_email']) if(!/^[^\\s@,;]+@[^\\s@,;]+\\.[^\\s@,;]+$/.test(c[k]||'')) throw Error('Invalid email setting: '+k);\n if(c.test_fixture!==undefined&&typeof c.test_fixture!=='boolean') throw Error('test_fixture must be boolean');\n c.scope=`${c.github_owner.toLowerCase()}/${c.github_repo.toLowerCase()}@${c.target_branch}${c.test_fixture?'#controlled-test':''}`;\n return c;\n}\nfunction detect(text,path,sha,source,c,lineMap) {\n const repo=`${c.github_owner}/${c.github_repo}`, result=[], seen=new Set();\n function add(rule,kind,severity,value,index,confidence) {\n  if(placeholder(value)||confidence<c.minimum_confidence) return;\n  const hash=fingerprint(`${repo}::${path}::${rule}::${value}`); if(seen.has(hash)) return; seen.add(hash);\n  const indexLine=text.slice(0,index).split('\\n').length;\n  const line=lineMap?.[indexLine-1]||indexLine;\n  result.push({finding_hash:hash,secret_fingerprint:fingerprint(`${repo}::${rule}::${value}`),rule_id:rule,secret_type:kind,severity,confidence,repository:repo,file_path:path,line_number:line,commit_sha:sha,source,masked_secret:'[REDACTED]',author:'repository-scan',commit_url:`https://github.com/${repo}/blob/${encodeURIComponent(sha)}/${path.split('/').map(encodeURIComponent).join('/')}#L${line}`,remediation_steps:'Confermare il risultato; revocare o ruotare la credenziale; correggere il codice e controllare gli accessi. La corrispondenza non verifica che la credenziale sia attiva.'});\n }\n const rules=[\n  ['github-pat','GitHub token','CRITICAL',/\\b(?:gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82})\\b/g,98],\n  ['aws-key','AWS access key ID','HIGH',/\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b/g,90],\n  ['google-key','Google API key','HIGH',/\\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])/g,95],\n  ['openai-key','AI provider key','HIGH',/\\bsk-(?:proj-[A-Za-z0-9_-]{40,200}|[A-Za-z0-9]{48})(?![A-Za-z0-9_-])/g,90],\n  ['slack-token','Slack token','HIGH',/\\bxox[baprs]-[0-9A-Za-z-]{20,200}\\b/g,95],\n  ['stripe-key','Stripe secret key','HIGH',/\\b[rs]k_(?:live|test)_[A-Za-z0-9]{24,200}\\b/g,95],\n  ['private-key','Private key material','CRITICAL',/-----BEGIN ((?:RSA |OPENSSH |EC |DSA |ENCRYPTED )?PRIVATE KEY)-----\\s*([A-Za-z0-9+/=\\s]{64,})-----END \\1-----/g,100],\n  ['connection-uri','Database connection URI','HIGH',/\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|rediss?):\\/\\/[^\\s\"'`<>]+/gi,85]\n ];\n for(const [id,kind,severity,re,confidence] of rules) for(const m of text.matchAll(re)) {\n  if(id==='connection-uri') { const auth=m[0].match(/:\\/\\/([^/@]+):([^/@]+)@/); if(!auth||placeholder(auth[2])||auth[2].length<6) continue; }\n  add(id,kind,severity,m[0],m.index,confidence);\n }\n // Only literal assignments to credential names, with enough entropy. Runtime references and names alone do not qualify.\n const generic=/(?:^|[\\s,{])['\"]?((?:[A-Za-z][\\w.-]*[_-])?(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key))['\"]?\\s*[:=]\\s*(?:\"([^\"\\r\\n]{12,300})\"|'([^'\\r\\n]{12,300})'|([A-Za-z0-9_+/.=-]{16,300}))/gim;\n for(const m of text.matchAll(generic)) {\n  const value=m[2]||m[3]||m[4]; if(placeholder(value)||/[\\s{}]/.test(value)||entropy(value)<3.5) continue;\n  const classes=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(re=>re.test(value)).length;\n  if(classes<3 && !(value.length>=32&&classes>=2)) continue;\n  const confidence=/(^|\\/)(?:tests?|fixtures|examples|docs|samples|__tests__|e2e|integration|testdata|testing|__fixtures__)(\\/|$)|\\.(?:example|sample|template|spec|test)(?:\\.|$)/i.test(path)?65:80;\n  add('credential-assignment','Hardcoded credential','MEDIUM',value,m.index,confidence);\n }\n return result;\n}\nfunction initialState(c) {return {version:4,scope:c.scope,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1},seen:{},gaps:[],cooldown_until:0};}\nfunction initialize(c,payload,execution) {\n let persisted=payload?JSON.parse(payload):{};\n if(persisted.committed?.scope && persisted.committed.scope!==c.scope) throw Error('State scope mismatch');\n let s=persisted.committed||initialState(c);\n if(s.version!==4) throw Error('Unsupported state version');\n if(s.revision!==RULE_REVISION) {s={...s,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1}};}\n const base={cfg:c,execution:String(execution),persisted,state:JSON.parse(JSON.stringify(s)),requests:0,files:0,commits:0,findings:[],errors:[],new_gaps:[],next:null,done:false,stage:'head',started:Date.now()};\n if(persisted.pending) {base.pending=persisted.pending;base.done=true;base.stage='outbox-recovery';}\n else if(s.cooldown_until>Date.now()) {base.done=true;base.stage='cooldown';}\n else if(c.test_fixture) {\n  const value='ghp_'+'R4d8kP2qN7mX9cV3bZ6sL1wF5yH0tJ8uA2eD';\n  base.findings=detect(value,'__monitor_controlled_test__/config.env','0000000000000000000000000000000000000000','CONTROLLED TEST - synthetic credential',c).filter(f=>!s.seen[f.finding_hash]).map(f=>({...f,commit_url:`https://github.com/${c.github_owner}/${c.github_repo}`,secret_type:'TEST ONLY - synthetic GitHub token'}));\n  base.files=1;base.done=true;base.stage='controlled-fixture';\n }\n return base;\n}\nfunction gap(x,message) {if(!x.state.gaps.includes(message)) {x.state.gaps.push(message);x.new_gaps.push(message);} if(x.state.gaps.length>300) throw Error('Coverage gap ledger exceeds 300; review and reset explicitly');}\nfunction finish(x,stage) {x.done=true;x.stage=stage; x.next=null; return x;}\nfunction plan(x) {\n if(x.done) return x;\n if(Date.now()-x.started>240000 || x.requests>=x.cfg.max_requests_per_run || x.findings.length>=x.cfg.max_findings_per_run) return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,h=s.history;\n const root=`/repos/${encodeURIComponent(c.github_owner)}/${encodeURIComponent(c.github_repo)}`;\n function req(kind,suffix,extra={}) {x.next={kind,path:root+suffix,...extra};return x;}\n if(x.stage==='head') return req('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot') {\n  if(!s.snapshot) {\n   if(s.snapshot_head===x.head) {x.stage='history'; return plan(x);}\n   return req('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');\n  }\n  const p=s.snapshot;\n  while(p.offset<p.files.length && s.cache[p.files[p.offset].path]===p.files[p.offset].sha) p.offset++;\n  if(p.offset>=p.files.length) {\n   const valid=new Set(p.files.map(f=>f.path)); for(const path of Object.keys(s.cache)) if(!valid.has(path)) delete s.cache[path];\n   s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);\n  }\n  if(x.files>=c.max_files_per_run) return finish(x,'snapshot-pending');\n  const file=p.files[p.offset]; return req('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='history') {\n  if(!c.history_enabled) return finish(x,'snapshot-only');\n  if(!h.anchor) {\n   if(h.tip===x.head) return finish(x,'up-to-date');\n   h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;\n  }\n  if(x.commits>=c.max_commits_per_scan) return finish(x,'history-pending');\n  if(h.index<h.queue.length) return req('commit',`/commits/${h.queue[h.index]}?per_page=100&page=${h.filePage}`,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound || h.exhausted) {\n   if(h.tip&&!h.stopFound) gap(x,'Previous history tip not reachable from current anchor; branch history may have been rewritten');\n   h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;\n   return finish(x,'up-to-date');\n  }\n  return req('commits',`/commits?sha=${h.anchor}&per_page=${c.max_commits_per_scan}&page=${h.page}`);\n }\n throw Error('Unknown scan stage');\n}\nfunction addFindings(x,found) {\n const hashes=new Set(x.findings.map(f=>f.finding_hash));\n for(const f of found) if(!x.state.seen[f.finding_hash]&&!hashes.has(f.finding_hash)) {hashes.add(f.finding_hash);x.findings.push(f);}\n if(x.findings.length>500) throw Error('More than 500 findings in a single response; no checkpoint saved');\n}\nfunction advance(x,response) {\n const request=x.next;x.requests++;x.next=null;\n const status=Number(response.statusCode||0),b=response.body,headers=Object.fromEntries(Object.entries(response.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));\n if(status!==200) {\n  const retry=Number(headers['retry-after']),reset=Number(headers['x-ratelimit-reset'])*1000;\n  if(status===403||status===429) x.state.cooldown_until=Math.max(Date.now()+60000,Number.isFinite(retry)?Date.now()+retry*1000:0,Number.isFinite(reset)?reset:0);\n  x.errors.push({stage:request.kind,status:status||'transport',message:'GitHub request failed; response content omitted'});\n  return finish(x,'request-error');\n }\n if(Number(headers['x-ratelimit-remaining'])<=10 && headers['x-ratelimit-remaining']!==undefined) {x.stop_after_response=true;x.state.cooldown_until=Math.max(Date.now()+60000,Number(headers['x-ratelimit-reset'])*1000||0);}\n if(request.kind==='head') {\n  if(!/^[a-f0-9]{40,64}$/i.test(b?.commit?.sha||'')) throw Error('Invalid branch HEAD response');\n  x.head=b.commit.sha;x.stage='snapshot';\n } else if(request.kind==='tree') {\n  if(!Array.isArray(b?.tree)||b.truncated) {x.errors.push({stage:'tree',message:'Missing or truncated repository tree; snapshot checkpoint unchanged'});return finish(x,'incomplete-tree');}\n  const files=b.tree.filter(f=>f.type==='blob'&&f.mode!=='120000'&&eligible(f.path));\n  if(files.length>x.cfg.max_snapshot_files) {x.errors.push({stage:'tree',message:'Eligible file count exceeds max_snapshot_files; checkpoint unchanged'});return finish(x,'scope-limit');}\n  const small=[];\n  for(const f of files) {if(typeof f.size!=='number'||f.size>x.cfg.max_file_bytes) gap(x,'Oversized or unknown-size snapshot file: '+f.path);else small.push({path:f.path,sha:f.sha,size:f.size});}\n  small.sort((a,b)=>{const score=p=>/(\\.env|\\.pem|\\.key|credentials|id_rsa|id_ed25519)/i.test(p)?0:/config|secret/i.test(p)?1:2;return score(a.path)-score(b.path)||a.path.localeCompare(b.path);});\n  x.state.snapshot={sha:x.head,files:small,offset:0};\n } else if(request.kind==='blob') {\n  if(b?.sha!==request.file.sha||b.encoding!=='base64'||typeof b.content!=='string'||b.size>x.cfg.max_file_bytes) throw Error('Invalid or oversized Git blob response');\n  const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');\n  if(bytes.length!==b.size) throw Error('Git blob length mismatch');\n  const text=bytes.toString('utf8');\n  if(text.includes('\\uFFFD')||text.includes('\\0')) gap(x,'Binary or invalid UTF-8 file: '+request.file.path);\n  else addFindings(x,detect(text,request.file.path,request.sha,'Current repository snapshot',x.cfg));\n  x.state.cache[request.file.path]=request.file.sha;x.state.snapshot.offset++;x.files++;\n } else if(request.kind==='commits') {\n  if(!Array.isArray(b)) throw Error('Invalid commits response');\n  const h=x.state.history;h.queue=[];h.index=0;h.filePage=1;h.page++;\n  for(const item of b) {if(!/^[a-f0-9]{40,64}$/i.test(item.sha||'')) throw Error('Invalid commit identifier');if(item.sha===h.tip) {h.stopFound=true;break;} h.queue.push(item.sha);}\n  h.exhausted=b.length<x.cfg.max_commits_per_scan;\n } else if(request.kind==='commit') {\n  if(b?.sha!==request.sha||!Array.isArray(b.files)) throw Error('Invalid commit details response');\n  for(const f of b.files) {\n   if(!eligible(f.filename)||!f.changes) continue;\n   if(typeof f.patch!=='string') {gap(x,'Missing historical patch: '+request.sha+' '+f.filename);continue;}\n   const added=[],removed=[],addMap=[],removeMap=[];let old=1,now=1;\n   for(const line of f.patch.split('\\n')) {\n    const m=line.match(/^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)/);if(m){old=+m[1];now=+m[2];continue;}\n    if(line.startsWith('+')) {added.push(line.slice(1));addMap.push(now++);} else if(line.startsWith('-')) {removed.push(line.slice(1));removeMap.push(old++);} else if(line.startsWith(' ')) {old++;now++;}\n   }\n   addFindings(x,detect(added.join('\\n'),f.filename,request.sha,'Git history added lines',x.cfg,addMap));\n   if(b.parents?.[0]?.sha) addFindings(x,detect(removed.join('\\n'),f.previous_filename||f.filename,b.parents[0].sha,'Git history removed lines',x.cfg,removeMap));\n  }\n  const h=x.state.history;\n  if(/rel=\"next\"/.test(String(headers.link||''))) {if(h.filePage>=30) {gap(x,'Historical commit exceeds GitHub file pagination limit: '+request.sha);h.index++;h.filePage=1;x.commits++;} else h.filePage++;}\n  else {h.index++;h.filePage=1;x.commits++;}\n }\n if(x.stop_after_response) return finish(x,'rate-limit-reserve');\n return x;\n}\nreturn {RULE_REVISION,fingerprint,eligible,validate,detect,initialState,initialize,plan,advance};\n\n})();\nconst originalAdvance=core.advance;\ncore.advance=function(x,response){\n const kind=x.next.kind;\n if(kind.startsWith('watch-')){\n  const saved=x.state.history;x.state.history=x.state.recent;x.next.kind=kind.slice(6);\n  const result=originalAdvance(x,response);\n  x.state.recent=x.state.history;x.state.history=saved;\n  if(!result.done)result.stage='watch';return result;\n }\n const result=originalAdvance(x,response);\n if(kind==='head'&&!result.done){result.state.recent=result.state.recent||{tip:result.head,anchor:'',page:1,queue:[],index:0,filePage:1};result.stage='watch';}\n return result;\n};\nconst ctx=$('V4 \u00b7 GitHub: Request Planner').item.json;\nreturn [{json:core.advance(ctx,$input.first().json)}];"
+      },
+      "id": "b1e6eed7-1fb7-4897-9894-7565a5dc4fad",
+      "name": "V4 \u00b7 Scan: Advance and Detect",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4000,
+        3584
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const core=(()=>{\nfunction sha256(ascii) {\n  ascii = unescape(encodeURIComponent(ascii));\n  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }\n  const mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length';\n  let i, j, result = '';\n  const words = [], asciiBitLength = ascii[lengthProperty] * 8;\n  let hash = sha256.h = sha256.h || [];\n  const k = sha256.k = sha256.k || [];\n  let primeCounter = k[lengthProperty];\n  const isComposite = {};\n  for (let candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;\n      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;\n      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;\n    }\n  }\n  ascii += '\\x80';\n  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i) & 0xff;\n    words[i >> 2] |= j << ((3 - i) % 4) * 8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);\n  words[words[lengthProperty]] = (asciiBitLength);\n  for (j = 0; j < words[lengthProperty];) {\n    const w = words.slice(j, j += 16), oldHash = hash;\n    hash = hash.slice(0, 8);\n    for (i = 0; i < 64; i++) {\n      const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];\n      const temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);\n      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n      hash = [(temp1 + temp2) | 0].concat(hash);\n      hash[4] = (hash[4] + temp1) | 0;\n    }\n    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;\n  }\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j + 1; j--) {\n      const b = (hash[i] >> (j * 8)) & 255;\n      result += ((b < 16) ? 0 : '') + b.toString(16);\n    }\n  }\n  return result;\n}\n\n\n// Bundled into the n8n Code nodes; no network, filesystem or credential access.\nconst RULE_REVISION = '4.1';\nfunction fingerprint(value) { return sha256(value); }\nfunction entropy(s) { const f={}; for(const c of s) f[c]=(f[c]||0)+1; return Object.values(f).reduce((v,n)=>v-n/s.length*Math.log2(n/s.length),0); }\nfunction placeholder(s) {\n return /^(?:\\$|\\{|<|process\\.|import\\.|os\\.|env\\.|config\\.|settings\\.|secrets\\.|vault\\.|undefined$|null$|true$|false$)/i.test(s) ||\n /^(?:your[_-]|replace[_-]|insert[_-]|changeme|change_me|example|placeholder|dummy|sample[_-])/i.test(s) ||\n /^(?:[xX*]+|0+|1+)$/.test(s) || /(?:AKIAIOSFODNN7EXAMPLE|wJalrXUtnFEMI\\/K7MDENG\\/bPxRfiCYEXAMPLEKEY)/.test(s);\n}\nfunction eligible(path) {\n return !/(^|\\/)(?:node_modules|vendor|dist|build|\\.git|coverage|\\.next|\\.venv|venv|__pycache__)\\//i.test(path) &&\n !/(?:package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|\\.min\\.[cm]?js|\\.map)$/i.test(path) &&\n (/\\.(?:env(?:\\.[^/]+)?|py|[cm]?js|jsx|ts|tsx|json|jsonc|ya?ml|toml|ini|cfg|conf|config|properties|sh|bash|php|go|java|rb|rs|tf|tfvars|txt|md|xml|gradle|pem|key|ipynb|sql|ps1|log|csv)$/i.test(path) || /(^|\\/)(?:Dockerfile(?:\\.[^/]+)?|Makefile|\\.npmrc|\\.pypirc|\\.netrc|\\.gitconfig|\\.env(?:\\.[^/]+)?|credentials|config|id_rsa|id_ed25519)$/i.test(path));\n}\nfunction validate(raw) {\n const c={...raw};\n if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(c.github_owner||'') || !/^[A-Za-z0-9_.-]{1,100}$/.test(c.github_repo||'') || !c.target_branch || /[\\r\\n?#]/.test(c.target_branch)) throw Error('Invalid repository or branch configuration');\n const ranges={max_requests_per_run:[2,100],max_files_per_run:[1,50],max_commits_per_scan:[1,20],max_file_bytes:[1024,500000],max_snapshot_files:[1,10000],max_findings_per_run:[1,500],minimum_confidence:[60,100],email_minimum_confidence:[60,100]};\n for(const [key,[min,max]] of Object.entries(ranges)) if(!Number.isInteger(c[key])||c[key]<min||c[key]>max) throw Error('Invalid scan setting: '+key);\n if(c.email_minimum_confidence<c.minimum_confidence) throw Error('Email threshold must be at least the detection threshold');\n for(const k of ['alert_from_email','alert_to_email']) if(!/^[^\\s@,;]+@[^\\s@,;]+\\.[^\\s@,;]+$/.test(c[k]||'')) throw Error('Invalid email setting: '+k);\n if(c.test_fixture!==undefined&&typeof c.test_fixture!=='boolean') throw Error('test_fixture must be boolean');\n c.scope=`${c.github_owner.toLowerCase()}/${c.github_repo.toLowerCase()}@${c.target_branch}${c.test_fixture?'#controlled-test':''}`;\n return c;\n}\nfunction detect(text,path,sha,source,c,lineMap) {\n const repo=`${c.github_owner}/${c.github_repo}`, result=[], seen=new Set();\n function add(rule,kind,severity,value,index,confidence) {\n  if(placeholder(value)||confidence<c.minimum_confidence) return;\n  const hash=fingerprint(`${repo}::${path}::${rule}::${value}`); if(seen.has(hash)) return; seen.add(hash);\n  const indexLine=text.slice(0,index).split('\\n').length;\n  const line=lineMap?.[indexLine-1]||indexLine;\n  result.push({finding_hash:hash,secret_fingerprint:fingerprint(`${repo}::${rule}::${value}`),rule_id:rule,secret_type:kind,severity,confidence,repository:repo,file_path:path,line_number:line,commit_sha:sha,source,masked_secret:'[REDACTED]',author:'repository-scan',commit_url:`https://github.com/${repo}/blob/${encodeURIComponent(sha)}/${path.split('/').map(encodeURIComponent).join('/')}#L${line}`,remediation_steps:'Confermare il risultato; revocare o ruotare la credenziale; correggere il codice e controllare gli accessi. La corrispondenza non verifica che la credenziale sia attiva.'});\n }\n const rules=[\n  ['github-pat','GitHub token','CRITICAL',/\\b(?:gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82})\\b/g,98],\n  ['aws-key','AWS access key ID','HIGH',/\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b/g,90],\n  ['google-key','Google API key','HIGH',/\\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])/g,95],\n  ['openai-key','AI provider key','HIGH',/\\bsk-(?:proj-[A-Za-z0-9_-]{40,200}|[A-Za-z0-9]{48})(?![A-Za-z0-9_-])/g,90],\n  ['slack-token','Slack token','HIGH',/\\bxox[baprs]-[0-9A-Za-z-]{20,200}\\b/g,95],\n  ['stripe-key','Stripe secret key','HIGH',/\\b[rs]k_(?:live|test)_[A-Za-z0-9]{24,200}\\b/g,95],\n  ['private-key','Private key material','CRITICAL',/-----BEGIN ((?:RSA |OPENSSH |EC |DSA |ENCRYPTED )?PRIVATE KEY)-----\\s*([A-Za-z0-9+/=\\s]{64,})-----END \\1-----/g,100],\n  ['connection-uri','Database connection URI','HIGH',/\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|rediss?):\\/\\/[^\\s\"'`<>]+/gi,85]\n ];\n for(const [id,kind,severity,re,confidence] of rules) for(const m of text.matchAll(re)) {\n  if(id==='connection-uri') { const auth=m[0].match(/:\\/\\/([^/@]+):([^/@]+)@/); if(!auth||placeholder(auth[2])||auth[2].length<6) continue; }\n  add(id,kind,severity,m[0],m.index,confidence);\n }\n // Only literal assignments to credential names, with enough entropy. Runtime references and names alone do not qualify.\n const generic=/(?:^|[\\s,{])['\"]?((?:[A-Za-z][\\w.-]*[_-])?(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key))['\"]?\\s*[:=]\\s*(?:\"([^\"\\r\\n]{12,300})\"|'([^'\\r\\n]{12,300})'|([A-Za-z0-9_+/.=-]{16,300}))/gim;\n for(const m of text.matchAll(generic)) {\n  const value=m[2]||m[3]||m[4]; if(placeholder(value)||/[\\s{}]/.test(value)||entropy(value)<3.5) continue;\n  const classes=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(re=>re.test(value)).length;\n  if(classes<3 && !(value.length>=32&&classes>=2)) continue;\n  const confidence=/(^|\\/)(?:tests?|fixtures|examples|docs|samples|__tests__)(\\/|$)|\\.(?:example|sample|template)(?:\\.|$)/i.test(path)?65:80;\n  add('credential-assignment','Hardcoded credential','MEDIUM',value,m.index,confidence);\n }\n return result;\n}\nfunction initialState(c) {return {version:4,scope:c.scope,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1},seen:{},gaps:[],cooldown_until:0};}\nfunction initialize(c,payload,execution) {\n let persisted=payload?JSON.parse(payload):{};\n if(persisted.committed?.scope && persisted.committed.scope!==c.scope) throw Error('State scope mismatch');\n let s=persisted.committed||initialState(c);\n if(s.version!==4) throw Error('Unsupported state version');\n if(s.revision!==RULE_REVISION) {s={...s,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1}};}\n const base={cfg:c,execution:String(execution),persisted,state:JSON.parse(JSON.stringify(s)),requests:0,files:0,commits:0,findings:[],errors:[],new_gaps:[],next:null,done:false,stage:'head',started:Date.now()};\n if(persisted.pending) {base.pending=persisted.pending;base.done=true;base.stage='outbox-recovery';}\n else if(s.cooldown_until>Date.now()) {base.done=true;base.stage='cooldown';}\n else if(c.test_fixture) {\n  const value='ghp_'+'R4d8kP2qN7mX9cV3bZ6sL1wF5yH0tJ8uA2eD';\n  base.findings=detect(value,'__monitor_controlled_test__/config.env','0000000000000000000000000000000000000000','CONTROLLED TEST - synthetic credential',c).filter(f=>!s.seen[f.finding_hash]).map(f=>({...f,commit_url:`https://github.com/${c.github_owner}/${c.github_repo}`,secret_type:'TEST ONLY - synthetic GitHub token'}));\n  base.files=1;base.done=true;base.stage='controlled-fixture';\n }\n return base;\n}\nfunction gap(x,message) {if(!x.state.gaps.includes(message)) {x.state.gaps.push(message);x.new_gaps.push(message);} if(x.state.gaps.length>300) throw Error('Coverage gap ledger exceeds 300; review and reset explicitly');}\nfunction finish(x,stage) {x.done=true;x.stage=stage; x.next=null; return x;}\nfunction plan(x) {\n if(x.done) return x;\n if(Date.now()-x.started>240000 || x.requests>=x.cfg.max_requests_per_run || x.findings.length>=x.cfg.max_findings_per_run) return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,h=s.history;\n const root=`/repos/${encodeURIComponent(c.github_owner)}/${encodeURIComponent(c.github_repo)}`;\n function req(kind,suffix,extra={}) {x.next={kind,path:root+suffix,...extra};return x;}\n if(x.stage==='head') return req('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot') {\n  if(!s.snapshot) {\n   if(s.snapshot_head===x.head) {x.stage='history'; return plan(x);}\n   return req('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');\n  }\n  const p=s.snapshot;\n  while(p.offset<p.files.length && s.cache[p.files[p.offset].path]===p.files[p.offset].sha) p.offset++;\n  if(p.offset>=p.files.length) {\n   const valid=new Set(p.files.map(f=>f.path)); for(const path of Object.keys(s.cache)) if(!valid.has(path)) delete s.cache[path];\n   s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);\n  }\n  if(x.files>=c.max_files_per_run) return finish(x,'snapshot-pending');\n  const file=p.files[p.offset]; return req('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='history') {\n  if(!c.history_enabled) return finish(x,'snapshot-only');\n  if(!h.anchor) {\n   if(h.tip===x.head) return finish(x,'up-to-date');\n   h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;\n  }\n  if(x.commits>=c.max_commits_per_scan) return finish(x,'history-pending');\n  if(h.index<h.queue.length) return req('commit',`/commits/${h.queue[h.index]}?per_page=100&page=${h.filePage}`,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound || h.exhausted) {\n   if(h.tip&&!h.stopFound) gap(x,'Previous history tip not reachable from current anchor; branch history may have been rewritten');\n   h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;\n   return finish(x,'up-to-date');\n  }\n  return req('commits',`/commits?sha=${h.anchor}&per_page=${c.max_commits_per_scan}&page=${h.page}`);\n }\n throw Error('Unknown scan stage');\n}\nfunction addFindings(x,found) {\n const hashes=new Set(x.findings.map(f=>f.finding_hash));\n for(const f of found) if(!x.state.seen[f.finding_hash]&&!hashes.has(f.finding_hash)) {hashes.add(f.finding_hash);x.findings.push(f);}\n if(x.findings.length>500) throw Error('More than 500 findings in a single response; no checkpoint saved');\n}\nfunction advance(x,response) {\n const request=x.next;x.requests++;x.next=null;\n const status=Number(response.statusCode||0),b=response.body,headers=Object.fromEntries(Object.entries(response.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));\n if(status!==200) {\n  const retry=Number(headers['retry-after']),reset=Number(headers['x-ratelimit-reset'])*1000;\n  if(status===403||status===429) x.state.cooldown_until=Math.max(Date.now()+60000,Number.isFinite(retry)?Date.now()+retry*1000:0,Number.isFinite(reset)?reset:0);\n  x.errors.push({stage:request.kind,status:status||'transport',message:'GitHub request failed; response content omitted'});\n  return finish(x,'request-error');\n }\n if(Number(headers['x-ratelimit-remaining'])<=10 && headers['x-ratelimit-remaining']!==undefined) {x.stop_after_response=true;x.state.cooldown_until=Math.max(Date.now()+60000,Number(headers['x-ratelimit-reset'])*1000||0);}\n if(request.kind==='head') {\n  if(!/^[a-f0-9]{40,64}$/i.test(b?.commit?.sha||'')) throw Error('Invalid branch HEAD response');\n  x.head=b.commit.sha;x.stage='snapshot';\n } else if(request.kind==='tree') {\n  if(!Array.isArray(b?.tree)||b.truncated) {x.errors.push({stage:'tree',message:'Missing or truncated repository tree; snapshot checkpoint unchanged'});return finish(x,'incomplete-tree');}\n  const files=b.tree.filter(f=>f.type==='blob'&&f.mode!=='120000'&&eligible(f.path));\n  if(files.length>x.cfg.max_snapshot_files) {x.errors.push({stage:'tree',message:'Eligible file count exceeds max_snapshot_files; checkpoint unchanged'});return finish(x,'scope-limit');}\n  const small=[];\n  for(const f of files) {if(typeof f.size!=='number'||f.size>x.cfg.max_file_bytes) gap(x,'Oversized or unknown-size snapshot file: '+f.path);else small.push({path:f.path,sha:f.sha,size:f.size});}\n  small.sort((a,b)=>{const score=p=>/(\\.env|\\.pem|\\.key|credentials|id_rsa|id_ed25519)/i.test(p)?0:/config|secret/i.test(p)?1:2;return score(a.path)-score(b.path)||a.path.localeCompare(b.path);});\n  x.state.snapshot={sha:x.head,files:small,offset:0};\n } else if(request.kind==='blob') {\n  if(b?.sha!==request.file.sha||b.encoding!=='base64'||typeof b.content!=='string'||b.size>x.cfg.max_file_bytes) throw Error('Invalid or oversized Git blob response');\n  const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');\n  if(bytes.length!==b.size) throw Error('Git blob length mismatch');\n  const text=bytes.toString('utf8');\n  if(text.includes('\\uFFFD')||text.includes('\\0')) gap(x,'Binary or invalid UTF-8 file: '+request.file.path);\n  else addFindings(x,detect(text,request.file.path,request.sha,'Current repository snapshot',x.cfg));\n  x.state.cache[request.file.path]=request.file.sha;x.state.snapshot.offset++;x.files++;\n } else if(request.kind==='commits') {\n  if(!Array.isArray(b)) throw Error('Invalid commits response');\n  const h=x.state.history;h.queue=[];h.index=0;h.filePage=1;h.page++;\n  for(const item of b) {if(!/^[a-f0-9]{40,64}$/i.test(item.sha||'')) throw Error('Invalid commit identifier');if(item.sha===h.tip) {h.stopFound=true;break;} h.queue.push(item.sha);}\n  h.exhausted=b.length<x.cfg.max_commits_per_scan;\n } else if(request.kind==='commit') {\n  if(b?.sha!==request.sha||!Array.isArray(b.files)) throw Error('Invalid commit details response');\n  for(const f of b.files) {\n   if(!eligible(f.filename)||!f.changes) continue;\n   if(typeof f.patch!=='string') {gap(x,'Missing historical patch: '+request.sha+' '+f.filename);continue;}\n   const added=[],removed=[],addMap=[],removeMap=[];let old=1,now=1;\n   for(const line of f.patch.split('\\n')) {\n    const m=line.match(/^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)/);if(m){old=+m[1];now=+m[2];continue;}\n    if(line.startsWith('+')) {added.push(line.slice(1));addMap.push(now++);} else if(line.startsWith('-')) {removed.push(line.slice(1));removeMap.push(old++);} else if(line.startsWith(' ')) {old++;now++;}\n   }\n   addFindings(x,detect(added.join('\\n'),f.filename,request.sha,'Git history added lines',x.cfg,addMap));\n   if(b.parents?.[0]?.sha) addFindings(x,detect(removed.join('\\n'),f.previous_filename||f.filename,b.parents[0].sha,'Git history removed lines',x.cfg,removeMap));\n  }\n  const h=x.state.history;\n  if(/rel=\"next\"/.test(String(headers.link||''))) {if(h.filePage>=30) {gap(x,'Historical commit exceeds GitHub file pagination limit: '+request.sha);h.index++;h.filePage=1;x.commits++;} else h.filePage++;}\n  else {h.index++;h.filePage=1;x.commits++;}\n }\n if(x.stop_after_response) return finish(x,'rate-limit-reserve');\n return x;\n}\nreturn {RULE_REVISION,fingerprint,eligible,validate,detect,initialState,initialize,plan,advance};\n\n})();\nconst x=$input.first().json;\nif(!x.pending) {\n const report={scope:x.cfg.scope,requests:x.requests,files:x.files,commits:x.commits,stage:x.stage,snapshot_complete:!x.state.snapshot&&!!x.state.snapshot_head,history_pending:!!x.state.history.anchor,coverage_gaps:x.state.gaps.length,new_gaps:x.new_gaps,errors:x.errors};\n x.pending={candidate:x.state,findings:x.findings.map(f=>({...f,notion_id:'',notion_existing:false})),report,email_sent:false,created_at:new Date().toISOString()};\n}\nx.persisted={committed:x.persisted.committed||core.initialState(x.cfg),pending:x.pending};\nconst payload=JSON.stringify(x.persisted);if(payload.length>5000000)throw Error('State exceeds 5 MB; explicit state maintenance required');\nreturn [{json:{...x,payload}}];"
+      },
+      "id": "e8feb994-5556-40a4-b501-98b99983bc8f",
+      "name": "V4 \u00b7 Outbox: Stage Scan Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3632,
+        3856
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.row_id }}"
+            },
+            {
+              "keyName": "owner",
+              "keyValue": "={{ $json.execution }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}",
+            "owner": "={{ $json.execution }}",
+            "lease": "={{ Date.now()+900000 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d0733e7a-c053-4f3e-abd9-0d293a76faab",
+      "name": "V4 \u00b7 State: Save Pending Batch",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3856,
+        3856
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$input.first().json;if(!row.id||row.owner!==String($execution.id))throw Error('Lease lost while persisting outbox');\nconst persisted=JSON.parse(row.payload),cfg=$('V4 \u00b7 Config: Target Repository').first().json;\nconst current=persisted.pending.findings.findIndex(f=>!f.notion_id);\nreturn [{json:{row_id:row.id,execution:String($execution.id),cfg,persisted,pending:persisted.pending,current,finding:current>=0?persisted.pending.findings[current]:null}}];"
+      },
+      "id": "334b0b7d-68ad-41b7-8724-7f614c40ba20",
+      "name": "V4 \u00b7 Outbox: Next Incident",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4080,
+        3856
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c013980d-db22-4f28-b4f8-22fa4d9b3e52",
+              "leftValue": "={{ $json.current >= 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e04e8da8-44d3-444f-bd2d-1b1d3dd4b04d",
+      "name": "V4 \u00b7 Outbox: Incidents Remaining?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4304,
+        3856
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": ""
+        },
+        "limit": 1,
+        "simple": false,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Finding Hash|rich_text",
+              "condition": "equals",
+              "richTextValue": "={{ $json.finding.finding_hash }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d617efc-64af-44e1-add5-e3ed11bdc2fe",
+      "name": "V4 \u00b7 Notion: Check Deduplication Hash",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4528,
+        3840
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$('V4 \u00b7 Outbox: Next Incident').item.json;const response=$input.first().json;\nif(response.id){const h=(response.properties?.['Finding Hash']?.rich_text||[]).map(t=>t.plain_text||t.text?.content||'').join('')||response.property_finding_hash;if(h!==x.finding.finding_hash)throw Error('Notion deduplication response did not match the requested hash');\nx.finding.notion_id=response.id;x.finding.notion_url=response.url||'';const created=Date.parse(response.created_time||response.createdTime||'');x.finding.notion_existing=!(created>=Date.parse(x.pending.created_at)-60000);}\nreturn [{json:x}];"
+      },
+      "id": "edc0e05b-4d59-45ac-af85-469a73c39337",
+      "name": "V4 \u00b7 Preserve Finding & Deduplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4752,
+        3840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb906070-6f9e-4bd4-ac89-7902099219f8",
+              "leftValue": "={{ !$json.finding.notion_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f4cc04c0-d9ac-48ea-af93-bd84def98620",
+      "name": "V4 \u00b7 Is New Finding?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4976,
+        3840
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": ""
+        },
+        "title": "={{ $json.cfg.test_fixture ? \"[TEST] \" : \"\" }}[{{ $json.finding.severity }}] {{ $json.finding.secret_type }} in {{ $json.finding.repository }}",
+        "simple": false,
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Finding Hash|rich_text",
+              "textContent": "={{ $json.finding.finding_hash }}"
+            },
+            {
+              "key": "Repository|rich_text",
+              "textContent": "={{ $json.finding.repository }}"
+            },
+            {
+              "key": "File Path|rich_text",
+              "textContent": "={{ $json.finding.file_path }}:{{ $json.finding.line_number }}"
+            },
+            {
+              "key": "Masked Secret|rich_text",
+              "textContent": "={{ $json.finding.masked_secret }}"
+            },
+            {
+              "key": "Author|rich_text",
+              "textContent": "={{ $json.finding.author }}"
+            },
+            {
+              "key": "Severity|select",
+              "selectValue": "={{ $json.finding.severity }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "={{ $json.cfg.test_fixture ? 'Test' : ($json.finding.confidence >= $json.cfg.email_minimum_confidence ? 'Open' : 'Needs Review') }}"
+            },
+            {
+              "key": "Commit URL|url",
+              "urlValue": "={{ $json.finding.commit_url }}"
+            },
+            {
+              "key": "Secret Fingerprint|rich_text",
+              "textContent": "={{ $json.finding.secret_fingerprint }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "441af04f-c785-4260-8fcc-f5c3343e3b7a",
+      "name": "V4 \u00b7 Notion: Log Incident & Status",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        5216,
+        3680
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$('V4 \u00b7 Is New Finding?').item.json;const r=$input.first().json;\nif(!x.finding.notion_id){if(!r.id)throw Error('Notion incident creation returned no page ID');x.finding.notion_id=r.id;x.finding.notion_url=r.url||'';x.finding.notion_existing=false;}\nx.persisted.pending.findings[x.current]=x.finding;return [{json:{...x,payload:JSON.stringify(x.persisted)}}];"
+      },
+      "id": "b23a7031-0aba-4359-9062-81bafbd841a2",
+      "name": "V4 \u00b7 Outbox: Record Incident Receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5408,
+        3856
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.row_id }}"
+            },
+            {
+              "keyName": "owner",
+              "keyValue": "={{ $json.execution }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}",
+            "owner": "={{ $json.execution }}",
+            "lease": "={{ Date.now()+900000 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a520879-c7bc-4cea-89bd-a67ac54a24e9",
+      "name": "V4 \u00b7 State: Save Incident Receipt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5632,
+        3856
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const core=(()=>{\nfunction sha256(ascii) {\n  ascii = unescape(encodeURIComponent(ascii));\n  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }\n  const mathPow = Math.pow, maxWord = mathPow(2, 32), lengthProperty = 'length';\n  let i, j, result = '';\n  const words = [], asciiBitLength = ascii[lengthProperty] * 8;\n  let hash = sha256.h = sha256.h || [];\n  const k = sha256.k = sha256.k || [];\n  let primeCounter = k[lengthProperty];\n  const isComposite = {};\n  for (let candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;\n      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;\n      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;\n    }\n  }\n  ascii += '\\x80';\n  while (ascii[lengthProperty] % 64 - 56) ascii += '\\x00';\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i) & 0xff;\n    words[i >> 2] |= j << ((3 - i) % 4) * 8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);\n  words[words[lengthProperty]] = (asciiBitLength);\n  for (j = 0; j < words[lengthProperty];) {\n    const w = words.slice(j, j += 16), oldHash = hash;\n    hash = hash.slice(0, 8);\n    for (i = 0; i < 64; i++) {\n      const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];\n      const temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);\n      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n      hash = [(temp1 + temp2) | 0].concat(hash);\n      hash[4] = (hash[4] + temp1) | 0;\n    }\n    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;\n  }\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j + 1; j--) {\n      const b = (hash[i] >> (j * 8)) & 255;\n      result += ((b < 16) ? 0 : '') + b.toString(16);\n    }\n  }\n  return result;\n}\n\n\n// Bundled into the n8n Code nodes; no network, filesystem or credential access.\nconst RULE_REVISION = '4.1';\nfunction fingerprint(value) { return sha256(value); }\nfunction entropy(s) { const f={}; for(const c of s) f[c]=(f[c]||0)+1; return Object.values(f).reduce((v,n)=>v-n/s.length*Math.log2(n/s.length),0); }\nfunction placeholder(s) {\n return /^(?:\\$|\\{|<|process\\.|import\\.|os\\.|env\\.|config\\.|settings\\.|secrets\\.|vault\\.|undefined$|null$|true$|false$)/i.test(s) ||\n /^(?:your[_-]|replace[_-]|insert[_-]|changeme|change_me|example|placeholder|dummy|sample[_-])/i.test(s) ||\n /^(?:[xX*]+|0+|1+)$/.test(s) || /(?:AKIAIOSFODNN7EXAMPLE|wJalrXUtnFEMI\\/K7MDENG\\/bPxRfiCYEXAMPLEKEY)/.test(s);\n}\nfunction eligible(path) {\n return !/(^|\\/)(?:node_modules|vendor|dist|build|\\.git|coverage|\\.next|\\.venv|venv|__pycache__)\\//i.test(path) &&\n !/(?:package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|\\.min\\.[cm]?js|\\.map)$/i.test(path) &&\n (/\\.(?:env(?:\\.[^/]+)?|py|[cm]?js|jsx|ts|tsx|json|jsonc|ya?ml|toml|ini|cfg|conf|config|properties|sh|bash|php|go|java|rb|rs|tf|tfvars|txt|md|xml|gradle|pem|key|ipynb|sql|ps1|log|csv)$/i.test(path) || /(^|\\/)(?:Dockerfile(?:\\.[^/]+)?|Makefile|\\.npmrc|\\.pypirc|\\.netrc|\\.gitconfig|\\.env(?:\\.[^/]+)?|credentials|config|id_rsa|id_ed25519)$/i.test(path));\n}\nfunction validate(raw) {\n const c={...raw};\n if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(c.github_owner||'') || !/^[A-Za-z0-9_.-]{1,100}$/.test(c.github_repo||'') || !c.target_branch || /[\\r\\n?#]/.test(c.target_branch)) throw Error('Invalid repository or branch configuration');\n const ranges={max_requests_per_run:[2,100],max_files_per_run:[1,50],max_commits_per_scan:[1,20],max_file_bytes:[1024,500000],max_snapshot_files:[1,10000],max_findings_per_run:[1,500],minimum_confidence:[60,100],email_minimum_confidence:[60,100]};\n for(const [key,[min,max]] of Object.entries(ranges)) if(!Number.isInteger(c[key])||c[key]<min||c[key]>max) throw Error('Invalid scan setting: '+key);\n if(c.email_minimum_confidence<c.minimum_confidence) throw Error('Email threshold must be at least the detection threshold');\n for(const k of ['alert_from_email','alert_to_email']) if(!/^[^\\s@,;]+@[^\\s@,;]+\\.[^\\s@,;]+$/.test(c[k]||'')) throw Error('Invalid email setting: '+k);\n if(c.test_fixture!==undefined&&typeof c.test_fixture!=='boolean') throw Error('test_fixture must be boolean');\n c.scope=`${c.github_owner.toLowerCase()}/${c.github_repo.toLowerCase()}@${c.target_branch}${c.test_fixture?'#controlled-test':''}`;\n return c;\n}\nfunction detect(text,path,sha,source,c,lineMap) {\n const repo=`${c.github_owner}/${c.github_repo}`, result=[], seen=new Set();\n function add(rule,kind,severity,value,index,confidence) {\n  if(placeholder(value)||confidence<c.minimum_confidence) return;\n  const hash=fingerprint(`${repo}::${path}::${rule}::${value}`); if(seen.has(hash)) return; seen.add(hash);\n  const indexLine=text.slice(0,index).split('\\n').length;\n  const line=lineMap?.[indexLine-1]||indexLine;\n  result.push({finding_hash:hash,secret_fingerprint:fingerprint(`${repo}::${rule}::${value}`),rule_id:rule,secret_type:kind,severity,confidence,repository:repo,file_path:path,line_number:line,commit_sha:sha,source,masked_secret:'[REDACTED]',author:'repository-scan',commit_url:`https://github.com/${repo}/blob/${encodeURIComponent(sha)}/${path.split('/').map(encodeURIComponent).join('/')}#L${line}`,remediation_steps:'Confermare il risultato; revocare o ruotare la credenziale; correggere il codice e controllare gli accessi. La corrispondenza non verifica che la credenziale sia attiva.'});\n }\n const rules=[\n  ['github-pat','GitHub token','CRITICAL',/\\b(?:gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82})\\b/g,98],\n  ['aws-key','AWS access key ID','HIGH',/\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b/g,90],\n  ['google-key','Google API key','HIGH',/\\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])/g,95],\n  ['openai-key','AI provider key','HIGH',/\\bsk-(?:proj-[A-Za-z0-9_-]{40,200}|[A-Za-z0-9]{48})(?![A-Za-z0-9_-])/g,90],\n  ['slack-token','Slack token','HIGH',/\\bxox[baprs]-[0-9A-Za-z-]{20,200}\\b/g,95],\n  ['stripe-key','Stripe secret key','HIGH',/\\b[rs]k_(?:live|test)_[A-Za-z0-9]{24,200}\\b/g,95],\n  ['private-key','Private key material','CRITICAL',/-----BEGIN ((?:RSA |OPENSSH |EC |DSA |ENCRYPTED )?PRIVATE KEY)-----\\s*([A-Za-z0-9+/=\\s]{64,})-----END \\1-----/g,100],\n  ['connection-uri','Database connection URI','HIGH',/\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|rediss?):\\/\\/[^\\s\"'`<>]+/gi,85]\n ];\n for(const [id,kind,severity,re,confidence] of rules) for(const m of text.matchAll(re)) {\n  if(id==='connection-uri') { const auth=m[0].match(/:\\/\\/([^/@]+):([^/@]+)@/); if(!auth||placeholder(auth[2])||auth[2].length<6) continue; }\n  add(id,kind,severity,m[0],m.index,confidence);\n }\n // Only literal assignments to credential names, with enough entropy. Runtime references and names alone do not qualify.\n const generic=/(?:^|[\\s,{])['\"]?((?:[A-Za-z][\\w.-]*[_-])?(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key))['\"]?\\s*[:=]\\s*(?:\"([^\"\\r\\n]{12,300})\"|'([^'\\r\\n]{12,300})'|([A-Za-z0-9_+/.=-]{16,300}))/gim;\n for(const m of text.matchAll(generic)) {\n  const value=m[2]||m[3]||m[4]; if(placeholder(value)||/[\\s{}]/.test(value)||entropy(value)<3.5) continue;\n  const classes=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(re=>re.test(value)).length;\n  if(classes<3 && !(value.length>=32&&classes>=2)) continue;\n  const confidence=/(^|\\/)(?:tests?|fixtures|examples|docs|samples|__tests__)(\\/|$)|\\.(?:example|sample|template)(?:\\.|$)/i.test(path)?65:80;\n  add('credential-assignment','Hardcoded credential','MEDIUM',value,m.index,confidence);\n }\n return result;\n}\nfunction initialState(c) {return {version:4,scope:c.scope,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1},seen:{},gaps:[],cooldown_until:0};}\nfunction initialize(c,payload,execution) {\n let persisted=payload?JSON.parse(payload):{};\n if(persisted.committed?.scope && persisted.committed.scope!==c.scope) throw Error('State scope mismatch');\n let s=persisted.committed||initialState(c);\n if(s.version!==4) throw Error('Unsupported state version');\n if(s.revision!==RULE_REVISION) {s={...s,revision:RULE_REVISION,cache:{},snapshot:null,snapshot_head:'',history:{tip:'',anchor:'',page:1,queue:[],index:0,filePage:1}};}\n const base={cfg:c,execution:String(execution),persisted,state:JSON.parse(JSON.stringify(s)),requests:0,files:0,commits:0,findings:[],errors:[],new_gaps:[],next:null,done:false,stage:'head',started:Date.now()};\n if(persisted.pending) {base.pending=persisted.pending;base.done=true;base.stage='outbox-recovery';}\n else if(s.cooldown_until>Date.now()) {base.done=true;base.stage='cooldown';}\n else if(c.test_fixture) {\n  const value='ghp_'+'R4d8kP2qN7mX9cV3bZ6sL1wF5yH0tJ8uA2eD';\n  base.findings=detect(value,'__monitor_controlled_test__/config.env','0000000000000000000000000000000000000000','CONTROLLED TEST - synthetic credential',c).filter(f=>!s.seen[f.finding_hash]).map(f=>({...f,commit_url:`https://github.com/${c.github_owner}/${c.github_repo}`,secret_type:'TEST ONLY - synthetic GitHub token'}));\n  base.files=1;base.done=true;base.stage='controlled-fixture';\n }\n return base;\n}\nfunction gap(x,message) {if(!x.state.gaps.includes(message)) {x.state.gaps.push(message);x.new_gaps.push(message);} if(x.state.gaps.length>300) throw Error('Coverage gap ledger exceeds 300; review and reset explicitly');}\nfunction finish(x,stage) {x.done=true;x.stage=stage; x.next=null; return x;}\nfunction plan(x) {\n if(x.done) return x;\n if(Date.now()-x.started>240000 || x.requests>=x.cfg.max_requests_per_run || x.findings.length>=x.cfg.max_findings_per_run) return finish(x,'bounded-batch');\n const c=x.cfg,s=x.state,h=s.history;\n const root=`/repos/${encodeURIComponent(c.github_owner)}/${encodeURIComponent(c.github_repo)}`;\n function req(kind,suffix,extra={}) {x.next={kind,path:root+suffix,...extra};return x;}\n if(x.stage==='head') return req('head','/branches/'+encodeURIComponent(c.target_branch));\n if(x.stage==='snapshot') {\n  if(!s.snapshot) {\n   if(s.snapshot_head===x.head) {x.stage='history'; return plan(x);}\n   return req('tree','/git/trees/'+encodeURIComponent(x.head)+'?recursive=1');\n  }\n  const p=s.snapshot;\n  while(p.offset<p.files.length && s.cache[p.files[p.offset].path]===p.files[p.offset].sha) p.offset++;\n  if(p.offset>=p.files.length) {\n   const valid=new Set(p.files.map(f=>f.path)); for(const path of Object.keys(s.cache)) if(!valid.has(path)) delete s.cache[path];\n   s.snapshot_head=p.sha;s.snapshot=null;x.stage='history';return plan(x);\n  }\n  if(x.files>=c.max_files_per_run) return finish(x,'snapshot-pending');\n  const file=p.files[p.offset]; return req('blob','/git/blobs/'+file.sha,{file,sha:p.sha});\n }\n if(x.stage==='history') {\n  if(!c.history_enabled) return finish(x,'snapshot-only');\n  if(!h.anchor) {\n   if(h.tip===x.head) return finish(x,'up-to-date');\n   h.anchor=x.head;h.page=1;h.queue=[];h.index=0;h.filePage=1;h.stopFound=false;\n  }\n  if(x.commits>=c.max_commits_per_scan) return finish(x,'history-pending');\n  if(h.index<h.queue.length) return req('commit',`/commits/${h.queue[h.index]}?per_page=100&page=${h.filePage}`,{sha:h.queue[h.index],page:h.filePage});\n  if(h.stopFound || h.exhausted) {\n   if(h.tip&&!h.stopFound) gap(x,'Previous history tip not reachable from current anchor; branch history may have been rewritten');\n   h.tip=h.anchor;h.anchor='';h.queue=[];h.index=0;h.filePage=1;h.page=1;h.exhausted=false;h.stopFound=false;\n   return finish(x,'up-to-date');\n  }\n  return req('commits',`/commits?sha=${h.anchor}&per_page=${c.max_commits_per_scan}&page=${h.page}`);\n }\n throw Error('Unknown scan stage');\n}\nfunction addFindings(x,found) {\n const hashes=new Set(x.findings.map(f=>f.finding_hash));\n for(const f of found) if(!x.state.seen[f.finding_hash]&&!hashes.has(f.finding_hash)) {hashes.add(f.finding_hash);x.findings.push(f);}\n if(x.findings.length>500) throw Error('More than 500 findings in a single response; no checkpoint saved');\n}\nfunction advance(x,response) {\n const request=x.next;x.requests++;x.next=null;\n const status=Number(response.statusCode||0),b=response.body,headers=Object.fromEntries(Object.entries(response.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));\n if(status!==200) {\n  const retry=Number(headers['retry-after']),reset=Number(headers['x-ratelimit-reset'])*1000;\n  if(status===403||status===429) x.state.cooldown_until=Math.max(Date.now()+60000,Number.isFinite(retry)?Date.now()+retry*1000:0,Number.isFinite(reset)?reset:0);\n  x.errors.push({stage:request.kind,status:status||'transport',message:'GitHub request failed; response content omitted'});\n  return finish(x,'request-error');\n }\n if(Number(headers['x-ratelimit-remaining'])<=10 && headers['x-ratelimit-remaining']!==undefined) {x.stop_after_response=true;x.state.cooldown_until=Math.max(Date.now()+60000,Number(headers['x-ratelimit-reset'])*1000||0);}\n if(request.kind==='head') {\n  if(!/^[a-f0-9]{40,64}$/i.test(b?.commit?.sha||'')) throw Error('Invalid branch HEAD response');\n  x.head=b.commit.sha;x.stage='snapshot';\n } else if(request.kind==='tree') {\n  if(!Array.isArray(b?.tree)||b.truncated) {x.errors.push({stage:'tree',message:'Missing or truncated repository tree; snapshot checkpoint unchanged'});return finish(x,'incomplete-tree');}\n  const files=b.tree.filter(f=>f.type==='blob'&&f.mode!=='120000'&&eligible(f.path));\n  if(files.length>x.cfg.max_snapshot_files) {x.errors.push({stage:'tree',message:'Eligible file count exceeds max_snapshot_files; checkpoint unchanged'});return finish(x,'scope-limit');}\n  const small=[];\n  for(const f of files) {if(typeof f.size!=='number'||f.size>x.cfg.max_file_bytes) gap(x,'Oversized or unknown-size snapshot file: '+f.path);else small.push({path:f.path,sha:f.sha,size:f.size});}\n  small.sort((a,b)=>{const score=p=>/(\\.env|\\.pem|\\.key|credentials|id_rsa|id_ed25519)/i.test(p)?0:/config|secret/i.test(p)?1:2;return score(a.path)-score(b.path)||a.path.localeCompare(b.path);});\n  x.state.snapshot={sha:x.head,files:small,offset:0};\n } else if(request.kind==='blob') {\n  if(b?.sha!==request.file.sha||b.encoding!=='base64'||typeof b.content!=='string'||b.size>x.cfg.max_file_bytes) throw Error('Invalid or oversized Git blob response');\n  const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');\n  if(bytes.length!==b.size) throw Error('Git blob length mismatch');\n  const text=bytes.toString('utf8');\n  if(text.includes('\\uFFFD')||text.includes('\\0')) gap(x,'Binary or invalid UTF-8 file: '+request.file.path);\n  else addFindings(x,detect(text,request.file.path,request.sha,'Current repository snapshot',x.cfg));\n  x.state.cache[request.file.path]=request.file.sha;x.state.snapshot.offset++;x.files++;\n } else if(request.kind==='commits') {\n  if(!Array.isArray(b)) throw Error('Invalid commits response');\n  const h=x.state.history;h.queue=[];h.index=0;h.filePage=1;h.page++;\n  for(const item of b) {if(!/^[a-f0-9]{40,64}$/i.test(item.sha||'')) throw Error('Invalid commit identifier');if(item.sha===h.tip) {h.stopFound=true;break;} h.queue.push(item.sha);}\n  h.exhausted=b.length<x.cfg.max_commits_per_scan;\n } else if(request.kind==='commit') {\n  if(b?.sha!==request.sha||!Array.isArray(b.files)) throw Error('Invalid commit details response');\n  for(const f of b.files) {\n   if(!eligible(f.filename)||!f.changes) continue;\n   if(typeof f.patch!=='string') {gap(x,'Missing historical patch: '+request.sha+' '+f.filename);continue;}\n   const added=[],removed=[],addMap=[],removeMap=[];let old=1,now=1;\n   for(const line of f.patch.split('\\n')) {\n    const m=line.match(/^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)/);if(m){old=+m[1];now=+m[2];continue;}\n    if(line.startsWith('+')) {added.push(line.slice(1));addMap.push(now++);} else if(line.startsWith('-')) {removed.push(line.slice(1));removeMap.push(old++);} else if(line.startsWith(' ')) {old++;now++;}\n   }\n   addFindings(x,detect(added.join('\\n'),f.filename,request.sha,'Git history added lines',x.cfg,addMap));\n   if(b.parents?.[0]?.sha) addFindings(x,detect(removed.join('\\n'),f.previous_filename||f.filename,b.parents[0].sha,'Git history removed lines',x.cfg,removeMap));\n  }\n  const h=x.state.history;\n  if(/rel=\"next\"/.test(String(headers.link||''))) {if(h.filePage>=30) {gap(x,'Historical commit exceeds GitHub file pagination limit: '+request.sha);h.index++;h.filePage=1;x.commits++;} else h.filePage++;}\n  else {h.index++;h.filePage=1;x.commits++;}\n }\n if(x.stop_after_response) return finish(x,'rate-limit-reserve');\n return x;\n}\nreturn {RULE_REVISION,fingerprint,eligible,validate,detect,initialState,initialize,plan,advance};\n\n})();\nconst x=$input.first().json,p=x.pending;\nconst selected=p.findings.filter(f=>!f.notion_existing&&f.confidence>=x.cfg.email_minimum_confidence);\nconst errorKey=core.fingerprint(JSON.stringify([p.report.errors,p.report.new_gaps]));const old=p.candidate.last_error||{};\nconst operational=(p.report.errors.length>0||p.report.new_gaps.length>0)&&(old.key!==errorKey||Date.now()-(old.at||0)>86400000);\nx.send_digest=!p.email_sent&&(selected.length>0||operational);x.operational_only=selected.length===0;\nx.subject=`${x.cfg.test_fixture?'[TEST] ':''}[Secrets Monitor] ${x.cfg.github_owner}/${x.cfg.github_repo}: ${selected.length} nuovi risultati, ${p.report.errors.length} errori`;\nx.message=[`Monitor credenziali: ${x.cfg.github_owner}/${x.cfg.github_repo}`,`Richieste GitHub: ${p.report.requests}; file: ${p.report.files}; commit: ${p.report.commits}.`,`Stato: ${p.report.stage}; lacune API registrate: ${p.report.coverage_gaps}.`,`I risultati sono corrispondenze da verificare; non viene provata la validita delle credenziali.`,...selected.map(f=>`\\n[${f.severity}] ${f.secret_type} (confidenza ${f.confidence})\\n${f.file_path}:${f.line_number}\\nValore: [REDACTED]\\nGitHub: ${f.commit_url}\\nNotion: ${f.notion_url}`),...(operational?[`\\nScansione incompleta: ${JSON.stringify(p.report.errors)}\\n${p.report.new_gaps.join('\\n')}`]:[]),'\\nRuotare le credenziali confermate e verificare gli accessi. Nessun valore segreto e incluso in questa notifica.'].join('\\n');\nif(operational)p.candidate.last_error={key:errorKey,at:Date.now()};return [{json:x}];"
+      },
+      "id": "1f6d6279-1e30-4398-859b-da662c5cc02a",
+      "name": "V4 \u00b7 Outbox: Build Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4544,
+        4192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dbfe85be-ffa3-484e-bff0-09f460e69a3c",
+              "leftValue": "={{ $json.send_digest }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7db20a5c-dff8-40c8-b48b-70ecc392711e",
+      "name": "V4 \u00b7 Digest Needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4768,
+        4192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0fe23c10-5040-4221-a292-d8cc9abdd9eb",
+              "leftValue": "={{ $json.operational_only }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7d9a4246-ab7c-4fc6-8043-2b65b45c657f",
+      "name": "V4 \u00b7 Operational Digest Only?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5072,
+        4096
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.cfg.alert_from_email }}",
+        "toEmail": "={{ $json.cfg.alert_to_email }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5296,
+        4304
+      ],
+      "id": "e4030160-3f90-41fb-aef5-c51fb8c86e4a",
+      "name": "V4 \u00b7 Send an Email"
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.cfg.alert_from_email }}",
+        "toEmail": "={{ $json.cfg.alert_to_email }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b27bb782-3516-45ee-bec7-a9a5de94004c",
+      "name": "V4 \u00b7 Send Scan Error Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5296,
+        4080
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$('V4 \u00b7 Digest Needed?').item.json;x.persisted.pending.email_sent=true;return [{json:{...x,payload:JSON.stringify(x.persisted)}}];"
+      },
+      "id": "e7171b7b-c8eb-4e8a-86c1-35ada8aa54c4",
+      "name": "V4 \u00b7 Outbox: Acknowledge Delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5584,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.row_id }}"
+            },
+            {
+              "keyName": "owner",
+              "keyValue": "={{ $json.execution }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}",
+            "owner": "={{ $json.execution }}",
+            "lease": "={{ Date.now()+900000 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "92e3dbb1-6c4d-40c5-8d10-3407517aec0c",
+      "name": "V4 \u00b7 State: Save Delivery Receipt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5840,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$input.first().json;if(row.owner!==String($execution.id))throw Error('Lease lost');const p=JSON.parse(row.payload),pending=p.pending;if(!pending.email_sent||pending.findings.some(f=>!f.notion_id))throw Error('Outbox is not fully acknowledged');\nconst candidate=pending.candidate;for(const f of pending.findings)candidate.seen[f.finding_hash]=pending.created_at;\ncandidate.last_report=pending.report;const payload=JSON.stringify({committed:candidate});if(payload.length>5000000)throw Error('State exceeds 5 MB');return [{json:{row_id:row.id,execution:String($execution.id),payload,report:pending.report,findings:pending.findings.length}}];"
+      },
+      "id": "8019067e-4283-4039-87d0-392ac1f2e35d",
+      "name": "V4 \u00b7 State: Prepare Checkpoint",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6064,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "secrets_monitor_v4_state"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.row_id }}"
+            },
+            {
+              "keyName": "owner",
+              "keyValue": "={{ $json.execution }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}",
+            "owner": "",
+            "lease": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lease",
+              "displayName": "lease",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d97297eb-e4a3-40ee-b707-9fc5d9a8cd5c",
+      "name": "V4 \u00b7 State: Commit and Release Lease",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        6288,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$input.first().json;if(!row.id||row.owner||row.lease!==0)throw Error('Checkpoint or lease release failed');const state=JSON.parse(row.payload).committed;return [{json:{status:'batch_committed',...state.last_report,known_findings:Object.keys(state.seen).length,snapshot_progress:state.snapshot?{processed:state.snapshot.offset,total:state.snapshot.files.length}:null,history_progress:state.history.anchor?{page:state.history.page,commit_index:state.history.index,file_page:state.history.filePage}:null,scope:'Configured text files at branch HEAD plus available added and removed GitHub commit patches; gaps are retained explicitly.'}}];"
+      },
+      "id": "74a2c940-aef2-4cd7-8492-42d0b278a4ce",
+      "name": "V4 \u00b7 Scan Batch Committed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6512,
+        4640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Secrets Exposure & Credential Leak Monitor\n\n### Quick Overview\nMonitor a GitHub repository for possible credential exposure. Track unique findings in Notion and send one redacted email digest per batch.\n\n### How It Works\nManual or scheduled runs scan bounded snapshots and available commit patches. New commits take priority while persistent cursors resume unfinished work. Checkpoints advance after incident and delivery receipts are saved.\n\n### Setup\n1. Set the repository, branch, sender and recipient in **Config: Target Repository**.\n2. Connect GitHub credentials with repository contents read access, a Notion integration and SMTP.\n3. Match the Notion properties: Name, Finding Hash, Repository, File Path, Masked Secret, Author, Severity, Status, Commit URL and Secret Fingerprint. Status options: **Open**, **Needs Review**, **Test**.\n4. Run with `test_fixture=true`; check Notion and email, then restore `false`. Enable the schedule after reviewing the result.\n\n### Customization\nAdjust API, file and commit budgets, file-size limits and confidence thresholds. Tune provider patterns and generated-file exclusions for your repository.\n\n### Additional Info\nRequires native n8n Data Tables. Configured text files and available GitHub patches are not a complete Git audit. Findings require confirmation; an interrupted SMTP receipt can cause a repeated digest.\n\n### Contact\nWorkflow setup and customization: [paoloronco.it](https://paoloronco.it).\n",
+        "height": 784,
+        "width": 668
+      },
+      "id": "cb212a6b-5b09-456f-a7d0-e8a07e788c95",
+      "name": "Guide - Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        3312
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 01 - Start & Configure\nChoose a manual run or schedule, then set the repository and notification addresses.",
+        "height": 320,
+        "width": 656,
+        "color": 7
+      },
+      "id": "b88c41e9-49af-4c5c-bb0e-0db4e482b101",
+      "name": "Section 01 - Start and Configuration",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        3312
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 02 - Load Repository State\nCreate or reuse durable storage, validate its schema, and initialize missing repository state.",
+        "height": 496,
+        "width": 1056,
+        "color": 7
+      },
+      "id": "df3a9014-f9a2-401e-a1f2-a25f8ade0605",
+      "name": "Section 02 - Persistent State",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        3312
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 03 - Prevent Overlapping Scans\nAcquire the repository lease before scanning. Concurrent runs stop when the lease is already held.",
+        "height": 320,
+        "width": 656,
+        "color": 7
+      },
+      "id": "cd5120d9-169d-4868-9712-0fc6e341a463",
+      "name": "Section 03 - Repository Lease",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        3488
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 04 - Scan & Detect\nPrioritize new commits, resume bounded snapshot/history work, and emit redacted findings.",
+        "height": 288,
+        "width": 1376,
+        "color": 7
+      },
+      "id": "71367537-86cc-4dc6-adb2-6e4c1ece61b6",
+      "name": "Section 04 - Scanning and Detection",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        3488
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 05 - Queue Results Before Delivery",
+        "height": 240,
+        "width": 896,
+        "color": 7
+      },
+      "id": "7c88e51c-ee6e-469e-9f61-e70bc8688853",
+      "name": "Section 05 - Durable Results Queue",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        3792
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 06 - Deduplicate & Track Incidents\nLook up finding fingerprints, create missing Notion records, and persist each incident receipt.",
+        "height": 464,
+        "width": 1328,
+        "color": 7
+      },
+      "id": "89ac977e-2c6f-4f40-9821-446eeba7c620",
+      "name": "Section 06 - Notion Incidents",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        3552
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 07 - Review & Notify\nSend one redacted digest; keep lower-confidence candidates in Notion for review.",
+        "height": 448,
+        "width": 992,
+        "color": 7
+      },
+      "id": "07d4680f-cd10-4f8a-a048-20877a715640",
+      "name": "Section 07 - Email Digests",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        4032
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 08 - Confirm Progress\nSave delivery receipts, commit acknowledged cursors, release the lease, and report remaining work.",
+        "height": 288,
+        "width": 1168,
+        "color": 7
+      },
+      "id": "4af57690-40f2-449e-9aa0-337090b4c73f",
+      "name": "Section 08 - Checkpoint",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5520,
+        4544
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "V4 \u00b7 Scheduled Scan (Every 6h)": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Config: Target Repository",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Manual Scan": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Config: Target Repository",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Config: Target Repository": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Ensure Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Ensure Table": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Verify Table Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Verify Table Schema": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Read Repository",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Read Repository": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Row Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Row Exists?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Validate and Prepare Lease",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 State: Initialize Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Initialize Row": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Validate and Prepare Lease",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Validate and Prepare Lease": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Acquire Lease",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Acquire Lease": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Lease Acquired?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Lease Acquired?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Scan: Initialize Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Scan: Initialize Context": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 GitHub: Request Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 GitHub: Request Planner": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 GitHub: Request Needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 GitHub: Request Needed?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 GitHub: Validate Request Boundary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Stage Scan Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 GitHub: Validate Request Boundary": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 GitHub: Fetch Blob",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 GitHub: Fetch Blob": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Scan: Advance and Detect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Scan: Advance and Detect": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 GitHub: Request Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Stage Scan Results": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Save Pending Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Save Pending Batch": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Next Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Next Incident": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Incidents Remaining?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Incidents Remaining?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Notion: Check Deduplication Hash",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Build Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Notion: Check Deduplication Hash": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Preserve Finding & Deduplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Preserve Finding & Deduplicate": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Is New Finding?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Is New Finding?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Notion: Log Incident & Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Record Incident Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Notion: Log Incident & Status": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Record Incident Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Record Incident Receipt": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Save Incident Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Save Incident Receipt": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Next Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Build Digest": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Digest Needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Digest Needed?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Operational Digest Only?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Acknowledge Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Operational Digest Only?": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Send Scan Error Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "V4 \u00b7 Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Send an Email": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Acknowledge Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Send Scan Error Alert Email": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Outbox: Acknowledge Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 Outbox: Acknowledge Delivery": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Save Delivery Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Save Delivery Receipt": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Prepare Checkpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Prepare Checkpoint": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 State: Commit and Release Lease",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "V4 \u00b7 State: Commit and Release Lease": {
+      "main": [
+        [
+          {
+            "node": "V4 \u00b7 Scan Batch Committed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 300,
+    "availableInMCP": false
+  }
+}

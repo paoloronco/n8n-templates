@@ -1,4 +1,10 @@
 # WordPress VoiceOvers
+
+## n8n publication and source versions
+
+- [n8n #11789 — V1.3 · a pagamento](https://n8n.io/workflows/11789-convert-wordpress-articles-into-multilingual-voiceovers-with-google-tts-and-openai/): Paid V1.3 preview with 27 nodes, not the complete deliverable. Distinct from free V2 #22712. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/11789).
+- [n8n #22712 — V2.0 · gratuita](https://n8n.io/workflows/22712-create-multilingual-wordpress-audio-players-with-google-sheets-and-cloud-run/): 51 public nodes and 50 source nodes, both with 43 operational nodes. Credential bindings and documentation differ. Paid V1.3 #11789 remains separate. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22712).
+
 ## Quick overview
 This workflow converts recent WordPress posts into multilingual voiceovers using Google Cloud Text-to-Speech and Google Translate, managing job status and audio publishing through a Google Sheets queue.
 ## How it works

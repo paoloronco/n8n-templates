@@ -1,5 +1,10 @@
 # Smart Menu Order Automation — Real-Time Alerts, Voice Announcements & BAC Tracking (V4)
 
+## n8n publication and source versions
+
+- [n8n #14487 — V4 · release pubblicata](https://n8n.io/workflows/14487-notify-on-menu-orders-via-ntfy-and-home-assistant-tts-with-daily-bac-tracking/): Published release: 71 nodes. V4 STAGING: 66 nodes, with five Delete operations removed. Earlier versions remain separate. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/14487).
+
+
 > **Staging candidate — not production-ready.** This release is shared for evaluation and integration testing. The published JSON intentionally removes all five unfiltered DataTable Delete nodes and disconnects the weekly cleanup and legacy setup triggers. Do not enable production traffic before completing the validation checklist.
 
 ## Quick Overview

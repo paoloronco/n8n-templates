@@ -1,5 +1,8 @@
 # n8n Templates — Paolo Ronco
 
+[Published n8n catalog: release IDs, exact public copies, source revisions and pending submissions](catalog/n8n-publications.md).
+
+
 A curated collection of n8n automation workflows, practical implementation guides and reusable assets. Templates are organized by solution, with variants and releases grouped together.
 
 [![Paolo Ronco — Website](assets/paoloronco-website-blue-v5.svg)](https://paoloronco.it/)

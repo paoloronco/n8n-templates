@@ -1,5 +1,10 @@
 # Add New YouTube Videos to OrbitPage
 
+## n8n publication and source versions
+
+- [n8n #22127 — Release pubblicata](https://n8n.io/workflows/22127-publish-new-youtube-videos-to-orbitpage-with-optional-email-approval/): 52 nodes; same logic, credential bindings and one note differ. The n8n description contains legacy GitHub paths. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22127).
+
+
 ## Quick overview
 
 Add new public YouTube videos to your OrbitPage as native video cards with a cover and Play button. Choose automatic publication or a private draft with email approval. Public feed polling needs no YouTube API key or AI service.

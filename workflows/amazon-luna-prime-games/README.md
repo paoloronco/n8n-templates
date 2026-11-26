@@ -1,5 +1,10 @@
 # Sync Amazon Luna Prime Games to Google Sheets with Automatic Updates
 
+## n8n publication and source versions
+
+- [n8n #10733 — V1](https://n8n.io/workflows/10733-sync-amazon-luna-prime-games-to-google-sheets-with-automatic-updates/): Same pipeline; credential bindings and browser user-agent version differ. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/10733).
+
+
 ## Quick Overview
 
 Automatically fetch Amazon Luna games included with Prime, detect newly added titles, synchronize the catalog with Google Sheets, and optionally send Discord notifications when new games become available.

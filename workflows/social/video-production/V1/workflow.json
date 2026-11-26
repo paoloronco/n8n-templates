@@ -745,10 +745,10 @@
     },
     {
       "parameters": {
-        "content": "# Local Video Production\n\nRender narrated vertical videos on your computer, review the exact MP4, and publish approved drafts to Instagram Reels and YouTube Shorts through n8n.\n\n## How it works\n- Create a brief in the local gallery; the worker renders and uploads a verified MP4.\n- Watch the video, listen to its audio and approve the exact file and destinations.\n- Scheduled slots publish eligible drafts and retain per-channel receipts for recovery.\n\n## Customization\n- Edit text, images, layout and narration language in the gallery.\n- Choose channels and earliest publishing time.\n- Match backend timezone/hours with the n8n schedules.\n\n## Requirements\n- V1 companion runtime: Python 3.10+, Node.js 22+, FFmpeg/ffprobe and persistent storage.\n- SSH, Meta/YouTube OAuth, account IDs and signed HTTPS webhooks.\n- A running worker; open its gallery at http://127.0.0.1:3850/ on that computer.\n\n## Additional info\n\n- [Version-specific README and package files](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/README.md)\n- [Detailed configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/documentation.md)\n- Start with **YouTube only + private test**; Instagram tests publish publicly.\n- Keep the workflow inactive and backend publishing disabled during setup.\n- [Full documentation: setup, validation and recovery](https://paoloronco.notion.site/41cf0ba27c32816a8f5afafed8269368)",
+        "content": "# Local video production\n\n### How it works\nRender narrated vertical videos locally, review the exact MP4 and publish approved drafts to Instagram Reels and YouTube Shorts. A durable queue keeps approvals and per-channel receipts for recovery.\n\n### Setup\n1. Install the [matching V1 runtime](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/README.md) on the Linux backend and rendering computer: Python 3.10+, Node.js 22+ and FFmpeg/ffprobe.\n2. Connect SSH, Meta and YouTube credentials; set account/channel IDs, the shared signing secret, HTTPS webhooks and helper paths.\n3. Open http://127.0.0.1:3850/ on the rendering computer. Create a YouTube-only private test, watch/listen and approve the exact file.\n4. Verify the private result before enabling the workflow, backend publishing and schedules. Instagram tests publish publicly.\n\n### Customization\nChoose narration language, layout, images, caption, channels and publishing hours. Keep backend hours and n8n schedules aligned.\n\n[Full setup guide](https://paoloronco.notion.site/41cf0ba27c32816a8f5afafed8269368) · [Configuration and recovery](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/documentation.md)",
         "height": 640,
         "width": 736,
-        "color": 2
+        "color": 1
       },
       "id": "b1bc111b-4bc9-41f4-95cb-63ea87c0be77",
       "name": "[TPA] 00 Overview",
@@ -761,7 +761,7 @@
     },
     {
       "parameters": {
-        "content": "## 1. Render and review private drafts\n\nThis optional manual branch queues four sample briefs, waits for the PC worker and returns gallery links. Edit **Choose formats and audience** before running it.\n\nPolling reuses each job ID; a new manual execution creates a new batch. Review existing jobs before repeating it. The gallery opens on the rendering computer.",
+        "content": "## 1. Render and review private drafts\n\nQueue four sample briefs and poll their existing job IDs while the worker renders. Each new manual execution creates another batch; inspect existing jobs before repeating it.",
         "height": 592,
         "width": 2576,
         "color": 7
@@ -793,7 +793,7 @@
     },
     {
       "parameters": {
-        "content": "## 3. Check the approved queue\n\nAt **09:00 Europe/Rome**, report up to five approved, ready drafts. This branch creates and approves no videos.\n\nPublishing slots run separately at **10, 12, 15, 18 and 21**. An empty or ineligible queue returns a no-op.",
+        "content": "## 3. Check the approved queue\n\nAt 09:00 Europe/Rome, report up to five approved, ready drafts without creating content. Separate publishing slots run at 10, 12, 15, 18 and 21; an ineligible queue produces no publication.",
         "height": 448,
         "width": 912,
         "color": 7
@@ -809,7 +809,7 @@
     },
     {
       "parameters": {
-        "content": "## 4. Claim a slot and deliver Instagram\n\nClaim one due, approved video. The backend plans the next Meta action, saves its receipt and polls the same container until verified.\n\nUnselected Instagram targets are skipped, including private YouTube tests. The final gate continues only when an approved YouTube target is prepared. Uncertain writes require reconciliation.",
+        "content": "## 4. Claim an approved slot and deliver Instagram\n\nClaim one due video, execute the next Meta action and retain its receipt. Skip unselected Instagram targets, including YouTube-only private tests; reconcile uncertain writes before retrying.",
         "height": 656,
         "width": 2400,
         "color": 7
@@ -825,7 +825,7 @@
     },
     {
       "parameters": {
-        "content": "## 7. Receive the worker's verified MP4\n\nAuthorize the signed upload for its exact job and lease, restore the original binary and store it in the restricted upload directory. The backend checks its hash, decodes video/audio and acknowledges only a valid file. Uploading is separate from human approval.",
+        "content": "## 7. Receive the verified MP4\n\nAuthorize the exact signed job and lease before storing the original file. The backend checks its hash and decodes video/audio; uploading does not approve publication.",
         "height": 352,
         "width": 1952,
         "color": 7
@@ -1379,7 +1379,7 @@
     },
     {
       "parameters": {
-        "content": "## 9. Resume only the incomplete channel\n\nPersist the error and any existing YouTube ID. Use **Resume youtube** in the local gallery after fixing the cause.\n\nAn uncertain upload without an ID requires operator reconciliation. Keep successful channel receipts and verify an existing upload before retrying.",
+        "content": "## 9. Resume the incomplete channel\n\nKeep the error and any existing YouTube ID for gallery recovery. Verify an existing upload before retrying; an uncertain upload without an ID requires manual reconciliation.",
         "height": 368,
         "width": 1056,
         "color": 7
@@ -1452,7 +1452,7 @@
     },
     {
       "parameters": {
-        "content": "## 5. Upload the approved MP4 to YouTube\n\nCheck the OAuth channel against your configured ID and claim the approved original file. Upload once, save the returned video ID, then continue with that ID.\n\nAn existing ID resumes verification. Private tests use YouTube alone; the dry-run branch performs no upload.",
+        "content": "## 5. Upload the approved MP4 to YouTube\n\nVerify the OAuth channel and claim the approved original file, then save the returned video ID. Resume existing IDs without another upload; private tests use YouTube alone and dry runs do not upload.",
         "height": 480,
         "width": 2448,
         "color": 7
@@ -1468,7 +1468,7 @@
     },
     {
       "parameters": {
-        "content": "## 6. Verify processing and save the result\n\nRead the saved ID and check processing, channel, approved visibility, vertical dimensions and audio-stream metadata. Pending videos wait before another read; failures enter the recovery band below.\n\nSave success only after verification. Platform metadata does not judge narration quality or guarantee Shorts classification.",
+        "content": "## 6. Verify processing and record the result\n\nCheck the saved ID, channel, visibility and video/audio metadata before recording success. Wait for pending processing; failures enter recovery, and metadata cannot establish narration quality or guarantee Shorts classification.",
         "height": 528,
         "width": 2448,
         "color": 7

@@ -1,0 +1,347 @@
+{
+  "name": "Notion backup catalog setup — V3 — Revised",
+  "nodes": [
+    {
+      "id": "ff5b569b-cf88-4419-9ce2-c6970a664443",
+      "name": "Called by backup",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        64
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "config",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d40c0edc-fb58-475e-88d8-3b2882721ac1",
+      "name": "Run setup manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        256
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "57aa8b0b-4bf5-48fc-8bfc-99cbe2b9a4c1",
+      "name": "Setup configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        256
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{config:{\"setupWorkflowId\":\"SELECT_IMPORTED_SETUP_WORKFLOW_ID\",\"notionParentPageId\":\"YOUR_NOTION_PARENT_PAGE_ID\",\"catalogTitle\":\"n8n Workflow Backups\",\"documentationDataSourceId\":\"\",\"documentationRootPageId\":\"\",\"n8nOrigin\":\"https://n8n.example.com\",\"n8nApiBase\":\"https://n8n.example.com/api/v1\",\"includeInactive\":true,\"includeArchived\":true,\"includePinData\":false,\"secretPolicy\":\"redact\",\"includeWorkflowIds\":[],\"excludeWorkflowIds\":[],\"maxMinutes\":45,\"notionRequestIntervalSeconds\":1,\"forceFullVerification\":false,\"externalErrorHandler\":false,\"notifyOnErrors\":false,\"notifyOnChanges\":false,\"emailTo\":\"you@example.com\",\"emailFrom\":\"n8n@example.com\",\"notionMaxFileBytes\":5242880}}}];"
+      }
+    },
+    {
+      "id": "3d7e4980-f12a-41bd-95a8-04f0364c90d5",
+      "name": "Initialize setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        64
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "var Setup = (() => {\n  var __defProp = Object.defineProperty;\n  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;\n  var __getOwnPropNames = Object.getOwnPropertyNames;\n  var __hasOwnProp = Object.prototype.hasOwnProperty;\n  var __export = (target, all) => {\n    for (var name in all)\n      __defProp(target, name, { get: all[name], enumerable: true });\n  };\n  var __copyProps = (to, from, except, desc) => {\n    if (from && typeof from === \"object\" || typeof from === \"function\") {\n      for (let key2 of __getOwnPropNames(from))\n        if (!__hasOwnProp.call(to, key2) && key2 !== except)\n          __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });\n    }\n    return to;\n  };\n  var __toCommonJS = (mod) => __copyProps(__defProp({}, \"__esModule\", { value: true }), mod);\n\n  // output/notion-v3-2026-11-20/setup-core.mjs\n  var setup_core_exports = {};\n  __export(setup_core_exports, {\n    advance: () => advance,\n    initialize: () => initialize\n  });\n\n  // output/notion-v3-2026-11-20/schema.mjs\n  var BASE_SCHEMA = { Name: \"title\", ID: \"rich_text\", Status: \"select\", Trigger: \"multi_select\", \"Workflow link\": \"url\", \"Updated at\": \"date\", Notes: \"rich_text\" };\n  var EXTRA_SCHEMA = { \"Node count\": \"number\", Tags: \"multi_select\", Active: \"checkbox\", Archived: \"checkbox\", \"JSON bytes\": \"number\", \"JSON SHA-256\": \"rich_text\", \"Backup saved at\": \"date\" };\n  var SCHEMA = { ...BASE_SCHEMA, ...EXTRA_SCHEMA };\n  function properties() {\n    const p = Object.fromEntries(Object.entries(SCHEMA).map(([name, type]) => [name, { [type]: type === \"number\" ? { format: \"number\" } : {} }]));\n    p.Status.select.options = [[\"Active\", \"green\"], [\"Active \\xB7 scheduled\", \"green\"], [\"Inactive\", \"gray\"], [\"Scheduled \\xB7 inactive\", \"yellow\"], [\"Archived\", \"brown\"], [\"Unavailable\", \"red\"]].map(([name, color]) => ({ name, color }));\n    p.Trigger.multi_select.options = [\"Schedule\", \"Manual\", \"Error\", \"Sub-workflow\", \"Chat\", \"Webhook\", \"App trigger\"].map((name) => ({ name }));\n    return p;\n  }\n\n  // output/notion-v3-2026-11-20/setup-core.mjs\n  var check = (v, m) => {\n    if (!v) throw Error(m);\n  };\n  var validId = (v) => /^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(String(v || \"\"));\n  var key = (v) => String(v || \"\").replaceAll(\"-\", \"\").toLowerCase();\n  var rich = (s) => [{ type: \"text\", text: { content: s } }];\n  var paragraph = (s) => ({ object: \"block\", type: \"paragraph\", paragraph: { rich_text: rich(s) } });\n  var signature = \"Catalog created by n8n Workflow Backup to Notion.\";\n  var guideTitle = \"Setup and restore\";\n  function request(s, method, path, payload, phase) {\n    s.req = { method, path, ...payload ? { payload } : {} };\n    s.phase = phase;\n    s.done = false;\n    s.attempt = 0;\n    s.delaySeconds = 1;\n    return s;\n  }\n  function list(s, id, phase) {\n    s.items = [];\n    s.cursors = [];\n    return request(s, \"GET\", \"/blocks/\" + id + \"/children?page_size=100\", null, phase);\n  }\n  function collect(s, b, id, phase) {\n    check(b?.object === \"list\" && Array.isArray(b.results), \"Incomplete setup block inventory\");\n    s.items.push(...b.results.filter((x) => !x.archived && !x.in_trash));\n    if (b.has_more) {\n      check(b.next_cursor && !s.cursors.includes(b.next_cursor), \"Setup pagination repeated\");\n      s.cursors.push(b.next_cursor);\n      return request(s, \"GET\", \"/blocks/\" + id + \"/children?page_size=100&start_cursor=\" + encodeURIComponent(b.next_cursor), null, phase);\n    }\n    return null;\n  }\n  var title = (b) => b.child_page?.title || b.child_database?.title;\n  function initialize(config, now = Date.now()) {\n    check(config && typeof config === \"object\" && !Array.isArray(config), \"Provide one configuration object\");\n    const s = { config: { ...config }, startedAt: now, requests: 0, created: {}, rootTitle: config.catalogTitle || \"n8n Workflow Backups\" };\n    check(s.rootTitle.length > 0 && s.rootTitle.length <= 100, \"Catalog title must contain 1\\u2013100 characters\");\n    if (validId(config.documentationDataSourceId)) {\n      s.dataSourceId = config.documentationDataSourceId;\n      s.existingSource = true;\n      return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n    }\n    check(!config.documentationDataSourceId || config.documentationDataSourceId === \"YOUR_NOTION_DATA_SOURCE_ID\", \"Invalid existing data source ID\");\n    check(validId(config.notionParentPageId), \"Share a parent page with the Notion integration and set notionParentPageId\");\n    return list(s, config.notionParentPageId, \"parent\");\n  }\n  function rootContents(s) {\n    return list(s, s.rootPageId, \"root\");\n  }\n  function rootFound(s) {\n    const matches = s.items.filter((b) => b.type === \"child_page\" && title(b) === s.rootTitle);\n    check(matches.length <= 1, \"Multiple catalog pages have this title; select an existing data source explicitly\");\n    if (matches.length) {\n      s.rootPageId = matches[0].id;\n      return rootContents(s);\n    }\n    check(!s.uncertainRoot, \"Page creation could not be reconciled; inspect the parent before rerunning\");\n    return request(s, \"POST\", \"/pages\", { parent: { type: \"page_id\", page_id: s.config.notionParentPageId }, icon: { type: \"emoji\", emoji: \"\\u{1F5C4}\\uFE0F\" }, properties: { title: { title: rich(s.rootTitle) } }, children: [paragraph(signature), paragraph(\"Browse workflow status, triggers, tags and verified JSON attachments. Each workflow page keeps its generated documentation and your personal notes.\")] }, \"create_root\");\n  }\n  function databaseFound(s) {\n    check(s.items.some((b) => b.type === \"paragraph\" && (b.paragraph.rich_text || []).map((x) => x.plain_text ?? x.text?.content ?? \"\").join(\"\") === signature), \"A page with this title already exists but is not this catalog; choose another catalogTitle or an existing data source\");\n    const dbs = s.items.filter((b) => b.type === \"child_database\" && title(b) === \"Workflows\");\n    check(dbs.length <= 1, \"Multiple Workflows databases found\");\n    if (dbs.length) {\n      s.databaseId = dbs[0].id;\n      return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"database\");\n    }\n    check(!s.uncertainDatabase, \"Database creation could not be reconciled; inspect the catalog before rerunning\");\n    return request(s, \"POST\", \"/databases\", { parent: { type: \"page_id\", page_id: s.rootPageId }, title: rich(\"Workflows\"), is_inline: true, initial_data_source: { properties: properties() } }, \"create_database\");\n  }\n  function source(s, b) {\n    check(b?.object === \"database\" && key(b.id) === key(s.databaseId) && !b.archived && !b.in_trash, \"Unexpected database\");\n    check(b.data_sources?.length === 1, \"Select the intended data source explicitly for a database with multiple sources\");\n    s.dataSourceId = b.data_sources[0].id;\n    check(validId(s.dataSourceId), \"Missing data source identity\");\n    return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n  }\n  function schema(s, b) {\n    check(b?.object === \"data_source\" && key(b.id) === key(s.dataSourceId) && !b.archived && !b.in_trash, \"Unexpected data source\");\n    s.databaseId = b.parent?.database_id || s.databaseId;\n    check(validId(s.databaseId), \"Data source has no database parent\");\n    const missing = {};\n    for (const [name, type] of Object.entries(SCHEMA)) {\n      const p = b.properties?.[name];\n      if (p) check(p.type === type, \"Property \" + name + \" must be \" + type + \"; existing data was left unchanged\");\n      else missing[name] = properties()[name];\n    }\n    if (Object.keys(missing).length) {\n      check(!s.patched, \"Schema update was not saved\");\n      s.addedProperties = Object.keys(missing);\n      return request(s, \"PATCH\", \"/data_sources/\" + s.dataSourceId, { properties: missing }, \"patch_schema\");\n    }\n    s.verifiedProperties = Object.keys(SCHEMA);\n    if (s.existingSource) return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"existing_database\");\n    return list(s, s.rootPageId, \"guide\");\n  }\n  function ensureGuide(s) {\n    const matches = s.items.filter((b) => b.type === \"child_page\" && title(b) === guideTitle);\n    check(matches.length <= 1, \"Multiple setup guides found\");\n    if (matches.length) {\n      s.guidePageId = matches[0].id;\n      return complete(s);\n    }\n    check(!s.uncertainGuide, \"Guide creation could not be reconciled; inspect the catalog before rerunning\");\n    return request(s, \"POST\", \"/pages\", { parent: { type: \"page_id\", page_id: s.rootPageId }, properties: { title: { title: rich(guideTitle) } }, children: [paragraph(\"Start the backup\"), paragraph(\"Import both workflow JSON files. Select your credentials and this setup workflow in the main Configuration node. Share the parent page with the Notion integration, enter its page ID and your n8n URLs, then run the main workflow manually.\"), paragraph(\"Check the result\"), paragraph(\"Open a workflow row, review its documentation and metadata, and download its complete JSON attachment. Notes and content outside managed sections remain yours.\"), paragraph(\"Restore safely\"), paragraph(\"Import the downloaded JSON into a separate inactive n8n workflow. Reconnect credentials and review URLs, redacted values, schedules and webhooks before activation. Credential secrets, instance databases and encryption keys require separate backups.\"), paragraph(\"Repeat setup\"), paragraph(\"The setup reuses this catalog and adds missing compatible columns. To use an existing catalog, provide its data source ID. Conflicting column types stop setup without rewriting your data.\")] }, \"create_guide\");\n  }\n  function complete(s) {\n    s.done = true;\n    delete s.req;\n    s.output = { ...s.config, documentationDataSourceId: s.dataSourceId, documentationRootPageId: s.rootPageId, documentationDatabaseId: s.databaseId, catalogUrl: \"https://www.notion.so/\" + s.rootPageId.replaceAll(\"-\", \"\"), setup: { verified: true, propertyCount: s.verifiedProperties.length, created: s.created, addedProperties: s.addedProperties || [], guidePageId: s.guidePageId || null } };\n    return s;\n  }\n  function advance(state, response, now = Date.now()) {\n    const s = JSON.parse(JSON.stringify(state));\n    s.requests++;\n    check(s.requests <= 100 && now - s.startedAt < 3e5, \"Setup exceeded its request or time budget\");\n    const status = Number(response.statusCode ?? response.status ?? 0), b = response.body;\n    const uncertain = !status || status === 408 || status >= 500;\n    if (uncertain && [\"create_root\", \"create_database\", \"create_guide\"].includes(s.phase)) {\n      if (s.phase === \"create_root\") {\n        s.uncertainRoot = true;\n        return list(s, s.config.notionParentPageId, \"parent\");\n      }\n      if (s.phase === \"create_database\") {\n        s.uncertainDatabase = true;\n        return rootContents(s);\n      }\n      s.uncertainGuide = true;\n      return list(s, s.rootPageId, \"guide\");\n    }\n    if ((!status || [408, 409, 429, 500, 502, 503, 504].includes(status)) && s.attempt < 3) {\n      s.attempt++;\n      const h = response.headers || {}, v = h[\"retry-after\"] ?? h[\"Retry-After\"];\n      const delay = v === void 0 ? 2 ** s.attempt : Number(v);\n      check(Number.isFinite(delay) && delay >= 0 && delay <= 60, \"Unsupported retry delay\");\n      s.delaySeconds = Math.max(1, delay);\n      return s;\n    }\n    check(status >= 200 && status < 300 && status !== 202, \"Notion setup \" + s.phase + \" failed (HTTP \" + status + \"): \" + String(b?.message || response.error?.message || \"\").slice(0, 180));\n    check(!(b?.warnings || []).length, \"Notion returned setup warnings\");\n    switch (s.phase) {\n      case \"parent\":\n        return collect(s, b, s.config.notionParentPageId, \"parent\") || rootFound(s);\n      case \"create_root\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.config.notionParentPageId), \"Unexpected created page\");\n        s.rootPageId = b.id;\n        s.created.page = true;\n        return rootContents(s);\n      case \"root\":\n        return collect(s, b, s.rootPageId, \"root\") || databaseFound(s);\n      case \"create_database\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.rootPageId), \"Unexpected created database\");\n        s.databaseId = b.id;\n        s.created.database = true;\n        return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"database\");\n      case \"database\":\n        return source(s, b);\n      case \"schema\":\n        return schema(s, b);\n      case \"patch_schema\":\n        s.patched = true;\n        return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n      case \"existing_database\":\n        check(b?.object === \"database\" && key(b.id) === key(s.databaseId) && !b.archived && !b.in_trash, \"Unexpected existing database\");\n        s.rootPageId = b.parent?.page_id;\n        check(validId(s.rootPageId), \"The catalog database must be inside a page\");\n        if (validId(s.config.documentationRootPageId)) check(key(s.rootPageId) === key(s.config.documentationRootPageId), \"Configured root does not contain this database\");\n        return complete(s);\n      case \"guide\":\n        return collect(s, b, s.rootPageId, \"guide\") || ensureGuide(s);\n      case \"create_guide\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.rootPageId), \"Unexpected setup guide\");\n        s.guidePageId = b.id;\n        s.created.guide = true;\n        return complete(s);\n      default:\n        throw Error(\"Unknown setup phase \" + s.phase);\n    }\n  }\n  return {initialize,advance};\n})();\n\nreturn [{json:Setup.initialize($input.first().json.config)}];"
+      }
+    },
+    {
+      "id": "176ca58d-f08b-43ce-ad04-d392cb853dd7",
+      "name": "Setup complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        64
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cc6fe680-6c77-4557-adbc-18566f08b989",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "31a01281-39eb-4c7d-b2ca-1372c6239439",
+      "name": "Pace setup requests",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        976,
+        256
+      ],
+      "parameters": {
+        "amount": "={{ $json.delaySeconds }}",
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "dedc0812-e346-45eb-b7dc-f148267eea7c",
+      "name": "Keep setup state",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        256
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "43609be6-f4d1-4247-88f4-9235294e11cc",
+      "name": "Notion setup API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1424,
+        256
+      ],
+      "parameters": {
+        "method": "={{ $json.req.method }}",
+        "url": "={{ \"https://api.notion.com/v1\"+$json.req.path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2026-03-11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.req.payload || {}) }}",
+        "options": {
+          "lowercaseHeaders": false,
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "b84b62d0-c189-4d31-9fad-09e81fc00138",
+      "name": "Advance setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        256
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "var Setup = (() => {\n  var __defProp = Object.defineProperty;\n  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;\n  var __getOwnPropNames = Object.getOwnPropertyNames;\n  var __hasOwnProp = Object.prototype.hasOwnProperty;\n  var __export = (target, all) => {\n    for (var name in all)\n      __defProp(target, name, { get: all[name], enumerable: true });\n  };\n  var __copyProps = (to, from, except, desc) => {\n    if (from && typeof from === \"object\" || typeof from === \"function\") {\n      for (let key2 of __getOwnPropNames(from))\n        if (!__hasOwnProp.call(to, key2) && key2 !== except)\n          __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });\n    }\n    return to;\n  };\n  var __toCommonJS = (mod) => __copyProps(__defProp({}, \"__esModule\", { value: true }), mod);\n\n  // output/notion-v3-2026-11-20/setup-core.mjs\n  var setup_core_exports = {};\n  __export(setup_core_exports, {\n    advance: () => advance,\n    initialize: () => initialize\n  });\n\n  // output/notion-v3-2026-11-20/schema.mjs\n  var BASE_SCHEMA = { Name: \"title\", ID: \"rich_text\", Status: \"select\", Trigger: \"multi_select\", \"Workflow link\": \"url\", \"Updated at\": \"date\", Notes: \"rich_text\" };\n  var EXTRA_SCHEMA = { \"Node count\": \"number\", Tags: \"multi_select\", Active: \"checkbox\", Archived: \"checkbox\", \"JSON bytes\": \"number\", \"JSON SHA-256\": \"rich_text\", \"Backup saved at\": \"date\" };\n  var SCHEMA = { ...BASE_SCHEMA, ...EXTRA_SCHEMA };\n  function properties() {\n    const p = Object.fromEntries(Object.entries(SCHEMA).map(([name, type]) => [name, { [type]: type === \"number\" ? { format: \"number\" } : {} }]));\n    p.Status.select.options = [[\"Active\", \"green\"], [\"Active \\xB7 scheduled\", \"green\"], [\"Inactive\", \"gray\"], [\"Scheduled \\xB7 inactive\", \"yellow\"], [\"Archived\", \"brown\"], [\"Unavailable\", \"red\"]].map(([name, color]) => ({ name, color }));\n    p.Trigger.multi_select.options = [\"Schedule\", \"Manual\", \"Error\", \"Sub-workflow\", \"Chat\", \"Webhook\", \"App trigger\"].map((name) => ({ name }));\n    return p;\n  }\n\n  // output/notion-v3-2026-11-20/setup-core.mjs\n  var check = (v, m) => {\n    if (!v) throw Error(m);\n  };\n  var validId = (v) => /^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(String(v || \"\"));\n  var key = (v) => String(v || \"\").replaceAll(\"-\", \"\").toLowerCase();\n  var rich = (s) => [{ type: \"text\", text: { content: s } }];\n  var paragraph = (s) => ({ object: \"block\", type: \"paragraph\", paragraph: { rich_text: rich(s) } });\n  var signature = \"Catalog created by n8n Workflow Backup to Notion.\";\n  var guideTitle = \"Setup and restore\";\n  function request(s, method, path, payload, phase) {\n    s.req = { method, path, ...payload ? { payload } : {} };\n    s.phase = phase;\n    s.done = false;\n    s.attempt = 0;\n    s.delaySeconds = 1;\n    return s;\n  }\n  function list(s, id, phase) {\n    s.items = [];\n    s.cursors = [];\n    return request(s, \"GET\", \"/blocks/\" + id + \"/children?page_size=100\", null, phase);\n  }\n  function collect(s, b, id, phase) {\n    check(b?.object === \"list\" && Array.isArray(b.results), \"Incomplete setup block inventory\");\n    s.items.push(...b.results.filter((x) => !x.archived && !x.in_trash));\n    if (b.has_more) {\n      check(b.next_cursor && !s.cursors.includes(b.next_cursor), \"Setup pagination repeated\");\n      s.cursors.push(b.next_cursor);\n      return request(s, \"GET\", \"/blocks/\" + id + \"/children?page_size=100&start_cursor=\" + encodeURIComponent(b.next_cursor), null, phase);\n    }\n    return null;\n  }\n  var title = (b) => b.child_page?.title || b.child_database?.title;\n  function initialize(config, now = Date.now()) {\n    check(config && typeof config === \"object\" && !Array.isArray(config), \"Provide one configuration object\");\n    const s = { config: { ...config }, startedAt: now, requests: 0, created: {}, rootTitle: config.catalogTitle || \"n8n Workflow Backups\" };\n    check(s.rootTitle.length > 0 && s.rootTitle.length <= 100, \"Catalog title must contain 1\\u2013100 characters\");\n    if (validId(config.documentationDataSourceId)) {\n      s.dataSourceId = config.documentationDataSourceId;\n      s.existingSource = true;\n      return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n    }\n    check(!config.documentationDataSourceId || config.documentationDataSourceId === \"YOUR_NOTION_DATA_SOURCE_ID\", \"Invalid existing data source ID\");\n    check(validId(config.notionParentPageId), \"Share a parent page with the Notion integration and set notionParentPageId\");\n    return list(s, config.notionParentPageId, \"parent\");\n  }\n  function rootContents(s) {\n    return list(s, s.rootPageId, \"root\");\n  }\n  function rootFound(s) {\n    const matches = s.items.filter((b) => b.type === \"child_page\" && title(b) === s.rootTitle);\n    check(matches.length <= 1, \"Multiple catalog pages have this title; select an existing data source explicitly\");\n    if (matches.length) {\n      s.rootPageId = matches[0].id;\n      return rootContents(s);\n    }\n    check(!s.uncertainRoot, \"Page creation could not be reconciled; inspect the parent before rerunning\");\n    return request(s, \"POST\", \"/pages\", { parent: { type: \"page_id\", page_id: s.config.notionParentPageId }, icon: { type: \"emoji\", emoji: \"\\u{1F5C4}\\uFE0F\" }, properties: { title: { title: rich(s.rootTitle) } }, children: [paragraph(signature), paragraph(\"Browse workflow status, triggers, tags and verified JSON attachments. Each workflow page keeps its generated documentation and your personal notes.\")] }, \"create_root\");\n  }\n  function databaseFound(s) {\n    check(s.items.some((b) => b.type === \"paragraph\" && (b.paragraph.rich_text || []).map((x) => x.plain_text ?? x.text?.content ?? \"\").join(\"\") === signature), \"A page with this title already exists but is not this catalog; choose another catalogTitle or an existing data source\");\n    const dbs = s.items.filter((b) => b.type === \"child_database\" && title(b) === \"Workflows\");\n    check(dbs.length <= 1, \"Multiple Workflows databases found\");\n    if (dbs.length) {\n      s.databaseId = dbs[0].id;\n      return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"database\");\n    }\n    check(!s.uncertainDatabase, \"Database creation could not be reconciled; inspect the catalog before rerunning\");\n    return request(s, \"POST\", \"/databases\", { parent: { type: \"page_id\", page_id: s.rootPageId }, title: rich(\"Workflows\"), is_inline: true, initial_data_source: { properties: properties() } }, \"create_database\");\n  }\n  function source(s, b) {\n    check(b?.object === \"database\" && key(b.id) === key(s.databaseId) && !b.archived && !b.in_trash, \"Unexpected database\");\n    check(b.data_sources?.length === 1, \"Select the intended data source explicitly for a database with multiple sources\");\n    s.dataSourceId = b.data_sources[0].id;\n    check(validId(s.dataSourceId), \"Missing data source identity\");\n    return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n  }\n  function schema(s, b) {\n    check(b?.object === \"data_source\" && key(b.id) === key(s.dataSourceId) && !b.archived && !b.in_trash, \"Unexpected data source\");\n    s.databaseId = b.parent?.database_id || s.databaseId;\n    check(validId(s.databaseId), \"Data source has no database parent\");\n    const missing = {};\n    for (const [name, type] of Object.entries(SCHEMA)) {\n      const p = b.properties?.[name];\n      if (p) check(p.type === type, \"Property \" + name + \" must be \" + type + \"; existing data was left unchanged\");\n      else missing[name] = properties()[name];\n    }\n    if (Object.keys(missing).length) {\n      check(!s.patched, \"Schema update was not saved\");\n      s.addedProperties = Object.keys(missing);\n      return request(s, \"PATCH\", \"/data_sources/\" + s.dataSourceId, { properties: missing }, \"patch_schema\");\n    }\n    s.verifiedProperties = Object.keys(SCHEMA);\n    if (s.existingSource) return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"existing_database\");\n    return list(s, s.rootPageId, \"guide\");\n  }\n  function ensureGuide(s) {\n    const matches = s.items.filter((b) => b.type === \"child_page\" && title(b) === guideTitle);\n    check(matches.length <= 1, \"Multiple setup guides found\");\n    if (matches.length) {\n      s.guidePageId = matches[0].id;\n      return complete(s);\n    }\n    check(!s.uncertainGuide, \"Guide creation could not be reconciled; inspect the catalog before rerunning\");\n    return request(s, \"POST\", \"/pages\", { parent: { type: \"page_id\", page_id: s.rootPageId }, properties: { title: { title: rich(guideTitle) } }, children: [paragraph(\"Start the backup\"), paragraph(\"Import both workflow JSON files. Select your credentials and this setup workflow in the main Configuration node. Share the parent page with the Notion integration, enter its page ID and your n8n URLs, then run the main workflow manually.\"), paragraph(\"Check the result\"), paragraph(\"Open a workflow row, review its documentation and metadata, and download its complete JSON attachment. Notes and content outside managed sections remain yours.\"), paragraph(\"Restore safely\"), paragraph(\"Import the downloaded JSON into a separate inactive n8n workflow. Reconnect credentials and review URLs, redacted values, schedules and webhooks before activation. Credential secrets, instance databases and encryption keys require separate backups.\"), paragraph(\"Repeat setup\"), paragraph(\"The setup reuses this catalog and adds missing compatible columns. To use an existing catalog, provide its data source ID. Conflicting column types stop setup without rewriting your data.\")] }, \"create_guide\");\n  }\n  function complete(s) {\n    s.done = true;\n    delete s.req;\n    s.output = { ...s.config, documentationDataSourceId: s.dataSourceId, documentationRootPageId: s.rootPageId, documentationDatabaseId: s.databaseId, catalogUrl: \"https://www.notion.so/\" + s.rootPageId.replaceAll(\"-\", \"\"), setup: { verified: true, propertyCount: s.verifiedProperties.length, created: s.created, addedProperties: s.addedProperties || [], guidePageId: s.guidePageId || null } };\n    return s;\n  }\n  function advance(state, response, now = Date.now()) {\n    const s = JSON.parse(JSON.stringify(state));\n    s.requests++;\n    check(s.requests <= 100 && now - s.startedAt < 3e5, \"Setup exceeded its request or time budget\");\n    const status = Number(response.statusCode ?? response.status ?? 0), b = response.body;\n    const uncertain = !status || status === 408 || status >= 500;\n    if (uncertain && [\"create_root\", \"create_database\", \"create_guide\"].includes(s.phase)) {\n      if (s.phase === \"create_root\") {\n        s.uncertainRoot = true;\n        return list(s, s.config.notionParentPageId, \"parent\");\n      }\n      if (s.phase === \"create_database\") {\n        s.uncertainDatabase = true;\n        return rootContents(s);\n      }\n      s.uncertainGuide = true;\n      return list(s, s.rootPageId, \"guide\");\n    }\n    if ((!status || [408, 409, 429, 500, 502, 503, 504].includes(status)) && s.attempt < 3) {\n      s.attempt++;\n      const h = response.headers || {}, v = h[\"retry-after\"] ?? h[\"Retry-After\"];\n      const delay = v === void 0 ? 2 ** s.attempt : Number(v);\n      check(Number.isFinite(delay) && delay >= 0 && delay <= 60, \"Unsupported retry delay\");\n      s.delaySeconds = Math.max(1, delay);\n      return s;\n    }\n    check(status >= 200 && status < 300 && status !== 202, \"Notion setup \" + s.phase + \" failed (HTTP \" + status + \"): \" + String(b?.message || response.error?.message || \"\").slice(0, 180));\n    check(!(b?.warnings || []).length, \"Notion returned setup warnings\");\n    switch (s.phase) {\n      case \"parent\":\n        return collect(s, b, s.config.notionParentPageId, \"parent\") || rootFound(s);\n      case \"create_root\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.config.notionParentPageId), \"Unexpected created page\");\n        s.rootPageId = b.id;\n        s.created.page = true;\n        return rootContents(s);\n      case \"root\":\n        return collect(s, b, s.rootPageId, \"root\") || databaseFound(s);\n      case \"create_database\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.rootPageId), \"Unexpected created database\");\n        s.databaseId = b.id;\n        s.created.database = true;\n        return request(s, \"GET\", \"/databases/\" + s.databaseId, null, \"database\");\n      case \"database\":\n        return source(s, b);\n      case \"schema\":\n        return schema(s, b);\n      case \"patch_schema\":\n        s.patched = true;\n        return request(s, \"GET\", \"/data_sources/\" + s.dataSourceId, null, \"schema\");\n      case \"existing_database\":\n        check(b?.object === \"database\" && key(b.id) === key(s.databaseId) && !b.archived && !b.in_trash, \"Unexpected existing database\");\n        s.rootPageId = b.parent?.page_id;\n        check(validId(s.rootPageId), \"The catalog database must be inside a page\");\n        if (validId(s.config.documentationRootPageId)) check(key(s.rootPageId) === key(s.config.documentationRootPageId), \"Configured root does not contain this database\");\n        return complete(s);\n      case \"guide\":\n        return collect(s, b, s.rootPageId, \"guide\") || ensureGuide(s);\n      case \"create_guide\":\n        check(validId(b?.id) && key(b.parent?.page_id) === key(s.rootPageId), \"Unexpected setup guide\");\n        s.guidePageId = b.id;\n        s.created.guide = true;\n        return complete(s);\n      default:\n        throw Error(\"Unknown setup phase \" + s.phase);\n    }\n  }\n  return {initialize,advance};\n})();\n\nreturn [{json:Setup.advance($(\"Keep setup state\").last().json,$input.first().json)}];"
+      }
+    },
+    {
+      "id": "c00ee0e5-3be1-4e08-a9f2-7676738eecf0",
+      "name": "Return catalog configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        64
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const s=$input.first().json;if(!s.done||!s.output?.setup?.verified)throw Error(\"Catalog setup is incomplete\");return [{json:s.output}];"
+      }
+    },
+    {
+      "id": "8a5bcd54-5bf6-4524-a610-62110e33fe5d",
+      "name": "Setup and reuse",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -176
+      ],
+      "parameters": {
+        "content": "## Create and verify the destination\n\nReuse the matching catalog, or create its page, database, 14 typed columns and restore guide. Add missing compatible columns without changing personal content. Ambiguous identities or conflicting types stop setup.",
+        "width": 1840,
+        "height": 640,
+        "color": 7
+      }
+    },
+    {
+      "id": "46e0ce37-5a71-4f92-a372-c6239af431d9",
+      "name": "Overview and setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -176
+      ],
+      "parameters": {
+        "color": 1,
+        "width": 688,
+        "height": 480,
+        "content": "## Prepare the Notion backup catalog\n\n### How it works\nThis companion supplies the destination for the main workflow. It creates or reuses a dedicated catalog page, inline Workflows database, 14 typed properties and a restore guide, then returns the verified data source configuration. Repeated runs reuse the same structure. Existing compatible catalogs gain missing properties; conflicting types stop the run.\n\n### Setup\n1. Connect your Notion integration in **Notion setup API**. Share a parent page with that integration and save this workflow inactive.\n2. Import the main backup workflow. In its **Configuration**, enter this saved workflow ID, the shared parent page UUID and a stable catalog title. The main workflow calls this companion automatically.\n3. For standalone provisioning, edit **Setup configuration** with the same values and run manually.\n4. Inspect the database and restore guide. Repeat once to confirm reuse. Run initial provisioning sequentially for each parent/title combination.\n\n### Customization\nSet the title or provide an existing data source ID. This helper creates structure; the main workflow populates documentation pages and verified JSON attachments. It does not copy n8n credentials or activate workflows.\n\n[Main workflow and setup guide](https://github.com/paoloronco/n8n-templates/tree/main/workflows/n8n-notion-workflow-backup)"
+      }
+    }
+  ],
+  "connections": {
+    "Called by backup": {
+      "main": [
+        [
+          {
+            "node": "Initialize setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run setup manually": {
+      "main": [
+        [
+          {
+            "node": "Setup configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup configuration": {
+      "main": [
+        [
+          {
+            "node": "Initialize setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize setup": {
+      "main": [
+        [
+          {
+            "node": "Setup complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup complete?": {
+      "main": [
+        [
+          {
+            "node": "Return catalog configuration",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pace setup requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pace setup requests": {
+      "main": [
+        [
+          {
+            "node": "Keep setup state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep setup state": {
+      "main": [
+        [
+          {
+            "node": "Notion setup API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion setup API": {
+      "main": [
+        [
+          {
+            "node": "Advance setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Advance setup": {
+      "main": [
+        [
+          {
+            "node": "Setup complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 360,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "pinData": {},
+  "tags": []
+}

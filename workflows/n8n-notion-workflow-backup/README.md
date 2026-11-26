@@ -1,5 +1,11 @@
 # n8n Workflow Backup to Notion · V4
 
+## n8n publication and source versions
+
+- [n8n #23213 — V3](https://n8n.io/workflows/23213-back-up-workflow-catalog-json-to-notion-with-n8n-api/): V3: 32 nodes plus the 12-node setup companion (10 operational, 2 notes) from repository history. Unified V4: 30 nodes, submission #22936 under review. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/23213).
+- The main `workflow.json` is the exact V4 review candidate for [#22936](https://creators.n8n.io/workflows/22936), not the published V3.
+
+
 ![n8n Workflow Backup to Notion](cover.png)
 
 Back up saved n8n workflows into a structured Notion catalog. One workflow creates or reuses the catalog, generates documentation from sticky notes, attaches a complete JSON export and verifies the downloaded file. Existing pages, personal notes and unchanged attachments are reused.

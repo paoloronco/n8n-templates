@@ -1,5 +1,10 @@
 # OrbitPage Event Lifecycle
 
+## n8n publication and source versions
+
+- [n8n #22354 — Release pubblicata](https://n8n.io/workflows/22354-publish-phased-orbitpage-event-pages-with-email-approvals-and-data-tables/): 41 public nodes versus 40 in source; same Code nodes, different native connector parameters and annotations. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22354).
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/40df0ba27c32810d8540d623db4e082b)

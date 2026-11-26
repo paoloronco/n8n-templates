@@ -1,5 +1,10 @@
 # Automated Invoice Archiving and AI Data Extraction
 
+## n8n publication and source versions
+
+- [n8n #10923 — V1](https://n8n.io/workflows/10923-automatic-email-invoice-archiving-and-data-extraction-with-gmail-drive-and-ai/): 26 nodes; operational parameters and canvas match. One note and export metadata differ. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/10923).
+
+
 ## Quick Overview
 
 Automatically collect invoice PDFs from Gmail, archive them in Google Drive or an optional FTP/SFTP server, extract structured invoice data with AI, and record the results in Google Sheets.

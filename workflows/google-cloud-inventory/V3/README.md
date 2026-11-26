@@ -1,5 +1,10 @@
 # Google Cloud Inventory and IAM Audit — V3
 
+## n8n publication and source versions
+
+- [n8n #22943 — V3.0.1](https://n8n.io/workflows/22943-audit-google-cloud-inventory-and-iam-with-bigquery-and-google-sheets/): 62 nodes; exact workflow-object match including notes and layout. Removal was requested for obsolete submission #21565 only. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22943).
+
+
 ## Documentation links
 
 - [Setup and operations for this version](https://github.com/paoloronco/n8n-templates/blob/main/workflows/google-cloud-inventory/V3/SETUP.md)

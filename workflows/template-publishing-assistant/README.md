@@ -1,4 +1,9 @@
 # Template Publishing Assistant - v6
+
+## n8n publication and source versions
+
+- [n8n #22117 — v6 · release pubblicata](https://n8n.io/workflows/22117-draft-template-docs-and-assets-with-openai-notion-and-smtp-email/): 57 nodes in both copies; the source changes sanitization, Notion page creation, sticky-note generation, delivery and email code. It is a distinct source revision. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22117).
+
 ## Quick overview
 This workflow assists in preparing and publishing n8n workflow templates by sanitizing secrets, generating documentation, creating visual assets, and packaging deliverables for distribution.
 ## How it works

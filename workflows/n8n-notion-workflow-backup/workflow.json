@@ -1,5 +1,5 @@
 {
-  "name": "n8n Workflow Backup to Notion",
+  "name": "Back up n8n workflows to Notion with built-in setup and verified JSON",
   "nodes": [
     {
       "parameters": {},
@@ -351,7 +351,7 @@
     },
     {
       "parameters": {
-        "content": "# n8n Workflow Backup to Notion\n\nAutomatically back up and document your n8n workflows in Notion, with structured documentation, verified JSON exports, and change tracking.\n\n### How it works\n- Retrieves active, inactive, and archived workflows via the n8n API.\n- Creates or updates dedicated Notion pages with generated documentation.\n- Uploads and verifies complete JSON workflow backups.\n- Preserves personal notes and previous backups on failure.\n- Tracks changes, handles API limits, and reports errors.\n\n### Setup\n- Import the workflow into n8n.\n- Connect your n8n API and Notion credentials.\n- Set a shared parent page to create the catalog automatically, or select an existing data source.\n- Set URLs, scope and optional property aliases in **Configuration**.\n- Run a manual test, verify backups, and enable the schedule.\n\n### Requirements\n- n8n instance with API access.\n- Notion database and integration with read/write permissions.\n- Sufficient Notion file-upload allowance.\n- SMTP credentials (optional).\n- No AI services or community nodes required.\n\n### Customization\n- Adjust backup frequency and time zone.\n- Include or exclude specific workflows.\n- Customize documentation through workflow sticky notes.\n- Configure API limits, file sizes, and email notifications.\n\n### Additional Info\n- One-way backup: n8n → Notion.\n- Restore workflows by importing their JSON files.\n- Credentials, database, and encryption keys require separate backups.\n- Failed backups are reported without deleting previous copies.\n",
+        "content": "# n8n Workflow Backup to Notion · V4\n\nAutomatically back up and document your n8n workflows in Notion, with structured documentation, verified JSON exports, and change tracking.\n\n### How it works\n- Retrieves active, inactive, and archived workflows via the n8n API.\n- Creates or updates dedicated Notion pages with generated documentation.\n- Uploads and verifies complete JSON workflow backups.\n- Preserves personal notes and previous backups on failure.\n- Tracks changes, handles API limits, and reports errors.\n\n### Setup\n- Import the workflow into n8n.\n- Connect your n8n API and Notion credentials.\n- Set a shared parent page to create the catalog automatically, or select an existing data source.\n- Set URLs, scope and optional property aliases in **Configuration**.\n- Run a manual test, verify backups, and enable the schedule.\n\n### Requirements\n- n8n instance with API access.\n- Notion database and integration with read/write permissions.\n- Sufficient Notion file-upload allowance.\n- SMTP credentials (optional).\n- No AI services or community nodes required.\n\n### Customization\n- Adjust backup frequency and time zone.\n- Include or exclude specific workflows.\n- Customize documentation through workflow sticky notes.\n- Configure API limits, file sizes, and email notifications.\n\n### Additional Info\n- One-way backup: n8n → Notion.\n- Restore workflows by importing their JSON files.\n- Credentials, database, and encryption keys require separate backups.\n- Failed backups are reported without deleting previous copies.\n",
         "height": 848,
         "width": 688,
         "color": 2
@@ -399,7 +399,7 @@
     },
     {
       "parameters": {
-        "content": "## 03 · Catalog, README and JSON attachment\n\nRead one source at a time, update its stable page and attach the complete .json file directly. Verify the downloaded bytes before retiring the previous copy or legacy JSON subpage. Preserve personal notes. If a file exceeds the Notion account limit, report an error and retain the previous backup.\n\nBuilt-in setup creates or reuses the catalog before backing up. Set operation to setup for a manual catalog-only run. Original sticky notes are also copied into the generated documentation.",
+        "content": "## 03 · Catalog, README and JSON\n\nBuilt-in setup creates or reuses the catalog. Update each workflow page and verify its complete JSON attachment before replacing older copies; preserve personal notes and previous backups on failure.",
         "height": 768,
         "width": 2352,
         "color": 7

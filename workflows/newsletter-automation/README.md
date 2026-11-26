@@ -1,5 +1,10 @@
 # Newsletter Subscription + New Release Notification
 
+## n8n publication and source versions
+
+- [n8n #20636 — V1 · release pubblicata](https://n8n.io/workflows/20636-send-newsletter-welcomes-and-release-announcements-with-github-openai-and-smtp/): 37 nodes; Release Email Copywriter Agent is disabled in the public release. The source revision enables it and changes agent parameters. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/20636).
+
+
 ## Quick Overview
 
 This workflow provides a complete lightweight newsletter flow for product updates: it collects and validates subscriber emails through a webhook, stores subscribers in an n8n Data Table, sends a welcome email to new subscribers, and distributes release notifications generated from your changelog or GitHub README.

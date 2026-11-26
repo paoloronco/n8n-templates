@@ -1,5 +1,10 @@
 # Tech & AI News Intelligence — V1
 
+## n8n publication and source versions
+
+- [n8n #11466 — V1](https://n8n.io/workflows/11466-create-and-send-tech-news-digests-with-rss-gemini-ai-and-gmail/): 48 nodes; V1 code and canvas. The source uses portable Sheets/SMTP configuration. V2 #23696 is under review. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/11466).
+
+
 ## Archived public version
 
 Import [Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json](Tech_AI_Daily_Briefing-RSS-AI-Email-V1.json).

@@ -1,5 +1,10 @@
 # Create and Validate Digital Certificates with PDF Generator API Templates
 
+## n8n publication and source versions
+
+- [n8n #11886 — PDF Generator API](https://n8n.io/workflows/11886-create-and-validate-digital-certificates-with-pdf-generator-api-and-gmail/): 19 nodes; same logic. Source credential bindings and inactive import metadata differ. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/11886).
+
+
 ## Quick Overview
 
 Issue and verify digital certificates with n8n using reusable PDF Generator API templates, unique certificate IDs, an n8n Data Table registry, Gmail delivery, and a public verification endpoint.

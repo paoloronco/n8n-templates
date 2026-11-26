@@ -1,5 +1,10 @@
 # Instagram Reel to Notion Second Brain — v2
 
+## n8n publication and source versions
+
+- [n8n #21770 — V2 · Instagram Reels](https://n8n.io/workflows/21770-save-instagram-reels-as-structured-notion-pages-with-telegram-apify-and-openai/): 29 nodes, 22 operational and 7 notes. Correct source: v2 English, not the 57-node V4. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/21770).
+
+
 [All Second Brain versions](../README.md) · [Multimodal v3](../v3/README.md)
 
 ## Quick Overview

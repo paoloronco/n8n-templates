@@ -1,5 +1,10 @@
 # Google Cloud Inventory and IAM Audit — V2
 
+## n8n publication and source versions
+
+- [n8n #22116 — V2.0.1](https://n8n.io/workflows/22116-audit-google-cloud-inventory-and-iam-changes-with-bigquery-and-google-sheets/): Published V2.0.1: 47 nodes. Main V2 folder contains later V2.2.1 with 52 nodes. V3 #22943 is a separate listing. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22116).
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/408f0ba27c3281aea226fecadfab05f8)

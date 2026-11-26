@@ -1,5 +1,10 @@
 # Build an AI Second Brain with Telegram, OpenAI & Notion
 
+## n8n publication and source versions
+
+- [n8n #22788 — V4](https://n8n.io/workflows/22788-capture-and-summarize-content-to-notion-with-telegram-openai-and-apify/): 57 nodes; same pipeline. Source replaces Telegram identity and Notion configuration with portable values, in addition to credential bindings. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22788).
+
+
 ## Quick overview
 
 Turn Telegram messages into an organized Notion knowledge inbox. Capture Instagram posts and Reels, TikTok videos, YouTube videos and Shorts, webpages, screenshots, or quick ideas. OpenAI extracts key information, creates concise English summaries, and suggests relevant next steps while preserving source context.

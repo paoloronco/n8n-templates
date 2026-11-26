@@ -1,5 +1,10 @@
 # OrbitPage Release Guardian — Monitor, Approve and Roll Back Website Releases
 
+## n8n publication and source versions
+
+- [n8n #21773 — Release pubblicata](https://n8n.io/workflows/21773-guard-orbitpage-releases-with-gmail-approvals-and-rollback-controls/): 38 nodes; same logic, credential bindings and one note differ. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/21773).
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/41df0ba27c328198b8d8d9e943b6bf8a)

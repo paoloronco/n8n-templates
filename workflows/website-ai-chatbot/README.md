@@ -1,5 +1,10 @@
 Build an AI chatbot that answers questions using your website's own knowledge base.
 
+## n8n publication and source versions
+
+- [n8n #20208 — V1](https://n8n.io/workflows/20208-run-an-english-website-chatbot-with-openai-gpt-5-and-qdrant/): 25 nodes; same logic, credential bindings and one note differ. Separate from the WordPress chatbot. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/20208).
+
+
 This workflow combines intent classification, safety routing, vector search with Qdrant, OpenAI embeddings, Cohere reranking, grounded AI responses, and structured JSON output through a webhook.
 
 ## Project Links

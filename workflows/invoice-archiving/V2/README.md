@@ -1,5 +1,10 @@
 # Archive and log invoices from Gmail with SFTP and Google Sheets — V2
 
+## n8n publication and source versions
+
+- [n8n #21592 — V2 · SFTP](https://n8n.io/workflows/21592-archive-and-log-invoices-from-gmail-with-sftp-and-google-sheets/): 36 nodes; exact workflow-object match including notes and layout. V3 Drive and V2.1 are separate revisions. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/21592).
+
+
 This V2 is maintained on GitHub. V1 is the original published Creator template; V3 is the separate Google Drive version being prepared for the revised Creator submission.
 
 Collect text-based invoice PDFs from Gmail, extract invoice details with configurable rules, archive each PDF over SFTP, and insert or update a shared Google Sheets register. Four example categories cover utilities, internet, cloud and hosting. No AI API or OCR service is required.

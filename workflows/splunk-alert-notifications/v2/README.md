@@ -1,5 +1,10 @@
 # Splunk Security Alert Enrichment, Deduplication & Smart Notifications
 
+## n8n publication and source versions
+
+- [n8n #19906 — V2](https://n8n.io/workflows/19906-enrich-and-route-splunk-security-alerts-via-abuseipdb-email-and-telegram/): 40 nodes; Normalize Splunk Alert Payload contains an invalid regular expression in the public release. The source contains the fix. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/19906).
+
+
 ## Quick overview
 
 This workflow ingests Splunk security alerts via webhook, normalizes and deduplicates them using an n8n Data Table, enriches public source IPs with AbuseIPDB reputation data, calculates a risk score, and sends

@@ -1,5 +1,10 @@
 # RSS to Instagram with AI
 
+## n8n publication and source versions
+
+- [n8n #11791 — V1 · a pagamento](https://n8n.io/workflows/11791-automate-rss-to-instagram-with-ai-generated-content-and-cloudinary/): Paid 36-node preview; the portal hides parameters. Full GitHub source identity cannot be established from this preview. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/11791).
+
+
 ![AI News → Social Publishing Automation](assets/cover.png)
 
 Turn RSS stories into an Instagram post with AI-written copy and a generated image. OpenAI selects up to three articles, writes the caption and image headline, and creates the visual. The workflow adds text overlays, hosts the image on Cloudinary and publishes through the Meta Graph API.

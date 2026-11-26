@@ -1,5 +1,10 @@
 # Local video production, draft approval and publishing
 
+## Creator Portal candidate #22950
+
+The main workflow JSON is the exact reviewed candidate (under review). The changes shorten the sticky-note documentation while preserving operational nodes, IDs, connections and the owner’s canvas geometry. [Existing submission](https://creators.n8n.io/workflows/22950). Final submission is manual.
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c32816a8f5afafed8269368)

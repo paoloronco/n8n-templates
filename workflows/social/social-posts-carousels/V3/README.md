@@ -1,5 +1,10 @@
 # Website Updates to Approved Instagram Videos — V3
 
+## n8n publication and source versions
+
+- [n8n #22955 — V3 · Creatomate](https://n8n.io/workflows/22955-create-and-publish-instagram-posts-with-openai-and-facebook-graph-api/): 84 nodes; exact V3 workflow-object match including notes and layout. The listing retains its original Facebook Graph API title. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22955).
+
+
 V3 is published in the n8n library as [Create and publish Instagram posts with OpenAI and Facebook Graph API](https://n8n.io/workflows/22955-create-and-publish-instagram-posts-with-openai-and-facebook-graph-api/). The listing retains its original title; its downloadable workflow is the V3 Creatomate implementation.
 
 Turn selected facts from a public product page, article or release note into a reviewed Instagram video or four-part video carousel. Creatomate renders in the cloud; an email contains the complete package for human approval. A native n8n Data Table records selected source revisions, progress and actual publication receipts.

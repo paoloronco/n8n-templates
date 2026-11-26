@@ -1,5 +1,10 @@
 # OrbitPage Campaign Launch Kit
 
+## n8n publication and source versions
+
+- [n8n #22355 — Release pubblicata](https://n8n.io/workflows/22355-publish-orbitpage-campaign-pages-with-email-approvals-and-qr-launch-kits/): 46 nodes in both copies; source Code nodes and native connector parameters differ. Release and source revision are kept separate. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22355).
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/40df0ba27c3281949701f8bff66e8bae)

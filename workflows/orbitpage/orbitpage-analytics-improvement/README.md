@@ -1,4 +1,9 @@
 # Review OrbitPage Analytics and Approve One CTA Improvement
+
+## n8n publication and source versions
+
+- [n8n #22356 — Release pubblicata](https://n8n.io/workflows/22356-send-weekly-orbitpage-analytics-reports-and-review-one-ai-cta-change-via-email/): 43 nodes; logic and graph match, one note differs. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22356).
+
 ## Quick overview
 This workflow reviews weekly OrbitPage analytics, sends a measured report, and optionally prepares, reviews, and publishes one exact server AI preview of a CTA title improvement after email approvals.
 ## How it works

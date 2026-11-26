@@ -1,4 +1,9 @@
 # Sync Google Sheets Menus and Price Lists to OrbitPage
+
+## n8n publication and source versions
+
+- [n8n #22130 — Release pubblicata](https://n8n.io/workflows/22130-sync-approved-google-sheets-menu-items-with-orbitpage-native-menus/): 43 nodes; Code nodes match, while native connector parameters and Sheets authentication differ. These are not identical exports. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/22130).
+
 ## Quick overview
 This workflow synchronizes menu items and price lists from a Google Sheets document to a native OrbitPage menu section, preserving other sections and settings.
 ## How it works

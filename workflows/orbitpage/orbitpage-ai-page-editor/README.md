@@ -1,5 +1,10 @@
 # OrbitPage AI Page Editor — Review and Publish Page Changes from Chat
 
+## n8n publication and source versions
+
+- [n8n #21795 — Release pubblicata](https://n8n.io/workflows/21795-edit-and-publish-orbitpage-site-content-with-openai-chat-approval/): 25 nodes; same logic, with credential bindings, webhook metadata and documentation/layout differences. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/21795).
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/41df0ba27c3281e8ae76c3b10b4e35a3)

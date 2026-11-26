@@ -1,5 +1,10 @@
 # Create and Publish Reels & Shorts with HeyGen and Dropbox
 
+## Creator Portal candidate #23115
+
+The main workflow JSON is the exact reviewed candidate (prepared locally; changes requested in the portal, not submitted). The changes shorten the sticky-note documentation while preserving operational nodes, IDs, connections and the owner’s canvas geometry. [Existing submission](https://creators.n8n.io/workflows/23115). Final submission is manual.
+
+
 ## Documentation links
 
 - [Full Notion documentation](https://paoloronco.notion.site/41cf0ba27c3281129b90cecd2134fc53)

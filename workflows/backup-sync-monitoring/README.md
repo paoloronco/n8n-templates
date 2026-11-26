@@ -1,5 +1,10 @@
 # Reliable Backup & Sync Execution Validation (Log-Driven)
 
+## n8n publication and source versions
+
+- [n8n #12880 — V2](https://n8n.io/workflows/12880-monitor-backup-and-sync-logs-with-google-cloud-storage-github-gmail-openai-and-glpi/): 38 nodes; same logic and graph, one note differs. [Published release reference](https://github.com/paoloronco/n8n-templates/tree/main/catalog/n8n-published/12880).
+
+
 ## Quick Overview
 
 Monitor backup and synchronization jobs through execution logs stored in Google Cloud Storage. This n8n workflow checks expected logs against a GitHub configuration, detects missing or failed runs, analyzes log contents with OpenAI, and sends Gmail alerts when attention is needed.

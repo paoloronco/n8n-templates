@@ -37,6 +37,7 @@ This catalog maps each published Creator Portal listing to the workflow actually
 
 | Submission | Revision | State | Source |
 | --- | --- | --- | --- |
+| — | Secrets Exposure & Credential Leak Monitor V4, 46 nodes | GitHub source available; not submitted to n8n | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/secrets-exposure-credential-leak-monitor/workflow.json) · [Guide](https://github.com/paoloronco/n8n-templates/blob/main/workflows/secrets-exposure-credential-leak-monitor/README.md) |
 | [#22936](https://creators.n8n.io/workflows/22936) | Notion Backup V4, 30 nodes | Under review | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/n8n-notion-workflow-backup/workflow.json) |
 | [#22950](https://creators.n8n.io/workflows/22950) | Local Video V1, 76 nodes | Under review | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/social/video-production/V1/workflow.json) |
 | [#23696](https://creators.n8n.io/workflows/23696) | Tech & AI News V2, 48 nodes | Under review | [JSON](https://github.com/paoloronco/n8n-templates/blob/main/workflows/tech-ai-news-digest/V2/Tech_AI_Daily_Briefing-RSS-AI-Email-V2.json) |
